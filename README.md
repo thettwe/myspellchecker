@@ -2,6 +2,7 @@
 
 > **Myanmar (Burmese) text intelligence library — 10-strategy checking pipeline, dictionary building, and AI model training, from O(1) SymSpell lookups to ONNX-powered inference.**
 
+[![PyPI](https://img.shields.io/pypi/v/myspellchecker)](https://pypi.org/project/myspellchecker/)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Coverage](https://img.shields.io/badge/coverage-75%25-green)](tests/)
@@ -9,7 +10,7 @@
 
 ## Overview
 
-**mySpellChecker** is a comprehensive text intelligence library built specifically for the Myanmar language. It covers three domains: a **10-strategy checking pipeline** (from syllable rules through grammar checking to AI inference), a **dictionary building pipeline** (corpus ingestion, segmentation, N-gram frequency, SQLite packaging), and **AI model training** (semantic MLM fine-tuning with ONNX export). Unlike English tools that rely on spaces, mySpellChecker uses a **syllable-first architecture** to handle the continuous flow of Myanmar script, where each layer builds on validated output from the layer below.
+**mySpellChecker** is a comprehensive text intelligence library built specifically for the Myanmar language. It covers three domains: a **10-strategy checking pipeline** (from rule-based validation through grammar checking, N-gram context, homophone detection, to ONNX-powered AI inference), a **dictionary building pipeline** (corpus ingestion, segmentation, N-gram frequency, SQLite packaging), and **AI model training** (semantic MLM fine-tuning with ONNX export). Since Myanmar script is written as a continuous stream without spaces between words, the library uses a multi-layer validation approach — starting with fast syllable-level checks and progressively applying deeper analysis including POS tagging, 6 grammar checkers, and context-aware semantic validation.
 
 ## Key Features
 
