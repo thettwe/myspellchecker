@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "myspellchecker"
 version = "1.0.0"
-description = "High-performance Myanmar (Burmese) spell checker with syllable-first architecture"
+description = "Myanmar (Burmese) text intelligence library — spell checking, grammar validation, dictionary building, and AI model training"
 readme = "README.md"
 # NOTE: Codebase uses Python 3.10+ syntax (PEP 604 unions like `str | None`).
 requires-python = ">=3.10"
