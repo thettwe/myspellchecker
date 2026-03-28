@@ -1,0 +1,330 @@
+"""
+Data constants for phonetic hashing and analysis.
+
+This module contains static data structures used by the PhoneticHasher.
+Separating data from logic improves readability and maintainability.
+"""
+
+from __future__ import annotations
+
+from myspellchecker.core.constants import TONE_MARKS
+
+__all__ = [
+    "COLLOQUIAL_SUBSTITUTIONS",
+    "MYANMAR_SUBSTITUTION_COSTS",
+    "PHONETIC_GROUPS",
+    "STANDARD_TO_COLLOQUIAL",
+    "TONAL_GROUPS",
+    "VISUAL_SIMILAR",
+    "get_standard_forms",
+    "is_colloquial_variant",
+]
+
+# Phonetic Group Keys
+KEY_LABIAL = "p"
+KEY_ALVEOLAR = "t"
+KEY_VELAR = "k"
+KEY_PALATAL = "c"
+KEY_RETROFLEX = "ṭ"
+KEY_LIQUID_L = "l"
+KEY_LIQUID_R = "r"
+KEY_APPROX_Y = "y"
+KEY_APPROX_W = "w"
+KEY_SIBILANT = "s"
+KEY_GLOTTAL = "h"
+KEY_NASAL_M = "m"
+KEY_NASAL_N = "n"
+KEY_NASAL_NG = "ng"
+KEY_NASAL_NY = "ny"
+KEY_NASAL_N_RETRO = "n_retro"
+KEY_MEDIAL_Y = "medial_y"
+KEY_MEDIAL_R = "medial_r"
+KEY_MEDIAL_W = "medial_w"
+KEY_MEDIAL_H = "medial_h"
+KEY_VOWEL_A = "vowel_a"
+KEY_VOWEL_I = "vowel_i"
+KEY_VOWEL_U = "vowel_u"
+KEY_VOWEL_E = "vowel_e"
+KEY_VOWEL_AI = "vowel_ai"  # Separated from E - ဲ is phonetically /ɛ/, not /e/
+KEY_VOWEL_O = "vowel_o"
+KEY_TONE = "tone"
+
+# Phonetic similarity groups
+# Characters in the same group sound similar and are often confused
+PHONETIC_GROUPS: dict[str, list[str]] = {
+    # Labial consonants (bilabial sounds)
+    KEY_LABIAL: ["ပ", "ဖ", "ဗ", "ဘ"],
+    KEY_NASAL_M: ["မ"],
+    # Alveolar consonants (tongue-teeth sounds)
+    KEY_ALVEOLAR: ["တ", "ထ", "ဒ", "ဓ"],
+    KEY_NASAL_N: ["န"],
+    # Velar consonants (back of throat sounds)
+    KEY_VELAR: ["က", "ခ", "ဂ", "ဃ"],
+    KEY_NASAL_NG: ["င"],
+    # Palatal consonants
+    KEY_PALATAL: ["စ", "ဆ", "ဇ", "ဈ"],
+    KEY_NASAL_NY: ["ည", "\u1009"],
+    # Retroflex consonants
+    KEY_RETROFLEX: ["ဋ", "ဌ", "ဍ", "ဎ"],
+    KEY_NASAL_N_RETRO: ["ဏ"],
+    # Approximants and liquids
+    KEY_LIQUID_L: ["လ", "ဠ"],
+    KEY_LIQUID_R: ["ရ"],
+    KEY_APPROX_Y: ["ယ"],
+    KEY_APPROX_W: ["ဝ"],
+    # Sibilants and fricatives
+    KEY_SIBILANT: ["သ", "ဿ"],  # Shan SHA (U+1050) and SSA (U+1051) removed: Burmese only
+    KEY_GLOTTAL: ["ဟ"],  # Ha
+    "a": [],  # A/E moved to vowels
+    # Medials (can be confused)
+    KEY_MEDIAL_Y: ["ျ"],  # Ya-pin
+    KEY_MEDIAL_R: ["ြ"],  # Ya-yit
+    KEY_MEDIAL_W: ["ွ"],  # Wa-hswe
+    KEY_MEDIAL_H: ["ှ"],  # Ha-htoe
+    # Vowels
+    KEY_VOWEL_A: ["ာ", "\u102b"],  # -aa (dependent vowels only)
+    "vowel_carrier": ["\u1021"],  # အ glottal stop onset (not a vowel sign)
+    KEY_VOWEL_I: ["ိ", "ီ", "\u1023", "\u1024"],  # -i, -ii, I, II
+    KEY_VOWEL_U: ["ု", "ူ", "\u1025", "\u1026"],  # -u, -uu, U, UU
+    # Separated ေ (/e/) and ဲ (/ɛ/) - phonetically distinct vowels
+    # ေ (U+1031) = E vowel, prefix position, IPA /e/ (mid front unrounded)
+    # ဲ (U+1032) = AI vowel, suffix position, IPA /ɛ/ (mid-low front + glide)
+    KEY_VOWEL_E: ["ေ", "\u1027"],  # e-, E (Mon E U+1028 removed: Burmese only)
+    KEY_VOWEL_AI: ["ဲ"],  # ai (suffix vowel, distinct phoneme)
+    # Only single-codepoint independent vowels here; multi-codepoint "ော"/"ော်"
+    # removed to prevent CHAR_TO_PHONETIC corruption.
+    KEY_VOWEL_O: ["\u1029", "\u102a"],  # Independent O (ဩ), Independent AU (ဪ)
+    # Tones (can be omitted or confused)
+    KEY_TONE: list(TONE_MARKS),
+}
+
+
+# Visual confusability groups
+# Characters that look similar and are often mistaken
+VISUAL_SIMILAR: dict[str, set[str]] = {
+    "ိ": {"ီ"},  # short i vs long ii
+    "ီ": {"ိ"},  # long ii → short i
+    "ု": {"ူ"},  # short u vs long uu
+    "ူ": {"ု"},  # long uu → short u
+    "ာ": {"\u102b"},  # different aa marks
+    "\u102b": {"ာ"},  # tall AA → regular AA
+    # Removed ေ/ဲ pairing - they are phonetically distinct
+    # ေ (/e/) and ဲ (/ɛ/) should NOT be treated as interchangeable
+    "ျ": {"ြ"},  # ya-pin vs ya-yit (sometimes confusing)
+    "န": {"ည"},  # na vs nya
+    # Note: "င" (\u1004) mapping defined below with NGA vs NYA confusion
+    # Additional visual/typing confusions
+    "\u101b": {"\u101a"},  # ရ <-> ယ (Ra and Ya - visually similar in some fonts)
+    "\u101a": {"\u101b"},  # ယ <-> ရ (bidirectional)
+    "\u101e": {"\u103f"},  # သ <-> ဿ (Sa and Great Sa - visually similar)
+    "\u103f": {"\u101e"},  # ဿ <-> သ (bidirectional)
+    "\u1015": {"\u1017"},  # ပ <-> ဗ (Pa and Ba - aspirated vs voiced confusion)
+    "\u1017": {"\u1015"},  # ဗ <-> ပ (bidirectional)
+    # Myanmar-specific substitution costs
+    # NYA variants - ည (U+100A) and ဉ (U+1009) are phonetically identical
+    "\u100a": {"\u1009"},  # ည <-> ဉ (both are NYA, commonly confused)
+    "\u1009": {"\u100a"},  # ဉ <-> ည (bidirectional)
+    # Velar nasals and palatals often confused in colloquial speech
+    "\u1004": {"\u100a", "\u1009"},  # င <-> ည/ဉ (NGA vs NYA confusion, includes nga vs nya)
+    # Aspirated vs unaspirated consonant pairs (common typing errors)
+    "\u1000": {"\u1001"},  # က <-> ခ (Ka vs Kha)
+    "\u1001": {"\u1000"},  # ခ <-> က (bidirectional)
+    "\u1002": {"\u1003"},  # ဂ <-> ဃ (Ga vs Gha)
+    "\u1003": {"\u1002"},  # ဃ <-> ဂ (bidirectional)
+    "\u1005": {"\u1006"},  # စ <-> ဆ (Sa vs Ssa)
+    "\u1006": {"\u1005"},  # ဆ <-> စ (bidirectional)
+    "\u1010": {"\u1011"},  # တ <-> ထ (Ta vs Tha)
+    "\u1011": {"\u1010"},  # ထ <-> တ (bidirectional)
+    "\u1012": {"\u1013"},  # ဒ <-> ဓ (Da vs Dha)
+    "\u1013": {"\u1012"},  # ဓ <-> ဒ (bidirectional)
+    "\u1016": {"\u1018"},  # ဖ <-> ဘ (Pha vs Bha)
+    "\u1018": {"\u1016"},  # ဘ <-> ဖ (bidirectional)
+    # Retroflex consonants (rarely used but sometimes confused)
+    "\u100b": {"\u100c"},  # ဋ <-> ဌ (retroflex Ta vs Tha)
+    "\u100c": {"\u100b"},  # ဌ <-> ဋ (bidirectional)
+    "\u100d": {"\u100e"},  # ဍ <-> ဎ (retroflex Da vs Dha)
+    "\u100e": {"\u100d"},  # ဎ <-> ဍ (bidirectional)
+    # LA variants (common confusion)
+    "\u101c": {"\u1020"},  # လ <-> ဠ (La vs Lla - Pali distinction)
+    "\u1020": {"\u101c"},  # ဠ <-> လ (bidirectional)
+    # Medial confusions (very common in typing errors)
+    "\u103d": {"\u103e"},  # ွ <-> ှ (Wa-hswe vs Ha-htoe)
+    "\u103e": {"\u103d"},  # ှ <-> ွ (bidirectional)
+    # Wa consonant vs Myanmar zero digit (visually identical)
+    "\u101d": {"\u1040"},  # ဝ <-> ၀ (Wa vs Zero)
+    "\u1040": {"\u101d"},  # ၀ <-> ဝ (bidirectional)
+}
+
+
+# Myanmar-specific substitution costs for edit distance
+# Lower cost means more likely confusion - used for weighted distance
+# These costs are applied when neither visual_weight nor keyboard_weight applies
+MYANMAR_SUBSTITUTION_COSTS: dict[str, dict[str, float]] = {
+    # NYA variants - practically identical, very low cost
+    "\u100a": {"\u1009": 0.1},  # ည <-> ဉ
+    "\u1009": {"\u100a": 0.1},  # ဉ <-> ည
+    # Ra/Ya confusion - common in rapid typing
+    "\u101b": {"\u101a": 0.3},  # ရ <-> ယ
+    "\u101a": {"\u101b": 0.3},  # ယ <-> ရ
+    # Sa/Great Sa - practically identical sound
+    "\u101e": {"\u103f": 0.2},  # သ <-> ဿ
+    "\u103f": {"\u101e": 0.2},  # ဿ <-> သ
+    # Aspirated consonant pairs - phonetically close (includes voiced cross-pairs)
+    "\u1000": {"\u1001": 0.4, "\u1002": 0.3, "\u1003": 0.4},  # က <-> ခ, ဂ, ဃ
+    "\u1001": {"\u1000": 0.4, "\u1002": 0.4, "\u1003": 0.4},  # ခ <-> က, ဂ, ဃ
+    "\u1005": {"\u1006": 0.4, "\u1007": 0.3, "\u1008": 0.4},  # စ <-> ဆ, ဇ, ဈ
+    "\u1006": {"\u1005": 0.4, "\u1007": 0.4, "\u1008": 0.4},  # ဆ <-> စ, ဇ, ဈ
+    "\u1010": {"\u1011": 0.4, "\u1012": 0.3, "\u1013": 0.4},  # တ <-> ထ, ဒ, ဓ
+    "\u1011": {"\u1010": 0.4, "\u1012": 0.4, "\u1013": 0.4},  # ထ <-> တ, ဒ, ဓ
+    "\u1015": {"\u1016": 0.4, "\u1017": 0.3, "\u1018": 0.3},  # ပ <-> ဖ, ဗ, ဘ
+    "\u1016": {"\u1015": 0.4, "\u1018": 0.4},  # ဖ <-> ပ, ဘ
+    # Voiced/voiceless pairs
+    "\u1017": {"\u1015": 0.3, "\u1018": 0.3},  # ဗ <-> ပ, ဘ
+    "\u1018": {"\u1015": 0.3, "\u1016": 0.4, "\u1017": 0.3},  # ဘ <-> ပ, ဖ, ဗ
+    # Additional voiced/voiceless pairs
+    "\u1002": {"\u1000": 0.3, "\u1001": 0.4, "\u1003": 0.4},  # ဂ <-> က, ခ, ဃ
+    "\u1003": {"\u1000": 0.4, "\u1001": 0.4, "\u1002": 0.4},  # ဃ <-> က, ခ, ဂ
+    "\u1007": {"\u1005": 0.3, "\u1006": 0.4, "\u1008": 0.4},  # ဇ <-> စ, ဆ, ဈ
+    "\u1008": {"\u1005": 0.4, "\u1006": 0.4, "\u1007": 0.4},  # ဈ <-> စ, ဆ, ဇ
+    "\u1012": {"\u1010": 0.3, "\u1011": 0.4, "\u1013": 0.4},  # ဒ <-> တ, ထ, ဓ
+    "\u1013": {"\u1010": 0.4, "\u1011": 0.4, "\u1012": 0.4},  # ဓ <-> တ, ထ, ဒ
+    # Retroflex pairs
+    "\u100b": {"\u100c": 0.3},  # ဋ <-> ဌ
+    "\u100c": {"\u100b": 0.3},  # ဌ <-> ဋ
+    "\u100d": {"\u100e": 0.3},  # ဍ <-> ဎ
+    "\u100e": {"\u100d": 0.3},  # ဎ <-> ဍ
+    # LA variants
+    "\u101c": {"\u1020": 0.2},  # လ <-> ဠ
+    "\u1020": {"\u101c": 0.2},  # ဠ <-> လ
+    # Tone mark confusion (aukmyit vs visarga)
+    "\u1037": {"\u1038": 0.2},  # ့ <-> း
+    "\u1038": {"\u1037": 0.2},  # း <-> ့
+    # Medial confusions - very common (same-class + cross-class)
+    # Same-class: ျ↔ြ (both Y-medials), ွ↔ှ (both lower medials)
+    # Cross-class: ွ↔ျ, ွ↔ြ (e.g. ကွောင်း→ကျောင်း)
+    "\u103b": {"\u103c": 0.2, "\u103d": 0.5},  # ျ <-> ြ, ွ
+    "\u103c": {"\u103b": 0.2, "\u103d": 0.5},  # ြ <-> ျ, ွ
+    "\u103d": {"\u103e": 0.4, "\u103b": 0.5, "\u103c": 0.5},  # ွ <-> ှ, ျ, ြ
+    "\u103e": {"\u103d": 0.4},  # ှ <-> ွ
+    # Vowel length confusion
+    "\u102d": {"\u102e": 0.2},  # ိ <-> ီ (short vs long i)
+    "\u102e": {"\u102d": 0.2},  # ီ <-> ိ
+    "\u102f": {"\u1030": 0.2},  # ု <-> ူ (short vs long u)
+    "\u1030": {"\u102f": 0.2},  # ူ <-> ု
+    # Wa consonant vs Myanmar zero digit (visually identical)
+    "\u101d": {"\u1040": 0.1},  # ဝ <-> ၀
+    "\u1040": {"\u101d": 0.1},  # ၀ <-> ဝ
+    # Virama vs Asat - stacked consonant marker vs final consonant marker
+    "\u1039": {"\u103a": 0.1},  # ္ <-> ်
+    "\u103a": {"\u1039": 0.1},  # ် <-> ္
+}
+
+# Tonal groups for variant generation
+# Characters that differ only by tone or length, often confused in typing
+# Format: canonical_char -> list of tonal variants
+TONAL_GROUPS: dict[str, list[str]] = {
+    # Vowel 'a'
+    "ာ": [
+        "ာ",
+        "\u1037",
+        "\u1038",
+        "ား",
+    ],  # aa, dot below, visarga, aa + visarga (removed empty variant)
+    "\u102b": ["\u102b", "\u1037", "\u1038", "ါး"],  # tall aa variants
+    # Vowel 'i'
+    "ိ": ["ိ", "ီ", "ိ့", "ီး"],  # i, ii, i + dot, ii + visarga
+    "ီ": ["ိ", "ီ", "ိ့", "ီး"],
+    # Vowel 'u'
+    "ု": ["ု", "ူ", "ု့", "ူး"],  # u, uu, u + dot, uu + visarga
+    "ူ": ["ု", "ူ", "ု့", "ူး"],
+    # Vowel 'e'
+    "ေ": ["ေ", "ေ့", "ေး"],  # e, e + dot, e + visarga
+    "ဲ": ["ဲ", "ဲ့"],  # ai, ai + dot
+    # Vowel 'o' (combined)
+    "ော": [
+        "ော",
+        "ော့",
+        "ော်",
+    ],  # o, o + dot, aw (ိုး removed: distinct vowel phoneme /o:/, not a tonal variant of ော /ɔ/)
+    # Tone marks themselves
+    "\u1037": ["", "\u1038"],  # Dot Below (Auk-myit) -> empty or Visarga
+    "\u1038": ["", "\u1037"],  # Visarga (Wit-sa-pauk) -> empty or Dot Below
+}
+
+# Colloquial Substitutions
+# Common multi-character or whole-word substitutions found in colloquial/social media text
+# that cannot be explained by simple edit distance or single-char phonetic groups.
+# Format: colloquial_form -> set of standard forms
+COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
+    # Particle variants
+    "အုန်း": {"ဦး"},  # Ohn (Coconut) -> U (Particle)
+    "အုံး": {"ဦး"},  # Ohn (Pillow) -> U (Particle)
+    # Verb ending colloquialisms
+    "ပါဘူး": {"မပါဘူး"},  # Shortened negation
+    "တာပဲ": {"တာပါပဲ"},  # Shortened emphasis
+    # "တဲ့" removed: it is a VALID quotative/reported-speech particle, not a colloquial variant
+    # Pronoun colloquialisms
+    "ကျနော်": {"ကျွန်တော်"},  # Male first person (colloquial)
+    "ကျွနော်": {"ကျွန်တော်"},  # Male first person (variant)
+    "ကျမ": {"ကျွန်မ"},  # Female first person (colloquial)
+    "မင်း": {"သင်"},  # Second person (informal -> formal)
+    "ငါ": {"ကျွန်တော်", "ကျွန်မ"},  # First person (very informal)
+    "သူတို့": {"သူများ"},  # Third person plural variants
+    # Common word colloquialisms
+    "ဟုတ်": {"ဟုတ်ကဲ့"},  # Yes (shortened)
+    "အို": {"အိုး"},  # Pot/exclamation (without visarga)
+    "အဲ": {"ထို"},  # That (colloquial -> formal)
+    "အဲဒါ": {"ထိုအရာ"},  # That thing (colloquial -> formal)
+    "ဘယ်လို": {"မည်သို့"},  # How (colloquial -> formal)
+    "ဘာကြောင့်": {"အဘယ်ကြောင့်"},  # Why (colloquial -> formal)
+    # Adverb colloquialisms
+    "တော်တော်": {"အလွန်"},  # Very (colloquial -> formal)
+    "သိပ်": {"အလွန်"},  # Very (colloquial -> formal)
+    "ရမ်းရမ်း": {"အလွန်"},  # Very (very colloquial)
+    # Reduplication variants
+    "ကောင်းကောင်း": {"ကောင်းမွန်စွာ"},  # Well (reduplication -> adverb)
+    "မြန်မြန်": {"မြန်ဆန်စွာ"},  # Quickly (reduplication -> adverb)
+    "နှေးနှေး": {"နှေးကွေးစွာ"},  # Slowly (reduplication -> adverb)
+    # Colloquial contractions
+    "လို့ပဲ": {"ထို့ကြောင့်"},  # Because (contracted)
+    "ရင်": {"လျှင်"},  # If (colloquial -> formal)
+    # "တော့" removed: different particle from "တွင်" (discourse vs locative)
+    # Social media / texting abbreviations
+    "555": {"ဟာဟာဟာ"},  # Laughing (Thai style)
+    # "ရယ်" removed: distinct particle (listing/exclamation) from "လေ" (emphasis/evidential)
+}
+
+# Reverse mapping: standard form -> set of colloquial variants
+# Used to recognize when a colloquial form is intentionally used
+STANDARD_TO_COLLOQUIAL: dict[str, set[str]] = {}
+for colloquial, standards in COLLOQUIAL_SUBSTITUTIONS.items():
+    for standard in standards:
+        if standard not in STANDARD_TO_COLLOQUIAL:
+            STANDARD_TO_COLLOQUIAL[standard] = set()
+        STANDARD_TO_COLLOQUIAL[standard].add(colloquial)
+
+
+def is_colloquial_variant(word: str) -> bool:
+    """
+    Check if a word is a known colloquial variant.
+
+    Args:
+        word: The word to check.
+
+    Returns:
+        True if word is a colloquial variant of a standard form.
+    """
+    return word in COLLOQUIAL_SUBSTITUTIONS
+
+
+def get_standard_forms(colloquial: str) -> set[str]:
+    """
+    Get standard forms for a colloquial variant.
+
+    Args:
+        colloquial: The colloquial word to look up.
+
+    Returns:
+        Set of standard forms, empty set if not a known colloquial variant.
+    """
+    return COLLOQUIAL_SUBSTITUTIONS.get(colloquial, set())

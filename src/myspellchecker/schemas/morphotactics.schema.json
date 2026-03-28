@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/morphotactics/v1.0",
+  "title": "Myanmar Morphotactics Schema",
+  "description": "JSON Schema for validating morphotactics.yaml - Compound word POS pattern rules and frequency floors",
+
+  "type": "object",
+  "required": ["version", "category", "compound_patterns", "blocked_patterns", "frequency_floors"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (semver 1.x.x)"
+    },
+    "category": {
+      "type": "string",
+      "const": "morphotactics",
+      "description": "Category type (must be 'morphotactics')"
+    },
+
+    "compound_patterns": {
+      "description": "POS combination patterns that are valid in compound word synthesis",
+      "type": "array",
+      "items": { "$ref": "#/definitions/compound_pattern_entry" }
+    },
+
+    "blocked_patterns": {
+      "description": "POS combination patterns that should never form valid compounds",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "frequency_floors": {
+      "description": "Minimum corpus frequency thresholds per POS pattern type",
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+
+    "morphotactic_bonuses": {
+      "description": "Per-pattern confidence bonuses for compound word validation",
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    }
+  },
+
+  "definitions": {
+    "compound_pattern_entry": {
+      "description": "A POS combination pattern for compound word validation",
+      "type": "object",
+      "required": ["pattern"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "description": "POS combination pattern (e.g., N+N, V+V, ADJ+N)"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this pattern is active"
+        },
+        "min_confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Minimum confidence threshold for this pattern"
+        }
+      }
+    }
+  }
+}

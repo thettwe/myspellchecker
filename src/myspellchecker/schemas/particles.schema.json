@@ -1,0 +1,440 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/particles/v1.0",
+  "title": "Myanmar Linguistic Particles Schema",
+  "description": "JSON Schema for validating particles.yaml - Myanmar linguistic particles with POS tags",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "particles"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "particles",
+      "description": "Category type (must be 'particles')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "confusion_pairs": {
+      "description": "Common particle confusion pairs (wrong form → correct form)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/confusion_pair_entry" }
+    },
+
+    "sequential_particle_confusion": {
+      "description": "Sequential particle confusion rules (honorific vs emphatic)",
+      "type": "object",
+      "properties": {
+        "wrong": { "type": "string" },
+        "correct": { "type": "string" },
+        "error_type": { "type": "string" },
+        "confidence": { "$ref": "_common.schema.json#/definitions/confidence_score" },
+        "left_context_triggers": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["wrong", "correct", "left_context_triggers"]
+    },
+
+    "ha_htoe_particle_confusion": {
+      "description": "Ha-htoe particle confusion rules (missing/extra ha-htoe)",
+      "type": "object",
+      "properties": {
+        "corrections": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/confusion_pair_entry" }
+        },
+        "exclusions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "honorific_prefixes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "dangling_particles": {
+      "description": "Clause-linking particles that shouldn't appear at sentence end",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["particle", "meaning"],
+        "properties": {
+          "particle": { "type": "string" },
+          "meaning": { "type": "string" }
+        }
+      }
+    },
+
+    "suppression_suffixes": {
+      "description": "Suffixes that suppress false-positive context_probability errors",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["suffix", "meaning"],
+        "properties": {
+          "suffix": { "type": "string" },
+          "meaning": { "type": "string" }
+        }
+      }
+    },
+
+    "syllable_finals": {
+      "description": "Myanmar syllable-final markers indicating syllable boundaries",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["char", "name"],
+        "properties": {
+          "char": { "type": "string", "minLength": 1 },
+          "name": { "type": "string" }
+        }
+      }
+    },
+
+    "visarga_exclude_pronouns": {
+      "description": "Pronouns excluded from missing-visarga detection",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "subject_pronouns": {
+      "description": "Subject pronouns for contextual object-marker confusion detection",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "missing_asat_particles": {
+      "description": "Sentence-final particles that require asat but are often mistyped without it",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["incorrect", "correct", "meaning"],
+        "properties": {
+          "incorrect": { "type": "string" },
+          "correct": { "type": "string" },
+          "meaning": { "type": "string" }
+        }
+      }
+    },
+
+    "missing_visarga_suffixes": {
+      "description": "Clause-linker suffixes missing visarga (dot-below)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["incorrect", "correct", "meaning"],
+        "properties": {
+          "incorrect": { "type": "string" },
+          "correct": { "type": "string" },
+          "meaning": { "type": "string" }
+        }
+      }
+    },
+
+    "particle_misuse_rules": {
+      "description": "Verb-frame-based particle correction rules for semantic particle misuse",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["wrong_particle", "correct_particle", "verb_triggers"],
+        "additionalProperties": false,
+        "properties": {
+          "wrong_particle": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The incorrect (but valid) particle"
+          },
+          "correct_particle": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The correct particle for the verb frame"
+          },
+          "verb_triggers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "description": "Verbs/verb-phrases in right context that disambiguate"
+          },
+          "max_window": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Max tokens to scan ahead for verb triggers (default: 5)"
+          },
+          "require_prior_marker": {
+            "type": "string",
+            "description": "Only fire when this marker appeared on an earlier token"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable explanation of the rule"
+          }
+        }
+      }
+    },
+
+    "locative_exempt_prefixes": {
+      "description": "Spatial postpositions that exempt locative particles from misuse detection",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "particles": {
+      "description": "Hierarchical organization of particles by linguistic function",
+      "type": "object",
+      "required": ["verbs", "nouns", "modifiers", "interrogative", "politeness"],
+      "additionalProperties": false,
+
+      "properties": {
+        "negation": {
+          "description": "Negation particles and markers",
+          "type": "array",
+          "items": { "$ref": "#/definitions/particle_entry" }
+        },
+
+        "verbs": {
+          "description": "Verb-related particles",
+          "type": "object",
+          "required": ["tense", "aspect", "statement_endings"],
+          "additionalProperties": false,
+          "properties": {
+            "tense": {
+              "description": "Tense markers (past, future)",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "aspect": {
+              "description": "Aspect markers (progressive, completion)",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "statement_endings": {
+              "description": "Declarative statement endings",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "ability_permission": {
+              "description": "Ability and permission markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "conditional": {
+              "description": "Conditional particles",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "nominalization": {
+              "description": "Nominalization particles",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "causative_reason": {
+              "description": "Causative and reason particles",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "plural_collective": {
+              "description": "Plural and collective markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "emphasis": {
+              "description": "Emphasis particles",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            }
+          }
+        },
+
+        "nouns": {
+          "description": "Noun-related particles",
+          "type": "object",
+          "required": ["case_markers", "location"],
+          "additionalProperties": false,
+          "properties": {
+            "case_markers": {
+              "description": "Case markers (subject, object)",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "location": {
+              "description": "Location markers (locative, ablative)",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "spatial": {
+              "description": "Spatial relation markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "comitative_instrumental": {
+              "description": "Comitative and instrumental markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "possessive": {
+              "description": "Possessive markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "relational": {
+              "description": "Relational particles",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "plural": {
+              "description": "Plural markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "topic_emphasis": {
+              "description": "Topic and emphasis markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            }
+          }
+        },
+
+        "modifiers": {
+          "description": "Modifier particles",
+          "type": "object",
+          "required": ["relative_clause", "adverbial"],
+          "additionalProperties": false,
+          "properties": {
+            "relative_clause": {
+              "description": "Relative clause markers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            },
+            "adverbial": {
+              "description": "Adverbial modifiers",
+              "type": "array",
+              "items": { "$ref": "#/definitions/particle_entry" }
+            }
+          }
+        },
+
+        "interrogative": {
+          "description": "Question particles",
+          "type": "array",
+          "items": { "$ref": "#/definitions/particle_entry" }
+        },
+
+        "politeness": {
+          "description": "Politeness markers",
+          "type": "array",
+          "items": { "$ref": "#/definitions/particle_entry" }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "confusion_pair_entry": {
+      "description": "Particle confusion pair (incorrect → correct)",
+      "type": "object",
+      "required": ["incorrect", "correct"],
+      "properties": {
+        "incorrect": { "type": "string", "minLength": 1 },
+        "correct": { "type": "string", "minLength": 1 },
+        "error_type": { "type": "string" },
+        "meaning": { "type": "string" },
+        "confidence": { "$ref": "_common.schema.json#/definitions/confidence_score" }
+      }
+    },
+
+    "particle_entry": {
+      "description": "Individual particle entry with metadata",
+      "type": "object",
+      "required": ["particle", "pos_tag", "type", "meaning", "confidence"],
+      "additionalProperties": false,
+
+      "properties": {
+        "particle": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar particle text"
+        },
+
+        "pos_tag": {
+          "$ref": "_common.schema.json#/definitions/pos_tag"
+        },
+
+        "type": {
+          "type": "string",
+          "description": "Grammatical type/function of particle",
+          "examples": ["past_tense", "future_tense", "locative", "subject_marker"]
+        },
+
+        "meaning": {
+          "type": "string",
+          "minLength": 3,
+          "description": "English meaning/translation"
+        },
+
+        "formality": {
+          "$ref": "_common.schema.json#/definitions/formality_level"
+        },
+
+        "examples": {
+          "type": "array",
+          "items": { "$ref": "_common.schema.json#/definitions/example" },
+          "minItems": 1,
+          "description": "Usage examples with translations"
+        },
+
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+
+        "notes": {
+          "type": "string",
+          "description": "Additional notes or usage guidance"
+        },
+
+        "alternatives": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Alternative forms of the same particle"
+        },
+
+        "sentence_final": {
+          "type": "boolean",
+          "description": "Whether this particle appears at sentence end"
+        },
+
+        "required_preceding": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "POS tags that must precede this particle"
+        },
+
+        "required_following": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "POS tags that must follow this particle"
+        }
+      }
+    }
+  }
+}

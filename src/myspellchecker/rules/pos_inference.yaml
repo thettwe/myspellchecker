@@ -1,0 +1,345 @@
+# Myanmar POS Inference Rules - Version 1.0
+# Rules for inferring Part-of-Speech tags for unknown words
+#
+# This file contains:
+# - Prefix patterns (e.g. "အ" -> Noun)
+# - Proper noun suffix patterns (e.g. "မြို့" -> Noun)
+# - Suffix probability rules for N/V/ADV
+#
+# Schema: https://myspellchecker.dev/schemas/pos-inference/v1.0
+
+version: "1.0.0"
+category: "pos_inference"
+description: "Rules for POS guessing based on morphology"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-01-24"
+  changes:
+    - date: "2026-01-24"
+      description: "Expanded prefix patterns and proper noun suffixes"
+
+# ============================================================
+# PREFIX PATTERNS
+# ============================================================
+prefixes:
+  - prefix: "အ"
+    pos: "N"
+    confidence: 0.75
+    description: "Nominalizer prefix - converts verbs/adjectives to nouns"
+    exceptions: ["အဲ", "အို", "အင်း", "အော်", "အိုး"]
+
+  - prefix: "မ"
+    pos: "V"
+    confidence: 0.60
+    description: "Negation prefix - implies verb follows"
+    exceptions: ["မိ", "မေ", "မယ်", "မုန့်", "မြင်း", "မျက်"]
+
+  # Additional prefix patterns for expanded morphological coverage
+  - prefix: "ကျွန်"
+    pos: "N"
+    confidence: 0.85
+    description: "First person humble prefix"
+    exceptions: ["ကျွန်း"]
+
+  - prefix: "ခင်ဗျား"
+    pos: "N"
+    confidence: 0.90
+    description: "Second person polite form"
+    exceptions: []
+
+  - prefix: "ရှေး"
+    pos: "N"
+    confidence: 0.70
+    description: "Ancient/former prefix"
+    exceptions: []
+
+  - prefix: "သစ်"
+    pos: "ADJ"
+    confidence: 0.65
+    description: "New prefix (modifier)"
+    exceptions: ["သစ်ပင်", "သစ်သီး", "သစ်တော", "သစ်ကား"]
+
+  - prefix: "ဟောင်း"
+    pos: "ADJ"
+    confidence: 0.70
+    description: "Old/former prefix (modifier)"
+    exceptions: []
+
+  - prefix: "ပြည်တွင်း"
+    pos: "ADJ"
+    confidence: 0.80
+    description: "Domestic/internal prefix"
+    exceptions: []
+
+  - prefix: "ပြည်ပ"
+    pos: "ADJ"
+    confidence: 0.80
+    description: "Foreign/external prefix"
+    exceptions: []
+
+  - prefix: "နိုင်ငံခြား"
+    pos: "ADJ"
+    confidence: 0.85
+    description: "Foreign/international prefix"
+    exceptions: []
+
+  - prefix: "အစိုးရ"
+    pos: "N"
+    confidence: 0.75
+    description: "Government (noun modifier in compounds)"
+    exceptions: []
+
+  - prefix: "ပုဂ္ဂလိက"
+    pos: "ADJ"
+    confidence: 0.80
+    description: "Private sector prefix"
+    exceptions: []
+
+# ============================================================
+# PROPER NOUN SUFFIXES
+# ============================================================
+proper_noun_suffixes:
+  - suffix: "နိုင်ငံ"
+    pos: "N"
+    confidence: 0.95
+    description: "Country name suffix"
+  - suffix: "မြို့"
+    pos: "N"
+    confidence: 0.95
+    description: "City name suffix"
+  - suffix: "တက္ကသိုလ်"
+    pos: "N"
+    confidence: 0.95
+    description: "University name suffix"
+  - suffix: "ဘုရား"
+    pos: "N"
+    confidence: 0.90
+    description: "Religious place/figure suffix"
+  - suffix: "ဘဏ်"
+    pos: "N"
+    confidence: 0.90
+    description: "Bank name suffix"
+  - suffix: "ကုမ္ပဏီ"
+    pos: "N"
+    confidence: 0.90
+    description: "Company name suffix"
+  - suffix: "ဆည်"
+    pos: "N"
+    confidence: 0.85
+    description: "Dam/weir suffix"
+  - suffix: "ကျောင်း"
+    pos: "N"
+    confidence: 0.85
+    description: "School/monastery suffix"
+  - suffix: "ဆေးရုံ"
+    pos: "N"
+    confidence: 0.90
+    description: "Hospital suffix"
+  - suffix: "ရုံး"
+    pos: "N"
+    confidence: 0.85
+    description: "Office suffix"
+  - suffix: "လမ်း"
+    pos: "N"
+    confidence: 0.85
+    description: "Street/road suffix"
+  - suffix: "ရပ်ကွက်"
+    pos: "N"
+    confidence: 0.90
+    description: "Ward/quarter suffix"
+  - suffix: "မြစ်"
+    pos: "N"
+    confidence: 0.90
+    description: "River suffix"
+  - suffix: "တောင်"
+    pos: "N"
+    confidence: 0.85
+    description: "Mountain suffix"
+  - suffix: "ကျွန်း"
+    pos: "N"
+    confidence: 0.90
+    description: "Island suffix"
+  # Additional proper noun suffixes for expanded morphological coverage
+  - suffix: "ခရိုင်"
+    pos: "N"
+    confidence: 0.90
+    description: "District suffix"
+  - suffix: "မြို့နယ်"
+    pos: "N"
+    confidence: 0.92
+    description: "Township suffix"
+  - suffix: "ပြည်နယ်"
+    pos: "N"
+    confidence: 0.95
+    description: "State suffix"
+  - suffix: "တိုင်းဒေသကြီး"
+    pos: "N"
+    confidence: 0.95
+    description: "Region suffix"
+  - suffix: "ကျေးရွာ"
+    pos: "N"
+    confidence: 0.90
+    description: "Village suffix"
+  - suffix: "နယ်မြေ"
+    pos: "N"
+    confidence: 0.85
+    description: "Territory/area suffix"
+  - suffix: "ဝန်ကြီးဌာန"
+    pos: "N"
+    confidence: 0.95
+    description: "Ministry suffix"
+  - suffix: "ဦးစီးဌာန"
+    pos: "N"
+    confidence: 0.95
+    description: "Department suffix"
+  - suffix: "ကော်မတီ"
+    pos: "N"
+    confidence: 0.90
+    description: "Committee suffix"
+  - suffix: "အသင်း"
+    pos: "N"
+    confidence: 0.85
+    description: "Association suffix"
+  - suffix: "အဖွဲ့အစည်း"
+    pos: "N"
+    confidence: 0.90
+    description: "Organization suffix"
+  - suffix: "စင်တာ"
+    pos: "N"
+    confidence: 0.85
+    description: "Center suffix"
+  - suffix: "ဌာန"
+    pos: "N"
+    confidence: 0.80
+    description: "Department/office suffix"
+  - suffix: "အိမ်"
+    pos: "N"
+    confidence: 0.75
+    description: "House/building suffix"
+  - suffix: "စက်ရုံ"
+    pos: "N"
+    confidence: 0.90
+    description: "Factory suffix"
+  - suffix: "လေဆိပ်"
+    pos: "N"
+    confidence: 0.95
+    description: "Airport suffix"
+  - suffix: "ဆိပ်ကမ်း"
+    pos: "N"
+    confidence: 0.90
+    description: "Port suffix"
+  - suffix: "ဘူတာ"
+    pos: "N"
+    confidence: 0.85
+    description: "Station suffix"
+  - suffix: "စျေး"
+    pos: "N"
+    confidence: 0.85
+    description: "Market suffix"
+
+# ============================================================
+# SUFFIX PROBABILITY RULES
+# ============================================================
+suffix_rules:
+  noun:
+    - suffix: "သူ"
+      confidence: 0.85
+    - suffix: "သား"
+      confidence: 0.85
+    - suffix: "သမား"
+      confidence: 0.90
+    - suffix: "သူများ"
+      confidence: 0.85
+    - suffix: "မယ်"
+      confidence: 0.65
+    - suffix: "ခြင်း"
+      confidence: 0.90
+    - suffix: "မှု"
+      confidence: 0.90
+    - suffix: "ရေး"
+      confidence: 0.85
+    - suffix: "ရာ"
+      confidence: 0.70
+    - suffix: "များ"
+      confidence: 0.75
+    - suffix: "တွေ"
+      confidence: 0.75
+    - suffix: "မျိုး"
+      confidence: 0.80
+    - suffix: "ပုံ"
+      confidence: 0.75
+    - suffix: "ချက်"
+      confidence: 0.80
+    - suffix: "ပစ္စည်း"
+      confidence: 0.85
+    - suffix: "အရာ"
+      confidence: 0.80
+    - suffix: "အချက်"
+      confidence: 0.80
+    - suffix: "လုံး"
+      confidence: 0.75
+    - suffix: "ယောက်"
+      confidence: 0.85
+    - suffix: "ခု"
+      confidence: 0.80
+    - suffix: "ဦး"
+      confidence: 0.80
+
+  verb:
+    - suffix: "သည်"
+      confidence: 0.85
+    - suffix: "တယ်"
+      confidence: 0.85
+    - suffix: "ခဲ့"
+      confidence: 0.80
+    - suffix: "နေ"
+      confidence: 0.75
+    - suffix: "ပြီ"
+      confidence: 0.80
+    - suffix: "ပြီး"
+      confidence: 0.75
+    - suffix: "မည်"
+      confidence: 0.85
+    - suffix: "မယ်"
+      confidence: 0.90
+    - suffix: "နိုင်"
+      confidence: 0.80
+    - suffix: "တတ်"
+      confidence: 0.80
+    - suffix: "ရ"
+      confidence: 0.70
+    - suffix: "လာ"
+      confidence: 0.70
+    - suffix: "သွား"
+      confidence: 0.70
+    - suffix: "ထား"
+      confidence: 0.75
+    - suffix: "ပေး"
+      confidence: 0.75
+    - suffix: "လိုက်"
+      confidence: 0.75
+    - suffix: "ချင်"
+      confidence: 0.80
+    - suffix: "စေ"
+      confidence: 0.80
+    - suffix: "ပါ"
+      confidence: 0.70
+
+  adverb:
+    - suffix: "စွာ"
+      confidence: 0.90
+    - suffix: "တိုင်း"
+      confidence: 0.85
+    - suffix: "လျက်"
+      confidence: 0.80
+    - suffix: "ပြန်"
+      confidence: 0.75
+    - suffix: "လိုလို"
+      confidence: 0.85
+    - suffix: "အလိုက်"
+      confidence: 0.85
+    - suffix: "ချင်း"
+      confidence: 0.80
+    - suffix: "တကူ"
+      confidence: 0.85

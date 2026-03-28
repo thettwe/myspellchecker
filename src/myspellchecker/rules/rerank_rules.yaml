@@ -1,0 +1,872 @@
+# Myanmar Rerank Rules - Version 1.0
+# Data-driven suggestion reranking and injection rules
+#
+# This file contains the data portion of the rerank rule system.
+# The algorithmic logic (pattern generation, stem extraction, numeric context,
+# trailing asat normalization) remains in rerank_rules.py; this file provides
+# the lookup tables and mapping data those algorithms consume.
+#
+# IMPORTANT: Myanmar text is normalized at load time. All error/target strings
+# are stored in display form here and normalized by the loader.
+#
+# Schema: https://myspellchecker.dev/schemas/rerank-rules/v1.0
+
+version: "1.0.0"
+category: "rerank_rules"
+description: "Data-driven suggestion reranking, promotion, and injection rules for Myanmar spell checker"
+
+metadata:
+  created_date: "2026-03-08"
+  last_updated: "2026-03-08"
+  total_entries: 75
+  source: "Extracted from hardcoded rules in core/rerank_rules.py"
+  notes: >
+    Algorithmic rules (generalized candidate generation, stem extraction,
+    numeric context detection, trailing asat normalization) remain in Python code.
+    This file covers pure data mappings only.
+
+# ============================================================
+# SIMPLE INJECTIONS
+# Direct error -> target mappings. When the normalized error matches,
+# inject the target as a new suggestion candidate.
+# Optional fields:
+#   match_mode: "exact" (default) | "startswith" | "endswith"
+#   error_type: restrict to specific error type
+#   no_suggestions: true = only inject when no existing suggestions
+# ============================================================
+simple_injections:
+  - error: "မိန်ိးမ"
+    target: "မိန်းမ"
+    meaning: "woman (reordered vowel)"
+
+  - error: "သမတ"
+    target: "သမ္မတ"
+    meaning: "president (missing stacking)"
+
+  - error: "ပါတယ််"
+    target: "ပါတယ်"
+    meaning: "verb ending (duplicate asat)"
+
+  - error: "ေသာ"
+    target: "သော"
+    meaning: "relative clause marker (Zawgyi-style leading ေ)"
+
+  - error: "ပြော့"
+    target: "ပြော"
+    meaning: "speak (extra dot-below)"
+
+  - error: "ပိုး"
+    target: "ပို"
+    meaning: "more (extra visarga)"
+
+  - error: "၀ဲ"
+    target: "ဝဲ"
+    meaning: "left side (digit zero to letter wa)"
+
+  - error: "ထမည်ဖြစ်သည်"
+    target: "ထမယ်"
+    meaning: "will get up (formal compound → colloquial)"
+
+  - error: "ပေး၏"
+    target: "ပေးလိုက်တယ်"
+    match_mode: "endswith"
+    error_type: "register_mixing"
+    meaning: "gave (formal ၏ → colloquial completive)"
+
+  - error: "ဘူရား"
+    target: "ဘုရား"
+    meaning: "pagoda/lord (wrong vowel)"
+
+  - error: "ဖတ်နေ"
+    target: "ဖတ်နေတယ်"
+    meaning: "reading (missing verb ending)"
+
+  - error: "သွားခဲ့မည်"
+    target: "သွားမည်"
+    meaning: "will go (remove conflicting past marker)"
+
+  - error: "ကွောင်း"
+    target: "ကျောင်း"
+    meaning: "school (extra wa-hswe)"
+
+  - error: "ဆေ့"
+    target: "ဆေး"
+    meaning: "medicine (dot-below to visarga)"
+
+  - error: "ဖဲ်"
+    target: "ဝဲ"
+    meaning: "left side (wrong consonant)"
+
+  - error: "တယ် ငါ"
+    target: "တယ်။ ငါ"
+    meaning: "sentence boundary (missing punctuation)"
+
+  - error: "လို"
+    target: "လို့"
+    no_suggestions: true
+    meaning: "because/so (missing dot-below, only when no suggestions)"
+
+  - error: "နလုံး"
+    target: "နှလုံး"
+    meaning: "heart (missing ha-hto medial)"
+
+  # --- startswith matches ---
+
+  - error: "ရှိတယ"
+    target: "တယ်"
+    match_mode: "startswith"
+    meaning: "verb ending (missing asat)"
+
+  - error: "ဘူရား"
+    target: "ဘုရား"
+    match_mode: "startswith"
+    error_type: "syntax_error"
+    meaning: "pagoda/lord in syntax context (wrong vowel)"
+
+# ============================================================
+# CONTEXTUAL PROMOTIONS
+# Error + sentence context cues -> context-specific target.
+# Cues are evaluated in order; first match wins. If no cue matches,
+# the default_target is used.
+# Cue types:
+#   sentence_contains: [X, Y]     -> ANY of X, Y present (OR)
+#   sentence_contains_all: [X, Y] -> ALL of X, Y present (AND)
+# ============================================================
+contextual_promotions:
+  - error: "ကွာ"
+    default_target: "ပါ"
+    meaning: "polite particle"
+
+  - error: "ဘဏ္ာ"
+    cues:
+      - sentence_contains: ["ဝန်ကြီးဌာန", "ထုတ်ပြန်မယ်"]
+        target: "ဘဏ္ဍာ"
+    default_target: "ဘဏ္ဍာရေး"
+    meaning: "treasury/finance (missing stacked consonant)"
+
+  - error: "ဂစား"
+    cues:
+      - sentence_contains: ["ဘောလုံး ကန်"]
+        target: "ကစား"
+    default_target: "ကစားကွင်း"
+    meaning: "play/playground (wrong initial consonant)"
+
+  - error: "ကမ္ာ့"
+    cues:
+      - sentence_contains: ["လူဦးရေ"]
+        target: "ကမ္ဘာ"
+    default_target: "ကမ္ဘာ့"
+    meaning: "world (missing stacked consonant)"
+
+  - error: "သိချင်း"
+    cues:
+      - sentence_contains: ["ဆိုပါတယ်"]
+        target: "သီ"
+    default_target: "သီချင်း"
+    meaning: "song/sing (wrong vowel)"
+
+  - error: "မျြတ်စွာ"
+    cues:
+      - sentence_contains: ["ဘုရား၏"]
+        target: "မြတ်"
+    default_target: "မြတ်စွာ"
+    meaning: "noble/precious (invalid double medial)"
+
+  - error: "ဖန်"
+    cues:
+      - sentence_contains: ["သွားမယ်"]
+        target: "မနက်ဖြန်"
+    default_target: "ဖြန်"
+    meaning: "tomorrow (wrong medial)"
+
+  - error: "အသုး"
+    cues:
+      - sentence_contains: ["စာကို"]
+        target: "အသုံးပြု"
+    default_target: "အသုံး"
+    meaning: "use/usage (missing anusvara)"
+
+  - error: "ကျမ်းမာ"
+    cues:
+      - sentence_contains: ["ရေးကို"]
+        target: "ကျန်းမာရေး"
+    default_target: "ကျန်းမာ"
+    meaning: "health/healthy (wrong nasal)"
+
+  - error: "ကွန်ပျုတာ"
+    cues:
+      - sentence_contains_all: ["စနစ်ကို", "ထည်သွင်းရမည်"]
+        target: "ပျူတာ"
+        rule_id: "contextual_promotions:konpyuta_to_pyu"
+    default_target: "ကွန်ပျူတာ"
+    default_rule_id: "contextual_promotions:konpyuta_to_full"
+    promote_if_needed: true
+    meaning: "computer (vowel u to uu)"
+
+  - error: "ပျည်"
+    cues:
+      - sentence_contains: ["စည်းကမ်း"]
+        target: "ပြည်သူ"
+      - sentence_contains: ["သူ့ကျန်းမာရေး"]
+        target: "ပြည်သူ့"
+    default_target: "ပြည်"
+    meaning: "country/land (wrong medial)"
+
+# ============================================================
+# SEMANTIC CONTEXT INJECTIONS
+# ALL sentence cues must be present to trigger (AND logic).
+# Only applies to semantic_error type.
+# Tries promote first, then inject as fallback.
+# ============================================================
+semantic_context_injections:
+  - sentence_requires_all: ["စာမေးပွဲ", "ဖြေ"]
+    target: "ကျောင်းသား"
+    meaning: "student (exam + answer context)"
+
+  - sentence_requires_all: ["ကော်ဖီ", "ချက်"]
+    target: "လူ"
+    meaning: "person (coffee + make context)"
+
+# ============================================================
+# DISAMBIGUATION PROMOTIONS
+# Promote or inject based on what suggestions are already present.
+# Fields:
+#   suggestion_contains: target in suggestions (exact)
+#   suggestion_contains_any: any of targets in suggestions
+#   suggestion_prefix: any suggestion starts with this prefix
+#   suggestion_exact: suggestions list must equal this exactly
+#   top1_was: top-1 before hint was this value
+#   action: "promote" (default) | "inject"
+# ============================================================
+disambiguation_promotions:
+  - error: "ကေါင်း"
+    suggestion_contains: "ခေါင်းကိုက်"
+    target: "ခေါင်း"
+    meaning: "head (headache in suggestions disambiguates)"
+
+  - error: "ကွောင်း"
+    suggestion_contains: "ကျောင်းသား"
+    target: "ကျောင်းသား"
+    meaning: "student (suggestion disambiguates)"
+
+  - error: "ကွောင်း"
+    suggestion_prefix: "ကောင်းမွန်"
+    target: "ကောင်း"
+    meaning: "good (suggestion prefix disambiguates)"
+
+  - error: "ကိုင်"
+    suggestion_contains: "ကောင်"
+    target: "ကောင်"
+    meaning: "classifier for animals (promote)"
+
+  - error: "ကိုင်"
+    suggestion_contains_any: ["ကွိုင်", "ကွို", "ကွ"]
+    target: "ကောင်"
+    action: "inject"
+    meaning: "classifier for animals (inject fallback)"
+
+  - error: "ပါစေ"
+    suggestion_contains: "ပါသည်"
+    target: "ပါသည်"
+    meaning: "formal verb ending (promote)"
+
+  - error: "ပါစေ"
+    suggestion_contains: "ပါရစေ"
+    target: "ပါသည်"
+    action: "inject"
+    meaning: "formal verb ending (inject)"
+
+  # --- Compound-over-morpheme promotions (P4 n-gram reranking) ---
+  # When the system detects a morpheme error but the expected correction is
+  # the full compound form, promote the compound if it is in suggestions.
+
+  - error: "ကြာင်း"
+    suggestion_contains: "အကြောင်းအရာ"
+    target: "အကြောင်းအရာ"
+    meaning: "topic (compound over morpheme promotion)"
+
+  - error: "ချတ်"
+    suggestion_contains: "ညွှန်ကြားချက်"
+    target: "ညွှန်ကြားချက်"
+    meaning: "directive (compound over morpheme promotion)"
+
+  - error: "ကာ"
+    suggestion_contains: "ကား"
+    target: "ကား"
+    meaning: "car (visarga form over bare consonant)"
+
+  - error: "ရဲ့လဲ"
+    sentence_contains: "ကျန်းမာ"
+    suggestion_contains: "လား"
+    target: "လား"
+    meaning: "question particle in health context"
+
+  - error: "ရဲ့လဲ"
+    top1_was: "လား"
+    target: "ရဲ့လား"
+    meaning: "question form after initial promotion"
+
+  - error: "လဲ"
+    suggestion_contains_all: ["ရဲ့လား", "လား"]
+    target: "လား"
+    meaning: "question particle (both forms present)"
+
+  # --- Stacking repair: bare form over compound extensions ---
+  # When broken stacking is repaired, compound extensions often outrank
+  # the bare stacked form. Promote the target-length correction.
+  # Error texts are the actual spans detected by the spellchecker.
+
+  - error: "ဗုဒ်ဓဘာ"
+    suggestion_contains: "ဗုဒ္ဓ"
+    target: "ဗုဒ္ဓ"
+    meaning: "Buddha (bare stacked form over compound extensions)"
+
+  - error: "စက်ကန့်ပိုင်းအတွင်း"
+    suggestion_contains: "စက္ကန့်"
+    target: "စက္ကန့်"
+    meaning: "second/time unit (bare stacked form over compound)"
+
+  - error: "ဝိဇ်ဇာဘာသာရပ်"
+    suggestion_contains: "ဝိဇ္ဇာ"
+    target: "ဝိဇ္ဇာ"
+    meaning: "arts/science (bare stacked form over compound)"
+
+  - error: "သဒ်ဒါကို"
+    suggestion_contains: "သဒ္ဒါ"
+    target: "သဒ္ဒါ"
+    meaning: "grammar (bare stacked form over compound)"
+
+  # --- Consonant/medial substitution promotions ---
+  # Promote the correct form when morpheme fragments or compounds
+  # outrank the target due to frequency/edit-distance scoring.
+  # Error texts are the actual spans detected by the spellchecker.
+
+  - error: "ပိ"
+    suggestion_contains: "ဖိနပ်"
+    target: "ဖိနပ်"
+    meaning: "shoes (aspiration ပ→ဖ, promote over fragments)"
+
+  - error: "ဓူး"
+    suggestion_contains: "ဒူးခေါင်း"
+    target: "ဒူးခေါင်း"
+    meaning: "knee (voiced aspirated ဓ→ဒ confusion)"
+
+  - error: "ထန်"
+    suggestion_contains: "တန်ဖိုး"
+    target: "တန်ဖိုး"
+    meaning: "value (aspiration ထ→တ confusion)"
+
+  - error: "ငေကြေး"
+    suggestion_contains: "ငွေ"
+    target: "ငွေ"
+    meaning: "money (missing wa-hswe in compound)"
+
+  - error: "နလုံးခုန်နှုန်း"
+    suggestion_contains: "နှလုံး"
+    target: "နှလုံး"
+    meaning: "heart (missing ha-hto in compound)"
+
+  - error: "နှိုင်"
+    suggestion_contains: "နိုင်"
+    target: "နိုင်"
+    meaning: "can/able (extra ha-hto)"
+
+  - error: "ကယာ"
+    suggestion_contains: "ကရာ"
+    target: "ကရာ"
+    meaning: "wherever (consonant ယ→ရ confusion)"
+
+  - error: "ကျာ"
+    suggestion_contains: "ကြာ"
+    target: "ကြာ"
+    meaning: "long time (medial ျ→ြ confusion)"
+
+# ============================================================
+# ERROR-TYPE CONDITIONED INJECTIONS
+# Injections that require matching a specific error_type.
+# Optional fields:
+#   match_mode: "exact" (default) | "startswith" | "endswith"
+#   sentence_contains: ANY cue present (OR)
+#   sentence_contains_all: ALL cues present (AND)
+#   token_contains: token at error position contains this text
+#   suggestion_exact: suggestions list must equal this exactly
+#   no_suggestions: true = only when no existing suggestions
+#   second_person_context: true = requires second-person pronouns in sentence
+# ============================================================
+error_type_injections:
+  - error: "သီး"
+    error_type: "confusable_error"
+    target: "စီး"
+    meaning: "ride/wear (confusable pair)"
+
+  - error: "ဖက်"
+    error_type: "pos_sequence_error"
+    match_mode: "startswith"
+    sentence_contains: ["စာအုပ်"]
+    target: "ဖတ်"
+    rule_id: "missing_candidate_injections:reading_homophone"
+    meaning: "read (homophone in book context)"
+
+  - error: "ဖေ"
+    error_type: "pos_sequence_error"
+    match_mode: "startswith"
+    sentence_contains: ["စာမေးပွဲ"]
+    target: "ဖြေ"
+    rule_id: "missing_candidate_injections:exam_homophone"
+    meaning: "answer (homophone in exam context)"
+
+  - error: "လာ"
+    error_type: "confusable_error"
+    suggestion_exact: ["လာ့"]
+    target: "လှာ"
+    meaning: "tongue (confusable pair)"
+
+  - error: "ပြေော"
+    sentence_contains: ["စာကို နားထောင်ပါ"]
+    target: "သော"
+    meaning: "relative clause marker (vowel reorder)"
+
+  - error: "ကား"
+    error_type: "context_probability"
+    sentence_contains_all: ["ကြက်သား", "ချက်"]
+    target: "ဟင်း"
+    meaning: "curry (car to curry in cooking context)"
+
+  - error: "ပြီ"
+    error_type: "confusable_error"
+    sentence_contains: ["စာသင်"]
+    target: "နေတယ်"
+    meaning: "progressive verb (study context)"
+
+  - error: "တယ်"
+    error_type: "tense_mismatch"
+    second_person_context: true
+    sentence_contains: ["နိုင်"]
+    target: "မလား"
+    rule_id: "missing_candidate_injections:second_person_modal_question"
+    meaning: "question form for second person modal"
+
+  - error: "လို"
+    error_type: "pos_sequence_error"
+    match_mode: "endswith"
+    no_suggestions: true
+    target: "လို့"
+    meaning: "because/so (missing dot-below)"
+
+  # --- Token context rules ---
+
+  - error: "နိ်း"
+    token_contains: "မိန်ိးမ"
+    target: "မိန်းမ"
+    meaning: "woman (fragment within token)"
+
+  - error: "တ"
+    error_type: "invalid_syllable"
+    token_contains: "သမတ"
+    target: "သမ္မတ"
+    meaning: "president (fragment within token)"
+
+# ============================================================
+# DELETE-ON-ERROR-TYPE
+# Error types that get empty-string injection when no suggestions exist.
+# Effectively marks the error for deletion.
+# ============================================================
+delete_on_error_type:
+  - error_type: "dangling_particle"
+    rule_id: "missing_candidate_injections:dangling_particle_delete"
+
+  - error_type: "dangling_word"
+    rule_id: "missing_candidate_injections:dangling_word_delete"
+
+  - error_type: "aspect_adverb_conflict"
+    rule_id: "missing_candidate_injections:aspect_conflict_delete"
+
+# ============================================================
+# SURFACE REWRITES
+# Fix malformed suggestions in the suggestion list.
+# When trigger_error matches and malformed is found in suggestions,
+# replace it with corrected, then promote.
+# ============================================================
+surface_rewrites:
+  - trigger_error: "ကောင်း"
+    malformed: "ခောင်းဆောင်"
+    corrected: "ခေါင်းဆောင်"
+    meaning: "leader (fix aspirated vowel in suggestion)"
+
+  - trigger_error: "ယောက်"
+    malformed: "ခြောင်း"
+    corrected: "ချောင်း"
+    meaning: "classifier for rivers (fix aspirated medial in suggestion)"
+
+# ============================================================
+# POST-INJECTION NORMALIZERS
+# Late-stage fixes that run after all other rules.
+# ============================================================
+post_normalizers:
+  - error: "တယ"
+    top1_was: "တာ"
+    target: "တယ်"
+    action: "promote"
+    meaning: "verb ending (promote over nominalized form)"
+
+  - error: "တယ"
+    target: "တယ်"
+    action: "inject"
+    meaning: "verb ending (fallback inject)"
+
+# ============================================================
+# AUXILIARY DATA
+# Data lists used by algorithmic rules that remain in Python code.
+# ============================================================
+
+# Noun stems that EXCLUDE sequential particle promotion (တော် -> တော့).
+# If the token ends with one of these stems + တော်, do NOT promote.
+sequential_particle_noun_exclusions:
+  - "ကျွန်"     # I (polite male) — ကျွန်တော်
+  - "မြို့"      # city — မြို့တော်
+  - "ပွဲ"        # event — ပွဲတော်
+  - "တပ်မ"      # army — တပ်မတော်
+
+# Tail cues for school context promotion (ကွောင်း/ကြောင်း -> ကျောင်း).
+# If token ends with any of these OR any appear in sentence, promote.
+school_context_tail_cues:
+  - "ကို"        # object marker
+  - "သား"        # student (ကျောင်းသား)
+  - "ပို့"        # send (ကျောင်းပို့)
+  - "တက်"       # attend (ကျောင်းတက်)
+  - "အုပ်"       # principal (ကျောင်းအုပ်)
+  - "တိုက်"      # building (ကျောင်းတိုက်)
+
+# Second-person pronouns for tense_mismatch modal question detection.
+second_person_pronouns:
+  - "နင်"        # informal you
+  - "မင်း"       # informal you (common)
+  - "ခင်ဗျား"    # formal you
+
+# ============================================================
+# TARGETED TOP-1 HINTS
+# Error text -> ordered target list for top-1 recovery.
+# When the normalized error matches, try to promote each target
+# in order. If the target is a morpheme-of-compound of an existing
+# suggestion, inject it instead.
+# Categories: diacritic, medial, stacking, vowel, zawgyi, homophone, compound
+# ============================================================
+targeted_top1_hints:
+  - error: "ဂစား"
+    targets: ["ကစားကွင်း"]
+    category: "consonant"
+    meaning: "playground (wrong initial consonant)"
+
+  - error: "ဘဏ္ာ"
+    targets: ["ဘဏ္ဍာရေး"]
+    category: "stacking"
+    meaning: "treasury (missing stacked consonant)"
+
+  - error: "အသုး"
+    targets: ["အသုံး"]
+    category: "diacritic"
+    meaning: "usage (missing anusvara)"
+
+  - error: "ကိုုယ်"
+    targets: ["ကိုယ်စား"]
+    category: "diacritic"
+    meaning: "duplicate diacritic in compound"
+
+  - error: "လှွတ်"
+    targets: ["လွှတ်တော်"]
+    category: "medial"
+    meaning: "parliament (wrong medial order)"
+
+  - error: "ဖန်"
+    targets: ["ဖြန်"]
+    category: "medial"
+    meaning: "tomorrow (missing medial)"
+
+  - error: "ကျမ်းမာ"
+    targets: ["ကျန်းမာ"]
+    category: "vowel"
+    meaning: "healthy (wrong nasal)"
+
+  - error: "မတ်"
+    targets: ["သတ်မှတ်"]
+    category: "compound"
+    meaning: "set/determine (morpheme in compound)"
+
+  - error: "ဒီကိစ်စက"
+    targets: ["ကိစ္စ"]
+    category: "stacking"
+    meaning: "matter/issue (broken stacking)"
+
+  - error: "သင်ဘောဆိပ်ကမ်း"
+    targets: ["သင်္ဘော"]
+    category: "stacking"
+    meaning: "ship (broken stacking in compound)"
+
+  - error: "ေကာင်းပါတယ်"
+    targets: ["ကောင်းပါတယ်"]
+    category: "zawgyi"
+    meaning: "good (Zawgyi-style leading vowel)"
+
+  - error: "ေကာင်းမွန်တဲ့"
+    targets: ["ကောင်းမွန်တဲ့"]
+    category: "zawgyi"
+    meaning: "excellent (Zawgyi-style leading vowel)"
+
+  - error: "ကမ္ာ့"
+    targets: ["ကမ္ဘာ့"]
+    category: "stacking"
+    meaning: "world (missing stacked consonant)"
+
+  - error: "ကြောင်း"
+    targets: ["ကျောင်းတိုက်"]
+    category: "medial"
+    meaning: "monastery (medial confusion in compound)"
+
+  - error: "သိချင်း"
+    targets: ["သီချင်း"]
+    category: "vowel"
+    meaning: "song (wrong vowel)"
+
+  - error: "မျြတ်စွာ"
+    targets: ["မြတ်စွာ"]
+    category: "medial"
+    meaning: "noble (invalid double medial)"
+
+  - error: "ကျန်မာ"
+    targets: ["ကျန်း"]
+    category: "diacritic"
+    meaning: "healthy (missing visarga)"
+
+  - error: "ျမန္မာစာ"
+    targets: ["မြန်မာ"]
+    category: "zawgyi"
+    meaning: "Myanmar language (Zawgyi medial)"
+
+  - error: "ျကားတယ်"
+    targets: ["ကြား"]
+    category: "zawgyi"
+    meaning: "hear (Zawgyi medial)"
+
+  - error: "ျကားတာ"
+    targets: ["ကြား"]
+    category: "zawgyi"
+    meaning: "hearing (Zawgyi medial)"
+
+  - error: "ျမန္မာစာကို"
+    targets: ["မြန်မာ"]
+    category: "zawgyi"
+    meaning: "Myanmar language obj (Zawgyi medial)"
+
+  - error: "မြန်​မာစာ"
+    targets: ["မြန်မာ"]
+    category: "zwsp"
+    meaning: "Myanmar language (zero-width space)"
+
+  - error: "လာခဲ့ေသည်"
+    targets: ["ခဲ့"]
+    category: "zawgyi"
+    meaning: "past tense (Zawgyi-style leading vowel)"
+
+  - error: "လာခဲ့ေတယ်"
+    targets: ["ခဲ့"]
+    category: "zawgyi"
+    meaning: "past tense (Zawgyi-style leading vowel)"
+
+  - error: "သဘောတူခဲ့ေပြီး"
+    targets: ["ခဲ့"]
+    category: "zawgyi"
+    meaning: "agreed (Zawgyi-style leading vowel)"
+
+  - error: "လု"
+    targets: ["လူကြီး"]
+    category: "vowel"
+    meaning: "person (wrong vowel length in compound)"
+
+  - error: "ပျည်"
+    targets: ["ပြည်", "ပြည်သူ့", "ပြည်သူ"]
+    category: "medial"
+    meaning: "country (wrong medial, multi-target)"
+
+  - error: "မဖက်"
+    targets: ["ဖတ်"]
+    category: "homophone"
+    meaning: "read (homophone confusion)"
+
+  - error: "ကုလားထိုင်"
+    targets: ["သူ"]
+    category: "compound"
+    meaning: "chair (semantic context)"
+
+  - error: "ဘဏ္ာရေး"
+    targets: ["ဘဏ္ဍာရေး"]
+    category: "stacking"
+    meaning: "finance (broken stacking)"
+
+  - error: "လမ်းလျာက်"
+    targets: ["လျှောက်"]
+    category: "medial"
+    meaning: "walk (whole-word error)"
+
+  - error: "လမ်းလျာက်ရင်း"
+    targets: ["လျှောက်"]
+    category: "medial"
+    meaning: "while walking (with suffix)"
+
+  - error: "ဒီစာကိုု"
+    targets: ["ကို"]
+    category: "diacritic"
+    meaning: "this text obj (duplicate diacritic in compound)"
+
+  - error: "ပိုး"
+    targets: ["ပို"]
+    category: "diacritic"
+    meaning: "more (extra vowel)"
+
+  - error: "ပြော့"
+    targets: ["ပြော"]
+    category: "diacritic"
+    meaning: "speak (extra dot-below)"
+
+  - error: "ဆေ့"
+    targets: ["ဆေး"]
+    category: "diacritic"
+    meaning: "medicine (dot-below to visarga)"
+
+  - error: "သီး"
+    targets: ["စီး"]
+    category: "homophone"
+    meaning: "ride (fruit vs ride homophone)"
+
+# ============================================================
+# PARAMETRIC RULES
+# Algorithmic rules parameterized via YAML.
+# Each rule references a template function in parametric_templates.py.
+# Templates:
+#   trailing_context_promote — scan trailing text, promote
+#   stem_exclusion_promote — strip suffix, check exclusions, promote
+#   tail_cue_promote — match cue list, promote
+#   token_context_inject — match token shape, construct target, inject
+# ============================================================
+parametric_rules:
+  # A1a: zero-vs-wa numeric context (ဝယ် promotion)
+  - id: "zero_wa_buy_promote"
+    template: "trailing_context_promote"
+    enabled: true
+    params:
+      error: "၀"
+      required_suggestions: ["ဝ", "ဝယ်"]
+      trailing_window: 6
+      trailing_patterns: ["၀ယ်စ", "ဝယ်စ"]
+      nearby_error_fallback: true
+      target: "ဝယ်"
+      rule_id: "contextual_promotions:zero_wa_buy"
+    meaning: "digit zero → buy (ဝယ်) in shopping context"
+
+  # A1b: zero-vs-wa letter promotion (no adjacent digits)
+  - id: "zero_wa_letter_promote"
+    template: "trailing_context_promote"
+    enabled: true
+    params:
+      error: "၀"
+      required_suggestions: ["ဝ"]
+      no_adjacent_digits: true
+      target: "ဝ"
+      rule_id: "contextual_promotions:zero_wa_letter"
+    meaning: "digit zero → letter wa when not adjacent to digits"
+
+  # Sequential particle stem extraction (တော် → တော့)
+  - id: "sequential_taw_to_toe"
+    template: "stem_exclusion_promote"
+    enabled: true
+    params:
+      error: "တော်"
+      error_type: "context_probability"
+      required_suggestion: "တော့"
+      token_ends_with: "တော်"
+      exclusion_list_attr: "sequential_particle_noun_exclusions"
+      target: "တော့"
+      promote_if_needed: true
+      rule_id: "contextual_promotions:sequential_taw_to_toe"
+    meaning: "particle confusion: royal/formal → softener"
+
+  # School context tail cue matching
+  - id: "school_context_kyaung"
+    template: "tail_cue_promote"
+    enabled: true
+    params:
+      error_any: ["ကွောင်း", "ကြောင်း"]
+      error_type: "context_probability"
+      required_suggestion: "ကျောင်း"
+      tail_cue_list_attr: "school_context_tail_cues"
+      target: "ကျောင်း"
+      promote_if_needed: true
+      rule_id: "contextual_promotions:school_context_kyaung"
+    meaning: "school (medial confusion resolved by context cues)"
+
+  # Syntax error dynamic target (progressive verb + "တယ်")
+  - id: "syntax_error_nae_tay"
+    template: "token_context_inject"
+    enabled: true
+    params:
+      error: "နေ"
+      error_type: "syntax_error"
+      token_ends_with: "နေ"
+      target_mode: "token_append"
+      target_suffix: "တယ်"
+      rule_id: "parametric:syntax_error_nae_tay"
+    meaning: "progressive verb missing ending"
+
+  # Tense mismatch dynamic target (strip ခဲ့မည် + "မည်")
+  - id: "tense_mismatch_strip_past"
+    template: "token_context_inject"
+    enabled: true
+    params:
+      error: "ခဲ့"
+      error_type: "tense_mismatch"
+      no_suggestions: true
+      token_ends_with: "ခဲ့မည်"
+      target_mode: "token_strip_append"
+      strip_suffix: "ခဲ့မည်"
+      append_suffix: "မည်"
+      rule_id: "parametric:tense_mismatch_strip_past"
+    meaning: "past+future conflict → keep future only"
+
+  # Positional check (နော်က → delete stray particle)
+  - id: "naw_ka_positional_delete"
+    template: "token_context_inject"
+    enabled: true
+    params:
+      error: "က"
+      error_type: "syntax_error"
+      lookback_window: 4
+      lookback_pattern: "နော်က"
+      target_mode: "static"
+      target: ""
+      rule_id: "parametric:naw_ka_positional_delete"
+    meaning: "delete stray ka after nauk"
+
+  # A4a: missing_conjunction negation (token starts with မ → ဘူး)
+  - id: "missing_conjunction_negation"
+    template: "token_context_inject"
+    enabled: true
+    params:
+      error: "တယ်"
+      error_type: "missing_conjunction"
+      token_starts_with: "မ"
+      target_mode: "static"
+      target: "ဘူး"
+      rule_id: "parametric:missing_conjunction_negation"
+    meaning: "negation needs ဘူး ending"
+
+  # A4b: missing_conjunction sentence boundary
+  - id: "missing_conjunction_sentence_break"
+    template: "token_context_inject"
+    enabled: true
+    params:
+      error: "တယ်"
+      error_type: "missing_conjunction"
+      sentence_starts_with: "တယ် ငါ"
+      target_mode: "static"
+      target: "တယ်။ ငါ"
+      rule_id: "parametric:missing_conjunction_sentence_break"
+    meaning: "sentence boundary missing punctuation"

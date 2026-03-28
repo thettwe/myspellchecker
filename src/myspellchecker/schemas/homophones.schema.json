@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/homophones/v1.0",
+  "title": "Myanmar Homophones Schema",
+  "description": "JSON Schema for validating homophones.yaml - Myanmar homophone mappings and context-dependent disambiguation",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "homophones"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (semver 1.x.x)"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "homophones",
+      "description": "Category type (must be 'homophones')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "homophones": {
+      "description": "Mapping of Myanmar words to their homophones",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1
+      }
+    },
+
+    "context_dependent": {
+      "description": "Context-dependent homophone disambiguation rules",
+      "type": "object",
+      "properties": {
+        "left_context_rules": {
+          "description": "Rules where correct form depends on left context",
+          "type": "array",
+          "items": { "$ref": "#/definitions/left_context_rule_entry" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "definitions": {
+    "left_context_rule_entry": {
+      "description": "Left-context homophone disambiguation rule",
+      "type": "object",
+      "required": ["wrong", "correct"],
+      "additionalProperties": false,
+
+      "properties": {
+        "wrong": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Wrong form that should be corrected in this context"
+        },
+
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correct form when left context matches"
+        },
+
+        "meaning": {
+          "type": "string",
+          "description": "Explanation of the correction"
+        },
+
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+
+        "left_context_words": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific preceding words that trigger this rule"
+        },
+
+        "left_context_suffixes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Suffixes on preceding words that trigger this rule"
+        }
+      }
+    }
+  }
+}

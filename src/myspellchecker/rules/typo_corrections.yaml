@@ -1,0 +1,612 @@
+# Myanmar Typo Corrections - Version 1.0
+# Common Myanmar typo patterns and corrections
+#
+# This file contains typo correction rules organized by error type:
+# - Particle typos (missing ha-htoe, medial confusions)
+# - Medial confusions (ya-pin vs ya-yit)
+# - Missing asat markers
+# - Missing vowels (e vowel patterns)
+# - Vowel length confusions
+# - Classifier typos
+# - Negation particle typos
+# - Visual/OCR errors (character confusion, composition, zero/wa confusion)
+#
+# Common Burmese error patterns
+#
+# Schema: https://myspellchecker.dev/schemas/typo-corrections/v1.0
+
+version: "1.0.0"
+category: "typo_corrections"
+description: "Common Myanmar typo patterns and corrections"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-01-28"
+  total_entries: 59
+  source: "Common Burmese error patterns"
+
+# ============================================================
+# TYPO & CORRECTION SYSTEM
+# Common errors organized by error type with confidence scores
+# ============================================================
+corrections:
+  # Particle Typos - Missing modifiers, wrong characters
+  particles:
+    - incorrect: "မာ"
+      correct: "မှာ"
+      error_type: "missing_ha_htoe"
+      context: "after_noun"
+      excluded_pos: ["ADJ"]  # Don't correct if it's likely an adjective (e.g. အသားမာ)
+      meaning: "Location particle 'at/in'"
+      confidence: 0.92
+      examples:
+        incorrect: "အိမ်မာ ရှိတယ်"
+        correct: "အိမ်မှာ ရှိတယ်"
+        translation: "is at home"
+
+    - incorrect: "နာ"
+      correct: "နှာ"
+      error_type: "missing_ha_htoe"
+      context: "context_dependent"
+      meaning: "Nose - context dependent"
+      confidence: 0.80
+      followed_by: ["ခေါင်း"]
+      examples:
+        incorrect: "နာခေါင်း"
+        correct: "နှာခေါင်း"
+        translation: "nose"
+
+    - incorrect: "ဂ"
+      correct: "က"
+      error_type: "character_confusion"
+      context: "after_noun"
+      meaning: "Subject marker (ဂ vs က confusion)"
+      confidence: 0.85
+      examples:
+        incorrect: "သူဂ လာတယ်"
+        correct: "သူက လာတယ်"
+        translation: "he came"
+
+    - incorrect: "ည"
+      correct: "ညှ"
+      error_type: "missing_ha_htoe"
+      context: "context_dependent"
+      meaning: "Squeeze - context dependent"
+      confidence: 0.75
+
+    # Additional particle typos
+    - incorrect: "နဲ"
+      correct: "နဲ့"
+      error_type: "missing_dot_below"
+      context: "after_noun"
+      meaning: "With/and particle (missing tone mark)"
+      confidence: 0.95
+      examples:
+        incorrect: "သူနဲ သွားတယ်"
+        correct: "သူနဲ့ သွားတယ်"
+        translation: "went with him"
+
+    - incorrect: "နှင်"
+      correct: "နှင့်"
+      error_type: "missing_dot_below"
+      context: "after_noun"
+      meaning: "Formal 'with/and' particle (missing tone)"
+      confidence: 0.95
+      examples:
+        incorrect: "အမေနှင် အဖေ"
+        correct: "အမေနှင့် အဖေ"
+        translation: "mother and father"
+
+    # Removed 4 identity mappings (ကို, တွင်, ပဲ, လဲ) where incorrect == correct
+
+  # Medial Confusions - ျ vs ြ, ွ vs ှ
+  medial_confusions:
+    - incorrect: "ကျောင်း"
+      correct: "ကြောင်း"
+      error_type: "ya_pin_ra_yit"
+      context: "after_verb"
+      meaning: "Because/cause (after verbs)"
+      pos_constraint:
+        preceding: ["V"]
+      confidence: 0.95
+      examples:
+        incorrect: "သွားကျောင်း ပြောတယ်"
+        correct: "သွားကြောင်း ပြောတယ်"
+        translation: "says that (he) went / because (he) went"
+
+    - incorrect: "ကျည်"
+      correct: "ကြည့်"
+      error_type: "ya_pin_ra_yit"
+      context: "after_verb"
+      meaning: "Look/watch (after verbs)"
+      pos_constraint:
+        preceding: ["V"]
+      confidence: 0.92
+      examples:
+        incorrect: "ကျည်တယ်"
+        correct: "ကြည့်တယ်"
+        translation: "looks/watches"
+
+    # Removed: "ကျွန်" → "ကြွန်" was backwards.
+    # "ကျွန်" (with Ya-pin ျ) is the CORRECT standard spelling
+    # used in "ကျွန်တော်" (I, male) and "ကျွန်မ" (I, female).
+    # "ကြွန်" (with Ya-yit ြ) is NOT a standard Myanmar word.
+
+    - incorrect: "မျော"
+      correct: "မြော"
+      error_type: "ya_pin_ra_yit"
+      context: "context_dependent"
+      meaning: "Float - context dependent"
+      confidence: 0.70
+
+    # Removed: "လျော" → "လြော" was wrong.
+    # The correct standard form is "လျော်" (with Ya-pin ျ and asat ်).
+    # Changing medial from Ya-pin to Ya-yit AND dropping asat produces
+    # a non-standard word.
+
+    - incorrect: "ကြေးဇူး"
+      correct: "ကျေးဇူး"
+      error_type: "ra_yit_ya_pin"
+      meaning: "Thanks/gratitude"
+      confidence: 0.98
+      examples:
+        incorrect: "ကြေးဇူးပါ"
+        correct: "ကျေးဇူးပါ"
+        translation: "thank you"
+
+    - incorrect: "ကြည်"
+      correct: "ကျည်"
+      error_type: "ra_yit_ya_pin"
+      context: "after_noun"
+      meaning: "Bullet (after nouns)"
+      pos_constraint:
+        preceding: ["N"]
+      confidence: 0.85
+      examples:
+        incorrect: "သေနတ်ကြည်"
+        correct: "သေနတ်ကျည်"
+        translation: "gun bullet"
+
+    # Additional medial confusions - ွ vs ု/ူ
+    - incorrect: "ခုင့်"
+      correct: "ခွင့်"
+      error_type: "vowel_medial_confusion"
+      meaning: "Permission (medial wa-hswe confusion)"
+      confidence: 0.88
+      examples:
+        incorrect: "ခုင့်ပြု"
+        correct: "ခွင့်ပြု"
+        translation: "to permit/allow"
+
+    # Removed: "တုံး" → "တွံ့" — these are two separate valid words
+    # (တုံး = stump/blunt, တွံ့ = hesitant), NOT a typo pair.
+
+    # Removed identity mapping for "ရှင်" (incorrect == correct)
+
+  # Missing E Vowel Patterns - Very common typo in ောင် words
+  missing_e_vowel:
+    - incorrect: "ကြာင့်"
+      correct: "ကြောင့်"
+      error_type: "missing_e_vowel"
+      context: "after_verb"
+      meaning: "Because (causal conjunction)"
+      confidence: 0.96
+      examples:
+        incorrect: "လာကြာင့် ဝမ်းသာပါတယ်"
+        correct: "လာကြောင့် ဝမ်းသာပါတယ်"
+        translation: "because (he) came, (I'm) happy"
+
+    - incorrect: "ဆာင်"
+      correct: "ဆောင်"
+      error_type: "missing_e_vowel"
+      meaning: "To do/perform (common verb)"
+      confidence: 0.95
+      examples:
+        incorrect: "လုပ်ဆာင်"
+        correct: "လုပ်ဆောင်"
+        translation: "to perform/do"
+
+    - incorrect: "ကာင်း"
+      correct: "ကောင်း"
+      error_type: "missing_e_vowel"
+      meaning: "Good"
+      confidence: 0.98
+      examples:
+        incorrect: "ကာင်းပါတယ်"
+        correct: "ကောင်းပါတယ်"
+        translation: "it's good"
+
+    - incorrect: "လာင်း"
+      correct: "လောင်း"
+      error_type: "missing_e_vowel"
+      context: "context_dependent"
+      meaning: "To pour/bet - context dependent"
+      confidence: 0.85
+
+    - incorrect: "ပာင်း"
+      correct: "ပောင်း"
+      error_type: "missing_e_vowel"
+      context: "context_dependent"
+      meaning: "Gourd - context dependent"
+      confidence: 0.80
+
+    - incorrect: "တာင်"
+      correct: "တောင်"
+      error_type: "missing_e_vowel"
+      meaning: "Mountain/south"
+      confidence: 0.92
+      examples:
+        incorrect: "တာင်ပေါ်"
+        correct: "တောင်ပေါ်"
+        translation: "on the mountain"
+
+    - incorrect: "မာင်"
+      correct: "မောင်"
+      error_type: "missing_e_vowel"
+      meaning: "Younger brother/male name prefix"
+      confidence: 0.94
+      examples:
+        incorrect: "မာင်မာင်"
+        correct: "မောင်မောင်"
+        translation: "Maung Maung (name)"
+
+    - incorrect: "နာက်"
+      correct: "နောက်"
+      error_type: "missing_e_vowel"
+      meaning: "Later/behind"
+      confidence: 0.95
+      examples:
+        incorrect: "နာက်မှာ"
+        correct: "နောက်မှာ"
+        translation: "at the back/later"
+
+    # Removed identity mapping for "ရှေ့" (incorrect == correct)
+
+  # Missing Asat/Tone Marks
+  missing_asat:
+    - incorrect: "ပါတယ"
+      correct: "ပါတယ်"
+      error_type: "missing_asat"
+      meaning: "Polite statement ending (missing asat)"
+      confidence: 0.98
+      examples:
+        incorrect: "သွားပါတယ"
+        correct: "သွားပါတယ်"
+        translation: "goes (polite)"
+
+    - incorrect: "တယ"
+      correct: "တယ်"
+      error_type: "missing_asat"
+      meaning: "Statement ending (missing asat)"
+      confidence: 0.98
+      examples:
+        incorrect: "သွားတယ"
+        correct: "သွားတယ်"
+        translation: "goes/went"
+
+    - incorrect: "သည"
+      correct: "သည်"
+      error_type: "missing_asat"
+      meaning: "Formal statement ending (missing asat)"
+      confidence: 0.95
+      examples:
+        incorrect: "သွားသည"
+        correct: "သွားသည်"
+        translation: "goes/went (formal)"
+
+    - incorrect: "မယ"
+      correct: "မယ်"
+      error_type: "missing_asat"
+      meaning: "Future ending (missing asat)"
+      confidence: 0.98
+      examples:
+        incorrect: "သွားမယ"
+        correct: "သွားမယ်"
+        translation: "will go"
+
+  # Classifier Typos
+  classifiers:
+    - incorrect: "ယေက်"
+      correct: "ယောက်"
+      error_type: "medial_typo"
+      meaning: "People classifier"
+      confidence: 0.92
+      examples:
+        incorrect: "လူ သုံးယေက်"
+        correct: "လူ သုံးယောက်"
+        translation: "three people"
+
+    - incorrect: "ယောက််"
+      correct: "ယောက်"
+      error_type: "double_asat"
+      meaning: "People classifier (double asat)"
+      confidence: 0.95
+
+    - incorrect: "ကေင်"
+      correct: "ကောင်"
+      error_type: "medial_confusion"
+      meaning: "Animal classifier"
+      confidence: 0.90
+      examples:
+        incorrect: "ခွေး သုံးကေင်"
+        correct: "ခွေး သုံးကောင်"
+        translation: "three dogs"
+
+    - incorrect: "ကောငး်"
+      correct: "ကောင်း"
+      error_type: "confusion_with_good"
+      meaning: "Confusion with ကောင်း (good)"
+      confidence: 0.85
+
+    - incorrect: "လုး"
+      correct: "လုံး"
+      error_type: "missing_anusvara"
+      meaning: "Round classifier (missing anusvara)"
+      confidence: 0.92
+
+    - incorrect: "လုံ"
+      correct: "လုံး"
+      error_type: "missing_visarga"
+      meaning: "Round classifier (missing visarga)"
+      confidence: 0.90
+
+    - incorrect: "ခူ"
+      correct: "ခု"
+      error_type: "wrong_vowel"
+      meaning: "General classifier (wrong vowel)"
+      confidence: 0.88
+
+    - incorrect: "စင်"
+      correct: "စင်း"
+      error_type: "missing_visarga"
+      meaning: "Flat classifier (missing visarga)"
+      confidence: 0.85
+
+    - incorrect: "အုပ်ပ်"
+      correct: "အုပ်"
+      error_type: "double_asat"
+      meaning: "Bundle classifier (double asat)"
+      confidence: 0.90
+
+    - incorrect: "ပုလင်"
+      correct: "ပုလင်း"
+      error_type: "missing_visarga"
+      meaning: "Bottle classifier (missing visarga)"
+      confidence: 0.88
+
+  # Negation Typos
+  negation:
+    - incorrect: "ဘူ"
+      correct: "ဘူး"
+      error_type: "missing_visarga"
+      meaning: "Negative ending (missing visarga)"
+      confidence: 0.98
+      examples:
+        incorrect: "မသွားဘူ"
+        correct: "မသွားဘူး"
+        translation: "doesn't go / won't go"
+
+    - incorrect: "ပါဘူ"
+      correct: "ပါဘူး"
+      error_type: "missing_visarga"
+      meaning: "Polite negative (missing visarga)"
+      confidence: 0.98
+      examples:
+        incorrect: "မသွားပါဘူ"
+        correct: "မသွားပါဘူး"
+        translation: "doesn't go (polite)"
+
+    - incorrect: "ူးဘ"
+      correct: "ဘူး"
+      error_type: "wrong_order"
+      meaning: "Negative ending (wrong character order)"
+      confidence: 0.85
+
+  # Visual & OCR Errors
+  visual_errors:
+    - incorrect: "ဥာဏ်"
+      correct: "ဉာဏ်"
+      error_type: "visual_confusion"
+      meaning: "Wisdom (U vs Nya confusion)"
+      confidence: 0.98
+      examples:
+        incorrect: "ဥာဏ်ကောင်း"
+        correct: "ဉာဏ်ကောင်း"
+
+    - incorrect: "ဥာဉ်"
+      correct: "ဉာဏ်"
+      error_type: "visual_confusion"
+      meaning: "Wisdom/Knowledge (U vs Nya, Nya vs Nna confusion)"
+      confidence: 0.98
+
+    - incorrect: "သြ"
+      correct: "ဩ"
+      error_type: "character_composition"
+      meaning: "Aw vowel (Th + Ra vs Aw)"
+      confidence: 0.95
+
+    - incorrect: "သြော်"
+      correct: "ဪ"
+      error_type: "character_composition"
+      meaning: "Aw (low tone) vowel"
+      confidence: 0.95
+
+    - incorrect: "အဂတ်"
+      correct: "အဝတ်"
+      error_type: "ocr_confusion"
+      meaning: "Clothing (Ga vs Wa)"
+      confidence: 0.85
+
+    - incorrect: "ဂါး"
+      correct: "ဝါး"
+      error_type: "ocr_confusion"
+      meaning: "Bamboo (Ga vs Wa)"
+      confidence: 0.70
+
+    - incorrect: "ဒါး"
+      correct: "ငါး"
+      error_type: "ocr_confusion"
+      context: "context_dependent"
+      meaning: "Fish (Da vs Nga) - context dependent"
+      confidence: 0.60
+      examples:
+        incorrect: "ဒါးကန်"
+        correct: "ငါးကန်"
+        translation: "fish pond"
+
+    # NOTE: "ဂ" → "ဝ" OCR confusion removed to avoid conflict with
+    # higher-priority "ဂ" → "က" subject marker correction (line 56).
+    # For "ဂ" vs "ဝ" confusion in words like "ဘဝ", use full word entries.
+
+    - incorrect: "ု"
+      correct: "ူ"
+      error_type: "ocr_noise"
+      context: "after_consonant"
+      meaning: "Vowel length confusion"
+      confidence: 0.50
+
+    # Zero (၀) vs Wa (ဝ) confusion - Very common OCR/encoding issue
+    - incorrect: "ပါ၀င်"
+      correct: "ပါဝင်"
+      error_type: "zero_wa_confusion"
+      meaning: "To be included (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "very_common"
+      examples:
+        incorrect: "ပါ၀င်တယ်"
+        correct: "ပါဝင်တယ်"
+        translation: "is included"
+
+    - incorrect: "၀င်"
+      correct: "ဝင်"
+      error_type: "zero_wa_confusion"
+      meaning: "To enter (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "very_common"
+      examples:
+        incorrect: "အထဲ ၀င်"
+        correct: "အထဲ ဝင်"
+        translation: "enter inside"
+
+    - incorrect: "၀န်"
+      correct: "ဝန်"
+      error_type: "zero_wa_confusion"
+      meaning: "Burden/minister (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "very_common"
+
+    - incorrect: "ဘ၀"
+      correct: "ဘဝ"
+      error_type: "zero_wa_confusion"
+      meaning: "Life (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "very_common"
+      examples:
+        incorrect: "ဘ၀တစ်သက်"
+        correct: "ဘဝတစ်သက်"
+        translation: "whole life"
+
+    - incorrect: "သဘာ၀"
+      correct: "သဘာဝ"
+      error_type: "zero_wa_confusion"
+      meaning: "Nature (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "common"
+      examples:
+        incorrect: "သဘာ၀ပတ်ဝန်းကျင်"
+        correct: "သဘာဝပတ်ဝန်းကျင်"
+        translation: "natural environment"
+
+    - incorrect: "တာ၀န်"
+      correct: "တာဝန်"
+      error_type: "zero_wa_confusion"
+      meaning: "Responsibility (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "common"
+      examples:
+        incorrect: "တာ၀န်ယူ"
+        correct: "တာဝန်ယူ"
+        translation: "take responsibility"
+
+    - incorrect: "၀ယ်"
+      correct: "ဝယ်"
+      error_type: "zero_wa_confusion"
+      meaning: "To buy (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "common"
+      examples:
+        incorrect: "၀ယ်တယ်"
+        correct: "ဝယ်တယ်"
+        translation: "buys"
+
+    - incorrect: "၀န်ကြီး"
+      correct: "ဝန်ကြီး"
+      error_type: "zero_wa_confusion"
+      meaning: "Minister (numeral zero → letter wa)"
+      confidence: 0.98
+      frequency: "common"
+      examples:
+        incorrect: "၀န်ကြီးချုပ်"
+        correct: "ဝန်ကြီးချုပ်"
+        translation: "prime minister"
+
+    # Additional OCR confusions - ရ vs သ
+    - incorrect: "ရူ"
+      correct: "သူ"
+      error_type: "ocr_confusion"
+      context: "sentence_initial"
+      meaning: "He/she - ra vs tha confusion"
+      confidence: 0.75
+      excluded_pos: ["V"]
+
+    - incorrect: "သေ"
+      correct: "ရေ"
+      error_type: "ocr_confusion"
+      context: "context_dependent"
+      meaning: "Water vs Death - tha vs ra confusion"
+      confidence: 0.60
+      excluded_pos: ["V"]
+
+    # Incomplete stacking patterns
+    - incorrect: "ဘဏ္ာ"
+      correct: "ဘဏ္ဍာ"
+      error_type: "incomplete_stacking"
+      meaning: "Treasury (missing stacked consonant)"
+      confidence: 0.95
+      examples:
+        incorrect: "ဘဏ္ာရေး"
+        correct: "ဘဏ္ဍာရေး"
+        translation: "financial"
+
+    - incorrect: "သဏ္ာန်"
+      correct: "သဏ္ဍာန်"
+      error_type: "incomplete_stacking"
+      meaning: "Shape/form (missing stacked consonant)"
+      confidence: 0.95
+
+    - incorrect: "ဒဏ္ာရီ"
+      correct: "ဒဏ္ဍာရီ"
+      error_type: "incomplete_stacking"
+      meaning: "Legend (missing stacked consonant)"
+      confidence: 0.95
+
+  # Question Particle Corrections - Position-dependent
+  question_particles:
+    - incorrect: "လာ"
+      correct: "လား"
+      error_type: "question_particle"
+      context: "sentence_final_after_verb"
+      pos_constraint:
+        preceding: ["V", "P"]
+        position: "sentence_final"
+      meaning: "Question particle (should be လား at sentence end after verb/particle)"
+      confidence: 0.85
+      examples:
+        incorrect: "သွားလာ"
+        correct: "သွားလား"
+        translation: "Are you going?"
+
+# ============================================================
+# GRAMMATICAL RULES
+# Sequence constraints and grammatical patterns
+# ============================================================

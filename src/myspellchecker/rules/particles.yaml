@@ -1,0 +1,1350 @@
+# Myanmar Linguistic Particles - Version 1.0
+# Myanmar particles organized by syntactic function with POS tags
+#
+# This file contains 92 linguistic particles with:
+# - POS tags (P_SUBJ, P_OBJ, P_SENT, P_LOC, etc.)
+# - Syntactic types (subject, object, locative, etc.)
+# - Formality levels (colloquial, neutral, formal, polite, literary)
+# - Confidence scores and usage examples
+#
+# Schema: https://myspellchecker.dev/schemas/particles/v1.0
+
+version: "1.1.0"
+category: "particles"
+description: "Myanmar linguistic particles with POS tags and metadata"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-03-19"
+  total_entries: 92
+
+# ============================================================
+# PARTICLE SYSTEM
+# Organized by syntactic function with POS tags and metadata
+# ============================================================
+# ============================================================
+particles:
+  # Verb Particles - Markers that follow verbs
+  verbs:
+    tense:
+      - particle: "ခဲ့"
+        pos_tag: "P_PAST"
+        type: "past_tense"
+        meaning: "Past tense marker"
+        formality: "neutral"
+        examples:
+          - correct: "သွားခဲ့တယ်"
+            translation: "went"
+          - correct: "စားခဲ့ပြီ"
+            translation: "already ate"
+        confidence: 0.98
+
+      - particle: "မယ်"
+        pos_tag: "P_FUT"
+        type: "future_tense"
+        meaning: "Future tense marker (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "သွားမယ်"
+            translation: "will go"
+        confidence: 0.98
+
+      - particle: "မည်"
+        pos_tag: "P_FUT"
+        type: "future_tense"
+        meaning: "Future tense marker (formal)"
+        formality: "formal"
+        examples:
+          - correct: "သွားမည်"
+            translation: "will go (formal)"
+        confidence: 0.95
+
+      - particle: "လိမ့်မည်"
+        pos_tag: "P_FUT"
+        type: "probable_future"
+        meaning: "Probable future (will likely)"
+        formality: "formal"
+        examples:
+          - correct: "ရောက်လိမ့်မည်"
+            translation: "will likely arrive"
+        confidence: 0.90
+
+      - particle: "လိမ့်မယ်"
+        pos_tag: "P_FUT"
+        type: "probable_future"
+        meaning: "Probable future (will likely) - colloquial"
+        formality: "colloquial"
+        examples:
+          - correct: "ရောက်လိမ့်မယ်"
+            translation: "will likely arrive"
+        confidence: 0.90
+
+    aspect:
+      - particle: "နေ"
+        pos_tag: "P_PROG"
+        type: "progressive"
+        meaning: "Progressive aspect (currently doing)"
+        formality: "neutral"
+        examples:
+          - correct: "စားနေတယ်"
+            translation: "is eating"
+          - correct: "သွားနေပြီ"
+            translation: "is already going"
+        confidence: 0.98
+
+      - particle: "ပြီ"
+        pos_tag: "P_PERF"
+        type: "completion"
+        meaning: "Completion marker (already/finished)"
+        formality: "neutral"
+        examples:
+          - correct: "စားပြီ"
+            translation: "finished eating"
+        confidence: 0.98
+
+      - particle: "ပြီး"
+        pos_tag: "P_PERF"
+        type: "completion_continuation"
+        meaning: "Completion + continuation (after finishing)"
+        formality: "neutral"
+        examples:
+          - correct: "စားပြီး သွားတယ်"
+            translation: "after eating, went"
+        confidence: 0.95
+
+      - particle: "လျက်"
+        pos_tag: "P_CONT"
+        type: "continuous"
+        meaning: "While doing (formal)"
+        formality: "formal"
+        examples:
+          - correct: "စားလျက် စောင့်နေသည်"
+            translation: "while eating, waiting"
+        confidence: 0.85
+
+    statement_endings:
+      - particle: "တယ်"
+        pos_tag: "P_SENT"
+        type: "declarative"
+        meaning: "Statement ending (colloquial)"
+        formality: "colloquial"
+        required_preceding: ["V", "ADJ", "P_POL", "P_NEG"]
+        examples:
+          - correct: "သွားတယ်"
+            translation: "goes/went"
+        confidence: 0.98
+
+      - particle: "ပါတယ်"
+        pos_tag: "P_SENT"
+        type: "declarative_polite"
+        meaning: "Polite statement ending"
+        formality: "polite"
+        required_preceding: ["V", "ADJ", "P_POL", "P_NEG"]
+        examples:
+          - correct: "သွားပါတယ်"
+            translation: "goes/went (polite)"
+        confidence: 0.98
+
+      - particle: "သည်"
+        pos_tag: "P_SENT"
+        type: "declarative_formal"
+        meaning: "Statement ending (formal)"
+        formality: "formal"
+        required_preceding: ["V", "ADJ", "P_POL", "P_NEG"]
+        examples:
+          - correct: "သွားသည်"
+            translation: "goes/went (formal)"
+        confidence: 0.95
+
+      - particle: "ပါသည်"
+        pos_tag: "P_SENT"
+        type: "declarative_polite"
+        meaning: "Polite formal statement"
+        formality: "polite"
+        required_preceding: ["V", "ADJ", "P_POL", "P_NEG"]
+        examples:
+          - correct: "သွားပါသည်"
+            translation: "goes/went (formal polite)"
+        confidence: 0.95
+
+    ability_permission:
+      - particle: "နိုင်"
+        pos_tag: "P_ABIL"
+        type: "ability"
+        meaning: "Can/ability to do"
+        formality: "neutral"
+        examples:
+          - correct: "သွားနိုင်တယ်"
+            translation: "can go"
+        confidence: 0.95
+
+      - particle: "ရ"
+        pos_tag: "P_PERM"
+        type: "permission"
+        meaning: "Can/permitted to do"
+        formality: "neutral"
+        examples:
+          - correct: "သွားရတယ်"
+            translation: "can go (permitted)"
+        confidence: 0.95
+
+      - particle: "တတ်"
+        pos_tag: "P_HAB"
+        type: "habitual"
+        meaning: "Habitually does/knows how"
+        formality: "neutral"
+        examples:
+          - correct: "စားတတ်တယ်"
+            translation: "knows how to eat / habitually eats"
+        confidence: 0.90
+
+    conditional:
+      - particle: "ရင်"
+        pos_tag: "P_COND"
+        type: "conditional"
+        meaning: "If/when (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "သွားရင် ပြောပါ"
+            translation: "if (you) go, tell (me)"
+        confidence: 0.95
+
+      - particle: "လျှင်"
+        pos_tag: "P_COND"
+        type: "conditional_formal"
+        meaning: "If/when (formal)"
+        formality: "formal"
+        examples:
+          - correct: "သွားလျှင် ပြောပါမည်"
+            translation: "if (you) go, (I) will tell"
+        confidence: 0.90
+
+      - particle: "သော်လည်း"
+        pos_tag: "P_CONC"
+        type: "concessive"
+        meaning: "Although/even though"
+        formality: "formal"
+        examples:
+          - correct: "သွားသော်လည်း မတွေ့ခဲ့"
+            translation: "although (I) went, didn't meet"
+        confidence: 0.85
+
+    nominalization:
+      - particle: "ခြင်း"
+        pos_tag: "P_NOM"
+        type: "nominalization"
+        meaning: "Turns verb into noun (-ing/-tion)"
+        formality: "formal"
+        examples:
+          - correct: "သွားခြင်း"
+            translation: "going / the act of going"
+        confidence: 0.95
+
+      - particle: "မှု"
+        pos_tag: "P_NOM"
+        type: "nominalization_formal"
+        meaning: "Turns verb into abstract noun (formal)"
+        formality: "formal"
+        examples:
+          - correct: "ကူညီမှု"
+            translation: "assistance"
+        confidence: 0.90
+
+      - particle: "ရန်"
+        pos_tag: "P_INF"
+        type: "infinitive"
+        meaning: "Purpose/infinitive (to do)"
+        formality: "formal"
+        examples:
+          - correct: "သွားရန် စီစဉ်သည်"
+            translation: "plans to go"
+        confidence: 0.90
+
+      - particle: "ဖို့"
+        pos_tag: "P_INF"
+        type: "infinitive_colloquial"
+        meaning: "Purpose (to do, colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "စားဖို့ ဝယ်တယ်"
+            translation: "buys to eat"
+        confidence: 0.95
+
+    causative_reason:
+      - particle: "အောင်"
+        pos_tag: "P_PURP"
+        type: "purpose"
+        meaning: "Until/so that"
+        formality: "neutral"
+        examples:
+          - correct: "အောင်မြင်အောင် ကြိုးစားတယ်"
+            translation: "tries so that (it) succeeds"
+        confidence: 0.90
+
+      - particle: "လို့"
+        pos_tag: "P_QUOT"
+        type: "quotative_reason"
+        meaning: "Because/quotative marker"
+        formality: "colloquial"
+        examples:
+          - correct: "နာလို့ မသွားဘူး"
+            translation: "because (I'm) sick, not going"
+        confidence: 0.95
+
+      - particle: "ကြောင့်"
+        pos_tag: "P_CAUS"
+        type: "causative"
+        meaning: "Because of (reason)"
+        formality: "neutral"
+        examples:
+          - correct: "မိုးရွာကြောင့် မသွားဘူး"
+            translation: "because of rain, not going"
+        confidence: 0.95
+
+      - particle: "ကြောင်း"
+        pos_tag: "P_COMP"
+        type: "complementizer"
+        meaning: "That (complement clause)"
+        formality: "neutral"
+        examples:
+          - correct: "သွားကြောင်း ပြောတယ်"
+            translation: "says that (he) went"
+        confidence: 0.95
+
+    plural_collective:
+      - particle: "ကြ"
+        pos_tag: "P_PL"
+        type: "plural_honorific"
+        meaning: "Plural/honorific marker for verbs"
+        formality: "neutral"
+        examples:
+          - correct: "သွားကြတယ်"
+            translation: "they go / you (plural/honorific) go"
+        confidence: 0.95
+
+    emphasis:
+      - particle: "လေ"
+        pos_tag: "P_EMPH"
+        type: "emphasis"
+        meaning: "Emphasis marker (literary/poetic)"
+        formality: "literary"
+        examples:
+          - correct: "ကောင်းလေ ကောင်းလေ"
+            translation: "the more the better"
+          - correct: "သွားလေ"
+            translation: "go indeed"
+        confidence: 0.85
+
+      - particle: "လေ့"
+        pos_tag: "P_HAB"
+        type: "habitual"
+        meaning: "Habitual marker (tends to)"
+        formality: "neutral"
+        examples:
+          - correct: "သွားလေ့ရှိတယ်"
+            translation: "tends to go"
+        confidence: 0.90
+
+      - particle: "ပေ"
+        pos_tag: "P_EMPH"
+        type: "literary_emphatic"
+        meaning: "Literary emphatic/hortative particle"
+        formality: "literary"
+        examples:
+          - correct: "ကောင်းပေသည်"
+            translation: "it is indeed good"
+          - correct: "ပြောပေ"
+            translation: "do tell"
+        confidence: 0.85
+
+  # Noun Particles - Markers that follow nouns
+  nouns:
+    case_markers:
+      - particle: "က"
+        pos_tag: "P_SUBJ"
+        type: "subject_marker"
+        meaning: "Subject marker (most common)"
+        formality: "neutral"
+        examples:
+          - correct: "သူက ရောက်တယ်"
+            translation: "He arrived"
+        confidence: 0.98
+
+      - particle: "ကို"
+        pos_tag: "P_OBJ"
+        type: "object_marker"
+        meaning: "Object marker (most common)"
+        formality: "neutral"
+        examples:
+          - correct: "သူ့ကို တွေ့တယ်"
+            translation: "met him"
+        confidence: 0.98
+
+      - particle: "အား"
+        pos_tag: "P_OBJ"
+        type: "object_marker_formal"
+        meaning: "Object marker (formal)"
+        formality: "formal"
+        examples:
+          - correct: "သူ့အား ပေးသည်"
+            translation: "gives to him (formal)"
+        confidence: 0.90
+
+      - particle: "သည်"
+        pos_tag: "P_TOP"
+        type: "topic_marker"
+        meaning: "Topic marker (formal)"
+        formality: "formal"
+        examples:
+          - correct: "ဤသည် စာအုပ်"
+            translation: "This is a book"
+        confidence: 0.95
+
+      - particle: "ဟာ"
+        pos_tag: "P_TOP"
+        type: "topic_marker_colloquial"
+        meaning: "Topic marker (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "ဒါဟာ စာအုပ်"
+            translation: "This is a book (colloquial)"
+        confidence: 0.95
+
+      - particle: "ကား"
+        pos_tag: "P_TOP"
+        type: "topic_marker_emphatic"
+        meaning: "Emphatic topic marker (literary)"
+        formality: "literary"
+        examples:
+          - correct: "မြန်မာပြည်ကား ရွှေဥယျာဉ်"
+            translation: "Myanmar indeed is the golden land"
+        confidence: 0.80
+
+    location:
+      - particle: "မှာ"
+        pos_tag: "P_LOC"
+        type: "locative"
+        meaning: "At/in (location marker)"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်မှာ ရှိတယ်"
+            translation: "is at home"
+        confidence: 0.98
+
+      - particle: "မှ"
+        pos_tag: "P_ABL"
+        type: "ablative"
+        meaning: "From (source)"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်မှ ထွက်တယ်"
+            translation: "leaves from home"
+        confidence: 0.95
+
+      - particle: "တွင်"
+        pos_tag: "P_LOC"
+        type: "locative_formal"
+        meaning: "At/in (formal)"
+        formality: "formal"
+        examples:
+          - correct: "အိမ်တွင် ရှိသည်"
+            translation: "is at home (formal)"
+        confidence: 0.90
+
+      - particle: "၌"
+        pos_tag: "P_LOC"
+        type: "locative_literary"
+        meaning: "At/in (literary)"
+        formality: "literary"
+        examples:
+          - correct: "နန်းတွင်း၌"
+            translation: "in the palace"
+        confidence: 0.80
+
+      - particle: "သို့"
+        pos_tag: "P_ALL"
+        type: "allative"
+        meaning: "To/toward (direction)"
+        formality: "formal"
+        examples:
+          - correct: "အိမ်သို့ ပြန်သည်"
+            translation: "returns to home"
+        confidence: 0.90
+
+      - particle: "ဆီ"
+        pos_tag: "P_ALL"
+        type: "allative_colloquial"
+        meaning: "To/at (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "သူ့ဆီ သွားတယ်"
+            translation: "goes to him/her"
+        confidence: 0.95
+
+    spatial:
+      - particle: "ထဲ"
+        pos_tag: "P_LOC"
+        type: "inside"
+        meaning: "Inside"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်ထဲ"
+            translation: "inside the house"
+        confidence: 0.95
+
+      - particle: "အထဲ"
+        pos_tag: "P_LOC"
+        type: "inside_formal"
+        meaning: "Inside (formal)"
+        formality: "formal"
+        examples:
+          - correct: "အိမ်အထဲ"
+            translation: "inside the house (formal)"
+        confidence: 0.90
+
+      - particle: "ပေါ်"
+        pos_tag: "P_LOC"
+        type: "on_top"
+        meaning: "On/upon/above"
+        formality: "neutral"
+        examples:
+          - correct: "စားပွဲပေါ်"
+            translation: "on the table"
+        confidence: 0.95
+
+      - particle: "အပေါ်"
+        pos_tag: "P_LOC"
+        type: "on_top_formal"
+        meaning: "On/upon (formal)"
+        formality: "formal"
+        examples:
+          - correct: "စားပွဲအပေါ်"
+            translation: "on the table (formal)"
+        confidence: 0.90
+
+      - particle: "အောက်"
+        pos_tag: "P_LOC"
+        type: "under"
+        meaning: "Under/below"
+        formality: "neutral"
+        examples:
+          - correct: "စားပွဲအောက်"
+            translation: "under the table"
+        confidence: 0.95
+
+      - particle: "ရှေ့"
+        pos_tag: "P_LOC"
+        type: "in_front"
+        meaning: "In front"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်ရှေ့"
+            translation: "in front of the house"
+        confidence: 0.95
+
+      - particle: "အရှေ့"
+        pos_tag: "P_LOC"
+        type: "in_front_formal"
+        meaning: "In front (formal)"
+        formality: "formal"
+        examples:
+          - correct: "အိမ်အရှေ့"
+            translation: "in front of the house (formal)"
+        confidence: 0.90
+
+      - particle: "နောက်"
+        pos_tag: "P_LOC"
+        type: "behind"
+        meaning: "Behind"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်နောက်"
+            translation: "behind the house"
+        confidence: 0.95
+
+      - particle: "အနောက်"
+        pos_tag: "P_LOC"
+        type: "behind_formal"
+        meaning: "Behind (formal)"
+        formality: "formal"
+        examples:
+          - correct: "အိမ်အနောက်"
+            translation: "behind the house (formal)"
+        confidence: 0.90
+
+      - particle: "ဘေး"
+        pos_tag: "P_LOC"
+        type: "beside"
+        meaning: "Beside/next to"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်ဘေး"
+            translation: "beside the house"
+        confidence: 0.95
+
+      - particle: "အနား"
+        pos_tag: "P_LOC"
+        type: "near"
+        meaning: "Near"
+        formality: "neutral"
+        examples:
+          - correct: "အိမ်အနား"
+            translation: "near the house"
+        confidence: 0.95
+
+    comitative_instrumental:
+      - particle: "နဲ့"
+        pos_tag: "P_COM"
+        type: "comitative"
+        meaning: "With (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "သူနဲ့ သွားတယ်"
+            translation: "goes with him"
+        confidence: 0.98
+
+      - particle: "နှင့်"
+        pos_tag: "P_COM"
+        type: "comitative_formal"
+        meaning: "With/and (formal)"
+        formality: "formal"
+        examples:
+          - correct: "သူနှင့် သွားသည်"
+            translation: "goes with him (formal)"
+        confidence: 0.95
+
+      - particle: "ဖြင့်"
+        pos_tag: "P_INS"
+        type: "instrumental"
+        meaning: "By means of/with (instrumental)"
+        formality: "formal"
+        examples:
+          - correct: "ကားဖြင့် သွားသည်"
+            translation: "goes by car"
+        confidence: 0.90
+
+      - particle: "၍"
+        pos_tag: "P_CONJ"
+        type: "conjunctive"
+        meaning: "And then/because (literary)"
+        formality: "literary"
+        examples:
+          - correct: "စား၍ သွားသည်"
+            translation: "eats and then goes"
+        confidence: 0.80
+
+    possessive:
+      - particle: "ရဲ့"
+        pos_tag: "P_POSS"
+        type: "possessive"
+        meaning: "Possessive marker (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "သူ့ရဲ့ စာအုပ်"
+            translation: "his book"
+        confidence: 0.98
+
+      - particle: "၏"
+        pos_tag: "P_POSS"
+        type: "possessive_formal"
+        meaning: "Possessive marker (formal)"
+        formality: "formal"
+        examples:
+          - correct: "သူ၏ စာအုပ်"
+            translation: "his book (formal)"
+        confidence: 0.90
+
+    relational:
+      - particle: "အတွက်"
+        pos_tag: "P_BEN"
+        type: "benefactive"
+        meaning: "For/because of"
+        formality: "neutral"
+        examples:
+          - correct: "သူ့အတွက် ဝယ်တယ်"
+            translation: "buys for him"
+        confidence: 0.95
+
+      - particle: "လို"
+        pos_tag: "P_SIM"
+        type: "similative"
+        meaning: "Like/as"
+        formality: "neutral"
+        examples:
+          - correct: "သူလို"
+            translation: "like him"
+        confidence: 0.95
+
+      - particle: "လိုလို"
+        pos_tag: "P_SIM"
+        type: "similative_emphatic"
+        meaning: "Just like (emphasis)"
+        formality: "colloquial"
+        examples:
+          - correct: "သူလိုလို"
+            translation: "just like him"
+        confidence: 0.90
+
+      - particle: "လိုပဲ"
+        pos_tag: "P_SIM"
+        type: "similative_exact"
+        meaning: "Exactly like"
+        formality: "colloquial"
+        examples:
+          - correct: "သူလိုပဲ"
+            translation: "exactly like him"
+        confidence: 0.90
+
+      - particle: "ထက်"
+        pos_tag: "P_COMP"
+        type: "comparative"
+        meaning: "More than/compared to"
+        formality: "neutral"
+        examples:
+          - correct: "သူထက် ကောင်းတယ်"
+            translation: "better than him"
+        confidence: 0.95
+
+    plural:
+      - particle: "များ"
+        pos_tag: "P_PL"
+        type: "plural"
+        meaning: "Plural marker (formal)"
+        formality: "formal"
+        examples:
+          - correct: "စာအုပ်များ"
+            translation: "books"
+        confidence: 0.98
+
+      - particle: "တို့"
+        pos_tag: "P_PL"
+        type: "plural_colloquial"
+        meaning: "Plural marker (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "သူတို့"
+            translation: "they"
+        confidence: 0.98
+
+    topic_emphasis:
+      - particle: "တော့"
+        pos_tag: "P_EMPH"
+        type: "emphasis_then"
+        meaning: "Emphasis/then"
+        formality: "colloquial"
+        examples:
+          - correct: "ဒါတော့ မှန်တယ်"
+            translation: "That then is correct"
+        confidence: 0.95
+
+      - particle: "ပဲ"
+        pos_tag: "P_EMPH"
+        type: "only_emphasis"
+        meaning: "Only/just/emphasis"
+        formality: "neutral"
+        examples:
+          - correct: "ဒါပဲ"
+            translation: "only that / just that"
+        confidence: 0.98
+
+      - particle: "ပေါ့"
+        pos_tag: "P_SOFT"
+        type: "softener"
+        meaning: "Softener/tag"
+        formality: "colloquial"
+        examples:
+          - correct: "ကောင်းပေါ့"
+            translation: "it's good (softly)"
+        confidence: 0.95
+
+  # Modifiers - Particles that create relative clauses or modify
+  modifiers:
+    relative_clause:
+      - particle: "သော"
+        pos_tag: "P_REL"
+        type: "relative_formal"
+        meaning: "Which/that (formal relative)"
+        formality: "formal"
+        examples:
+          - correct: "လာသော သူ"
+            translation: "the person who came"
+        confidence: 0.95
+
+      - particle: "တဲ့"
+        pos_tag: "P_REL"
+        type: "relative_colloquial"
+        meaning: "Which/that (colloquial relative)"
+        formality: "colloquial"
+        examples:
+          - correct: "လာတဲ့ သူ"
+            translation: "the person who came"
+        confidence: 0.98
+
+      - particle: "မယ့်"
+        pos_tag: "P_REL"
+        type: "relative_future"
+        meaning: "Which/that will (future relative)"
+        formality: "colloquial"
+        examples:
+          - correct: "လာမယ့် သူ"
+            translation: "the person who will come"
+        confidence: 0.95
+
+      - particle: "ခဲ့တဲ့"
+        pos_tag: "P_REL"
+        type: "relative_past"
+        meaning: "Which/that did (past relative)"
+        formality: "colloquial"
+        examples:
+          - correct: "လာခဲ့တဲ့ သူ"
+            translation: "the person who came (past)"
+        confidence: 0.95
+
+    adverbial:
+      - particle: "စွာ"
+        pos_tag: "P_ADV"
+        type: "manner"
+        meaning: "Adverbial marker (-ly)"
+        formality: "formal"
+        examples:
+          - correct: "လျင်မြန်စွာ"
+            translation: "quickly"
+          - correct: "ကောင်းစွာ"
+            translation: "well"
+        confidence: 0.95
+
+      - particle: "တိုင်း"
+        pos_tag: "P_DIST"
+        type: "distributive"
+        meaning: "Every/each time"
+        formality: "neutral"
+        examples:
+          - correct: "နေ့တိုင်း"
+            translation: "every day"
+        confidence: 0.95
+
+      - particle: "လောက်"
+        pos_tag: "P_APPROX"
+        type: "approximative"
+        meaning: "About/approximately"
+        formality: "neutral"
+        examples:
+          - correct: "ဆယ်လောက်"
+            translation: "about ten"
+        confidence: 0.90
+
+      - particle: "ပေမယ့်"
+        pos_tag: "P_CONC"
+        type: "concessive"
+        meaning: "Although/but (colloquial)"
+        formality: "colloquial"
+        examples:
+          - correct: "ကောင်းပေမယ့် မဝယ်ဘူး"
+            translation: "although good, won't buy"
+        confidence: 0.95
+
+  # Interrogative - Question particles
+  interrogative:
+    - particle: "လား"
+      pos_tag: "P_Q"
+      type: "yes_no_question"
+      meaning: "Yes/no question marker (colloquial)"
+      formality: "colloquial"
+      sentence_final: true
+      examples:
+        - correct: "သွားလား"
+          translation: "will (you) go?"
+      confidence: 0.98
+
+    - particle: "သလား"
+      pos_tag: "P_Q"
+      type: "yes_no_question_formal"
+      meaning: "Yes/no question marker (formal)"
+      formality: "formal"
+      sentence_final: true
+      examples:
+        - correct: "သွားသလား"
+          translation: "will (you) go? (formal)"
+      confidence: 0.90
+
+    - particle: "လဲ"
+      pos_tag: "P_Q"
+      type: "alternative_question"
+      meaning: "Alternative question / also"
+      formality: "colloquial"
+      examples:
+        - correct: "သူလဲ လာတယ်"
+          translation: "he also came"
+        - correct: "ဘယ်လဲ"
+          translation: "which one?"
+      confidence: 0.95
+
+    - particle: "မလဲ"
+      pos_tag: "P_Q"
+      type: "negative_question"
+      meaning: "Negative question marker"
+      formality: "colloquial"
+      sentence_final: true
+      examples:
+        - correct: "မသွားဘူးမလဲ"
+          translation: "won't (you) go?"
+      confidence: 0.90
+
+    - particle: "နော်"
+      pos_tag: "P_TAG"
+      type: "tag_question"
+      meaning: "Tag question (seeking confirmation)"
+      formality: "colloquial"
+      sentence_final: true
+      examples:
+        - correct: "ကောင်းတယ် နော်"
+          translation: "it's good, isn't it?"
+      confidence: 0.95
+
+  # Polite/Social - Politeness and social register particles
+  politeness:
+    - particle: "ပါ"
+      pos_tag: "P_POL"
+      type: "polite_marker"
+      meaning: "Polite particle"
+      formality: "polite"
+      sentence_final: true
+      examples:
+        - correct: "သွားပါတယ်"
+          translation: "goes (polite)"
+      confidence: 0.98
+
+    - particle: "ဗျ"
+      pos_tag: "P_POL"
+      type: "polite_male"
+      meaning: "Polite marker (male speaker)"
+      formality: "polite"
+      sentence_final: true
+      examples:
+        - correct: "သွားတယ်ဗျ"
+          translation: "goes (polite male)"
+      confidence: 0.90
+
+    - particle: "ဗျာ"
+      pos_tag: "P_POL"
+      type: "polite_male_extended"
+      meaning: "Polite marker (male, extended)"
+      formality: "polite"
+      sentence_final: true
+      examples:
+        - correct: "ကောင်းတယ်ဗျာ"
+          translation: "it's good (polite male)"
+      confidence: 0.85
+
+    - particle: "ရှင်"
+      pos_tag: "P_POL"
+      type: "polite_female"
+      meaning: "Polite marker (female speaker)"
+      formality: "polite"
+      sentence_final: true
+      examples:
+        - correct: "သွားတယ်ရှင်"
+          translation: "goes (polite female)"
+      confidence: 0.85
+
+    - particle: "ကဲ့"
+      pos_tag: "P_POL"
+      type: "polite_affirmative"
+      meaning: "Polite/affirmative"
+      formality: "polite"
+      sentence_final: true
+      examples:
+        - correct: "ဟုတ်ကဲ့"
+          translation: "yes (polite)"
+      confidence: 0.95
+
+  # Negation - Negation particles and markers
+  negation:
+    - particle: "မ"
+      pos_tag: "P_NEG"
+      type: "negation_prefix"
+      meaning: "Negation prefix (not)"
+      formality: "neutral"
+      required_following: ["V", "ADJ"]  # Must be followed by verb/adj
+      examples:
+        - correct: "မသွားဘူး"
+          translation: "don't go"
+      confidence: 0.98
+
+    - particle: "ဘူး"
+      pos_tag: "P_NEG_END"
+      type: "negation_ending"
+      meaning: "Negation ending (colloquial)"
+      formality: "colloquial"
+      required_preceding: ["V", "ADJ", "P_AUX"]
+      sentence_final: true
+      examples:
+        - correct: "မသွားဘူး"
+          translation: "don't go"
+      confidence: 0.98
+
+    - particle: "ပါဘူး"
+      pos_tag: "P_NEG_END"
+      type: "negation_ending_polite"
+      meaning: "Negation ending (polite)"
+      formality: "polite"
+      sentence_final: true
+      examples:
+        - correct: "မသွားပါဘူး"
+          translation: "don't go (polite)"
+      confidence: 0.98
+
+    - particle: "နဲ့"
+      pos_tag: "P_NEG_IMP"
+      type: "prohibition"
+      meaning: "Prohibition (Don't!)"
+      formality: "colloquial"
+      required_preceding: ["V"]
+      sentence_final: true
+      examples:
+        - correct: "မသွားနဲ့"
+          translation: "don't go!"
+      confidence: 0.95
+
+# ============================================================
+# PARTICLE CONFUSION PAIRS
+# Standalone particle typos (boundary-dependent detection)
+# ============================================================
+confusion_pairs:
+  - incorrect: "ကိ"
+    correct: "ကို"
+    error_type: "vowel_length_confusion"
+    meaning: "Object marker (short vowel → long vowel)"
+    confidence: 0.95
+  - incorrect: "ကု"
+    correct: "ကို"
+    error_type: "vowel_confusion"
+    meaning: "Object marker (u → o vowel)"
+    confidence: 0.95
+  - incorrect: "နဲ"
+    correct: "နဲ့"
+    error_type: "missing_dot_below"
+    meaning: "Conjunction particle (missing dot-below)"
+    confidence: 0.95
+
+# ============================================================
+# SEQUENTIAL PARTICLE CONFUSION
+# တော် (honorific suffix) vs တော့ (sequential/emphatic particle)
+# Inclusion-based: only flag when preceded by known verb-completion patterns
+# ============================================================
+sequential_particle_confusion:
+  wrong: "တော်"
+  correct: "တော့"
+  error_type: "particle_confusion"
+  confidence: 0.85
+  left_context_triggers:
+    - "ပြီးတော်"     # completed + then
+    - "ရောက်တော်"   # arrive + then
+    - "တော်ပြီ"      # (wrong) should be: တော့ + completed
+    - "ရတော်"        # get/obtain + then
+    - "ပြောတော်"     # say + then
+    - "လာတော်"       # come + then
+    - "သွားတော်"     # go + then
+    - "ဖြစ်တော်"     # happen/be + then
+    - "ပေးတော်"      # give + then
+    - "လုပ်တော်"     # do + then
+    - "ထားတော်"      # put/keep + then
+
+# ============================================================
+# HA-HTOE PARTICLE CONFUSION
+# Suffix particles missing ha-htoe (ှ U+103E)
+# ============================================================
+ha_htoe_particle_confusion:
+  corrections:
+    - incorrect: "မာ"
+      correct: "မှာ"
+      error_type: "missing_ha_htoe"
+      meaning: "hard (adj) vs at/in (location particle)"
+      confidence: 0.90
+  exclusions:
+    # Words ending with မာ that should NOT trigger ha-htoe correction
+    - "ဥပမာ"           # discourse marker "for example"
+    - "မြန်မာ"         # Myanmar (Unicode)
+    - "ျမန္မာ"         # Myanmar (Zawgyi)
+    - "ျမန်မာ"         # Myanmar (mixed encoding)
+    - "အမာ"            # tumor, hard thing
+    - "စိတ်မာ"         # stubborn/hard-hearted
+    - "ခေါင်းမာ"       # stubborn (lit. hard-headed)
+    - "အသားမာ"         # tough (meat)
+    - "ကျောက်မာ"      # gem, hard stone
+    - "လက်မာ"          # skilled/heavy-handed
+    - "သံမာ"           # hard metal/iron
+    - "နှလုံးမာ"       # hard-hearted
+    - "ကြေးမာ"         # hardened copper
+    - "ခြေမာ"          # strong-footed
+    - "သတ္တိမာ"        # brave/courageous
+    - "အရိုးမာ"        # hard-boned
+    - "ဉာဏ်မာ"        # sharp-minded
+    - "ခင်မာ"          # common female name (Khin Ma)
+  honorific_prefixes:
+    # When မာ appears in a token starting with these, it's a name
+    - "ဒေါ်"           # Daw (Mrs/Ms)
+    - "ဦး"             # U (Mr/Uncle)
+    - "ကို"            # Ko (Brother)
+    - "ဒေါက်တာ"       # Doctor
+    - "ပရော်ဖက်ဆာ"   # Professor
+    - "ဆရာ"           # Teacher/sir
+    - "ဆရာမ"          # Teacher (female)
+
+# ============================================================
+# DANGLING PARTICLES
+# Clause-linking particles that shouldn't appear at sentence end
+# ============================================================
+dangling_particles:
+  - particle: "ကြောင့်"
+    meaning: "because (causal)"
+  - particle: "ကြောင်း"
+    meaning: "that / because (complement/causal)"
+  - particle: "ပေမယ့်"
+    meaning: "although"
+  - particle: "ဒါပေမယ့်"
+    meaning: "but/however"
+  - particle: "အတွက်"
+    meaning: "for / in order to"
+  # v1.4 additions — clause-linking markers that require completion
+  - particle: "ဖို့"
+    meaning: "in order to / purpose (needs following clause)"
+  - particle: "ရန်"
+    meaning: "in order to / purpose (formal, needs following clause)"
+  - particle: "တဲ့"
+    meaning: "relative clause marker (needs head noun)"
+  - particle: "သော"
+    meaning: "relative clause marker (formal, needs head noun)"
+  - particle: "ပြီး"
+    meaning: "after / and then (sequential, needs main clause)"
+
+# ============================================================
+# SUPPRESSION SUFFIXES
+# Attached suffixes that suppress false-positive context_probability errors
+# on compound words (valid word + particle combinations)
+# ============================================================
+suppression_suffixes:
+  - suffix: "ကို"
+    meaning: "object marker"
+  - suffix: "က"
+    meaning: "subject marker"
+  - suffix: "မှာ"
+    meaning: "location marker"
+  - suffix: "မှ"
+    meaning: "ablative marker"
+  - suffix: "နှင့်"
+    meaning: "comitative (formal)"
+  - suffix: "နဲ့"
+    meaning: "comitative (colloquial)"
+  - suffix: "တွေ"
+    meaning: "plural marker"
+  - suffix: "ပါ"
+    meaning: "polite marker"
+  - suffix: "မယ်"
+    meaning: "future marker"
+  - suffix: "တယ်"
+    meaning: "statement ending"
+  - suffix: "သည်"
+    meaning: "formal statement ending"
+
+# ============================================================
+# SYLLABLE FINALS
+# Myanmar syllable-final markers that indicate a syllable boundary.
+# Used by particle confusion detection to identify left boundaries.
+# Includes both consonant finals (asat, visarga, dot-below) and
+# vowel endings (AA, tall-AA, UU, II, AI).
+# ============================================================
+syllable_finals:
+  # Consonant finals
+  - char: "\u103A"
+    name: "asat"
+  - char: "\u1038"
+    name: "visarga"
+  - char: "\u1037"
+    name: "dot below"
+  # Vowel endings
+  - char: "\u102C"
+    name: "AA vowel"
+  - char: "\u102B"
+    name: "tall AA vowel"
+  - char: "\u1030"
+    name: "UU vowel"
+  - char: "\u102E"
+    name: "II vowel"
+  - char: "\u1032"
+    name: "AI vowel"
+
+# ============================================================
+# VISARGA EXCLUDE PRONOUNS
+# Pronouns excluded from missing-visarga detection.
+# These validly end with "လို" (similative) and should not be
+# flagged as needing visarga (လို့).
+# ============================================================
+visarga_exclude_pronouns:
+  - "ငါ"
+  - "နင်"
+  - "မင်း"
+  - "သူ"
+  - "သူမ"
+  - "ကျွန်တော်"
+  - "ကျွန်မ"
+
+# ============================================================
+# SUBJECT PRONOUNS
+# Subject pronouns used in contextual object-marker (က→ကို)
+# confusion detection.
+# ============================================================
+subject_pronouns:
+  - "ငါ"
+  - "ငါတို့"
+  - "နင်"
+  - "နင်တို့"
+  - "မင်း"
+  - "သူ"
+  - "သူမ"
+  - "သူတို့"
+  - "ကျွန်တော်"
+  - "ကျွန်မ"
+
+# ============================================================
+# MISSING ASAT PARTICLES
+# Common sentence-final particles that require asat but are
+# often mistyped without it.
+# ============================================================
+missing_asat_particles:
+  - incorrect: "တယ"
+    correct: "တယ်"
+    meaning: "statement ending (missing asat)"
+  - incorrect: "မယ"
+    correct: "မယ်"
+    meaning: "future marker (missing asat)"
+  - incorrect: "သည"
+    correct: "သည်"
+    meaning: "formal statement ending (missing asat)"
+
+# ============================================================
+# MISSING VISARGA SUFFIXES
+# Clause-linker suffixes missing visarga (dot-below).
+# ============================================================
+missing_visarga_suffixes:
+  - incorrect: "လို"
+    correct: "လို့"
+    meaning: "quotative/reason (missing visarga)"
+
+# ============================================================
+# PARTICLE MISUSE RULES
+# Verb-frame-based particle correction rules.
+# When a specific particle appears before a verb (within a
+# context window), the particle is semantically wrong for the
+# verb's argument structure.
+#
+# Each rule:
+#   wrong_particle: the incorrect (but valid) particle
+#   correct_particle: what it should be
+#   verb_triggers: verbs/verb-phrases in the right context that
+#                  disambiguate the particle choice
+#   max_window: max tokens to scan ahead for verb triggers
+#   description: human-readable explanation
+#
+# IMPORTANT: These rules fire only when a verb trigger is found
+# in the right context. Particles without verb context are left
+# alone. Keep verb_triggers highly specific to avoid FPs.
+# ============================================================
+particle_misuse_rules:
+  # Pattern: NOUN+ကို VERB → should be NOUN+မှ VERB
+  # "retrieve FROM X" not "retrieve TO X"
+  - wrong_particle: "ကို"
+    correct_particle: "မှ"
+    verb_triggers:
+      - "ပြန်လည်ရယူ"    # retrieve / recover
+      - "ထုတ်ယူ"          # extract / take out
+      - "ရယူ"             # obtain / take
+      - "ထွက်ခွာ"         # depart from
+      - "ထွက်လာ"          # come out from
+      - "ရရှိ"            # receive from
+    max_window: 5
+    description: "Source/origin verbs require ablative (မှ), not object marker (ကို)"
+
+  # Pattern: NOUN+ကို V+နေ → should be NOUN+မှာ V+နေ
+  # "resting AT X" not "resting TO X"
+  # Only when the verb is in progressive aspect (နေ = ongoing state)
+  - wrong_particle: "ကို"
+    correct_particle: "မှာ"
+    verb_triggers:
+      - "အနားယူနေ"       # resting (progressive)
+      - "နေထိုင်နေ"      # residing (progressive)
+      - "စောင့်ဆိုင်းနေ"  # waiting (progressive)
+      - "အလုပ်လုပ်နေ"   # working (progressive)
+      - "စောင့်နေ"        # waiting (progressive)
+    max_window: 4
+    description: "Stative/progressive verbs require locative (မှာ), not object marker (ကို)"
+
+  # Pattern: NOUN+ကို စစ်ဆေးမှု/စစ်ဆေးခြင်း ပြုလုပ်
+  # "conduct inspection IN X" not "inspect TO X"
+  - wrong_particle: "ကို"
+    correct_particle: "တွင်"
+    verb_triggers:
+      - "စစ်ဆေးမှု ပြုလုပ်"     # conduct inspection
+      - "စစ်ဆေးခြင်း ပြုလုပ်"   # conduct inspection (formal)
+      - "စုံစမ်းစစ်ဆေးမှု ပြုလုပ်"  # conduct investigation
+    max_window: 5
+    description: "Nominalized inspection verbs require locative (တွင်), not object (ကို)"
+
+  # Pattern: NOUN+ကို မေးခွန်း မေး
+  # "ask questions AT/IN a discussion" not "ask questions TO a discussion"
+  - wrong_particle: "ကို"
+    correct_particle: "မှာ"
+    verb_triggers:
+      - "မေးခွန်း မေး"    # ask questions
+      - "မေးခွန်းမေး"     # ask questions (merged)
+    max_window: 4
+    description: "Asking questions happens AT a venue/event (မှာ), not TO it (ကို)"
+
+  # Pattern: NOUN+မှာ လေ့ကျင့်ခန်း/အစီရင်ခံစာ VERB
+  # "exercises FOR exam" not "exercises AT exam"
+  - wrong_particle: "မှာ"
+    correct_particle: "အတွက်"
+    verb_triggers:
+      - "လေ့ကျင့်ခန်း ပေး"    # give exercises
+      - "လေ့ကျင့်ခန်းပေး"     # give exercises (merged)
+      - "အစီရင်ခံစာ တင်သွင်း"  # submit report
+      - "အစီရင်ခံစာတင်သွင်း"  # submit report (merged)
+      - "ပြင်ဆင်"              # prepare for
+      - "လေ့ကျင့်"             # practice for
+      - "လေ့ကျင့်ခန်း လုပ်"    # do exercises
+    max_window: 5
+    description: "Purpose/benefactive verbs require အတွက် (for), not locative (မှာ)"
+
+  # Pattern: SUBJECT+က ... NOUN+က ... ပေး
+  # When two nouns are marked with က in the same clause and the verb
+  # is ditransitive (give/provide), the second က is likely the
+  # recipient and should be အား.
+  # require_prior_marker: "က" means only fire when there's already
+  # a က-marked noun earlier in the sentence.
+  - wrong_particle: "က"
+    correct_particle: "အား"
+    verb_triggers:
+      - "လမ်းညွှန်ချက် ပေး"    # give guidance
+      - "လမ်းညွှန်ချက်ပေး"     # give guidance (merged)
+      - "ညွှန်ကြားချက် ပေး"    # give instruction
+      - "ညွှန်ကြားချက်ပေး"     # give instruction (merged)
+    max_window: 4
+    require_prior_marker: "က"
+    description: "Recipient of ditransitive verbs requires အား (to), not subject marker (က)"
+
+# ============================================================
+# LOCATIVE EXEMPT PREFIXES
+# Spatial postpositions that, when immediately preceding a
+# locative particle (မှာ/တွင်), exempt the particle from
+# misuse detection. "ထဲမှာ" = "inside at" is always valid.
+# ============================================================
+locative_exempt_prefixes:
+  - "ထဲ"       # inside
+  - "ပေါ်"     # on top
+  - "အောက်"    # under
+  - "ရှေ့"      # in front
+  - "နောက်"    # behind
+  - "ဘေး"      # beside
+  - "အနား"     # near
+  - "အထဲ"      # inside (formal)
+  - "အပေါ်"    # on top (formal)

@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/collocations/v1.0",
+  "title": "Myanmar Collocation Error Rules Schema",
+  "description": "JSON Schema for validating collocations.yaml - Myanmar collocation error detection rules",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "metadata",
+    "collocations"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (semver 1.x.x)"
+    },
+    "category": {
+      "type": "string",
+      "const": "collocations",
+      "description": "Category type (must be 'collocations')"
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Human-readable description of the rule file"
+        },
+        "created_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date the file was created (YYYY-MM-DD)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "collocations": {
+      "type": "array",
+      "description": "List of collocation error detection rules",
+      "items": {
+        "type": "object",
+        "required": [
+          "wrong_word",
+          "correct_word",
+          "context_words"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "wrong_word": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The wrong word to detect in the text"
+          },
+          "correct_word": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The correct replacement word to suggest"
+          },
+          "context_words": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "description": "Words whose nearby presence triggers the detection"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right",
+              "both"
+            ],
+            "default": "both",
+            "description": "Direction to search for context words relative to the wrong word"
+          },
+          "window": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 3,
+            "description": "Number of tokens to scan in the specified direction"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Human-readable description of the rule (not used at runtime)"
+          }
+        }
+      }
+    }
+  }
+}

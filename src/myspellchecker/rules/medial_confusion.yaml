@@ -1,0 +1,251 @@
+# Myanmar Medial Confusion Corrections - Version 1.0
+# Medial ya-pin (ျ) / ya-yit (ြ) confusion detection patterns.
+#
+# Two categories:
+#   1. Unconditional — the wrong form is NOT a valid compound word.
+#   2. Contextual — both forms are valid; trigger only when a trailing
+#      context token appears (e.g. ကြောင်းကို → ကျောင်းကို).
+#
+# IMPORTANT: When `correct` is a list, ordering matters — first entry is
+# the preferred suggestion. This affects suggestion ranking.
+#
+# All text uses post-normalization Unicode forms (tall AA U+102B → U+102C).
+# The loader applies _norm_dict() / _norm_dict_context() after loading.
+
+version: "1.0.0"
+category: "medial_confusion"
+description: >
+  Medial confusion corrections for Myanmar text.
+  Keys are incorrect forms, values are correct forms.
+
+metadata:
+  created_date: "2026-03-14"
+  last_updated: "2026-03-18"
+  total_unconditional: 49
+  total_contextual: 2
+  total_colloquial: 1
+  source: >
+    Extracted from hardcoded dicts in
+    core/detectors/post_norm_mixins/medial_confusion_mixin.py
+  notes: >
+    List-valued 'correct' fields are order-sensitive
+    (first = preferred suggestion).
+
+# ============================================================
+# UNCONDITIONAL
+# Wrong medial form is ALWAYS incorrect regardless of context.
+# Format: incorrect -> correct (string or list of strings)
+# ============================================================
+unconditional:
+  # --- Ya-pin (ျ) vs Ya-yit (ြ) ---
+
+  # copper-value → gratitude
+  "ကြေးဇူး": "ကျေးဇူး"
+
+  # broken+eat → try hard (never valid as compound)
+  "ကျိုးစား": "ကြိုးစား"
+
+  # daddy+say → answer/respond (morpheme first — all golds are morpheme)
+  "ဖေဆို":
+    - "ဖြေ"
+    - "ဖြေဆို"
+
+  # reason+person → student + morpheme
+  "ကြောင်းသား":
+    - "ကျောင်းသား"
+    - "ကျောင်း"
+
+  # reason+send → morpheme first (gold=morpheme)
+  "ကြောင်းပို့":
+    - "ကျောင်း"
+    - "ကျောင်းပို့"
+
+  # remain+hard → morpheme first (gold=morpheme)
+  "ကျန်မာ":
+    - "ကျန်း"
+    - "ကျန်းမာ"
+
+  # text+hug → morpheme first (gold=morpheme)
+  "စာဖက်":
+    - "ဖတ်"
+    - "စာဖတ်"
+
+  # exit+ya-pin → morpheme first (gold=morpheme)
+  "ထွက်ခြာ":
+    - "ခွာ"
+    - "ထွက်ခွာ"
+
+  # computer (vowel u→uu, transliteration)
+  "ကွန်ပျုတာ": "ကွန်ပျူတာ"
+
+  # environment (missing anusvara)
+  "ပတ်ဝန်ကျင်": "ပတ်ဝန်းကျင်"
+
+  # know+between → song + morpheme
+  "သိချင်း":
+    - "သီချင်း"
+    - "သီ"
+
+  # --- ပျည° compounds: COMPOUND before morpheme (safe for non-conflicting) ---
+
+  # union/federation
+  "ပျည်ထောင်စု": "ပြည်ထောင်စု"
+
+  # state/region
+  "ပျည်နယ်": "ပြည်နယ်"
+
+  # domestic/internal
+  "ပျည်တွင်း": "ပြည်တွင်း"
+
+  # foreign/external
+  "ပျည်ပ": "ပြည်ပ"
+
+  # wrong medial ျ→ြ in country (never valid)
+  "ပျည်": "ပြည်"
+
+  # treat+brother → help (always ကူညီ)
+  "ကုညီ": "ကူညီ"
+
+  # vegetables (double missing anusvara)
+  "ဟင်သီးဟင်ရွက်": "ဟင်းသီးဟင်းရွက်"
+
+  # Bagan+hit → morpheme first (gold=morpheme)
+  "ပုဂံခတ်":
+    - "ခေတ်"
+    - "ပုဂံခေတ်"
+
+  # --- Double-medial compounds: COMPOUND entries BEFORE morpheme entries ---
+  # so longer match runs first (compound=rank1 when present).
+
+  # compound: I (polite male)
+  "ကျြန်တော်":
+    - "ကျွန်တော်"
+    - "ကျွန်"
+
+  # invalid double medial ျြ → wa-hswe ွ (I/servant)
+  "ကျြန်": "ကျွန်"
+
+  # compound: Myanmar's (possessive)
+  "မျြန်မာ့": "မြန်မာ့"
+
+  # compound: Myanmar
+  "မျြန်မာ": "မြန်မာ"
+
+  # reduplication: quickly/fast
+  "မျြန်မြန်": "မြန်မြန်"
+
+  # double medial ျြ → ြ only (fast)
+  "မျြန်": "မြန်"
+
+  # compound: noble/precious+suffix
+  "မျြတ်စွာ": "မြတ်စွာ"
+
+  # double medial ျြ → ြ only (noble/precious)
+  "မျြတ်": "မြတ်"
+
+  # --- Loanword misspellings ---
+
+  # computer (medial ြ→ျ: standard loanword spelling)
+  "ကွန်ပြူတာ": "ကွန်ပျူတာ"
+
+  # project (wrong final: တ်→က်)
+  "ပရောဂျတ်": "ပရောဂျက်"
+
+  # internet (wrong final: တ်→က်)
+  "အင်တာနတ်": "အင်တာနက်"
+
+  # budget (wrong consonant: က→တ)
+  "ဘက်ဂျက်": "ဘတ်ဂျက်"
+
+  # democracy (wrong vowel: ီ→ေ)
+  "ဒီမိုကရီစီ": "ဒီမိုကရေစီ"
+
+  # software (syllable reorder + vowel)
+  "ဆော့ဝ်ဖဲ": "ဆော့ဖ်ဝဲ"
+
+  # vitamin (missing vowel AA)
+  "ဗီတမင်": "ဗီတာမင်"
+
+  # hotel (wrong form: standard is ဟိုတယ်)
+  "ဟိုတေလ်": "ဟိုတယ်"
+
+  # --- Vowel / diacritic confusion in common words ---
+
+  # design (missing vowel ု)
+  "ဒီဇိင်း": "ဒီဇိုင်း"
+
+  # economy/business (wrong vowel: ိ→ီ)
+  "စိးပွားရေး": "စီးပွားရေး"
+
+  # school (missing vowel ော→ာ)
+  "ကျာင်း": "ကျောင်း"
+
+  # supervise (wrong vowel: ိ→ီ)
+  "ကြိးကြပ်": "ကြီးကြပ်"
+
+  # permission (wrong vowel: ူ→ု)
+  "ခွင့်ပြူချက်": "ခွင့်ပြုချက်"
+
+  # capital city (medial ျ→ြ)
+  "မျို့တော်": "မြို့တော်"
+
+  # --- Miscellaneous unconditional ---
+
+  # soft/limp+show → morpheme first (gold=morpheme)
+  "ပြော့ပြ":
+    - "ပြော"
+    - "ပြောပြ"
+
+  # double prefix အ → cold/cool (reduplication error)
+  "အအေး": "အေး"
+
+  # extra wa-hsweh: ကွောင်း → ကောင်း (good/well)
+  "ကွောင်း": "ကောင်း"
+
+  # formal conjunction in colloquial → colloquial "and then"
+  "ပြီးနှင့်": "ပြီးတော့"
+
+  # broken compound: day+neck → afternoon
+  "နေ့ လည်": "နေ့လည်"
+
+  # embrace+progressive → morpheme first (gold=morpheme)
+  "ဖက်နေ":
+    - "ဖတ်"
+    - "ဖတ်နေ"
+
+  # ya-pin→ya-yit: announce (ကျေညာ → ကြေညာ)
+  "ကျေညာ": "ကြေညာ"
+
+  # ya-yit→ya-pin: change/move (ပျောင်း → ပြောင်း)
+  "ပျောင်း": "ပြောင်း"
+
+# ============================================================
+# CONTEXTUAL
+# Triggered ONLY when followed by specific trailing tokens.
+# Both the wrong and correct forms are valid words on their own.
+# ============================================================
+contextual:
+  # "reason" → "school" — only when followed by school-related word
+  "ကြောင်း":
+    correct: "ကျောင်း"
+    contexts:
+      - "ကို"
+      - "သား"
+      - "ပို့"
+      - "အုပ်"
+      - "တိုက်"
+
+  # "loud" → "gratitude" + ဇူး suffix
+  "ကြး":
+    correct: "ကျေး"
+    contexts:
+      - "ဇူး"
+
+# ============================================================
+# COLLOQUIAL CONTRACTIONS
+# Colloquial forms that the segmenter may split, bypassing the
+# word-level colloquial checker.
+# ============================================================
+colloquial_contractions:
+  # casual "I" → polite "I"
+  "ကျနော်": "ကျွန်တော်"

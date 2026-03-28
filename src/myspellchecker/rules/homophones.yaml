@@ -1,0 +1,367 @@
+# Myanmar Homophones - Version 1.1
+# Real-word errors arising from homophone confusion
+#
+# This file contains mapping of words to their homophones.
+# Format: word: [homophone1, homophone2, ...]
+#
+# Only TRUE homophones or near-homophones belong here.
+# One-directional ha-htoe typos (e.g., မာ→မှာ where only one form is a word)
+# are handled by typo_corrections.yaml. This file covers ha-htoe pairs
+# where BOTH forms are valid words (real-word homophone confusion).
+#
+# Schema: https://myspellchecker.dev/schemas/homophones/v1.0
+
+version: "1.4.2"
+category: "homophones"
+description: "Myanmar homophones for real-word error correction"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-03-21"
+  total_entries: 217
+  source: "v1.4.2 — added ဆား/စား aspiration confusable pair (BM-515-E4)"
+
+# ============================================================
+# HOMOPHONE MAP
+# ============================================================
+homophones:
+  # ============================================================
+  # Ya-pin (ျ) vs Ya-yit (ြ) - Very common confusion
+  # These medials are phonetically close in many dialects.
+  # ============================================================
+  "ကျ": ["ကြ"]           # fall vs do/star
+  "ကြ": ["ကျ"]
+  "ကျောင်း": ["ကြောင်း"]  # school vs reason/line
+  "ကြောင်း": ["ကျောင်း"]
+  "ကျား": ["ကြား"]        # tiger vs hear/between
+  "ကြား": ["ကျား"]
+  "ကြမ်း": ["ကျမ်း"]      # rough vs scripture
+  "ကျမ်း": ["ကြမ်း"]
+  "ချ": ["ခြ"]            # put down vs (measure)
+  "ခြ": ["ချ"]
+  "ပြည်": ["ပျည်"]        # country vs pus (rare)
+  "ကြည့်": ["ကျည်"]       # look vs bullet
+  "ကျည်": ["ကြည့်"]
+  "ပြ": ["ပျ"]             # show vs spread
+  "ပျ": ["ပြ"]
+  "ပြား": ["ပျား"]         # flat vs bee
+  "ပျား": ["ပြား"]
+  "မြ": ["မျ"]             # high/bury vs (rare)
+  "မျ": ["မြ"]
+  "မြင်": ["မျင်"]         # see vs (rare)
+  "မျင်": ["မြင်"]
+  # v1.3 additions — high-frequency ကြ/ကျ pairs
+  "ကြီး": ["ကျီး"]          # big vs crow
+  "ကျီး": ["ကြီး"]
+  "ကြောက်": ["ကျောက်"]      # fear vs stone/rock
+  "ကျောက်": ["ကြောက်"]
+  "ကြော": ["ကျော"]          # tendon/sinew vs back (body)
+  "ကျော": ["ကြော"]
+  "ကြက်": ["ကျက်"]          # chicken vs memorize
+  "ကျက်": ["ကြက်"]
+
+  # ============================================================
+  # Nasal Finals (ံ vs န် vs မ် vs င်) - Common confusions
+  # ============================================================
+  "ကံ": ["ကန်", "ကင်"]       # luck vs kick/lake vs (rare)
+  "ကန်": ["ကံ", "ကင်"]
+  "ခန်း": ["ခမ်း"]         # room vs dry up
+  "ခမ်း": ["ခန်း"]
+  # Removed: "စံ"/"စန်" pair — "စန်" has no attested meaning in standard Burmese.
+  # If "စန်" appears, it is likely a misspelling of "စံ", not a homophone.
+  "တန်": ["တံ"]            # value vs rod/stick
+  "တံ": ["တန်"]
+  "လမ်း": ["လွမ်း", "လန်း", "လှမ်း"] # road vs miss/fresh vs reach
+  "လွမ်း": ["လမ်း"]
+  "သံ": ["သန်"]            # sound vs sharp
+  "သန်": ["သံ"]
+  # Removed: "ပန်း"/"ပံ" pair — "ပံ" does not mean "normal" (that is "ပုံမှန်").
+  # "ပံ" is not a recognized standalone word in standard Burmese.
+  "ကျန်": ["ကျံ"]          # remain vs (rare)
+  "ကျံ": ["ကျန်"]
+  "မှန်": ["မှံ"]           # mirror/true vs (rare)
+  "ခံ": ["ခန်"]             # endure vs (rare)
+  "ခန်": ["ခံ"]
+  "ရန်": ["ရံ"]             # enemy vs occasional
+  "ရံ": ["ရန်"]
+  "စမ်း": ["စန်း"]           # stream/test vs moon/luck
+  "စန်း": ["စမ်း"]
+  "လန်း": ["လမ်း"]
+  "တမ်း": ["တန်း"]           # yearn vs line/class
+  "တန်း": ["တမ်း"]
+  "နမ်း": ["နန်း"]           # kiss vs palace
+  "နန်း": ["နမ်း"]
+  "ဆမ်း": ["ဆန်း"]           # sprinkle vs strange/new
+  "ဆန်း": ["ဆမ်း"]
+  "သိမ်း": ["သိန်း"]          # store/keep vs hundred thousand
+  "သိန်း": ["သိမ်း"]
+  "ဝမ်း": ["ဝန်း"]           # belly vs surround/compound
+  "ဝန်း": ["ဝမ်း"]
+
+  # ============================================================
+  # Vowel Length Confusions (ု vs ူ, ိ vs ီ)
+  # ============================================================
+  "ခေါင်း": ["ခေါင်"]      # head vs desolate/empty
+  "ခေါင်": ["ခေါင်း"]
+  "လူ": ["လု", "လှူ"]       # person vs (rare vowel-length) vs donate (ha-htoe)
+  "လု": ["လူ"]
+  "ပူ": ["ပု"]              # hot vs (rare)
+  "ပု": ["ပူ"]
+  "မှူး": ["မှု"]           # chief vs activity
+  "မှု": ["မှူး"]
+  "သူ": ["သု"]              # he/she vs (rare)
+  "သု": ["သူ"]
+  "ညီ": ["ညိ"]             # younger brother vs squeeze
+  "ညိ": ["ညီ"]
+  "သီ": ["သိ"]              # fruit/ripen vs know
+  "သိ": ["သီ"]
+  "စီ": ["စိ", "ဆီ"]        # arrange vs (rare/bound morpheme) vs oil/to
+  "စိ": ["စီ"]
+  "ဆီ": ["စီ"]              # oil/to(directional) vs arrange
+
+  # ============================================================
+  # Wa-hswe (ွ) vs Lower vowels (ု) - True near-homophones only
+  # ============================================================
+  "ခွန်": ["ခုန်"]          # strength vs jump
+  "ခုန်": ["ခွန်"]
+
+  # ============================================================
+  # Aspirated/Unaspirated Confusions (တ/ထ, က/ခ, ပ/ဖ, ဆ/စ, ဘ/ဗ)
+  # ============================================================
+  # တ/ထ (ta/hta) — among the most common Myanmar confusions
+  "တင်": ["ထင်"]             # present/put vs think/expect
+  "ထင်": ["တင်"]
+  "တား": ["ထား"]             # prevent/block vs keep/put
+  "ထား": ["တား"]
+  "တိုက်": ["ထိုက်"]          # building/attack vs worthy/fit
+  "ထိုက်": ["တိုက်"]
+  "တုံး": ["ထုံး"]            # log/blunt vs lime/custom
+  "ထုံး": ["တုံး"]
+  # က/ခ (ka/kha)
+  "ကပ်": ["ခပ်"]             # stick/cling vs somewhat/slightly
+  "ကိုင်": ["ခိုင်"]           # hold vs firm/strong
+  "ခိုင်": ["ကိုင်"]
+  "ကွဲ": ["ခွဲ"]              # break/split vs divide/separate
+  "ခွဲ": ["ကွဲ"]
+  # ပ/ဖ (pa/pha)
+  "ပုံ": ["ဖုံ"]              # shape/image vs powder/dust
+  "ဖုံ": ["ပုံ"]
+  "ပေါ်": ["ဖော်"]           # appear/surface vs reveal
+  "ဖော်": ["ပေါ်"]
+  # ဆ/စ, ဘ/ဗ
+  "စင်": ["ဆင်"]           # stage/shelf vs elephant
+  "ဆင်": ["စင်"]
+  "စူး": ["ဆူး"]           # pierce vs thorn
+  "ဆူး": ["စူး"]
+  "စေး": ["ဆေး"]           # sticky vs medicine
+  "ဆေး": ["စေး"]
+  "ဗူး": ["ဘူး"]           # tin/can vs gourd/negative
+  "ဘူး": ["ဗူး", "ဖူး"]    # gourd/negative vs tin/can vs flower/experience
+  "ဆု": ["စု"]             # prize vs gather
+  "စု": ["ဆု"]
+  "ဆိုး": ["စိုး"]           # bad/dye vs rule/worry
+  "စိုး": ["ဆိုး"]
+  "ဆား": ["စား"]            # salt vs eat (aspiration confusable)
+  # Aspirated/labial pairs
+  "ဖူး": ["ဘူး"]            # flower/experience vs gourd/negation (pha↔ba)
+  "ဘိုက်": ["ဗိုက်"]         # belly (informal) vs belly (standard)
+  "ဗိုက်": ["ဘိုက်"]
+
+  # ============================================================
+  # Final Consonant Confusions (က် vs တ် vs ပ်)
+  # These all map to a glottal stop in spoken Burmese
+  # ============================================================
+  "ထက်": ["ထပ်"]           # above/than vs again/layer
+  "ထပ်": ["ထက်"]
+  "တတ်": ["တပ်", "တက်"]    # know how vs army/attach vs climb
+  "တပ်": ["တတ်", "တက်"]
+  "မှတ်": ["မှက်", "မတ်"]    # remember/note vs gnat vs March/upright
+  "မှက်": ["မှတ်"]
+  "နက်": ["နပ်", "နတ်"]    # black/deep vs cooked/comprehend vs spirit
+  "နပ်": ["နက်", "နတ်"]
+  "နတ်": ["နက်", "နပ်"]     # spirit/nat vs black/deep vs cooked
+  "စက်": ["စပ်"]           # machine vs spicy/join
+  "စပ်": ["စက်"]
+  "ဝတ်": ["ဝက်", "ဝပ်"]    # wear/duty vs pig vs prostrate
+  "ဝက်": ["ဝတ်", "ဝပ်"]
+  "ဝပ်": ["ဝတ်", "ဝက်"]     # prostrate/squat vs wear vs pig
+  "ရက်": ["ရပ်", "ရှက်"]    # day/weave vs stop/ward vs shame
+  "ရပ်": ["ရက်", "ရှပ်"]    # stop/ward vs day/weave vs shirt
+  "ခက်": ["ခတ်", "ခပ်"]    # difficult/branch vs strike/scoop vs somewhat
+  "ခတ်": ["ခက်", "ခပ်"]
+  "ခပ်": ["ခက်", "ခတ်", "ကပ်"]  # somewhat/slightly vs difficult vs strike vs stick
+  "မက်": ["မတ်"]           # crave vs stand/upright
+  "မတ်": ["မက်", "မှတ်"]    # March/upright vs crave vs remember
+  "သတ်": ["သပ်", "သက်"]    # kill vs wipe/neat vs age/life
+  "သပ်": ["သတ်"]
+  # Final consonant pairs
+  "တက်": ["တတ်", "တပ်"]    # climb/go up vs know how/afford vs army
+  "ထုပ်": ["ထုတ်"]           # wrap/package vs take out/produce
+  "ထုတ်": ["ထုပ်"]
+  "သက်": ["သတ်"]            # age/life vs kill
+  "ပက်": ["ပတ်"]            # splash vs circle/around
+  "ပတ်": ["ပက်"]
+  "ရုပ်": ["ရုတ်"]           # form/body vs sudden
+  "ရုတ်": ["ရုပ်"]
+  "အက်": ["အတ်"]            # crack/split vs for/benefit
+  "အတ်": ["အက်"]
+  "ဘက်": ["ဘတ်"]            # side/direction vs bat/bus fare
+  "ဘတ်": ["ဘက်"]
+
+  # ============================================================
+  # Ya-pin (ျ) vs Ya-yit (ြ) - Additional
+  # ============================================================
+  "ချင်": ["ခြင်"]           # want to vs mosquito
+  "ခြင်": ["ချင်"]
+  "ချည်": ["ခြည်"]           # thread/tie vs ray of light
+  "ခြည်": ["ချည်"]
+  "ဖျတ်": ["ဖြတ်"]           # agile/flash vs cut
+  "ဖြတ်": ["ဖျတ်"]
+  "ပြစ်": ["ပစ်"]           # fault/sin vs throw/shoot
+  "ပစ်": ["ပြစ်"]
+  "ခြောက်": ["ချောက်"]        # six/dry vs cliff
+  "ချောက်": ["ခြောက်"]
+  "ခြေ": ["ချေ"]            # foot vs crush/refute
+  "ချေ": ["ခြေ"]
+  "မြှောက်": ["မျှောက်", "မြောက်"]  # raise/multiply vs monkey (medial) vs north (ha-htoe)
+  "မျှောက်": ["မြှောက်"]
+
+  # ============================================================
+  # Ha-htoe real-word pairs (both forms are valid words)
+  # Unlike typo_corrections.yaml entries, these are true real-word
+  # confusions where removing/adding ha-htoe yields another word.
+  # ============================================================
+  "နာ": ["နှာ"]              # pain vs nose (ha-htoe changes meaning)
+  "နှာ": ["နာ"]
+  "နှစ်": ["နစ်"]            # year/like vs sink/drown
+  "နစ်": ["နှစ်"]
+  "ရှိ": ["ရိ"]              # exist vs (rare/old)
+  "ရိ": ["ရှိ"]
+  # v1.3 additions — expanded ha-htoe real-word pairs
+  "ရှာ": ["ရာ"]              # search vs hundred/count
+  "ရာ": ["ရှာ"]
+  "ရှင်": ["ရင်"]            # alive/monk vs chest/if
+  "ရင်": ["ရှင်"]
+  "ရှုံး": ["ရုံး"]           # lose vs office
+  "ရုံး": ["ရှုံး"]
+  "လှုပ်": ["လုပ်"]          # move/shake vs do/work
+  "လုပ်": ["လှုပ်"]
+  "ရှင်း": ["ရင်း"]          # clear/explain vs close/capital
+  "ရင်း": ["ရှင်း"]
+  "နှင်း": ["နင်း"]          # frost/dew vs trample
+  "နင်း": ["နှင်း"]
+  "လှိုင်း": ["လိုင်း"]       # wave vs line
+  "လိုင်း": ["လှိုင်း"]
+  "ရှေး": ["ရေး"]            # ancient vs write/affair
+  "လှဲ": ["လဲ"]              # tilt/tip over vs fall/also/change
+  "လဲ": ["လှဲ"]              # fall/also/change vs tilt/tip over
+  "နှုတ်": ["နုတ်"]          # mouth/lips/withdraw vs subtract
+  "နုတ်": ["နှုတ်"]
+  "ရှပ်": ["ရပ်"]            # shirt vs stop/ward
+  "နှိုး": ["နိုး"]           # wake (transitive) vs wake (intransitive)
+  "နိုး": ["နှိုး"]
+  "မှား": ["မား"]             # wrong/mistaken vs harden
+  "မား": ["မှား"]
+  "မှာ": ["မာ"]              # at/in (locative) vs hard/tough
+  "မာ": ["မှာ"]
+  "ရှက်": ["ရက်"]            # shame vs day/weave
+  "ရှယ်": ["ရယ်"]            # share vs laugh
+  "ရယ်": ["ရှယ်"]
+  "လှမ်း": ["လမ်း"]          # reach/stride vs road
+  "နှိပ်": ["နိပ်"]          # press vs (rare)
+  "နိပ်": ["နှိပ်"]
+  "နှေး": ["နေး"]            # slow vs (rare)
+  "နေး": ["နှေး"]
+  "လှိုင်": ["လိုင်"]         # Hlaing/abundant vs row/line
+  "လိုင်": ["လှိုင်"]
+
+  # v1.4 additions — DB-attested ha-htoe real-word pairs
+  "လှူ": ["လူ"]              # donate (f=12K) vs person (f=416K)
+  "အမှတ်": ["အမတ်"]          # mark/memory (f=165K) vs MP/representative (f=21K)
+  "အမတ်": ["အမှတ်"]
+  "ရှောက်": ["ရောက်"]         # care/look after (f=4K) vs arrive (f=185K)
+  "ရောက်": ["ရှောက်"]
+  "ရှောင်": ["ရောင်"]         # avoid (f=24K) vs color/shine (f=102K)
+  "ရောင်": ["ရှောင်"]
+  "မြှင့်": ["မြင့်"]          # promote/elevate (f=12K) vs high/tall (f=70K)
+  "မြင့်": ["မြှင့်"]
+  "အရှင်": ["အရင်"]          # lord/alive (f=20K) vs first/before (f=102K)
+  "အရင်": ["အရှင်"]
+  "ရွှေ": ["ရွေ"]              # gold (f=77K) vs choose (f=2K)
+  "ရွေ": ["ရွှေ"]
+  "မှေး": ["မေး"]             # dim/faint (f=1K) vs ask/chin (f=98K)
+  "မေး": ["မှေး"]
+  "ရှိုက်": ["ရိုက်"]          # sob/hiccup (f=1K) vs hit/strike (f=103K)
+  "ရိုက်": ["ရှိုက်"]
+  "မြောက်": ["မြှောက်"]        # north (f=88K) vs raise/multiply (f=4K)
+  "လွှတ်တော်": ["လွတ်တော်"]    # parliament (f=121K) vs free+royal (f=2K)
+  "လွတ်တော်": ["လွှတ်တော်"]
+
+  # ============================================================
+  # Common word pairs - Tone/final stop near-homophones
+  # ============================================================
+  "စာ": ["စား"]            # letter vs eat
+  "စား": ["စာ", "ဆား"]     # eat vs letter vs salt
+  "ကာ": ["ကား"]            # protect vs car
+  "ကား": ["ကာ"]
+  "လက်": ["လတ်"]           # hand vs fresh
+  "လတ်": ["လက်"]
+  "ဖက်": ["ဖတ်"]           # side vs read
+  "ဖတ်": ["ဖက်"]
+  "မုန်း": ["မုန့်"]          # hate vs snack
+  "မုန့်": ["မုန်း"]
+  "ရေး": ["ရေ", "ရှေး"]     # write vs water vs ancient
+  "ရေ": ["ရေး"]
+  "လေ": ["လေး"]            # air/wind vs four/heavy
+  "လေး": ["လေ"]
+
+  # ============================================================
+  # Particle confusion pairs (similar-looking particles)
+  # These are valid words confused as grammatical particles.
+  # N-gram context disambiguates (not phonetic similarity).
+  # ============================================================
+  "မဲ": ["မယ်"]             # vote/dark vs future particle
+  "မယ်": ["မဲ"]             # future particle vs vote/dark
+
+# ============================================================
+# CONTEXT-DEPENDENT HOMOPHONE DISAMBIGUATION
+# Rules where the correct form depends on surrounding context
+# ============================================================
+context_dependent:
+  left_context_rules:
+    # When wrong form appears after specific left-context words/suffixes,
+    # flag it as the correct form.
+    - wrong: "ဖက်"
+      correct: "ဖတ်"
+      meaning: "embrace → read (when preceded by reading-related words)"
+      confidence: 0.90
+      left_context_words:
+        - "စာအုပ်"       # book
+        - "စာ"           # text/letter
+        - "သတင်းစာ"      # newspaper
+        - "ဂျာနယ်"       # journal
+        - "မဂ္ဂဇင်း"      # magazine
+        - "မှတ်တမ်း"     # record/document
+        - "အမိန့်စာ"     # decree/order
+        - "စာချုပ်"       # contract
+        - "ဥပဒေ"         # law
+        - "စာမျက်နှာ"    # page
+        - "သင်ခန်းစာ"    # lesson
+        - "ဘာသာစကား"     # language
+      left_context_suffixes:
+        # If preceding word ends with any of these suffixes, also trigger
+        - "စာ"           # text/letter suffix
+        - "တမ်း"         # record suffix
+        - "ချုပ်"         # contract suffix
+        - "အုပ်"          # book/bundle suffix
+
+    # climb → afford/ability (when preceded by quantity/degree words)
+    - wrong: "တက်"
+      correct: "တတ်"
+      meaning: "climb → can afford/ability (when in abilitative question pattern)"
+      confidence: 0.85
+      left_context_words:
+        - "ဘယ်လောက်"   # how much
+        - "ဘယ်နှစ်"     # how many
+        - "ဘယ်အထိ"     # how far
+      left_context_suffixes: []

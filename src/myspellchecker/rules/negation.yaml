@@ -1,0 +1,155 @@
+# Myanmar Negation Rules - Version 1.0
+# Negation patterns, endings, and validations
+#
+# This file contains:
+# - Negation prefix
+# - Valid negative endings with metadata
+# - Negative auxiliaries
+# - Common negated verbs
+# - Typo corrections for negative endings
+# - Register mapping for negation patterns
+#
+# Schema: https://myspellchecker.dev/schemas/negation/v1.0
+
+version: "1.0.0"
+category: "negation"
+description: "Myanmar negation patterns and validation rules"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2025-12-30"
+
+# ============================================================
+# NEGATION CONSTANTS
+# ============================================================
+prefix: "မ"  # The universal negation marker
+
+# Negative endings (particles that follow the verb in negation)
+# Format: ending -> {type, description}
+endings:
+  # Standard negatives
+  "ဘူး":
+    type: "standard_negative"
+    description: "Colloquial negative ending"
+  "ပါဘူး":
+    type: "polite_negative"
+    description: "Polite colloquial negative"
+  "ဘူ":
+    type: "typo_negative"
+    description: "Missing visarga - common typo"
+  "ပါဘူ":
+    type: "typo_polite_negative"
+    description: "Missing visarga in polite form"
+
+  # Formal negatives
+  "ပါ":
+    type: "formal_negative"
+    description: "Formal/written negative ending"
+  # Removed: "မပါ" — it already contains the negation prefix "မ".
+  # The ending is "ပါ" (above); prefix + ending = "မ" + V + "ပါ".
+
+  # Conditional/hypothetical negatives
+  "ရင်":
+    type: "conditional_negative"
+    description: "If not - conditional"
+  "လျှင်":
+    type: "formal_conditional_negative"
+    description: "If not - formal conditional"
+
+  # Imperative negatives (prohibitions)
+  "နဲ့":
+    type: "prohibition"
+    description: "Don't! - imperative prohibition"
+  "ပါနဲ့":
+    type: "polite_prohibition"
+    description: "Please don't - polite prohibition"
+  "နှင့်":
+    type: "formal_prohibition"
+    description: "Don't - formal prohibition"
+
+  # Question negatives
+  "ဘူးလား":
+    type: "negative_question"
+    description: "Isn't it? - colloquial question"
+  "ပါဘူးလား":
+    type: "polite_negative_question"
+    description: "Isn't it? - polite question"
+  "သလား":
+    type: "formal_negative_question"
+    description: "Isn't it? - formal question"
+
+# Typo corrections for negative endings
+# Format: incorrect -> correct
+typo_map:
+  # Missing visarga (း)
+  "ဘူ": "ဘူး"
+  "ပါဘู": "ပါဘူး"
+  # Wrong order
+  "ူးဘ": "ဘူး"
+  "ဘုူး": "ဘူး"
+  # Missing asat (်)
+  "ဘုး": "ဘူး"
+  # Colloquial/slang
+  "ဘူ:": "ဘူး"
+
+# Auxiliary verbs that can appear between negation and ending
+# Format: word -> description
+auxiliaries:
+  # Modal auxiliaries
+  "တတ်": "habitual ability"
+  "နိုင်": "ability/possibility"
+  "ချင်": "want/desire"
+  "ရ": "permitted/possible"
+  "သေး": "yet (not yet)"
+  "ခင်": "before"
+  "လို့": "quotative/because"
+  # Directional/manner verbs that appear in serialized negation patterns
+  # (e.g., မရွေ့သွားဘူး = didn't move away, မလာခဲ့ဘူး = hasn't come)
+  "သွား": "away/go (directional)"
+  "လာ": "toward/come (directional)"
+  "ခဲ့": "past tense"
+  "ပေး": "for someone (benefactive)"
+  "ထား": "resultative (have done)"
+  "နေ": "progressive (doing)"
+  "ပြန်": "again/back"
+  "လိုက်": "along/quickly"
+  "ဖူး": "experiential (have ever done)"
+
+# Words that commonly follow the negation prefix directly
+# Format: word -> meaning
+common_verbs:
+  "သိ": "know"
+  "ရှိ": "exist/have"
+  "လာ": "come"
+  "သွား": "go"
+  "ပြော": "speak/say"
+  "စား": "eat"
+  "သောက်": "drink"
+  "ကြည့်": "look/watch"
+  "ကြား": "hear"
+  "ဖတ်": "read"
+  "ရေး": "write"
+  "လုပ်": "do/work"
+  "ပေး": "give"
+  "ယူ": "take"
+  "ထား": "put/place"
+  "ဖြစ်": "be/happen"
+  "ဝင်": "enter"
+  "ထွက်": "exit"
+  "တက်": "climb/attend"
+  "ဆင်း": "descend"
+
+# Register mapping for negation patterns
+# Format: pattern -> register (formal/colloquial)
+register_map:
+  # Formal register negations
+  "မပါ": "formal"
+  "မပါသည်": "formal"
+  # Removed: "မသည်" — "သည်" is an AFFIRMATIVE sentence-final particle, never used in negation
+  # Removed: "မမည်" — "မည်" (future marker) does not participate in negative constructions
+
+  # Colloquial register negations
+  "မဘူး": "colloquial"
+  "မပါဘူး": "colloquial"
+  # Removed: "မတယ်" — "တယ်" is an affirmative particle, never used in negation
+  # Removed: "မမယ်" — "မယ်" (colloquial future) does not participate in negative constructions

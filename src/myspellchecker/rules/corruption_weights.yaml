@@ -1,0 +1,16 @@
+version: "1.0.0"
+category: "corruption_weights"
+
+# Synthetic error generation weights for error detection training
+# Weights must sum to 1.0
+corruption_ratio: 0.15
+weights:
+  homophone_swap: 0.25
+  word_swap: 0.20
+  particle_confusion: 0.15
+  medial_confusion: 0.08
+  char_deletion: 0.08
+  aspirated_confusion: 0.07
+  typo_pattern: 0.07
+  similar_char_swap: 0.05
+  char_insertion: 0.05

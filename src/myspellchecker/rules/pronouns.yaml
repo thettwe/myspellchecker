@@ -1,0 +1,166 @@
+# Myanmar Pronouns - Version 1.0
+# Pronouns and honorifics with register and person information
+#
+# This file contains:
+# - Personal pronouns (I, you, he/she)
+# - Honorifics (U, Daw, Ko, Ma) used as pronouns
+# - Register information (formal, colloquial, polite)
+#
+# Schema: https://myspellchecker.dev/schemas/pronouns/v1.0
+
+version: "1.0.0"
+category: "pronouns"
+description: "Myanmar pronouns and honorifics with register metadata"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2025-12-30"
+  total_entries: 30
+
+# ============================================================
+# PRONOUN SYSTEM
+# ============================================================
+pronouns:
+  # First Person (I/We)
+  first_person:
+    - word: "ကျွန်တော်"
+      pos_tag: "PRO"
+      person: "1"
+      gender: "male"
+      register: "polite"
+      meaning: "I (male speaker)"
+      
+    - word: "ကျွန်မ"
+      pos_tag: "PRO"
+      person: "1"
+      gender: "female"
+      register: "polite"
+      meaning: "I (female speaker)"
+
+    - word: "ငါ"
+      pos_tag: "PRO"
+      person: "1"
+      gender: "neutral"
+      register: "informal"
+      meaning: "I (informal/rude)"
+
+    - word: "ကျုပ်"
+      pos_tag: "PRO"
+      person: "1"
+      gender: "male"
+      register: "colloquial"
+      meaning: "I (male colloquial)"
+
+    - word: "တို့"
+      pos_tag: "PRO"
+      person: "1"
+      gender: "neutral"
+      number: "plural"
+      register: "colloquial"
+      meaning: "We (colloquial)"
+
+  # Second Person (You)
+  second_person:
+    - word: "ခင်ဗျား"
+      pos_tag: "PRO"
+      person: "2"
+      gender: "neutral" # Addressed to anyone
+      speaker_gender: "male"
+      register: "polite"
+      meaning: "You (polite male speaker)"
+
+    - word: "ရှင်"
+      pos_tag: "PRO"
+      person: "2"
+      gender: "neutral"
+      speaker_gender: "female"
+      register: "polite"
+      meaning: "You (polite female speaker)"
+
+    - word: "မင်း"
+      pos_tag: "PRO"
+      person: "2"
+      gender: "neutral"
+      register: "informal"
+      meaning: "You (informal)"
+
+    - word: "နင်"
+      pos_tag: "PRO"
+      person: "2"
+      gender: "neutral"
+      register: "informal" # Can be rude
+      meaning: "You (informal/rude)"
+
+    - word: "အစ်ကို"
+      pos_tag: "PRO"
+      person: "2" # Used as 'You'
+      gender: "male"
+      register: "polite"
+      meaning: "Brother (used as You)"
+
+    - word: "အစ်မ"
+      pos_tag: "PRO"
+      person: "2"
+      gender: "female"
+      register: "polite"
+      meaning: "Sister (used as You)"
+
+  # Third Person (He/She/It)
+  third_person:
+    - word: "သူ"
+      pos_tag: "PRO"
+      person: "3"
+      gender: "neutral"
+      register: "neutral"
+      meaning: "He/She"
+
+    - word: "၎င်း"
+      pos_tag: "PRO"
+      person: "3"
+      gender: "neutral"
+      register: "formal"
+      meaning: "It/That (formal)"
+
+  # Honorifics (Used as Pronouns/Titles)
+  honorifics:
+    - word: "ဦး"
+      pos_tag: "N_HON"
+      gender: "male"
+      register: "formal"
+      meaning: "Mr./Uncle"
+
+    - word: "ဒေါ်"
+      pos_tag: "N_HON"
+      gender: "female"
+      register: "formal"
+      meaning: "Ms./Aunt"
+
+    - word: "ကို"
+      pos_tag: "N_HON"
+      gender: "male"
+      register: "neutral"
+      meaning: "Mr./Brother"
+
+    - word: "မ"
+      pos_tag: "N_HON"
+      gender: "female"
+      register: "neutral"
+      meaning: "Ms./Sister"
+
+    - word: "မောင်"
+      pos_tag: "N_HON"
+      gender: "male"
+      register: "formal"
+      meaning: "Mr./Younger Brother"
+
+    - word: "ဆရာ"
+      pos_tag: "N_HON"
+      gender: "male"
+      register: "polite"
+      meaning: "Teacher/Master (Male)"
+
+    - word: "ဆရာမ"
+      pos_tag: "N_HON"
+      gender: "female"
+      register: "polite"
+      meaning: "Teacher/Master (Female)"

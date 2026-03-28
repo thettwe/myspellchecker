@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/compounds/v1.0",
+  "title": "Myanmar Compound Word Rules Schema",
+  "description": "JSON Schema for validating compounds.yaml - Compound word patterns, reduplication, and confusion dicts",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version (must be '1.0.0')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "compounds",
+      "description": "Category type (must be 'compounds')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "noun_compounds": {
+      "description": "Noun-noun compound word definitions",
+      "type": "array",
+      "items": { "$ref": "#/definitions/compound_entry" }
+    },
+
+    "verb_compounds": {
+      "description": "Verb-verb compound word definitions",
+      "type": "array",
+      "items": { "$ref": "#/definitions/compound_entry" }
+    },
+
+    "adjective_compounds": {
+      "description": "Adjective compound word definitions",
+      "type": "array",
+      "items": { "$ref": "#/definitions/compound_entry" }
+    },
+
+    "reduplication": {
+      "description": "Reduplication patterns (complete and partial)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/reduplication_entry" }
+    },
+
+    "prefixes": {
+      "description": "Compound formation prefixes",
+      "type": "array",
+      "items": { "$ref": "#/definitions/prefix_entry" }
+    },
+
+    "suffixes": {
+      "description": "Compound formation suffixes",
+      "type": "array",
+      "items": { "$ref": "#/definitions/suffix_entry" }
+    },
+
+    "typos": {
+      "description": "Common compound word typos",
+      "type": "array",
+      "items": { "$ref": "#/definitions/typo_entry" }
+    },
+
+    "ha_htoe_compounds": {
+      "description": "Compounds with ha-htoe confusion (missing/extra ha-htoe on a component)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/confusion_compound_entry" }
+    },
+
+    "aspirated_compounds": {
+      "description": "Compounds with aspiration confusion (unaspirated vs aspirated initial consonant)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/confusion_compound_entry" }
+    },
+
+    "consonant_confusion_compounds": {
+      "description": "Compounds with consonant or visual confusion in a component",
+      "type": "array",
+      "items": { "$ref": "#/definitions/confusion_compound_entry" }
+    }
+  },
+
+  "definitions": {
+    "compound_entry": {
+      "description": "Compound word formed from component morphemes",
+      "type": "object",
+      "required": ["components", "compound"],
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "description": "Component morphemes of the compound"
+        },
+        "compound": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The compound word formed from the components"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English meaning of the compound"
+        }
+      }
+    },
+
+    "reduplication_entry": {
+      "description": "Reduplication pattern (base word repeated for emphasis/adverb formation)",
+      "type": "object",
+      "required": ["base", "reduplicated", "type", "meaning"],
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Base word before reduplication"
+        },
+        "reduplicated": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reduplicated form"
+        },
+        "type": {
+          "type": "string",
+          "description": "Reduplication type (e.g., complete, partial)"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English meaning of the reduplicated form"
+        }
+      }
+    },
+
+    "prefix_entry": {
+      "description": "Compound formation prefix",
+      "type": "object",
+      "required": ["prefix", "type", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "prefix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar prefix text"
+        },
+        "type": {
+          "type": "string",
+          "description": "Prefix type (e.g., nominalizer, negation, locative)"
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the prefix"
+        }
+      }
+    },
+
+    "suffix_entry": {
+      "description": "Compound formation suffix",
+      "type": "object",
+      "required": ["suffix", "type", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "suffix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar suffix text"
+        },
+        "type": {
+          "type": "string",
+          "description": "Suffix type (e.g., nominalization, agent, manner)"
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the suffix"
+        }
+      }
+    },
+
+    "typo_entry": {
+      "description": "Common compound typo with correction",
+      "type": "object",
+      "required": ["incorrect", "correct", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "incorrect": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incorrect (typo) form"
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correct form"
+        },
+        "type": {
+          "type": "string",
+          "description": "Typo type (e.g., missing_tone, wrong_vowel, missing_visarga)"
+        }
+      }
+    },
+
+    "confusion_compound_entry": {
+      "description": "Compound confusion pattern where one component is wrong",
+      "type": "object",
+      "required": ["pattern", "wrong", "correct"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Post-normalization pattern string to match in text"
+        },
+        "wrong": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The wrong component in the compound"
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct replacement for the wrong component"
+        },
+        "error_type": {
+          "type": "string",
+          "description": "Error type classification (e.g., ha_htoe_confusion, confusable_error)"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the confusion"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/aspects/v1.0",
+  "title": "Myanmar Aspect Markers Schema",
+  "description": "JSON Schema for validating aspects.yaml - Myanmar aspect marker definitions and rules",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "markers"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "aspects",
+      "description": "Category type (must be 'aspects')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "markers": {
+      "description": "Aspect marker definitions with properties",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/marker_entry"
+      }
+    },
+    "combinations": {
+      "description": "Valid aspect marker combinations",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/combination_entry"
+      }
+    },
+    "invalid_sequences": {
+      "description": "Invalid aspect marker sequences",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/invalid_sequence_entry"
+      }
+    },
+    "typos": {
+      "description": "Common aspect marker typos",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/typo_entry"
+      }
+    }
+  },
+  "definitions": {
+    "marker_entry": {
+      "description": "Individual aspect marker definition",
+      "type": "object",
+      "required": [
+        "marker",
+        "category",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "marker": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar aspect marker text"
+        },
+        "category": {
+          "type": "string",
+          "description": "Aspectual category (e.g., completion, progressive, habitual)"
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the marker function"
+        },
+        "can_combine": {
+          "type": "boolean",
+          "description": "Whether this marker can combine with other aspect markers"
+        },
+        "register": {
+          "type": "string",
+          "description": "Register level (e.g., neutral, formal, colloquial)"
+        },
+        "is_final": {
+          "type": "boolean",
+          "description": "Whether this marker appears in sentence-final position"
+        }
+      }
+    },
+    "combination_entry": {
+      "description": "Valid aspect marker combination",
+      "type": "object",
+      "required": [
+        "sequence",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sequence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "description": "Ordered sequence of aspect markers"
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the combined meaning"
+        }
+      }
+    },
+    "invalid_sequence_entry": {
+      "description": "Invalid aspect marker sequence",
+      "type": "object",
+      "required": [
+        "sequence",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sequence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "description": "Ordered sequence of aspect markers that is invalid"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Explanation of why this sequence is invalid"
+        }
+      }
+    },
+    "typo_entry": {
+      "description": "Aspect marker typo correction",
+      "type": "object",
+      "required": [
+        "incorrect",
+        "correct"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "incorrect": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incorrect (typo) form of the aspect marker"
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correct form of the aspect marker"
+        }
+      }
+    }
+  }
+}

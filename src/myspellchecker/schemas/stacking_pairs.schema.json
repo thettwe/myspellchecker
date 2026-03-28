@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/stacking-pairs/v1.0",
+  "title": "Myanmar Stacking Pairs Schema",
+  "description": "JSON Schema for validating stacking_pairs.yaml - Valid consonant stacking pairs (Pat Sint / Virama rules)",
+
+  "type": "object",
+  "required": ["version", "category", "stacking_pairs"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "stacking_pairs",
+      "description": "Category type (must be 'stacking_pairs')"
+    },
+
+    "stacking_pairs": {
+      "description": "Valid consonant stacking pairs organized by category",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/stacking_category"
+      }
+    }
+  },
+
+  "definitions": {
+    "stacking_category": {
+      "description": "A category of stacking pairs (e.g., gemination, cross_aspirated)",
+      "type": "object",
+      "required": ["enabled", "pairs"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this category of stacking pairs is active"
+        },
+        "pairs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/consonant_pair"
+          },
+          "minItems": 1,
+          "description": "List of valid [upper, lower] consonant pairs"
+        }
+      }
+    },
+
+    "consonant_pair": {
+      "description": "A pair of consonants [upper, lower] that can legally stack via virama",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Myanmar consonant character (Unicode)"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  }
+}

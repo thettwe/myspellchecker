@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/pronouns/v1.0",
+  "title": "Myanmar Pronouns Schema",
+  "description": "JSON Schema for validating pronouns.yaml - Pronouns and honorifics with register metadata",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "pronouns"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "pronouns",
+      "description": "Category type (must be 'pronouns')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "pronouns": {
+      "description": "Pronoun system organized by person and honorifics",
+      "type": "object",
+      "required": [
+        "first_person",
+        "second_person",
+        "third_person",
+        "honorifics"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "first_person": {
+          "description": "First person pronouns (I/We)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pronoun_entry"
+          }
+        },
+        "second_person": {
+          "description": "Second person pronouns (You)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pronoun_entry"
+          }
+        },
+        "third_person": {
+          "description": "Third person pronouns (He/She/It)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pronoun_entry"
+          }
+        },
+        "honorifics": {
+          "description": "Honorifics used as pronouns or titles",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pronoun_entry"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "pronoun_entry": {
+      "description": "Individual pronoun or honorific entry",
+      "type": "object",
+      "required": [
+        "word",
+        "pos_tag",
+        "meaning"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "word": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar pronoun text"
+        },
+        "pos_tag": {
+          "type": "string",
+          "description": "POS tag (PRO for pronouns, N_HON for honorifics)"
+        },
+        "person": {
+          "type": "string",
+          "description": "Grammatical person (1, 2, 3)"
+        },
+        "gender": {
+          "type": "string",
+          "description": "Gender association (male, female, neutral)"
+        },
+        "register": {
+          "type": "string",
+          "description": "Register level (formal, polite, neutral, colloquial, informal)"
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 1,
+          "description": "English meaning/translation"
+        },
+        "speaker_gender": {
+          "type": "string",
+          "description": "Gender of the speaker using this pronoun (male, female, neutral)"
+        },
+        "number": {
+          "type": "string",
+          "description": "Grammatical number (singular, plural)"
+        }
+      }
+    }
+  }
+}

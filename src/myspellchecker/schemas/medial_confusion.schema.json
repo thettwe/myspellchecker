@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/medial-confusion/v1.0",
+  "title": "Myanmar Medial Confusion Schema",
+  "description": "JSON Schema for validating medial_confusion.yaml - Medial ya-pin/ya-yit confusion detection patterns",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "unconditional"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "medial_confusion",
+      "description": "Category type (must be 'medial_confusion')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "unconditional": {
+      "description": "Wrong medial forms that are ALWAYS incorrect regardless of context. Keys are incorrect forms, values are correct forms (string or list).",
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1
+          }
+        ]
+      }
+    },
+
+    "contextual": {
+      "description": "Medial confusions triggered only when followed by specific trailing tokens. Both forms are valid words on their own.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/contextual_entry"
+      }
+    },
+
+    "colloquial_contractions": {
+      "description": "Colloquial forms that the segmenter may split, bypassing the word-level colloquial checker.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The standard (correct) form"
+      }
+    }
+  },
+
+  "definitions": {
+    "contextual_entry": {
+      "description": "A contextual medial confusion rule triggered by trailing tokens",
+      "type": "object",
+      "required": ["correct", "contexts"],
+      "additionalProperties": false,
+      "properties": {
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct form when context matches"
+        },
+        "contexts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Trailing tokens that trigger this correction"
+        }
+      }
+    }
+  }
+}

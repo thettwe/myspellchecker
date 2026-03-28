@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/tense-markers/v1.0",
+  "title": "Myanmar Tense Markers Schema",
+  "description": "JSON Schema for validating tense_markers.yaml - Temporal adverbs and SFP correction mappings for tense mismatch detection",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "temporal_adverbs", "sfp_corrections"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "tense_markers",
+      "description": "Category type (must be 'tense_markers')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "temporal_adverbs": {
+      "description": "Temporal adverbs grouped by tense/aspect category",
+      "type": "object",
+      "required": ["future", "past"],
+      "additionalProperties": false,
+      "properties": {
+        "future": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Future-tense temporal adverbs"
+        },
+        "past": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Past-tense temporal adverbs"
+        },
+        "habitual": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Habitual aspect temporal adverbs"
+        },
+        "present": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Present-tense temporal adverbs"
+        }
+      }
+    },
+
+    "sfp_corrections": {
+      "description": "Sentence-final particle correction maps by tense direction",
+      "type": "object",
+      "required": ["past_present_to_future", "future_to_past_present"],
+      "additionalProperties": false,
+      "properties": {
+        "past_present_to_future": {
+          "description": "SFP corrections when future adverb is present but SFP is past/present. Keys are wrong SFPs, values are correct SFPs.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "future_to_past_present": {
+          "description": "SFP corrections when past adverb is present but SFP is future. Keys are wrong SFPs, values are correct SFPs.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

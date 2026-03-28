@@ -1,0 +1,226 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/morphology/v1.0",
+  "title": "Myanmar Morphology Rules Schema",
+  "description": "JSON Schema for validating morphology.yaml - Morphological rules for verb, noun, and adverb suffixes",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "suffixes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "morphology",
+      "description": "Category type (must be 'morphology')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "prefixes": {
+      "description": "Morphological prefix rules organized by type (optional)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/prefix_entry"
+        }
+      }
+    },
+    "suffixes": {
+      "description": "Morphological suffix rules organized by word class",
+      "type": "object",
+      "required": [
+        "verb_suffixes",
+        "noun_suffixes",
+        "adverb_suffixes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "verb_suffixes": {
+          "description": "Verb suffix rules",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/suffix_entry"
+          }
+        },
+        "noun_suffixes": {
+          "description": "Noun suffix rules",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/suffix_entry"
+          }
+        },
+        "adverb_suffixes": {
+          "description": "Adverb suffix rules",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/suffix_entry"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "prefix_entry": {
+      "description": "Individual morphological prefix rule",
+      "type": "object",
+      "required": [
+        "prefix",
+        "category",
+        "meaning"
+      ],
+      "properties": {
+        "prefix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar prefix text"
+        },
+        "category": {
+          "type": "string",
+          "description": "Grammatical category of prefix"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English meaning/translation"
+        },
+        "formality": {
+          "$ref": "_common.schema.json#/definitions/formality_level"
+        },
+        "min_root_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum root length for prefix application"
+        },
+        "pos_output": {
+          "type": "string",
+          "description": "POS tag of resulting word"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "string"
+              },
+              "output": {
+                "type": "string"
+              },
+              "meaning": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Usage examples showing input → output transformations"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        }
+      }
+    },
+    "suffix_entry": {
+      "description": "Individual morphological suffix rule",
+      "type": "object",
+      "required": [
+        "suffix",
+        "category",
+        "meaning"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "suffix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar suffix text"
+        },
+        "category": {
+          "type": "string",
+          "description": "Grammatical category of suffix",
+          "examples": [
+            "statement",
+            "future",
+            "past",
+            "plural",
+            "manner",
+            "locative"
+          ]
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 3,
+          "description": "English meaning/translation"
+        },
+        "pos_tag": {
+          "$ref": "_common.schema.json#/definitions/pos_tag"
+        },
+        "formality": {
+          "$ref": "_common.schema.json#/definitions/formality_level"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Usage examples (Myanmar text with suffix applied)"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes or usage guidance"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Alternative forms of the same suffix"
+        },
+        "constraints": {
+          "type": "object",
+          "description": "Morphological constraints on suffix usage",
+          "properties": {
+            "requires_prefix": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Required prefixes for this suffix"
+            },
+            "incompatible_with": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Incompatible suffixes"
+            },
+            "phonological_rules": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Phonological transformation rules"
+            }
+          }
+        }
+      }
+    }
+  }
+}

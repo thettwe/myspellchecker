@@ -1,0 +1,311 @@
+# Myanmar Register Rules - Version 1.1
+# Formal (Written) vs Colloquial (Spoken) register mappings
+#
+# This file contains:
+# - Register pairs (formal <-> colloquial)
+# - Vocabulary pairs (informal/slang words with formal equivalents)
+# - Words exclusive to formal register
+# - Words exclusively to colloquial register
+# - Neutral words
+#
+# Schema: https://myspellchecker.dev/schemas/register/v1.0
+
+version: "1.2.0"
+category: "register"
+description: "Myanmar register pairs, vocabulary, slang detection, and register marker data"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-03-19"
+
+# ============================================================
+# REGISTER PAIRS
+# Direct mapping between Formal and Colloquial equivalents
+# ============================================================
+register_pairs:
+  # Sentence endings
+  - formal: "သည်"
+    colloquial: "တယ်"
+    type: "statement_ending"
+  - formal: "ပါသည်"
+    colloquial: "ပါတယ်"
+    type: "polite_statement"
+  - formal: "မည်"
+    colloquial: "မယ်"
+    type: "future"
+  - formal: "ပါမည်"
+    colloquial: "ပါမယ်"
+    type: "polite_future"
+
+  # Plurals
+  - formal: "များ"
+    colloquial: "တွေ"
+    type: "plural_marker"
+
+  # Conjunctions/Particles
+  - formal: "နှင့်"
+    colloquial: "နဲ့"
+    type: "conjunction"
+  # Removed: "သို့"→"ကို" — these serve different grammatical functions.
+  # "သို့" is allative (direction/to), "ကို" is accusative (object marker).
+  # They are not interchangeable register variants.
+  - formal: "မှ"
+    colloquial: "က"
+    type: "source"
+  - formal: "လျှင်"
+    colloquial: "ရင်"
+    type: "conditional"
+
+  # Possessives
+  - formal: "၏"
+    colloquial: "ရဲ့"
+    type: "possessive"
+
+  # Relative clauses
+  - formal: "သော"
+    colloquial: "တဲ့"
+    type: "relative_marker"
+  - formal: "မည့်"
+    colloquial: "မယ့်"
+    type: "future_relative"
+
+  # Location
+  - formal: "တွင်"
+    colloquial: "မှာ"
+    type: "location"
+
+  # Because/Reason
+  - formal: "ကြောင့်"
+    colloquial: "လို့"
+    type: "reason"
+
+  # Question
+  - formal: "သလော"
+    colloquial: "လား"
+    type: "question"
+
+# ============================================================
+# VOCABULARY LISTS
+# Words specific to a register without a direct pair mapping above
+# (or where the pair is already defined but listed for completeness)
+# ============================================================
+formal_words:
+  - "၍"      # sequential/causal
+  - "၌"      # locative
+  - "၎င်း"   # pronoun (it/that one)
+  - "အားဖြင့်" # by means of
+  - "သို့"    # allative (direction/to) — formal, no direct colloquial equivalent
+
+colloquial_words:
+  - "ပဲ"      # emphasis "only/just"
+  - "ပေါ့"    # softener
+  - "နော်"    # tag question
+  - "ဗျ"      # male polite
+  - "ဗျာ"     # male polite extended
+  - "ရှင်"    # female polite
+  - "သိပ်"    # intensifier "very" (colloquial for အလွန်)
+
+# ============================================================
+# VOCABULARY PAIRS
+# Informal/slang vocabulary with formal equivalents.
+# Used for vocabulary-level register detection: when a colloquial
+# word appears in a formal-register sentence, the formal_equivalent
+# is suggested. The informal word is scanned as an exact substring
+# in multi-word tokens (e.g., "တော်တော်မိုက်" contains "မိုက်").
+# ============================================================
+vocabulary_pairs:
+  # Colloquial intensifiers
+  - colloquial: "တော်တော်"
+    formal_equivalent: "အလွန်"
+    meaning: "very/really (colloquial intensifier)"
+    type: "colloquial_adverb"
+
+  # Slang adjectives/adverbs
+  - colloquial: "မိုက်"
+    formal_equivalent: "ကောင်းမွန်"
+    meaning: "awesome/cool (slang sense)"
+    type: "slang_adjective"
+  - colloquial: "ဂွမ်း"
+    formal_equivalent: "အသေးစိတ်"
+    meaning: "thorough/detailed (informal)"
+    type: "slang_adjective"
+  - colloquial: "အေးဆေး"
+    formal_equivalent: "တိတ်တဆိတ်"
+    meaning: "calm/relaxed (informal)"
+    type: "informal_adjective"
+  - colloquial: "အရမ်း"
+    formal_equivalent: "အလွန်"
+    meaning: "very/extremely (informal)"
+    type: "informal_adverb"
+  - colloquial: "ကြောက်စရာ"
+    formal_equivalent: "ထူးကဲစွာ"
+    meaning: "extremely/terrifyingly (slang intensifier)"
+    type: "slang_adverb"
+
+  # Informal multi-word patterns (scanned as substrings)
+  - colloquial: "တော်တော်မိုက်နေသည်"
+    formal_equivalent: "မြင့်တက်နေသည်"
+    meaning: "rising/intensifying (slang with formal verb ending)"
+    type: "slang_phrase"
+  - colloquial: "တော်တော်မိုက်"
+    formal_equivalent: "အလွန်ကောင်းမွန်"
+    meaning: "really awesome (slang)"
+    type: "slang_phrase"
+  - colloquial: "တော်တော်ဂွမ်း"
+    formal_equivalent: "အသေးစိတ်"
+    meaning: "really thorough (informal)"
+    type: "slang_phrase"
+
+# ============================================================
+# VOCABULARY EXEMPT PHRASES
+# Multi-word patterns that should NOT trigger vocabulary-level
+# register errors even in formal text. These are widely-used
+# colloquial intensifiers that appear across registers.
+# When a token contains an exempt phrase, the vocabulary scanner
+# skips the match to avoid false positives.
+# ============================================================
+vocabulary_exempt:
+  - "တော်တော်မိုက်"  # widely-used intensifier "really awesome" — tolerated in mixed-register text
+
+neutral_words:
+  - "က"      # subject marker
+  - "ကို"     # object marker
+  - "ပါ"      # polite particle
+  - "ခဲ့"     # past tense
+  - "နေ"      # progressive
+  - "ပြီ"     # completion
+  - "ပြီး"    # after completion
+  - "ကြ"      # plural verb marker
+  - "လိမ့်"   # probability
+  - "နိုင်"   # ability
+  - "ရ"       # necessity/permission
+  - "တတ်"    # habituality
+  # Removed "ရင်" and "လျှင်" from neutral_words — they are register-marked.
+  # "ရင်" is colloquial, "လျှင်" is formal. Added to register_pairs instead.
+
+# ============================================================
+# SENTENCE-FINAL PARTICLES
+# Sentence-final particles grouped by register.
+# Used by register mixing and sentence structure detectors.
+# ============================================================
+sentence_final_particles:
+  formal:
+    - "သည်"
+    - "ပါသည်"
+    - "မည်"
+    - "ပါမည်"
+  colloquial:
+    - "တယ်"
+    - "ပါတယ်"
+    - "မယ်"
+    - "ပါမယ်"
+  discourse:
+    - "နော်"      # tag question ("right?", "okay?")
+    - "လား"       # yes/no question
+    - "လဲ"        # wh-question
+    - "ပေါ့"      # softener
+    - "ပဲ"        # emphatic/restrictive
+    - "လေ"        # emphasis
+    - "ဟ"         # informal affirmation
+    - "ပြီ"       # completive
+    - "ပါပြီ"     # polite completive
+    - "ဘူး"       # negative
+    - "ပါဘူး"     # polite negative
+
+# ============================================================
+# LITERARY MARKERS
+# Words/particles signalling literary/formal register.
+# Used by register mixing detector to measure formal signal strength.
+# ============================================================
+literary_markers:
+  particles:
+    - "၏"          # possessive (literary)
+    - "တွင်"       # locative (literary)
+    - "သော"        # attributive (literary)
+    - "ဖြင့်"      # instrumental (literary)
+    - "၌"          # locative (literary, archaic)
+    - "အား"        # dative (literary, when postposition)
+    - "သော်လည်း"   # concessive conjunction (literary "although")
+  adverbs:
+    - "ယနေ့"       # today (formal); colloquial = ဒီနေ့
+    - "ယခု"        # now (formal); colloquial = အခု
+    - "ယခင်"       # before (formal); colloquial = အရင်
+  determiners:
+    - "ယင်း"       # that/those (formal demonstrative)
+    - "ထို"        # that (literary demonstrative)
+    - "ဤ"          # this (literary demonstrative)
+    - "ယင်းသို့"   # thus/in that way (literary)
+
+# ============================================================
+# PRONOUNS
+# Pronoun sets grouped by register. Used by register mixing
+# detector to identify informal pronouns in formal text.
+# ============================================================
+pronouns:
+  formal:
+    - "ကျွန်တော်"
+    - "ကျွန်မ"
+    - "ကျွန်ုပ်"
+  colloquial:
+    - "ငါ"
+    - "ငါတို့"
+    - "နင်"
+    - "နင်တို့"
+  first_person_all:
+    - "ကျွန်တော်"
+    - "ကျွန်မ"
+    - "ကျွန်ုပ်"
+    - "ကျွန်တော်တို့"
+    - "ကျွန်မတို့"
+    - "ငါ"
+    - "ငါတို့"
+  discourse_particles:
+    - "နော်"       # tag question (informal)
+    - "ဟ"          # informal affirmation
+    - "ဟေ့"        # hey (informal)
+    - "ဒါကြောင့်"  # so/therefore (informal)
+    - "ပေမဲ့"      # but (informal variant of ပေမယ့်)
+    - "ဒါပေမဲ့"    # but (informal variant of ဒါပေမယ့်)
+
+# ============================================================
+# INFORMAL PARTICLES
+# Casual sentence-ending particles that clash with
+# respectful address terms (honorifics).
+# ============================================================
+informal_particles:
+  - "ဟ"
+  - "ကွာ"
+  - "ကွ"
+  - "ဟေ့"
+
+# ============================================================
+# FORMAL CONTEXT
+# Lexical cues signalling official/formal context.
+# Used to strengthen formal signal in register mixing detection.
+# ============================================================
+formal_context:
+  words:
+    - "အစီရင်ခံစာ"    # report
+    - "အစည်းအဝေး"     # meeting
+    - "လွှတ်တော်"      # parliament
+  stems:
+    - "တင်ပြ"          # present/submit
+    - "ကျင်းပ"         # hold (a meeting)
+  full_form_stems:
+    - "တင်ပြ"          # triggers full-token rewrite (e.g., တင်ပြတယ် → တင်ပြပါသည်)
+
+# ============================================================
+# SUFFIX-ELIGIBLE PARTICLE TYPES
+# Only particles of these types are used for suffix-based
+# register detection. Excludes standalone particles (conjunctions,
+# case markers, conditionals) to prevent false positives on nouns
+# (e.g., "ဆရာသည်" = teacher + topic, not formal marker).
+# ============================================================
+suffix_eligible_types:
+  - "statement_ending"
+  - "polite_statement"
+  - "future"
+  - "polite_future"
+  - "question"
+  - "future_relative"
+  - "possessive"       # ၏ as formal statement ending

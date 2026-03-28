@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/pos-inference/v1.0",
+  "title": "Myanmar POS Inference Rules Schema",
+  "description": "JSON Schema for validating pos_inference.yaml - POS inference rules based on morphological patterns",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "prefixes",
+    "proper_noun_suffixes",
+    "suffix_rules"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "pos_inference",
+      "description": "Category type (must be 'pos_inference')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "prefixes": {
+      "description": "Prefix patterns for POS inference",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/prefix_entry"
+      }
+    },
+    "proper_noun_suffixes": {
+      "description": "Suffix patterns indicating proper nouns",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/suffix_entry"
+      }
+    },
+    "suffix_rules": {
+      "description": "Suffix probability rules organized by word class",
+      "type": "object",
+      "required": [
+        "noun",
+        "verb",
+        "adverb"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "noun": {
+          "description": "Suffixes indicating noun POS",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/suffix_rule_entry"
+          }
+        },
+        "verb": {
+          "description": "Suffixes indicating verb POS",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/suffix_rule_entry"
+          }
+        },
+        "adverb": {
+          "description": "Suffixes indicating adverb POS",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/suffix_rule_entry"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "prefix_entry": {
+      "description": "Morphological prefix rule for POS inference",
+      "type": "object",
+      "required": [
+        "prefix",
+        "pos"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "prefix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar prefix text"
+        },
+        "pos": {
+          "type": "string",
+          "description": "Inferred POS tag for words with this prefix"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the prefix function"
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words that are exceptions to this prefix rule"
+        }
+      }
+    },
+    "suffix_entry": {
+      "description": "Proper noun suffix rule for POS inference",
+      "type": "object",
+      "required": [
+        "suffix",
+        "pos"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "suffix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar suffix text"
+        },
+        "pos": {
+          "type": "string",
+          "description": "Inferred POS tag for words with this suffix"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the suffix function"
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words that are exceptions to this suffix rule"
+        }
+      }
+    },
+    "suffix_rule_entry": {
+      "description": "Suffix probability rule for word class inference",
+      "type": "object",
+      "required": [
+        "suffix",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "suffix": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar suffix text"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        }
+      }
+    }
+  }
+}

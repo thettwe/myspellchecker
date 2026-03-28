@@ -1,0 +1,93 @@
+version: "1.0.0"
+category: "confusion_matrix"
+description: >
+  Data-driven character substitution costs derived from corpus analysis.
+  These supplement the hand-crafted MYANMAR_SUBSTITUTION_COSTS in
+  phonetic_data.py.
+
+  Costs are inversely related to confusion frequency:
+    15+ occurrences → 0.20 (very common confusion)
+    8-14 occurrences → 0.30
+    4-7 occurrences  → 0.40
+    1-3 occurrences  → 0.50
+
+metadata:
+  total_pairs: 503
+
+# Character-level substitution costs not covered by MYANMAR_SUBSTITUTION_COSTS.
+# These are ADDITIONAL pairs — they merge with (not replace) the hardcoded costs.
+# Format: [from_char, to_char, cost, count, description]
+additional_substitution_costs:
+  # Asat/virama/tone confusions (not in current matrix)
+  - from: "\u103A"    # ် (asat)
+    to: "\u1037"      # ့ (dot below)
+    cost: 0.3
+    count: 9
+    description: "asat ↔ dot below (common confusion)"
+    bidirectional: true
+
+  - from: "\u103A"    # ် (asat)
+    to: "\u1039"      # ္ (virama)
+    cost: 0.3
+    count: 8
+    description: "asat ↔ virama (8 cases: ် typed instead of ္)"
+    bidirectional: true
+
+  - from: "\u103A"    # ် (asat)
+    to: "\u1038"      # း (visarga)
+    cost: 0.4
+    count: 4
+    description: "asat ↔ visarga (4 cases)"
+    bidirectional: true
+
+  # Cross-vagga consonant confusions (not same articulatory group)
+  - from: "\u1000"    # က (ka)
+    to: "\u1010"      # တ (ta)
+    cost: 0.4
+    count: 13
+    description: "ka ↔ ta (13 cases: keyboard proximity, visual similarity)"
+    bidirectional: true
+
+  - from: "\u1010"    # တ (ta)
+    to: "\u1018"      # ဘ (bha)
+    cost: 0.4
+    count: 4
+    description: "ta ↔ bha (4 cases)"
+    bidirectional: true
+
+  # Nasal confusion
+  - from: "\u1019"    # မ (ma)
+    to: "\u1014"      # န (na)
+    cost: 0.4
+    count: 3
+    description: "ma ↔ na (3 cases: nasal confusion)"
+    bidirectional: true
+
+  # Tall AA / regular AA confusion
+  - from: "\u102B"    # ါ (tall AA)
+    to: "\u102C"      # ာ (regular AA)
+    cost: 0.2
+    count: 3
+    description: "tall AA ↔ regular AA (3 cases: normalization artifacts)"
+    bidirectional: true
+
+# Cost refinements — corpus analysis suggests these existing costs could be adjusted.
+# DISABLED for now: the current hand-tuned costs achieve 98.2% Top-1; lowering costs
+# for high-frequency confusions (ျ↔ြ, ဆ↔စ) caused ranking ties that reduced Top-1.
+# These refinements are documented for future tuning when the ranking algorithm
+# can better distinguish between correct-word-with-low-edit-distance and
+# genuine-error-with-low-edit-distance.
+#
+# cost_refinements:
+#   - from: "\u103B"
+#     to: "\u103C"
+#     suggested_cost: 0.2
+#     current_cost: 0.3
+#     count: 43
+#     description: "ya-pin ↔ ya-yit (43 cases)"
+#   - from: "\u1006"
+#     to: "\u1005"
+#     suggested_cost: 0.25
+#     current_cost: 0.4
+#     count: 19
+#     description: "cha ↔ ca (19 cases)"

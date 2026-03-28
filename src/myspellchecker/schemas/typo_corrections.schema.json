@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/typo-corrections/v1.0",
+  "title": "Myanmar Typo Corrections Schema",
+  "description": "JSON Schema for validating typo_corrections.yaml - Common Myanmar typo patterns and corrections",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "corrections"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "typo_corrections",
+      "description": "Category type (must be 'typo_corrections')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "corrections": {
+      "description": "Typo correction rules organized by error type",
+      "type": "object",
+      "required": [
+        "particles",
+        "medial_confusions",
+        "missing_asat",
+        "classifiers",
+        "negation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "particles": {
+          "description": "Particle-specific typos",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "medial_confusions": {
+          "description": "Medial consonant confusions (ya-pin vs ya-yit, wa vs u)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "missing_e_vowel": {
+          "description": "Missing E vowel in ောင် and similar patterns",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "missing_asat": {
+          "description": "Missing asat marker errors",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "classifiers": {
+          "description": "Classifier typos",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "negation": {
+          "description": "Negation particle typos",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "visual_errors": {
+          "description": "Visual and OCR-related errors (character confusion, composition errors, zero/wa confusion)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        },
+        "question_particles": {
+          "description": "Question particle typos (e.g., လာ → လား)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/typo_correction_entry"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "typo_correction_entry": {
+      "description": "Individual typo correction rule",
+      "type": "object",
+      "required": [
+        "incorrect",
+        "correct",
+        "error_type",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "incorrect": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incorrect Myanmar text (typo)"
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correct Myanmar text"
+        },
+        "error_type": {
+          "$ref": "_common.schema.json#/definitions/error_type"
+        },
+        "context": {
+          "$ref": "_common.schema.json#/definitions/context_constraint"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "description": {
+          "type": "string",
+          "description": "Explanation of the typo and correction"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "Meaning or context of the correction"
+        },
+        "examples": {
+          "type": "object",
+          "description": "Usage example showing incorrect and correct forms",
+          "properties": {
+            "incorrect": {
+              "type": "string"
+            },
+            "correct": {
+              "type": "string"
+            },
+            "translation": {
+              "type": "string"
+            }
+          }
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "very_common",
+            "common",
+            "occasional",
+            "rare"
+          ],
+          "description": "How frequently this typo occurs"
+        },
+        "pos_constraint": {
+          "type": "object",
+          "description": "POS tag constraints for when this correction applies",
+          "properties": {
+            "preceding": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "POS tags that can precede this correction"
+            },
+            "following": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "POS tags that can follow this correction"
+            },
+            "position": {
+              "type": "string",
+              "enum": [
+                "sentence_initial",
+                "sentence_final",
+                "any"
+              ],
+              "description": "Position constraint for the correction"
+            }
+          }
+        },
+        "excluded_pos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "POS tags that exclude this correction from being applied"
+        },
+        "followed_by": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Words or tokens that must follow this typo for the correction to apply"
+        }
+      }
+    }
+  }
+}

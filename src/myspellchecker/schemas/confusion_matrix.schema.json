@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/confusion-matrix/v1.0",
+  "title": "Myanmar Confusion Matrix Schema",
+  "description": "JSON Schema for validating confusion_matrix.yaml - Data-driven character substitution costs",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "additional_substitution_costs"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "confusion_matrix",
+      "description": "Category type (must be 'confusion_matrix')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "type": "object",
+      "required": ["total_pairs"],
+      "properties": {
+        "total_pairs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of character pairs in the corpus analysis"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "additional_substitution_costs": {
+      "description": "Character-level substitution costs not covered by the hardcoded MYANMAR_SUBSTITUTION_COSTS",
+      "type": "array",
+      "items": { "$ref": "#/definitions/substitution_cost_entry" }
+    },
+
+    "cost_refinements": {
+      "description": "Suggested refinements to existing costs based on corpus analysis (may be disabled)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/cost_refinement_entry" }
+    }
+  },
+
+  "definitions": {
+    "substitution_cost_entry": {
+      "description": "A character substitution cost entry",
+      "type": "object",
+      "required": ["from", "to", "cost", "count", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source character (Unicode)"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target character (Unicode)"
+        },
+        "cost": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Substitution cost (lower = more common confusion)"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of occurrences in corpus analysis"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the confusion"
+        },
+        "bidirectional": {
+          "type": "boolean",
+          "description": "Whether the reverse substitution has the same cost"
+        }
+      }
+    },
+
+    "cost_refinement_entry": {
+      "description": "A suggested cost refinement for an existing substitution pair",
+      "type": "object",
+      "required": ["from", "to", "suggested_cost", "current_cost", "count", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source character (Unicode)"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target character (Unicode)"
+        },
+        "suggested_cost": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Suggested new cost"
+        },
+        "current_cost": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Current cost in the hardcoded matrix"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of occurrences supporting the refinement"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        }
+      }
+    }
+  }
+}

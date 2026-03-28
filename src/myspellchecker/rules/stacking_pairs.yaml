@@ -1,0 +1,181 @@
+version: "1.0.0"
+category: "stacking_pairs"
+
+# Valid Consonant Stacking Pairs (Pat Sint / Virama Rules)
+#
+# Defines which consonant pairs can legally stack via virama (U+1039).
+# Format: upper consonant stacks over lower consonant.
+# Each pair is [upper, lower] using Unicode escape sequences.
+#
+# Categories:
+#   gemination       - Same consonant doubled (e.g., က္က kka)
+#   cross_aspirated  - Unaspirated + aspirated of same vagga (e.g., က္ခ kkha)
+#   cross_row        - Cross-vagga combinations (e.g., က္တ kta)
+#   retroflex        - Retroflex consonant combinations (e.g., ဏ္ဍ)
+#   sonorant         - Consonant + Ya/Ra/Wa (e.g., က္ယ kya)
+#   ha_combinations  - Combinations with Ha (e.g., က္ဟ kha)
+#   nasal_cluster    - Nasal + stop/aspirated (e.g., င္က ṅka)
+#   additional       - Other valid Pali/Sanskrit patterns
+#
+# Reference: Myanmar Language Commission, "Standard Myanmar Orthography"
+#            Unicode Technical Note #11 (Myanmar encoding)
+
+stacking_pairs:
+
+  # Same consonant gemination
+  gemination:
+    enabled: true
+    pairs:
+      - ["\u1000", "\u1000"]  # က္က - kka
+      - ["\u1002", "\u1002"]  # ဂ္ဂ - gga
+      - ["\u1003", "\u1003"]  # ဃ္ဃ - ggha
+      - ["\u1005", "\u1005"]  # စ္စ - cca
+      - ["\u1006", "\u1006"]  # ဆ္ဆ - chcha
+      - ["\u1007", "\u1007"]  # ဇ္ဇ - jja
+      - ["\u1008", "\u1008"]  # ဈ္ဈ - jjha
+      - ["\u100b", "\u100b"]  # ဋ္ဋ - ṭṭa
+      - ["\u100d", "\u100d"]  # ဍ္ဍ - ḍḍa
+      - ["\u100e", "\u100e"]  # ဎ္ဎ - ḍḍha
+      - ["\u100f", "\u100f"]  # ဏ္ဏ - ṇṇa
+      - ["\u1010", "\u1010"]  # တ္တ - tta
+      - ["\u1011", "\u1011"]  # ထ္ထ - ttha
+      - ["\u1012", "\u1012"]  # ဒ္ဒ - dda
+      - ["\u1013", "\u1013"]  # ဓ္ဓ - ddha
+      - ["\u1014", "\u1014"]  # န္န - nna
+      - ["\u1015", "\u1015"]  # ပ္ပ - ppa
+      - ["\u1016", "\u1016"]  # ဖ္ဖ - ppha
+      - ["\u1017", "\u1017"]  # ဗ္ဗ - bba
+      - ["\u1018", "\u1018"]  # ဘ္ဘ - bbha
+      - ["\u1019", "\u1019"]  # မ္မ - mma
+      - ["\u101a", "\u101a"]  # ယ္ယ - yya
+      - ["\u101b", "\u101b"]  # ရ္ရ - rra
+      - ["\u101c", "\u101c"]  # လ္လ - lla
+      - ["\u101d", "\u101d"]  # ဝ္ဝ - wwa
+      - ["\u101e", "\u101e"]  # သ္သ - ssa
+      - ["\u101f", "\u101f"]  # ဟ္ဟ - hha
+      - ["\u1020", "\u1020"]  # ဠ္ဠ - ḷḷa
+      - ["\u1009", "\u1009"]  # ဉ္ဉ - ñña (archaic)
+      - ["\u100a", "\u100a"]  # ည္ည - ñña
+
+  # Unaspirated + aspirated of same vagga
+  cross_aspirated:
+    enabled: true
+    pairs:
+      - ["\u1000", "\u1001"]  # က္ခ - kkha
+      - ["\u1002", "\u1003"]  # ဂ္ဃ - ggha
+      - ["\u1005", "\u1006"]  # စ္ဆ - ccha
+      - ["\u1010", "\u1011"]  # တ္ထ - ttha
+      - ["\u1012", "\u1013"]  # ဒ္ဓ - ddha
+      - ["\u1015", "\u1016"]  # ပ္ဖ - ppha
+      - ["\u1017", "\u1018"]  # ဗ္ဘ - bbha
+
+  # Retroflex consonant combinations
+  retroflex:
+    enabled: true
+    pairs:
+      - ["\u100f", "\u100d"]  # ဏ္ဍ - ṇḍa
+      - ["\u100f", "\u100c"]  # ဏ္ဌ - ṇṭha
+      - ["\u100f", "\u100b"]  # ဏ္ဋ - ṇṭa (Pali retroflex, 2 words in prod DB)
+      - ["\u100b", "\u100c"]  # ဋ္ဌ - ṭṭha (604 words: ဥက္ကဋ္ဌ, ပြဋ္ဌာန်း)
+      - ["\u100d", "\u100e"]  # ဍ္ဎ - ḍḍha (4 words: ကုမဍ္ဎဏီ)
+
+  # Palatal nasal clusters (ñ + palatal stop)
+  palatal_nasal_cluster:
+    enabled: true
+    pairs:
+      - ["\u1009", "\u1005"]  # ဉ္စ - ñca (96 words: ပဉ္စမ fifth)
+      - ["\u1009", "\u1007"]  # ဉ္ဇ - ñja (46 words: သဉ္ဇာ)
+      - ["\u1009", "\u1016"]  # ဉ္ဖ - ñpha (6 words: ပဉ္ဖင်း)
+
+  # Cross-vagga combinations (Pali/Sanskrit)
+  cross_row:
+    enabled: true
+    pairs:
+      - ["\u1000", "\u1010"]  # က္တ - kta
+      - ["\u1000", "\u1014"]  # က္န - kna
+      - ["\u1000", "\u1019"]  # က္မ - kma
+      - ["\u1000", "\u1005"]  # က္စ - kca
+      - ["\u1002", "\u1014"]  # ဂ္န - gna
+      - ["\u1002", "\u1019"]  # ဂ္မ - gma
+      - ["\u1005", "\u1010"]  # စ္တ - cta
+      - ["\u1005", "\u1014"]  # စ္န - cna
+      - ["\u1005", "\u1007"]  # စ္ဇ - cja
+      - ["\u1007", "\u1008"]  # ဇ္ဈ - jjha
+      - ["\u1007", "\u1014"]  # ဇ္န - jna
+      - ["\u1010", "\u1000"]  # တ္က - tka
+      - ["\u1010", "\u1005"]  # တ္စ - tca
+      - ["\u1010", "\u1014"]  # တ္န - tna
+      - ["\u1010", "\u1019"]  # တ္မ - tma
+      - ["\u1012", "\u1014"]  # ဒ္န - dna
+      - ["\u1012", "\u1019"]  # ဒ္မ - dma
+      - ["\u1014", "\u1010"]  # န္တ - nta
+      - ["\u1014", "\u1012"]  # န္ဒ - nda
+      - ["\u1014", "\u1013"]  # န္ဓ - ndha
+      - ["\u1014", "\u1011"]  # န္ထ - ntha
+      - ["\u1014", "\u101e"]  # န္သ - nsa
+      - ["\u1015", "\u1010"]  # ပ္တ - pta
+      - ["\u1015", "\u1014"]  # ပ္န - pna
+      - ["\u1017", "\u1010"]  # ဗ္တ - bta
+      - ["\u1017", "\u1014"]  # ဗ္န - bna
+      - ["\u1019", "\u1015"]  # မ္ပ - mpa
+      - ["\u1019", "\u1017"]  # မ္ဗ - mba
+      - ["\u1019", "\u1018"]  # မ္ဘ - mbha
+      - ["\u1019", "\u1016"]  # မ္ဖ - mpha
+      - ["\u1019", "\u101e"]  # မ္သ - msa
+      - ["\u101e", "\u1010"]  # သ္တ - sta
+      - ["\u101e", "\u1014"]  # သ္န - sna
+      - ["\u101e", "\u1015"]  # သ္ပ - spa
+      - ["\u101e", "\u1019"]  # သ္မ - sma
+
+  # La combinations
+  la_combinations:
+    enabled: true
+    pairs:
+      - ["\u101c", "\u1000"]  # လ္က - lka
+      - ["\u101c", "\u1010"]  # လ္တ - lta
+      - ["\u101c", "\u1015"]  # လ္ပ - lpa
+
+  # Consonant + Ya/Ra/Wa (sonorant operands)
+  sonorant:
+    enabled: true
+    pairs:
+      # Ya as lower operand
+      - ["\u1000", "\u101a"]  # က္ယ - kya
+      - ["\u1010", "\u101a"]  # တ္ယ - tya
+      - ["\u1012", "\u101a"]  # ဒ္ယ - dya
+      - ["\u1014", "\u101a"]  # န္ယ - nya
+      - ["\u1019", "\u101a"]  # မ္ယ - mya
+      - ["\u101e", "\u101a"]  # သ္ယ - sya
+      # Ra as lower operand
+      - ["\u1000", "\u101b"]  # က္ရ - kra
+      - ["\u1010", "\u101b"]  # တ္ရ - tra
+      - ["\u1012", "\u101b"]  # ဒ္ရ - dra
+      - ["\u1014", "\u101b"]  # န္ရ - nra
+      - ["\u1015", "\u101b"]  # ပ္ရ - pra
+      - ["\u1017", "\u101b"]  # ဗ္ရ - bra
+      - ["\u1019", "\u101b"]  # မ္ရ - mra
+      - ["\u101e", "\u101b"]  # သ္ရ - sra
+      # Wa as lower operand
+      - ["\u1010", "\u101d"]  # တ္ဝ - twa
+      - ["\u1012", "\u101d"]  # ဒ္ဝ - dwa
+      - ["\u1014", "\u101d"]  # န္ဝ - nwa
+      - ["\u101e", "\u101d"]  # သ္ဝ - swa
+
+  # Ha as upper or lower operand
+  ha_combinations:
+    enabled: true
+    pairs:
+      - ["\u1000", "\u101f"]  # က္ဟ - kha
+      - ["\u1010", "\u101f"]  # တ္ဟ - tha
+      - ["\u1014", "\u101f"]  # န္ဟ - nha
+      - ["\u101f", "\u1019"]  # ဟ္မ - hma
+      - ["\u1019", "\u101f"]  # မ္ဟ - mha
+
+  # Nasal + stop/aspirated clusters
+  nasal_cluster:
+    enabled: true
+    pairs:
+      - ["\u1004", "\u1000"]  # င္က - ṅka
+      - ["\u1004", "\u1001"]  # င္ခ - ṅkha
+      - ["\u1004", "\u1002"]  # င္ဂ - ṅga
+      - ["\u1004", "\u1003"]  # င္ဃ - ṅgha

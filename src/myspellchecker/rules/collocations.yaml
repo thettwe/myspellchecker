@@ -1,0 +1,104 @@
+# Collocation error detection rules.
+#
+# Each entry specifies a wrong word that forms an unnatural collocation
+# when appearing near certain context words.  The detector scans the
+# segmented text and flags the wrong word when at least one context word
+# is found within the specified window.
+#
+# Fields:
+#   wrong_word    - the word that is wrong in the given context
+#   correct_word  - the correction to suggest
+#   context_words - words whose presence disambiguates
+#   direction     - where to look: "left", "right", or "both"
+#   window        - how many tokens to scan in the given direction
+#   notes         - human-readable description (not used at runtime)
+
+version: "1.0.0"
+category: "collocations"
+
+metadata:
+  description: "Collocation error detection rules for Myanmar"
+  created_date: "2026-03-18"
+
+collocations:
+  # --- rain + intensity ---
+  # "မိုးခိုင်မာစွာ" (rain + firmly) should be "မိုးသည်းထန်စွာ" (rain + heavily)
+  - wrong_word: "ခိုင်မာစွာ"
+    correct_word: "သည်းထန်စွာ"
+    context_words: ["မိုး", "ရွာ"]
+    direction: "both"
+    window: 3
+    notes: "Rain falls heavily, not firmly"
+
+  # --- emergency vs taste ---
+  # "အရသာပေါ်" (taste + on) should be "အရေးပေါ်" (emergency)
+  - wrong_word: "အရသာပေါ်"
+    correct_word: "အရေးပေါ်"
+    context_words: ["အစီအမံ", "ဆောင်ရွက်", "အာဏာပိုင်"]
+    direction: "both"
+    window: 4
+    notes: "Emergency measures, not taste measures"
+
+  # --- precise vs hot (answer context) ---
+  # "ပူသော ဖြေကြားချက်" (hot answer) should be "တိကျသော ဖြေကြားချက်" (precise answer)
+  - wrong_word: "ပူသော"
+    correct_word: "တိကျသော"
+    context_words: ["ဖြေကြားချက်", "ရေးသား"]
+    direction: "right"
+    window: 3
+    notes: "Precise answer, not hot answer"
+
+  # --- fast vs pleasant (system response context) ---
+  # "သာယာစွာ တုံ့ပြန်" (pleasantly respond) should be "မြန်ဆန်စွာ တုံ့ပြန်" (quickly respond)
+  - wrong_word: "သာယာစွာ"
+    correct_word: "မြန်ဆန်စွာ"
+    context_words: ["တုံ့ပြန်", "စနစ်"]
+    direction: "both"
+    window: 3
+    notes: "System responds quickly, not pleasantly"
+
+  # --- explain vs cook (child context) ---
+  # "ချက်ပြတယ်" (cooked/showed) should be "ရှင်းပြတယ်" (explained)
+  - wrong_word: "ချက်ပြ"
+    correct_word: "ရှင်းပြ"
+    context_words: ["ကလေး", "စိတ်ရှည်"]
+    direction: "left"
+    window: 4
+    notes: "Explain to child, not cook for child"
+
+  # --- price rises vs price softens ---
+  # "ပျော့တက်လာသည်" (softly rising) should be "မြင့်တက်လာသည်" (rising high)
+  - wrong_word: "ပျော့တက်"
+    correct_word: "မြင့်တက်"
+    context_words: ["ဈေးနှုန်း", "စျေးကွက်"]
+    direction: "left"
+    window: 4
+    notes: "Prices rise high, not rise soft"
+
+  # --- actively vs firmly (discussion context) ---
+  # "ခိုင်မာစွာ ဆွေးနွေး" (firmly discuss) should be "တက်ကြွစွာ ဆွေးနွေး" (actively discuss)
+  - wrong_word: "ခိုင်မာစွာ"
+    correct_word: "တက်ကြွစွာ"
+    context_words: ["ဆွေးနွေး"]
+    direction: "right"
+    window: 3
+    notes: "Discuss actively, not firmly"
+
+  # --- precise vs tasty (experiment context) ---
+  # "အရသာသော စမ်းသပ်ချက်" (tasty experiment) should be "တိကျသော စမ်းသပ်ချက်" (precise experiment)
+  - wrong_word: "အရသာသော"
+    correct_word: "တိကျသော"
+    context_words: ["စမ်းသပ်ချက်", "ပြုလုပ်"]
+    direction: "right"
+    window: 3
+    notes: "Precise experiments, not tasty experiments"
+
+  # --- clear vs sweet (example/sample context) ---
+  # "ချိုသာသော နမူနာ" (sweet example) should be "ရှင်းလင်းသော နမူနာ" (clear example)
+  - wrong_word: "ချိုသာသော"
+    correct_word: "ရှင်းလင်းသော"
+    context_words: ["နမူနာ", "တင်ပြ"]
+    direction: "right"
+    window: 3
+    notes: "Clear example, not sweet example"
+

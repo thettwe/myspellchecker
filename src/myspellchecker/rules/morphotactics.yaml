@@ -1,0 +1,109 @@
+version: "1.0.0"
+category: "morphotactics"
+
+# Compound word POS pattern rules
+# Controls which POS combinations are valid in compound word synthesis
+#
+# Patterns are validated by CompoundResolver's DP segmentation algorithm.
+# Only pairs matching these patterns (and passing frequency/PMI gates) are
+# accepted as valid compounds.
+#
+# Data source: Production DB analysis (601K words, 99.97% POS-tagged)
+compound_patterns:
+  # Core patterns (original 5)
+  - pattern: "N+N"
+    enabled: true
+    min_confidence: 0.85
+  - pattern: "V+V"
+    enabled: true
+    min_confidence: 0.80
+  - pattern: "N+V"
+    enabled: true
+    min_confidence: 0.80
+  - pattern: "V+N"
+    enabled: true
+    min_confidence: 0.80
+  - pattern: "ADJ+N"
+    enabled: true
+    min_confidence: 0.85
+
+  # Adjective/adverb compounds (DB-attested)
+  - pattern: "N+ADJ"
+    enabled: true
+    min_confidence: 0.80
+    # 600 compounds: နောက်ဆုံး (last), ပထမဆုံး (first), အသစ် (new)
+  - pattern: "ADJ+ADJ"
+    enabled: true
+    min_confidence: 0.75
+    # 156 compounds: ကောင်းကောင်း (well), ရှေးဟောင်း (ancient)
+  - pattern: "V+ADJ"
+    enabled: true
+    min_confidence: 0.75
+    # 165 compounds: သေဆုံး (perish), ကြာမြင့် (prolonged)
+  - pattern: "ADJ+V"
+    enabled: true
+    min_confidence: 0.80
+    # 152 compounds: ဆုံးဖြတ် (decide), ဆုံးရှုံး (lose)
+  - pattern: "ADV+V"
+    enabled: true
+    min_confidence: 0.75
+    # 178 compounds: ကြိုတင် (in advance), ကြိုဆို (welcome)
+
+  # Numeral and adverb compounds
+  - pattern: "TN+N"
+    enabled: true
+    min_confidence: 0.80
+    # 394 compounds: နှစ်နိုင်ငံ (two countries), တစ်နေ့ (one day)
+  - pattern: "ADV+N"
+    enabled: true
+    min_confidence: 0.75
+    # 205 compounds: အမြဲတမ်း (always), မကြာခဏ (frequently)
+  - pattern: "ADV+ADV"
+    enabled: true
+    min_confidence: 0.70
+    # 297 compounds: အလွယ်တကူ (easily), တဖြည်းဖြည်း (gradually)
+
+# Patterns that should never form valid compounds
+# NOTE: P+P, P+N, N+P were previously blocked but removed because
+# the coarse POS taxonomy labels content morphemes as PART, causing
+# false negatives on legitimate high-frequency words:
+#   - နိုင်ငံ (country, f=505K) = PART+N
+#   - နေရာ (place, f=294K) = PART+N
+#   - သူတို့ (they, f=457K) = N+PART
+#   - လေ့လာ (study, f=121K) = PART+PART
+# The frequency floor and DP scoring already prevent spurious splits.
+blocked_patterns: []
+
+# Minimum corpus frequency floors per pattern type
+frequency_floors:
+  "N+N": 10
+  "V+V": 20
+  "N+V": 15
+  "V+N": 15
+  "ADJ+N": 10
+  "N+ADJ": 10
+  "ADJ+ADJ": 15
+  "V+ADJ": 15
+  "ADJ+V": 15
+  "ADV+V": 15
+  "TN+N": 10
+  "ADV+N": 15
+  "ADV+ADV": 20
+
+# Morphotactic compatibility bonuses for compound DP scoring.
+# Increases score for morphotactically well-formed compound types.
+# Higher bonus = more likely to be a real compound (N+N most common).
+morphotactic_bonuses:
+  "N+N": 0.10
+  "ADJ+N": 0.08
+  "N+ADJ": 0.08
+  "V+V": 0.05
+  "N+V": 0.03
+  "V+N": 0.03
+  "ADJ+ADJ": 0.05
+  "V+ADJ": 0.03
+  "ADJ+V": 0.05
+  "ADV+V": 0.03
+  "TN+N": 0.05
+  "ADV+N": 0.03
+  "ADV+ADV": 0.05

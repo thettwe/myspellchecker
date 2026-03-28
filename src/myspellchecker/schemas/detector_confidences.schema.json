@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/detector-confidences/v1.0",
+  "title": "Myanmar Detector Confidences Schema",
+  "description": "JSON Schema for validating detector_confidences.yaml - Confidence scores for text-level detectors",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "confidences"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "detector_confidences",
+      "description": "Category type (must be 'detector_confidences')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "confidences": {
+      "description": "Confidence scores keyed by error type. Higher values indicate more confident detection.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    }
+  }
+}

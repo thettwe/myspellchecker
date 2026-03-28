@@ -1,0 +1,64 @@
+# Python build artifacts
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+temp_build/
+
+# Cython compiled outputs
+*.so
+*.pyd
+*.cpp
+
+# Virtual environments
+.env
+.venv
+venv/
+venv*/
+
+# Testing & coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.json
+.pytest_cache/
+.hypothesis/
+
+# Linting
+.ruff_cache/
+
+# Benchmark results (keep benchmark scripts)
+benchmarks/results/
+!benchmarks/*.py
+
+# Generated database files
+*.db
+data/
+
+# N-gram checkpoint (pipeline resume state)
+ngram_checkpoint/
+
+# ONNX shape inference temp files
+*.data
+sym_shape_infer_temp.onnx
+
+# OS files
+.DS_Store
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*~
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Agent/editor framework directories
+.claude/
+
+# Project instructions (local only)
+CLAUDE.md
