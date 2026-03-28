@@ -3,8 +3,22 @@ name: CI
 on:
   push:
     branches: [develop]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "benchmarks/**"
+      - "setup.py"
+      - "pyproject.toml"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "benchmarks/**"
+      - "setup.py"
+      - "pyproject.toml"
+      - ".github/workflows/ci.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
