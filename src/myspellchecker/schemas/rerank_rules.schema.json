@@ -1,0 +1,498 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/rerank-rules/v1.0",
+  "title": "Myanmar Rerank Rules Schema",
+  "description": "JSON Schema for validating rerank_rules.yaml - Data-driven suggestion reranking, promotion, and injection rules",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version (must be '1.0.0')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "rerank_rules",
+      "description": "Category type (must be 'rerank_rules')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "simple_injections": {
+      "description": "Direct error-to-target mappings for suggestion injection",
+      "type": "array",
+      "items": { "$ref": "#/definitions/simple_injection_entry" }
+    },
+
+    "contextual_promotions": {
+      "description": "Context-aware promotions with sentence cues and fallback defaults",
+      "type": "array",
+      "items": { "$ref": "#/definitions/contextual_promotion_entry" }
+    },
+
+    "semantic_context_injections": {
+      "description": "Injections requiring all sentence cues to be present (AND logic)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/semantic_context_injection_entry" }
+    },
+
+    "disambiguation_promotions": {
+      "description": "Promotions based on existing suggestion list contents",
+      "type": "array",
+      "items": { "$ref": "#/definitions/disambiguation_promotion_entry" }
+    },
+
+    "error_type_injections": {
+      "description": "Injections conditioned on a specific error type",
+      "type": "array",
+      "items": { "$ref": "#/definitions/error_type_injection_entry" }
+    },
+
+    "delete_on_error_type": {
+      "description": "Error types that receive empty-string injection (mark for deletion)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/delete_on_error_type_entry" }
+    },
+
+    "surface_rewrites": {
+      "description": "Fix malformed suggestions in the suggestion list",
+      "type": "array",
+      "items": { "$ref": "#/definitions/surface_rewrite_entry" }
+    },
+
+    "post_normalizers": {
+      "description": "Late-stage fixes that run after all other rules",
+      "type": "array",
+      "items": { "$ref": "#/definitions/post_normalizer_entry" }
+    },
+
+    "sequential_particle_noun_exclusions": {
+      "description": "Noun stems that exclude sequential particle promotion",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "school_context_tail_cues": {
+      "description": "Tail cues for school context promotion",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "second_person_pronouns": {
+      "description": "Second-person pronouns for tense_mismatch modal question detection",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "targeted_top1_hints": {
+      "description": "Error text to ordered target list mappings for top-1 recovery",
+      "type": "array",
+      "items": { "$ref": "#/definitions/targeted_top1_hint_entry" }
+    },
+
+    "parametric_rules": {
+      "description": "Algorithmic rules parameterized via YAML with template executors",
+      "type": "array",
+      "items": { "$ref": "#/definitions/parametric_rule_entry" }
+    }
+  },
+
+  "definitions": {
+    "simple_injection_entry": {
+      "description": "Direct error-to-target injection rule",
+      "type": "object",
+      "required": ["error", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Normalized error text to match"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correct suggestion to inject"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the correction"
+        },
+        "match_mode": {
+          "type": "string",
+          "enum": ["exact", "startswith", "endswith"],
+          "description": "How to match the error text (default: exact)"
+        },
+        "no_suggestions": {
+          "type": "boolean",
+          "description": "Only inject when no existing suggestions are present"
+        },
+        "error_type": {
+          "type": "string",
+          "description": "Restrict injection to this error type"
+        }
+      }
+    },
+
+    "contextual_promotion_entry": {
+      "description": "Context-aware promotion with sentence cues and a default fallback",
+      "type": "object",
+      "required": ["error", "default_target"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Normalized error text to match"
+        },
+        "cues": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/contextual_cue" },
+          "description": "Ordered list of context cues (first match wins)"
+        },
+        "default_target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Fallback target when no cue matches"
+        },
+        "default_rule_id": {
+          "type": "string",
+          "description": "Rule ID for the default target"
+        },
+        "promote_if_needed": {
+          "type": "boolean",
+          "description": "Whether to promote the target if already in suggestions"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the correction"
+        }
+      }
+    },
+
+    "contextual_cue": {
+      "description": "A sentence context cue for contextual promotions",
+      "type": "object",
+      "required": ["target"],
+      "additionalProperties": false,
+      "properties": {
+        "sentence_contains": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Any of these must be present in the sentence (OR logic)"
+        },
+        "sentence_contains_all": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "All of these must be present in the sentence (AND logic)"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target suggestion when this cue matches"
+        },
+        "rule_id": {
+          "type": "string",
+          "description": "Rule ID for this cue"
+        }
+      }
+    },
+
+    "semantic_context_injection_entry": {
+      "description": "Injection requiring all sentence cues (AND logic), for semantic_error type",
+      "type": "object",
+      "required": ["sentence_requires_all", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "sentence_requires_all": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "All of these must be present in the sentence"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target suggestion to inject"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the injection"
+        }
+      }
+    },
+
+    "disambiguation_promotion_entry": {
+      "description": "Promotion or injection based on existing suggestion list contents",
+      "type": "object",
+      "required": ["error", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Normalized error text to match"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target suggestion to promote or inject"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the disambiguation"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["promote", "inject"],
+          "description": "Whether to promote existing or inject new (default: promote)"
+        },
+        "suggestion_contains": {
+          "type": "string",
+          "description": "Target must be present in suggestions (exact match)"
+        },
+        "suggestion_contains_any": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Any of these must be present in suggestions"
+        },
+        "suggestion_contains_all": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "All of these must be present in suggestions"
+        },
+        "suggestion_prefix": {
+          "type": "string",
+          "description": "Any suggestion must start with this prefix"
+        },
+        "suggestion_exact": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Suggestions list must equal this exactly"
+        },
+        "top1_was": {
+          "type": "string",
+          "description": "Top-1 suggestion before this rule was this value"
+        },
+        "sentence_contains": {
+          "type": "string",
+          "description": "Sentence must contain this text"
+        }
+      }
+    },
+
+    "error_type_injection_entry": {
+      "description": "Injection conditioned on matching a specific error type",
+      "type": "object",
+      "required": ["error", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Normalized error text to match"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target suggestion to inject"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the injection"
+        },
+        "error_type": {
+          "type": "string",
+          "description": "Error type that must match for this rule"
+        },
+        "match_mode": {
+          "type": "string",
+          "enum": ["exact", "startswith", "endswith"],
+          "description": "How to match the error text (default: exact)"
+        },
+        "sentence_contains": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Any of these must be present in the sentence (OR logic)"
+        },
+        "sentence_contains_all": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "All of these must be present in the sentence (AND logic)"
+        },
+        "token_contains": {
+          "type": "string",
+          "description": "Token at error position must contain this text"
+        },
+        "suggestion_exact": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Suggestions list must equal this exactly"
+        },
+        "no_suggestions": {
+          "type": "boolean",
+          "description": "Only inject when no existing suggestions are present"
+        },
+        "second_person_context": {
+          "type": "boolean",
+          "description": "Requires second-person pronouns in sentence"
+        },
+        "rule_id": {
+          "type": "string",
+          "description": "Rule ID for tracking"
+        }
+      }
+    },
+
+    "delete_on_error_type_entry": {
+      "description": "Error type that gets empty-string injection when no suggestions exist",
+      "type": "object",
+      "required": ["error_type"],
+      "additionalProperties": false,
+      "properties": {
+        "error_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error type to match for deletion"
+        },
+        "rule_id": {
+          "type": "string",
+          "description": "Rule ID for tracking"
+        }
+      }
+    },
+
+    "surface_rewrite_entry": {
+      "description": "Fix malformed suggestion text in the suggestion list",
+      "type": "object",
+      "required": ["trigger_error", "malformed", "corrected"],
+      "additionalProperties": false,
+      "properties": {
+        "trigger_error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error text that triggers this rewrite"
+        },
+        "malformed": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Malformed suggestion text to find"
+        },
+        "corrected": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Corrected replacement text"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the rewrite"
+        }
+      }
+    },
+
+    "parametric_rule_entry": {
+      "description": "Algorithmic rule parameterized via YAML with a template executor",
+      "type": "object",
+      "required": ["id", "template", "params"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique rule identifier"
+        },
+        "template": {
+          "type": "string",
+          "enum": ["trailing_context_promote", "stem_exclusion_promote", "tail_cue_promote", "token_context_inject"],
+          "description": "Template function to execute"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this rule is active (default: true)"
+        },
+        "params": {
+          "type": "object",
+          "description": "Template-specific parameters (validated by the template function)"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the rule"
+        }
+      }
+    },
+
+    "targeted_top1_hint_entry": {
+      "description": "Error text to ordered target list for top-1 recovery via promotion or morpheme injection",
+      "type": "object",
+      "required": ["error", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error text to match (normalized at load time)"
+        },
+        "targets": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Ordered list of target suggestions to try"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["diacritic", "medial", "stacking", "vowel", "zawgyi", "homophone", "compound", "consonant", "zwsp"],
+          "description": "Category for grouping/analytics"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the correction"
+        }
+      }
+    },
+
+    "post_normalizer_entry": {
+      "description": "Late-stage fix that runs after all other rerank rules",
+      "type": "object",
+      "required": ["error", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error text to match"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target suggestion"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["promote", "inject"],
+          "description": "Whether to promote existing or inject new"
+        },
+        "top1_was": {
+          "type": "string",
+          "description": "Only apply if top-1 was this value before"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English description of the normalization"
+        }
+      }
+    }
+  }
+}

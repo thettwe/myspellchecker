@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/semantic-rules/v1.0",
+  "title": "Myanmar Semantic Rules Schema",
+  "description": "JSON Schema for validating semantic_rules.yaml - Semantic validation rules for agent implausibility and classifier agreement",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "implausible_subjects", "animacy_hints"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "semantic_rules",
+      "description": "Category type (must be 'semantic_rules')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "implausible_subjects": {
+      "description": "Inanimate nouns paired with human-only actions. Keys are inanimate subject words.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/implausible_subject_entry"
+      }
+    },
+
+    "animacy_hints": {
+      "description": "Animacy hints for classifier mismatch fallback",
+      "type": "object",
+      "required": ["animate", "inanimate"],
+      "additionalProperties": false,
+      "properties": {
+        "animate": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Words known to be animate (default classifier: ဦး)"
+        },
+        "inanimate": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Words known to be inanimate (default classifier: လုံး)"
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "implausible_subject_entry": {
+      "description": "An implausible subject rule mapping an inanimate noun to its correction and action cues",
+      "type": "object",
+      "required": ["suggestion", "action_cues"],
+      "additionalProperties": false,
+      "properties": {
+        "suggestion": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The corrected (animate) subject to suggest"
+        },
+        "action_cues": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Action tokens that trigger the implausibility error"
+        }
+      }
+    }
+  }
+}

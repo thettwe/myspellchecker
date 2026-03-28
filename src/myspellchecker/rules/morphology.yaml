@@ -1,0 +1,788 @@
+# Myanmar Morphology Rules - Version 1.0
+# Morphological rules for prefixes, verb/noun/adverb suffixes
+#
+# This file contains morphological rules organized by type:
+# - Prefixes (nominalizing, causative, negative, adjectival)
+# - Verb suffixes (statement, future, past, aspect markers)
+# - Noun suffixes (plural markers, case markers)
+# - Adverb suffixes (manner adverbs)
+#
+# Expanded with Burmese prefix patterns for OOV recovery
+#
+# Schema: https://myspellchecker.dev/schemas/morphology/v1.0
+
+version: "1.0.0"
+category: "morphology"
+description: "Myanmar morphological rules for prefixes and suffixes"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-01-25"
+  total_entries: 98
+  source: "Expanded with Burmese prefix patterns"
+
+# ============================================================
+# MORPHOLOGICAL RULES
+# Prefixes and suffixes with grammatical functions
+# ============================================================
+
+# ============================================================
+# PREFIXES
+# Common Burmese prefixes for word formation
+# ============================================================
+prefixes:
+  # Nominalizing Prefixes
+  nominalizing:
+    - prefix: "အ"
+      category: "nominalizer"
+      formality: "neutral"
+      meaning: "Forms nouns from verbs/adjectives"
+      min_root_length: 2
+      pos_output: "N"
+      examples:
+        - input: "လုပ်"
+          output: "အလုပ်"
+          meaning: "work → job/work (noun)"
+        - input: "ရောင်"
+          output: "အရောင်"
+          meaning: "shine → color"
+        - input: "ရေး"
+          output: "အရေး"
+          meaning: "write → matter/importance"
+        - input: "သုံး"
+          output: "အသုံး"
+          meaning: "use → usage"
+      confidence: 0.90
+
+    - prefix: "အ"
+      category: "abstract_noun"
+      formality: "formal"
+      meaning: "Forms abstract nouns"
+      min_root_length: 2
+      pos_output: "N"
+      examples:
+        - input: "မြင့်"
+          output: "အမြင့်"
+          meaning: "high → height"
+        - input: "ကြီး"
+          output: "အကြီး"
+          meaning: "big → size"
+      confidence: 0.85
+
+  # Causative/Derivational Prefixes
+  causative:
+    - prefix: "ပြ"
+      category: "causative"
+      formality: "neutral"
+      meaning: "Causative/intensive verb formation"
+      min_root_length: 2
+      pos_output: "V"
+      examples:
+        - input: "သ"
+          output: "ပြသ"
+          meaning: "know → show/exhibit"
+      confidence: 0.70
+
+    # Note: ပ as a verb derivation prefix is rare and mostly lexicalized.
+    # ပျော် is monomorphemic (not ပ + ျော်, since medials cannot begin syllables).
+    # No productive modern examples exist for this prefix.
+    # Entry removed — ပ-prefix derivations are not productive in modern Myanmar.
+
+    - prefix: "တ"
+      category: "numeral_contraction"
+      formality: "colloquial"
+      meaning: "Colloquial contraction of တစ် (one)"
+      min_root_length: 1
+      pos_output: "NUM"
+      examples:
+        - input: "ခါ"
+          output: "တခါ"
+          meaning: "once/one time (colloquial for တစ်ခါ)"
+      confidence: 0.50
+
+  # Negative/Prohibitive Prefixes
+  negative:
+    - prefix: "မ"
+      category: "negation"
+      formality: "neutral"
+      meaning: "Negative prefix for verbs"
+      min_root_length: 1
+      pos_output: "V"
+      requires_suffix: ["ဘူး", "ပါဘူး", "ဘူးဘူး"]  # Usually needs negative ending
+      examples:
+        - input: "သွား"
+          output: "မသွား"
+          meaning: "go → not go"
+        - input: "စား"
+          output: "မစား"
+          meaning: "eat → not eat"
+        - input: "လာ"
+          output: "မလာ"
+          meaning: "come → not come"
+      confidence: 0.95
+
+    - prefix: "မ"
+      category: "prohibitive"
+      formality: "neutral"
+      meaning: "Prohibitive (don't)"
+      min_root_length: 1
+      pos_output: "V"
+      requires_suffix: ["နဲ့", "ပါနဲ့"]  # Prohibitive requires နဲ့
+      examples:
+        - input: "သွားနဲ့"
+          output: "မသွားနဲ့"
+          meaning: "don't go"
+      confidence: 0.95
+
+  # Adjectival/Adverbial Prefixes
+  adjectival:
+    - prefix: "အလွန်"
+      category: "intensifier"
+      formality: "neutral"
+      meaning: "Very/extremely"
+      min_root_length: 2
+      pos_output: "ADV"
+      examples:
+        - input: "ကောင်း"
+          output: "အလွန်ကောင်း"
+          meaning: "very good"
+      confidence: 0.90
+
+    - prefix: "အရမ်း"
+      category: "intensifier"
+      formality: "colloquial"
+      meaning: "Very/extremely (colloquial)"
+      min_root_length: 2
+      pos_output: "ADV"
+      examples:
+        - input: "ကောင်း"
+          output: "အရမ်းကောင်း"
+          meaning: "very good"
+      confidence: 0.90
+
+    - prefix: "အနည်းငယ်"
+      category: "diminutive"
+      formality: "neutral"
+      meaning: "A little/slightly"
+      min_root_length: 2
+      pos_output: "ADV"
+      examples:
+        - input: "ပူ"
+          output: "အနည်းငယ်ပူ"
+          meaning: "slightly hot"
+      confidence: 0.85
+
+    - prefix: "အတော်"
+      category: "moderator"
+      formality: "neutral"
+      meaning: "Quite/fairly"
+      min_root_length: 2
+      pos_output: "ADV"
+      examples:
+        - input: "ကောင်း"
+          output: "အတော်ကောင်း"
+          meaning: "quite good"
+      confidence: 0.85
+
+    # Note: မြင့်မား is an adjective meaning "high/lofty", not a prefix.
+    # Myanmar adjectives follow nouns (e.g., တန်ဖိုးမြင့်မား "value is high").
+    # When used attributively, it requires marker သော (e.g., မြင့်မားသော တန်ဖိုး).
+    # Removed from prefixes — use အလွန် or အရမ်း for intensifier prefixes instead.
+
+  # Demonstrative/Deictic Prefixes
+  demonstrative:
+    - prefix: "ဤ"
+      category: "demonstrative"
+      formality: "formal"
+      meaning: "This (formal)"
+      min_root_length: 1
+      pos_output: "DET"
+      examples:
+        - input: "စာအုပ်"
+          output: "ဤစာအုပ်"
+          meaning: "this book"
+      confidence: 0.95
+
+    - prefix: "ထို"
+      category: "demonstrative"
+      formality: "formal"
+      meaning: "That (formal)"
+      min_root_length: 1
+      pos_output: "DET"
+      examples:
+        - input: "လူ"
+          output: "ထိုလူ"
+          meaning: "that person"
+      confidence: 0.95
+
+    - prefix: "ဒီ"
+      category: "demonstrative"
+      formality: "colloquial"
+      meaning: "This (colloquial)"
+      min_root_length: 1
+      pos_output: "DET"
+      examples:
+        - input: "စာအုပ်"
+          output: "ဒီစာအုပ်"
+          meaning: "this book"
+      confidence: 0.95
+
+    - prefix: "ဟို"
+      category: "demonstrative"
+      formality: "colloquial"
+      meaning: "That (colloquial, distant)"
+      min_root_length: 1
+      pos_output: "DET"
+      examples:
+        - input: "အိမ်"
+          output: "ဟိုအိမ်"
+          meaning: "that house (over there)"
+      confidence: 0.90
+
+  # Numeral/Quantifier Prefixes
+  quantifier:
+    - prefix: "တစ်"
+      category: "numeral"
+      formality: "neutral"
+      meaning: "One/a/an"
+      min_root_length: 1
+      pos_output: "NUM"
+      examples:
+        - input: "ခု"
+          output: "တစ်ခု"
+          meaning: "one (thing)"
+        - input: "ယောက်"
+          output: "တစ်ယောက်"
+          meaning: "one person"
+      confidence: 0.95
+
+    - prefix: "နှစ်"
+      category: "numeral"
+      formality: "neutral"
+      meaning: "Two"
+      min_root_length: 1
+      pos_output: "NUM"
+      examples:
+        - input: "ခု"
+          output: "နှစ်ခု"
+          meaning: "two (things)"
+      confidence: 0.95
+
+    - prefix: "သုံး"
+      category: "numeral"
+      formality: "neutral"
+      meaning: "Three"
+      min_root_length: 1
+      pos_output: "NUM"
+      examples:
+        - input: "ယောက်"
+          output: "သုံးယောက်"
+          meaning: "three people"
+      confidence: 0.95
+
+# ============================================================
+# SUFFIXES
+# Verb, noun, and adverb suffixes with grammatical functions
+# ============================================================
+suffixes:
+  # Verb Suffixes
+  verb_suffixes:
+    - suffix: "တယ်"
+      category: "statement"
+      formality: "colloquial"
+      meaning: "Statement ending"
+      examples: ["သွားတယ်", "စားတယ်"]
+
+    - suffix: "ပါတယ်"
+      category: "statement_polite"
+      formality: "polite"
+      meaning: "Polite statement ending"
+      examples: ["သွားပါတယ်", "စားပါတယ်"]
+
+    - suffix: "သည်"
+      category: "statement"
+      formality: "formal"
+      meaning: "Formal statement ending"
+      examples: ["သွားသည်", "စားသည်"]
+
+    - suffix: "ပါသည်"
+      category: "statement_polite"
+      formality: "polite"
+      meaning: "Formal polite statement"
+      examples: ["သွားပါသည်", "စားပါသည်"]
+
+    - suffix: "မယ်"
+      category: "future"
+      formality: "colloquial"
+      meaning: "Future marker"
+      examples: ["သွားမယ်", "စားမယ်"]
+
+    - suffix: "ပါမယ်"
+      category: "future_polite"
+      formality: "polite"
+      meaning: "Polite future"
+      examples: ["သွားပါမယ်", "စားပါမယ်"]
+
+    - suffix: "မည်"
+      category: "future"
+      formality: "formal"
+      meaning: "Formal future"
+      examples: ["သွားမည်", "စားမည်"]
+
+    - suffix: "ခဲ့"
+      category: "past"
+      formality: "neutral"
+      meaning: "Past tense"
+      examples: ["သွားခဲ့", "စားခဲ့"]
+
+    - suffix: "နေ"
+      category: "progressive"
+      formality: "neutral"
+      meaning: "Progressive aspect"
+      examples: ["သွားနေ", "စားနေ"]
+
+    - suffix: "ပြီ"
+      category: "completion"
+      formality: "neutral"
+      meaning: "Completion marker"
+      examples: ["သွားပြီ", "စားပြီ"]
+
+    - suffix: "ပြီး"
+      category: "completion_continuation"
+      formality: "neutral"
+      meaning: "Completion + continuation"
+      examples: ["သွားပြီး", "စားပြီး"]
+
+    - suffix: "နိုင်"
+      category: "ability"
+      formality: "neutral"
+      meaning: "Ability marker"
+      examples: ["သွားနိုင်", "စားနိုင်"]
+
+    - suffix: "ရ"
+      category: "permission"
+      formality: "neutral"
+      meaning: "Permission marker"
+      examples: ["သွားရ", "စားရ"]
+
+    - suffix: "တတ်"
+      category: "habitual"
+      formality: "neutral"
+      meaning: "Habitual/know how"
+      examples: ["သွားတတ်", "စားတတ်"]
+
+    - suffix: "ကြ"
+      category: "plural"
+      formality: "neutral"
+      meaning: "Plural/honorific"
+      examples: ["သွားကြ", "စားကြ"]
+
+    - suffix: "ခြင်း"
+      category: "nominalization"
+      formality: "formal"
+      meaning: "Nominalization"
+      examples: ["သွားခြင်း", "စားခြင်း"]
+
+    - suffix: "မှု"
+      category: "nominalization"
+      formality: "formal"
+      meaning: "Abstract nominalization"
+      examples: ["ကူညီမှု", "ပံ့ပိုးမှု"]
+
+    - suffix: "ရန်"
+      category: "infinitive"
+      formality: "formal"
+      meaning: "Purpose/infinitive"
+      examples: ["သွားရန်", "စားရန်"]
+
+    - suffix: "ဖို့"
+      category: "infinitive"
+      formality: "colloquial"
+      meaning: "Purpose (colloquial)"
+      examples: ["သွားဖို့", "စားဖို့"]
+
+    - suffix: "အောင်"
+      category: "purpose"
+      formality: "neutral"
+      meaning: "Until/so that"
+      examples: ["အောင်မြင်အောင်", "ကောင်းအောင်"]
+
+    - suffix: "လို့"
+      category: "quotative"
+      formality: "colloquial"
+      meaning: "Because/quotative"
+      examples: ["နာလို့", "ပြောလို့"]
+
+    - suffix: "ကြောင့်"
+      category: "causative"
+      formality: "neutral"
+      meaning: "Because of"
+      examples: ["မိုးရွာကြောင့်", "နာကြောင့်"]
+
+    - suffix: "ကြောင်း"
+      category: "complementizer"
+      formality: "neutral"
+      meaning: "That (complement)"
+      examples: ["သွားကြောင်း", "ကောင်းကြောင်း"]
+
+    - suffix: "ရင်"
+      category: "conditional"
+      formality: "colloquial"
+      meaning: "If/when"
+      examples: ["သွားရင်", "ကောင်းရင်"]
+
+    - suffix: "လျှင်"
+      category: "conditional"
+      formality: "formal"
+      meaning: "If/when (formal)"
+      examples: ["သွားလျှင်", "ကောင်းလျှင်"]
+
+    # Direction and compound verb suffixes
+    - suffix: "သွား"
+      category: "direction"
+      formality: "neutral"
+      meaning: "Go/away (direction)"
+      examples: ["ယူသွား", "ပြန်သွား"]
+
+    - suffix: "နေသည်"
+      category: "progressive"
+      formality: "formal"
+      meaning: "Progressive (formal)"
+      examples: ["သွားနေသည်"]
+
+    - suffix: "သည့်"
+      category: "relative"
+      formality: "formal"
+      meaning: "Relative clause"
+      examples: ["သွားသည့်"]
+
+    - suffix: "ထား"
+      category: "resultative"
+      formality: "neutral"
+      meaning: "Keep/have done"
+      examples: ["ယူထား"]
+
+    - suffix: "စေ"
+      category: "causative"
+      formality: "neutral"
+      meaning: "Cause to happen"
+      examples: ["သွားစေ"]
+
+    - suffix: "ပေး"
+      category: "benefactive"
+      formality: "neutral"
+      meaning: "Give/for someone"
+      examples: ["ယူပေး"]
+
+  # Noun Suffixes
+  noun_suffixes:
+    - suffix: "များ"
+      category: "plural"
+      formality: "formal"
+      meaning: "Plural marker"
+      examples: ["စာအုပ်များ", "ကလေးများ"]
+
+    - suffix: "တို့"
+      category: "plural"
+      formality: "colloquial"
+      meaning: "Plural (colloquial)"
+      examples: ["သူတို့", "ကျွန်တော်တို့"]
+
+    - suffix: "က"
+      category: "case"
+      formality: "neutral"
+      meaning: "Subject marker"
+      examples: ["သူက", "ကျွန်တော်က"]
+
+    - suffix: "ကို"
+      category: "case"
+      formality: "neutral"
+      meaning: "Object marker"
+      examples: ["သူ့ကို", "စာအုပ်ကို"]
+
+    - suffix: "မှာ"
+      category: "locative"
+      formality: "neutral"
+      meaning: "Location (at/in)"
+      examples: ["အိမ်မှာ", "ရုံးမှာ"]
+
+    - suffix: "မှ"
+      category: "ablative"
+      formality: "neutral"
+      meaning: "From"
+      examples: ["အိမ်မှ", "ရန်ကုန်မှ"]
+
+    - suffix: "သို့"
+      category: "allative"
+      formality: "formal"
+      meaning: "To/toward"
+      examples: ["အိမ်သို့", "ရုံးသို့"]
+
+    - suffix: "နဲ့"
+      category: "comitative"
+      formality: "colloquial"
+      meaning: "With"
+      examples: ["သူနဲ့", "စာအုပ်နဲ့"]
+
+    - suffix: "နှင့်"
+      category: "comitative"
+      formality: "formal"
+      meaning: "With (formal)"
+      examples: ["သူနှင့်", "စာအုပ်နှင့်"]
+
+    - suffix: "ရဲ့"
+      category: "possessive"
+      formality: "colloquial"
+      meaning: "Possessive"
+      examples: ["သူ့ရဲ့", "ကျွန်တော့်ရဲ့"]
+
+    - suffix: "၏"
+      category: "possessive"
+      formality: "formal"
+      meaning: "Possessive (formal)"
+      examples: ["သူ၏", "ကျွန်တော်၏"]
+
+    - suffix: "သည်"
+      category: "topic"
+      formality: "formal"
+      meaning: "Topic marker"
+      examples: ["ဤသည်", "မြန်မာပြည်သည်"]
+
+    - suffix: "ဟာ"
+      category: "topic"
+      formality: "colloquial"
+      meaning: "Topic (colloquial)"
+      examples: ["ဒါဟာ", "သူဟာ"]
+
+    - suffix: "အတွက်"
+      category: "benefactive"
+      formality: "neutral"
+      meaning: "For"
+      examples: ["သူ့အတွက်", "ကျွန်တော့်အတွက်"]
+
+    - suffix: "လို"
+      category: "similative"
+      formality: "neutral"
+      meaning: "Like/as"
+      examples: ["သူလို", "ဒီလို"]
+
+    - suffix: "ထက်"
+      category: "comparative"
+      formality: "neutral"
+      meaning: "Than"
+      examples: ["သူထက်", "အရင်ထက်"]
+
+    - suffix: "ပဲ"
+      category: "emphasis"
+      formality: "neutral"
+      meaning: "Only/just"
+      examples: ["ဒါပဲ", "သူပဲ"]
+
+    - suffix: "တော့"
+      category: "emphasis"
+      formality: "colloquial"
+      meaning: "Then/emphasis"
+      examples: ["ဒါတော့", "သူတော့"]
+
+    - suffix: "ပေါ့"
+      category: "softener"
+      formality: "colloquial"
+      meaning: "Softener"
+      examples: ["ဒါပေါ့", "သူပေါ့"]
+
+    - suffix: "လေ"
+      category: "emphasis"
+      formality: "neutral"
+      meaning: "Emphasis"
+      examples: ["သူလေ", "ဒါလေ"]
+
+    # Additional noun suffixes
+    - suffix: "ရေး"
+      category: "affair"
+      formality: "neutral"
+      meaning: "Matter/affair"
+      examples: ["ကျန်းမာရေး"]
+
+    - suffix: "ရာ"
+      category: "place"
+      formality: "neutral"
+      meaning: "Place/abstract noun"
+      examples: ["နေရာ"]
+
+    - suffix: "တွေ"
+      category: "plural"
+      formality: "colloquial"
+      meaning: "Plural marker (colloquial)"
+      examples: ["လူတွေ"]
+
+    - suffix: "သူ"
+      category: "agent"
+      formality: "neutral"
+      meaning: "Person (doer)"
+      examples: ["လုပ်သူ"]
+
+    - suffix: "သား"
+      category: "native"
+      formality: "neutral"
+      meaning: "Native of/person from"
+      examples: ["ရွာသား"]
+
+    - suffix: "သမား"
+      category: "professional"
+      formality: "neutral"
+      meaning: "Professional"
+      examples: ["လက်သမား"]
+
+    - suffix: "ချက်"
+      category: "point"
+      formality: "neutral"
+      meaning: "Point/fact"
+      examples: ["အချက်"]
+
+    - suffix: "ပုံ"
+      category: "manner"
+      formality: "neutral"
+      meaning: "Manner/appearance"
+      examples: ["နေပုံ"]
+
+    - suffix: "အချက်"
+      category: "point"
+      formality: "neutral"
+      meaning: "Point/item"
+      examples: ["အချက်"]
+
+    - suffix: "လုံး"
+      category: "whole"
+      formality: "neutral"
+      meaning: "Whole/entirety"
+      examples: ["တစ်လုံး"]
+
+    - suffix: "မျိုး"
+      category: "kind"
+      formality: "neutral"
+      meaning: "Kind/type"
+      examples: ["အမျိုး"]
+
+    - suffix: "ယောက်"
+      category: "classifier"
+      formality: "neutral"
+      meaning: "Classifier for people"
+      examples: ["တစ်ယောက်"]
+
+    - suffix: "ခု"
+      category: "classifier"
+      formality: "neutral"
+      meaning: "Classifier for items"
+      examples: ["တစ်ခု"]
+
+    - suffix: "ဦး"
+      category: "classifier"
+      formality: "polite"
+      meaning: "Classifier for persons"
+      examples: ["တစ်ဦး"]
+
+  # Adverb Suffixes
+  adverb_suffixes:
+    - suffix: "စွာ"
+      category: "manner"
+      formality: "formal"
+      meaning: "Manner adverb (-ly)"
+      examples: ["လျင်မြန်စွာ", "ကောင်းစွာ", "ဂရုတစိုက်စွာ"]
+
+    - suffix: "သဖြင့်"
+      category: "causative"
+      formality: "formal"
+      meaning: "Therefore/because"
+      examples: ["ထိုသဖြင့်", "ဤသဖြင့်"]
+
+    - suffix: "သောကြောင့်"
+      category: "causative"
+      formality: "formal"
+      meaning: "Because (formal)"
+      examples: ["ကောင်းသောကြောင့်", "မကောင်းသောကြောင့်"]
+
+    - suffix: "လျက်"
+      category: "continuous"
+      formality: "formal"
+      meaning: "While doing"
+      examples: ["စားလျက်", "သွားလျက်"]
+
+    - suffix: "တိုင်း"
+      category: "distributive"
+      formality: "neutral"
+      meaning: "Every time"
+      examples: ["နေ့တိုင်း", "အခါတိုင်း"]
+
+    - suffix: "လောက်"
+      category: "approximative"
+      formality: "neutral"
+      meaning: "About/approximately"
+      examples: ["ဆယ်လောက်", "ရက်လောက်"]
+
+    - suffix: "ပေါ်"
+      category: "locative"
+      formality: "neutral"
+      meaning: "On/upon/surface"
+      examples: ["စားပွဲပေါ်", "အပေါ်"]
+      # Note: ပေါ် is a postposition meaning "on/above/surface", not an intensive.
+      # The reduplicative form ပေါ်ပေါ် can express "quite" but that is a different pattern.
+
+    - suffix: "ပါးပါး"
+      category: "manner"
+      formality: "colloquial"
+      meaning: "Gently/lightly"
+      examples: ["ပြောပါးပါး", "လုပ်ပါးပါး"]
+
+    - suffix: "လေးလေး"
+      category: "manner"
+      formality: "colloquial"
+      meaning: "Small/gentle"
+      examples: ["ပြောလေးလေး", "လုပ်လေးလေး"]
+
+    - suffix: "ပြတ်ပြတ်"
+      category: "manner"
+      formality: "colloquial"
+      meaning: "Clearly/decisively"
+      examples: ["ပြောပြတ်ပြတ်", "လုပ်ပြတ်ပြတ်"]
+
+    - suffix: "သေသေချာချာ"
+      category: "manner"
+      formality: "colloquial"
+      meaning: "Carefully/thoroughly"
+      examples: ["လုပ်သေသေချာချာ", "ကြည့်သေသေချာချာ"]
+
+    # Additional adverb suffixes
+    - suffix: "ပြန်"
+      category: "repetition"
+      formality: "neutral"
+      meaning: "Again/back"
+      examples: ["လုပ်ပြန်"]
+
+    - suffix: "လိုလို"
+      category: "similative"
+      formality: "neutral"
+      meaning: "Like/as if"
+      examples: ["ကောင်းလိုလို"]
+
+    - suffix: "အလိုက်"
+      category: "accordance"
+      formality: "neutral"
+      meaning: "According to"
+      examples: ["ဖြစ်အလိုက်"]
+
+    - suffix: "ချင်း"
+      category: "reciprocal"
+      formality: "neutral"
+      meaning: "Together/same"
+      examples: ["လူချင်း"]
+
+    - suffix: "တကူ"
+      category: "special"
+      formality: "neutral"
+      meaning: "Specially/particularly"
+      examples: ["တမင်တကူ"]
+
+# ============================================================
+# METADATA
+# Version history and statistics
+# ============================================================

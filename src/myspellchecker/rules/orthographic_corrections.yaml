@@ -1,0 +1,393 @@
+# Myanmar Orthographic Corrections - Version 1.0
+# Orthographic correction rules consolidated from hardcoded Python dicts
+#
+# This file contains orthographic correction rules for Myanmar text:
+# - Medial consonant confusion (unconditional and contextual)
+# - Aukmyit (dot-below) confusion
+# - Vowel reorder errors (pre-normalization)
+# - Colloquial contractions
+# - Incomplete Pali/Sanskrit stacking
+#
+# IMPORTANT: When `correct` is a list, ordering matters — first entry is
+# the preferred suggestion. This affects suggestion ranking in the UI.
+#
+# Schema: https://myspellchecker.dev/schemas/orthographic-corrections/v1.0
+
+version: "1.0.0"
+category: "orthographic_corrections"
+description: "Orthographic correction rules for medial confusion, vowel reorder, and stacking errors"
+
+metadata:
+  created_date: "2026-03-08"
+  last_updated: "2026-03-18"
+  total_entries: 58
+  source: "Consolidated from hardcoded dicts in core/spellchecker.py"
+  notes: "List-valued 'correct' fields are order-sensitive (first = preferred suggestion)"
+
+# ============================================================
+# MEDIAL CONFUSION — UNCONDITIONAL
+# Wrong medial form is ALWAYS incorrect regardless of context.
+# ============================================================
+medial_confusion_unconditional:
+  # --- Ya-pin (ျ) vs Ya-yit (ြ) ---
+
+  - incorrect: "ကြေးဇူး"
+    correct: "ကျေးဇူး"
+    meaning: "gratitude (not copper-value)"
+    confidence: 0.95
+
+  - incorrect: "ကျိုးစား"
+    correct: "ကြိုးစား"
+    meaning: "try hard (not broken+eat)"
+    confidence: 0.95
+
+  - incorrect: "ဖေဆို"
+    correct:
+      - "ဖြေ"
+      - "ဖြေဆို"
+    meaning: "answer/respond (morpheme first)"
+    confidence: 0.90
+
+  - incorrect: "ကြောင်းသား"
+    correct:
+      - "ကျောင်းသား"
+      - "ကျောင်း"
+    meaning: "student (not reason+person)"
+    confidence: 0.95
+
+  - incorrect: "ကြောင်းပို့"
+    correct:
+      - "ကျောင်း"
+      - "ကျောင်းပို့"
+    meaning: "school bus/send to school (morpheme first)"
+    confidence: 0.90
+
+  - incorrect: "ကျန်မာ"
+    correct:
+      - "ကျန်း"
+      - "ကျန်းမာ"
+    meaning: "healthy (morpheme first)"
+    confidence: 0.90
+
+  - incorrect: "စာဖက်"
+    correct:
+      - "ဖတ်"
+      - "စာဖတ်"
+    meaning: "read (morpheme first)"
+    confidence: 0.90
+
+  - incorrect: "ထွက်ခြာ"
+    correct:
+      - "ခွာ"
+      - "ထွက်ခွာ"
+    meaning: "leave/depart (morpheme first)"
+    confidence: 0.90
+
+  - incorrect: "ပျည်ထောင်စု"
+    correct: "ပြည်ထောင်စု"
+    meaning: "union/federation"
+    confidence: 0.95
+
+  # v2.3 — new medial confusion entries
+  - incorrect: "ကျေညာ"
+    correct: "ကြေညာ"
+    meaning: "announce/declare (ya-yit→ya-pin: ကျေ→ကြေ)"
+    confidence: 0.95
+
+  - incorrect: "ပျောင်း"
+    correct: "ပြောင်း"
+    meaning: "change/move (ya-yit→ya-pin: ပျောင်း→ပြောင်း)"
+    confidence: 0.95
+
+  - incorrect: "ပျည်နယ်"
+    correct: "ပြည်နယ်"
+    meaning: "state/region"
+    confidence: 0.95
+
+  - incorrect: "ပျည်တွင်း"
+    correct: "ပြည်တွင်း"
+    meaning: "domestic/internal"
+    confidence: 0.95
+
+  - incorrect: "ပျည်ပ"
+    correct: "ပြည်ပ"
+    meaning: "foreign/external"
+    confidence: 0.95
+
+  - incorrect: "ပျည်"
+    correct: "ပြည်"
+    meaning: "country/land (wrong medial ျ→ြ)"
+    confidence: 0.95
+
+  # --- Double medial ျြ (invalid) → single medial ---
+
+  - incorrect: "ကျြန်တော်"
+    correct:
+      - "ကျွန်တော်"
+      - "ကျွန်"
+    meaning: "I (polite male) — invalid double medial ျြ→ွ"
+    confidence: 0.95
+
+  - incorrect: "ကျြန်"
+    correct: "ကျွန်"
+    meaning: "servant/slave — invalid double medial ျြ→ွ"
+    confidence: 0.95
+
+  - incorrect: "မျြန်မာ့"
+    correct: "မြန်မာ့"
+    meaning: "Myanmar's (possessive)"
+    confidence: 0.95
+
+  - incorrect: "မျြန်မာ"
+    correct: "မြန်မာ"
+    meaning: "Myanmar"
+    confidence: 0.95
+
+  - incorrect: "မျြန်မြန်"
+    correct: "မြန်မြန်"
+    meaning: "quickly/fast (reduplication)"
+    confidence: 0.95
+
+  - incorrect: "မျြန်"
+    correct: "မြန်"
+    meaning: "fast — double medial ျြ→ြ"
+    confidence: 0.95
+
+  - incorrect: "မျြတ်စွာ"
+    correct: "မြတ်စွာ"
+    meaning: "noble/precious+suffix"
+    confidence: 0.95
+
+  - incorrect: "မျြတ်"
+    correct: "မြတ်"
+    meaning: "noble/precious — double medial ျြ→ြ"
+    confidence: 0.95
+
+  # --- Vowel / anusvara errors in compounds ---
+
+  - incorrect: "ကွန်ပျုတာ"
+    correct: "ကွန်ပျူတာ"
+    meaning: "computer (vowel u→uu)"
+    confidence: 0.90
+
+  - incorrect: "ပတ်ဝန်ကျင်"
+    correct: "ပတ်ဝန်းကျင်"
+    meaning: "environment (missing anusvara)"
+    confidence: 0.90
+
+  - incorrect: "သိချင်း"
+    correct:
+      - "သီချင်း"
+      - "သီ"
+    meaning: "song (morpheme first)"
+    confidence: 0.90
+
+  - incorrect: "ကုညီ"
+    correct: "ကူညီ"
+    meaning: "help (vowel u→uu)"
+    confidence: 0.90
+
+  - incorrect: "ဟင်သီးဟင်ရွက်"
+    correct: "ဟင်းသီးဟင်းရွက်"
+    meaning: "vegetables (double missing anusvara)"
+    confidence: 0.90
+
+  - incorrect: "ပုဂံခတ်"
+    correct:
+      - "ခေတ်"
+      - "ပုဂံခေတ်"
+    meaning: "Bagan era (morpheme first)"
+    confidence: 0.85
+
+  # --- Loanword misspellings ---
+
+  - incorrect: "ကွန်ပြူတာ"
+    correct: "ကွန်ပျူတာ"
+    meaning: "computer (medial ြ→ျ: standard loanword spelling)"
+    confidence: 0.95
+
+  - incorrect: "ပရောဂျတ်"
+    correct: "ပရောဂျက်"
+    meaning: "project (wrong final: တ်→က်)"
+    confidence: 0.90
+
+  - incorrect: "အင်တာနတ်"
+    correct: "အင်တာနက်"
+    meaning: "internet (wrong final: တ်→က်)"
+    confidence: 0.90
+
+  - incorrect: "ဘက်ဂျက်"
+    correct: "ဘတ်ဂျက်"
+    meaning: "budget (wrong consonant: က→တ)"
+    confidence: 0.90
+
+  - incorrect: "ဒီမိုကရီစီ"
+    correct: "ဒီမိုကရေစီ"
+    meaning: "democracy (wrong vowel: ီ→ေ)"
+    confidence: 0.90
+
+  - incorrect: "ဆော့ဝ်ဖဲ"
+    correct: "ဆော့ဖ်ဝဲ"
+    meaning: "software (syllable reorder + vowel)"
+    confidence: 0.90
+
+  - incorrect: "ဗီတမင်"
+    correct: "ဗီတာမင်"
+    meaning: "vitamin (missing vowel AA)"
+    confidence: 0.90
+
+  - incorrect: "ဟိုတေလ်"
+    correct: "ဟိုတယ်"
+    meaning: "hotel (wrong form: standard is ဟိုတယ်)"
+    confidence: 0.90
+
+  # --- Vowel / diacritic confusion in common words ---
+
+  - incorrect: "ဒီဇိင်း"
+    correct: "ဒီဇိုင်း"
+    meaning: "design (missing vowel ု)"
+    confidence: 0.90
+
+  - incorrect: "စိးပွားရေး"
+    correct: "စီးပွားရေး"
+    meaning: "economy/business (wrong vowel: ိ→ီ)"
+    confidence: 0.90
+
+  - incorrect: "ကျာင်း"
+    correct: "ကျောင်း"
+    meaning: "school (missing vowel ော→ာ)"
+    confidence: 0.90
+
+  - incorrect: "ကြိးကြပ်"
+    correct: "ကြီးကြပ်"
+    meaning: "supervise (wrong vowel: ိ→ီ)"
+    confidence: 0.90
+
+  - incorrect: "ခွင့်ပြူချက်"
+    correct: "ခွင့်ပြုချက်"
+    meaning: "permission (wrong vowel: ူ→ု)"
+    confidence: 0.90
+
+  - incorrect: "မျို့တော်"
+    correct: "မြို့တော်"
+    meaning: "capital city (medial ျ→ြ)"
+    confidence: 0.95
+
+  # --- Virama / stacking confusion ---
+
+  - incorrect: "ကိစ်စ"
+    correct: "ကိစ္စ"
+    meaning: "matter/affair (asat→virama for Pali stacking)"
+    confidence: 0.90
+
+  # --- Miscellaneous unconditional ---
+
+  - incorrect: "ပြော့ပြ"
+    correct:
+      - "ပြော"
+      - "ပြောပြ"
+    meaning: "tell/explain (morpheme first)"
+    confidence: 0.85
+
+  - incorrect: "အအေး"
+    correct: "အေး"
+    meaning: "cold/cool (double prefix အ)"
+    confidence: 0.90
+
+  - incorrect: "ကွောင်း"
+    correct: "ကောင်း"
+    meaning: "good/well (extra wa-hswe)"
+    confidence: 0.90
+
+  - incorrect: "ပြီးနှင့်"
+    correct: "ပြီးတော့"
+    meaning: "then/after that (formal conjunction in colloquial)"
+    confidence: 0.80
+
+  - incorrect: "နေ့ လည်"
+    correct: "နေ့လည်"
+    meaning: "afternoon (broken compound with space)"
+    confidence: 0.90
+
+  - incorrect: "ဖက်နေ"
+    correct:
+      - "ဖတ်"
+      - "ဖတ်နေ"
+    meaning: "reading (progressive) — morpheme first"
+    confidence: 0.90
+
+# ============================================================
+# MEDIAL CONFUSION — CONTEXTUAL
+# Triggered ONLY when followed by specific tokens.
+# ============================================================
+medial_confusion_contextual:
+  - incorrect: "ကြောင်း"
+    correct: "ကျောင်း"
+    followed_by: ["ကို", "သား", "ပို့", "အုပ်", "တိုက်"]
+    meaning: "school (not reason) — context: followed by school-related word"
+    confidence: 0.90
+
+  - incorrect: "ကြး"
+    correct: "ကျေး"
+    followed_by: ["ဇူး"]
+    meaning: "gratitude (ကျေးဇူး) — context: followed by ဇူး"
+    confidence: 0.90
+
+# ============================================================
+# AUKMYIT (DOT-BELOW) CONFUSION
+# Missing or extra dot-below (့) creates a valid but wrong word.
+# Context-dependent corrections.
+# ============================================================
+aukmyit_confusion:
+  # Missing dot-below
+  - incorrect: "ထည်"
+    correct: "ထည့်"
+    followed_by: ["လိုက်", "ပေး", "သွင်း", "ထား", "ပါ", "မယ်"]
+    meaning: "put in (missing dot-below)"
+    confidence: 0.85
+
+  # Extra dot-below
+  - incorrect: "ပြော့"
+    correct: "ပြော"
+    followed_by: ["ကြား", "ပြ", "ဆို", "ခွင့်", "ရေး", "သည်", "ခဲ့", "မည်", "ပါ"]
+    meaning: "speak (extra dot-below)"
+    confidence: 0.85
+
+# ============================================================
+# VOWEL REORDER
+# Pre-normalization vowel ordering errors.
+# Detected before Unicode normalization silently fixes them.
+# ============================================================
+vowel_reorder:
+  - incorrect: "ကေါင်း"
+    correct:
+      - "ကောင်း"
+      - "ခေါင်း"
+    meaning: "good/well OR head (ambiguous vowel reorder)"
+    confidence: 0.85
+
+  - incorrect: "ေကာင်း"
+    correct:
+      - "ကောင်း"
+    meaning: "good/well (Zawgyi-style leading ေ)"
+    confidence: 0.85
+
+# ============================================================
+# COLLOQUIAL CONTRACTIONS
+# Informal/casual spelling → standard form.
+# ============================================================
+colloquial_contractions:
+  - incorrect: "ကျနော်"
+    correct: "ကျွန်တော်"
+    meaning: "I (polite male) — casual contraction"
+    confidence: 0.85
+
+# ============================================================
+# STACKING COMPLETIONS
+# Incomplete Pali/Sanskrit consonant stacking.
+# ============================================================
+stacking_completions:
+  - incorrect: "ဘဏ္ာ"
+    correct: "ဘဏ္ဍာ"
+    meaning: "treasury (missing stacked consonant)"
+    confidence: 0.90

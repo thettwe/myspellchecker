@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/classifiers/v1.0",
+  "title": "Myanmar Classifiers Schema",
+  "description": "JSON Schema for validating classifiers.yaml - Myanmar numeral classifiers organized by category",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "classifiers"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version (must be '1.0.0')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "classifiers",
+      "description": "Category type (must be 'classifiers')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "classifiers": {
+      "description": "Classifier entries organized by semantic category (people, animals, objects, etc.)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/classifier_entry" }
+      }
+    }
+  },
+
+  "definitions": {
+    "classifier_entry": {
+      "description": "Individual classifier word with type, description, and compatible noun examples",
+      "type": "object",
+      "required": ["word", "type", "description"],
+      "additionalProperties": false,
+
+      "properties": {
+        "word": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Myanmar classifier word"
+        },
+
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Classifier subtype (e.g., general, polite, sacred, round, flat)"
+        },
+
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "English description of the classifier"
+        },
+
+        "examples": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Compatible noun examples that use this classifier"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/confusable-pairs/v1.0",
+  "title": "Myanmar Confusable Pairs Schema",
+  "description": "JSON Schema for validating confusable_pairs.yaml - Curated confusable word pairs for MLM-based real-word error detection",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "pairs"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "confusable_pairs",
+      "description": "Category type (must be 'confusable_pairs')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "pairs": {
+      "description": "Curated confusable word pairs grouped by confusion type",
+      "type": "array",
+      "items": { "$ref": "#/definitions/confusable_pair_entry" }
+    },
+
+    "exempt_pairs": {
+      "description": "Word pairs that should NOT be flagged as confusable errors",
+      "type": "array",
+      "items": { "$ref": "#/definitions/exempt_pair_entry" }
+    },
+
+    "exempt_suffix_pairs": {
+      "description": "Suffix pairs where the ending should not trigger confusable detection",
+      "type": "array",
+      "items": { "$ref": "#/definitions/exempt_suffix_pair_entry" }
+    }
+  },
+
+  "definitions": {
+    "confusable_pair_entry": {
+      "description": "A curated confusable word pair",
+      "type": "object",
+      "required": ["word", "correction", "confusion_type", "bidirectional"],
+      "additionalProperties": false,
+      "properties": {
+        "word": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The commonly written (incorrect in context) form"
+        },
+        "correction": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The contextually correct form"
+        },
+        "confusion_type": {
+          "type": "string",
+          "description": "Type of confusion (near_synonym routes to higher threshold tier)",
+          "examples": [
+            "near_synonym",
+            "medial_nasal_compound",
+            "vowel_compound",
+            "verb_frame",
+            "compound_verb",
+            "compound_word"
+          ]
+        },
+        "bidirectional": {
+          "type": "boolean",
+          "description": "Whether the reverse pair should also be registered"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Annotation explaining the confusion pattern"
+        }
+      }
+    },
+
+    "exempt_pair_entry": {
+      "description": "A word pair exempt from confusable detection",
+      "type": "object",
+      "required": ["word", "variant", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "word": {
+          "type": "string",
+          "minLength": 1,
+          "description": "One form of the pair"
+        },
+        "variant": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The variant that should not be suggested as correction"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Explanation for the exemption"
+        }
+      }
+    },
+
+    "exempt_suffix_pair_entry": {
+      "description": "A suffix pair exempt from confusable detection",
+      "type": "object",
+      "required": ["suffix_a", "suffix_b", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "suffix_a": {
+          "type": "string",
+          "minLength": 1,
+          "description": "First suffix in the pair"
+        },
+        "suffix_b": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Second suffix in the pair"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Explanation for the exemption"
+        }
+      }
+    }
+  }
+}

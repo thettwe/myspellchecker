@@ -1,0 +1,46 @@
+version: "1.0.0"
+category: "medial_swap"
+description: "Medial consonant swap pairs for candidate generation"
+
+# Medial swap pairs — generate candidates by substituting one for another.
+# Bidirectional: if from→to is listed, to→from is also generated.
+# Weight: higher = more likely confusion (affects suggestion confidence).
+swap_pairs:
+  # Ya-pin vs Ya-yit (dominant medial confusion)
+  - from: "\u103B"   # ျ (ya-pin)
+    to: "\u103C"      # ြ (ya-yit)
+    label: "ya_pin_ya_yit"
+    weight: 1.0
+
+  # Wa-hswe vs Ha-htoe (ordering confusion)
+  - from: "\u103D"   # ွ (wa-hswe)
+    to: "\u103E"      # ှ (ha-htoe)
+    label: "wa_ha"
+    weight: 0.8
+
+# Medial insertion — adding a medial that may be missing.
+# Each entry generates a variant with the medial inserted after each
+# compatible consonant that doesn't already have a medial.
+insertions:
+  - medial: "\u103E"  # ှ (ha-htoe) — common insertion (မာ→မှာ, နာ→နှာ)
+    label: "ha_htoe_insert"
+    weight: 0.9
+
+  - medial: "\u103D"  # ွ (wa-hswe)
+    label: "wa_insert"
+    weight: 0.7
+
+# Medial deletion — removing an extra medial.
+deletions:
+  - medial: "\u103E"  # ှ (ha-htoe)
+    label: "ha_htoe_delete"
+    weight: 0.8
+
+  - medial: "\u103D"  # ွ (wa-hswe)
+    label: "wa_delete"
+    weight: 0.7
+
+# Anusvara (ံ U+1036) insertion/deletion
+anusvara:
+  insert_weight: 0.85
+  delete_weight: 0.85

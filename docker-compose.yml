@@ -1,0 +1,85 @@
+# =============================================================================
+# Myanmar Spell Checker - Docker Compose Configuration
+# =============================================================================
+#
+# Usage:
+#   CLI:          docker compose --profile cli run --rm cli check "မြန်မာစာ"
+#   CLI build:    docker compose --profile cli run --rm cli build --sample
+#   Tests:        docker compose --profile test run --rm test
+#   Development:  docker compose --profile dev up dev
+#   Build images: docker compose build
+#
+# Note: This library has no built-in web server. The API lives in the
+# sarsit-webapp repo which consumes this library via FastAPI.
+#
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # CLI Tool
+  # ---------------------------------------------------------------------------
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: cli
+      args:
+        PYTHON_VERSION: "3.11"
+    image: myspellchecker:cli
+    volumes:
+      - ./data:/app/data
+      - ./input:/app/input:ro
+      - ./output:/app/output
+    profiles:
+      - cli
+
+  # ---------------------------------------------------------------------------
+  # Test Runner
+  # ---------------------------------------------------------------------------
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        PYTHON_VERSION: "3.11"
+    image: myspellchecker:dev
+    volumes:
+      - ./tests:/app/tests:ro
+      - ./data:/app/data:ro
+    command: python -m pytest tests/ -v --cov=myspellchecker
+    profiles:
+      - test
+
+  # ---------------------------------------------------------------------------
+  # Development (mounts source for hot reload, uses pure Python fallbacks)
+  # ---------------------------------------------------------------------------
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        PYTHON_VERSION: "3.11"
+    image: myspellchecker:dev
+    container_name: myspellchecker-dev
+    volumes:
+      # Mount source code for hot reload (overrides pip-installed package)
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./data:/app/data:ro
+    environment:
+      # Intentionally set: enables hot reload of source changes at the cost
+      # of Cython extensions (pure Python fallbacks used instead)
+      - PYTHONPATH=/app/src
+      - LOG_LEVEL=DEBUG
+      - PYTHONDONTWRITEBYTECODE=1
+    profiles:
+      - dev
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  default:
+    name: myspellchecker-network

@@ -1,0 +1,280 @@
+# Myanmar Aspect Marker Rules - Version 1.0
+# Aspect markers indicating temporal/aspectual properties
+#
+# This file contains:
+# - Aspect markers with properties (category, description, etc.)
+# - Valid combinations
+# - Invalid sequences
+# - Common typos
+#
+# Schema: https://myspellchecker.dev/schemas/aspects/v1.0
+
+version: "1.0.0"
+category: "aspects"
+description: "Myanmar aspect marker definitions and rules"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2025-12-30"
+
+# ============================================================
+# ASPECT MARKER DEFINITIONS
+# ============================================================
+markers:
+  - marker: "ပြီ"
+    category: "completion"
+    description: "Completion - action is done"
+    can_combine: true
+    register: "neutral"
+    is_final: true
+
+  - marker: "ပြီး"
+    category: "completion"
+    description: "After completion / and then"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "နေ"
+    category: "progressive"
+    description: "Progressive - action is ongoing"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "တတ်"
+    category: "habitual"
+    description: "Habitual - usually does"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "ထား"
+    category: "resultative"
+    description: "Resultative - kept in state"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "လာ"
+    category: "direction"
+    description: "Direction coming - motion toward"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "သွား"
+    category: "direction"
+    description: "Direction going - motion away"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "ချင်"
+    category: "desiderative"
+    description: "Desiderative - want to"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "နိုင်"
+    category: "potential"
+    description: "Potential - can/able to"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "ရ"
+    category: "potential"
+    description: "Permitted/possible"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "လိုက်"
+    category: "immediate"
+    description: "Immediate - follow action"
+    can_combine: true
+    register: "neutral"
+
+  - marker: "ဖူး"
+    category: "experiential"
+    description: "Experiential - have ever done"
+    can_combine: true
+    register: "neutral"
+    is_final: true
+
+  - marker: "ခဲ့"
+    category: "past"
+    description: "Past tense - action completed in the past"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "သေး"
+    category: "continuative"
+    description: "Still/yet - action or state continues"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "မိ"
+    category: "accidental"
+    description: "Accidental/unintentional - accidentally did"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "ကုန်"
+    category: "exhaustive"
+    description: "Exhaustive/completive - did completely/all"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "ပစ်"
+    category: "dismissive"
+    description: "Forceful/dismissive completion - did away/forcefully"
+    can_combine: true
+    register: "neutral"
+    is_final: false
+
+  - marker: "လျက်"
+    category: "simultaneous"
+    description: "Simultaneously / while doing (formal)"
+    can_combine: true
+    register: "formal"
+    is_final: false
+
+# ============================================================
+# VALID COMBINATIONS
+# Format: [first, second]
+# ============================================================
+combinations:
+  - sequence: ["ပြီး", "လာ"]
+    description: "completed and came"
+  - sequence: ["ပြီး", "သွား"]
+    description: "completed and went"
+  - sequence: ["နေ", "ပြီ"]
+    description: "was doing and completed"
+  - sequence: ["တတ်", "နိုင်"]
+    description: "usually can"
+  - sequence: ["ချင်", "နိုင်"]
+    description: "may want to"
+  - sequence: ["လာ", "ပြီ"]
+    description: "has come (completed)"
+  - sequence: ["သွား", "ပြီ"]
+    description: "has gone (completed)"
+  - sequence: ["ထား", "နိုင်"]
+    description: "can keep/maintain"
+  - sequence: ["ထား", "ပြီ"]
+    description: "has kept (completed)"
+  - sequence: ["နိုင်", "ထား"]
+    description: "was able to keep"
+  - sequence: ["လိုက်", "လာ"]
+    description: "followed coming"
+  - sequence: ["လိုက်", "သွား"]
+    description: "followed going"
+  - sequence: ["ဖူး", "ပြီ"]
+    description: "have already experienced"
+  - sequence: ["ခဲ့", "ပြီ"]
+    description: "already did (past completed)"
+  - sequence: ["ခဲ့", "ဖူး"]
+    description: "have ever done (experiential past)"
+  - sequence: ["နေ", "သေး"]
+    description: "still doing (progressive continuative)"
+  - sequence: ["ထား", "သေး"]
+    description: "still kept (resultative continuative)"
+  - sequence: ["ခဲ့", "သေး"]
+    description: "was still (past continuative)"
+  - sequence: ["မိ", "ပြီ"]
+    description: "accidentally did (completed)"
+  - sequence: ["မိ", "သွား"]
+    description: "accidentally went/did away"
+  - sequence: ["ကုန်", "ပြီ"]
+    description: "all used up / completely done"
+  - sequence: ["ကုန်", "ပြီး"]
+    description: "after completely finishing"
+  - sequence: ["ပစ်", "လိုက်"]
+    description: "threw/did away (following action)"
+  - sequence: ["ပစ်", "ပြီ"]
+    description: "thrown away / forcefully done (completed)"
+
+# ============================================================
+# INVALID SEQUENCES
+# ============================================================
+invalid_sequences:
+  - sequence: ["ပြီ", "ပြီ"]
+    reason: "Duplicate completion marker"
+  - sequence: ["နေ", "နေ"]
+    reason: "Duplicate progressive marker"
+  - sequence: ["တတ်", "တတ်"]
+    reason: "Duplicate habitual marker"
+  - sequence: ["ပြီ", "နေ"]
+    reason: "Completion cannot precede progressive"
+  - sequence: ["ချင်", "ဖူး"]
+    reason: "Desire cannot precede experiential"
+  - sequence: ["ခဲ့", "ခဲ့"]
+    reason: "Duplicate past marker"
+  - sequence: ["သေး", "သေး"]
+    reason: "Duplicate continuative marker"
+  - sequence: ["လျက်", "လျက်"]
+    reason: "Duplicate simultaneous marker"
+  - sequence: ["သေး", "ပြီ"]
+    reason: "Contradictory: 'still' cannot precede 'completed'"
+  - sequence: ["ဖူး", "နေ"]
+    reason: "Experiential cannot precede progressive"
+  - sequence: ["ပြီး", "ပြီး"]
+    reason: "Duplicate sequential marker"
+  - sequence: ["မိ", "မိ"]
+    reason: "Duplicate accidental marker"
+  - sequence: ["ကုန်", "ကုန်"]
+    reason: "Duplicate exhaustive marker"
+  - sequence: ["ပစ်", "ပစ်"]
+    reason: "Duplicate dismissive marker"
+
+# ============================================================
+# TYPOS
+# ============================================================
+typos:
+  - incorrect: "ပြီ:"
+    correct: "ပြီး"
+  - incorrect: "ပြီ့"
+    correct: "ပြီး"
+  - incorrect: "ပြိ"
+    correct: "ပြီ"
+  # Removed: "ပရီ" → "ပြီ" was incorrect.
+  # "ပရီ" is the standard Myanmar transliteration of "Paris" — a valid word, not a typo.
+  # Removed: "နဲ" → "နေ" was incorrect.
+  # "နဲ" is a valid particle meaning "with" (colloquial form of "နှင့်") or "a little" — not a typo for "နေ".
+  - incorrect: "တတ"
+    correct: "တတ်"
+  # Removed: "တက်" → "တတ်" was incorrect.
+  # "တက်" (with Ka, U+1000) is a valid common verb meaning "to climb/attend".
+  # "တတ်" (with Ta, U+1010) is the habitual aspect marker — different word entirely.
+  - incorrect: "ထာ"
+    correct: "ထား"
+  - incorrect: "ထာ:"
+    correct: "ထား"
+  - incorrect: "လာ:"
+    correct: "လာ"
+  - incorrect: "သွာ"
+    correct: "သွား"
+  - incorrect: "သွာ:"
+    correct: "သွား"
+  - incorrect: "ချင"
+    correct: "ချင်"
+  - incorrect: "နိင်"
+    correct: "နိုင်"
+  - incorrect: "နုိင်"
+    correct: "နိုင်"
+  - incorrect: "လိက်"
+    correct: "လိုက်"
+  - incorrect: "လုိက်"
+    correct: "လိုက်"
+  - incorrect: "ဖူ"
+    correct: "ဖူး"
+  - incorrect: "ခဲ"
+    correct: "ခဲ့"
+  - incorrect: "ခဲ့:"
+    correct: "ခဲ့"
+  - incorrect: "သေ:"
+    correct: "သေး"
+  - incorrect: "ကုန"
+    correct: "ကုန်"
+  - incorrect: "ပစ"
+    correct: "ပစ်"

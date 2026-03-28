@@ -1,0 +1,490 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/grammar-rules/v1.0",
+  "title": "Myanmar Grammar Rules Schema",
+  "description": "JSON Schema for validating grammar_rules.yaml - Syntactic grammar validation rules",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "rules"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "grammar_rules",
+      "description": "Category type (must be 'grammar_rules')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "structure_conjunctions": {
+      "description": "Clause-linking conjunctions for sentence structure detection (G03)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suffix_safe": {
+      "description": "Unambiguous sentence-final suffixes for structure detection",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "word_order_verb_endings": {
+      "description": "Verb endings for word-order inversion detection (G04)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rules": {
+      "description": "Grammar validation rules organized by type",
+      "type": "object",
+      "required": [
+        "invalid_sequences",
+        "required_particles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sentence_start_constraints": {
+          "description": "Constraints on particles that can appear at sentence start",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/boundary_constraint_entry"
+          }
+        },
+        "sentence_end_constraints": {
+          "description": "Constraints on particles that can appear at sentence end",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/boundary_constraint_entry"
+          }
+        },
+        "invalid_sequences": {
+          "description": "Invalid POS tag sequences",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/sequence_rule_entry"
+          }
+        },
+        "required_particles": {
+          "description": "Required particles in certain contexts",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/requirement_rule_entry"
+          }
+        },
+        "sentence_final_required": {
+          "description": "Sentence-final particle requirements",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/requirement_rule_entry"
+          }
+        },
+        "particle_chains": {
+          "description": "Valid and invalid particle chain patterns",
+          "type": "object",
+          "properties": {
+            "valid_chains": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/particle_chain_entry"
+              }
+            },
+            "invalid_chains": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/invalid_particle_chain_entry"
+              }
+            }
+          }
+        },
+        "register_rules": {
+          "description": "Formal/colloquial register consistency rules",
+          "type": "object",
+          "properties": {
+            "formal_endings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "colloquial_endings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/register_check_entry"
+              }
+            }
+          }
+        },
+        "clause_linkage": {
+          "description": "Clause linkage patterns (causal, conditional, etc.)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/clause_rule_entry"
+          }
+        },
+        "negation_rules": {
+          "description": "Negation construction rules",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/clause_rule_entry"
+          }
+        },
+        "classifier_rules": {
+          "description": "Classifier construction rules",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/clause_rule_entry"
+          }
+        }
+      }
+    },
+    "particle_tags": {
+      "description": "Mapping of Myanmar particles to their granular POS tags (P_SUBJ, P_OBJ, P_LOC, etc.)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^P_[A-Z_]+$",
+        "description": "Granular particle POS tag"
+      }
+    },
+    "interjection_tags": {
+      "description": "Mapping of Myanmar interjections to their POS tags (INT)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^INT$",
+        "description": "Interjection POS tag"
+      }
+    }
+  },
+  "definitions": {
+    "sequence_rule_entry": {
+      "description": "Invalid POS sequence rule",
+      "type": "object",
+      "required": [
+        "pattern",
+        "severity",
+        "message"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "POS sequence pattern",
+          "examples": [
+            "V-V",
+            "P-P",
+            "N-N"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Error message shown to user"
+        },
+        "severity": {
+          "$ref": "_common.schema.json#/definitions/error_severity"
+        },
+        "suggestion": {
+          "type": "string",
+          "description": "Suggested correction or action"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "examples": {
+          "type": "object",
+          "description": "Examples showing incorrect/ambiguous and correct/better forms",
+          "properties": {
+            "incorrect": {
+              "type": "string"
+            },
+            "correct": {
+              "type": "string"
+            },
+            "ambiguous": {
+              "type": "string"
+            },
+            "better": {
+              "type": "string"
+            },
+            "translation": {
+              "type": "string"
+            }
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words that are exceptions to this rule (e.g., auxiliary verbs in V-V patterns)"
+        }
+      }
+    },
+    "requirement_rule_entry": {
+      "description": "Required particle rule",
+      "type": "object",
+      "required": [
+        "pattern",
+        "severity",
+        "message"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "POS sequence pattern when this rule applies",
+          "examples": [
+            "N-V",
+            "V$"
+          ]
+        },
+        "required_one_of": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of acceptable particles/elements (at least one required)"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Error message shown to user"
+        },
+        "severity": {
+          "$ref": "_common.schema.json#/definitions/error_severity"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "examples": {
+          "type": "object",
+          "description": "Examples showing questionable and better forms",
+          "properties": {
+            "questionable": {
+              "type": "string"
+            },
+            "better": {
+              "type": "string"
+            },
+            "translation": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "boundary_constraint_entry": {
+      "description": "Sentence boundary constraint rule",
+      "type": "object",
+      "required": [
+        "forbidden_tags",
+        "severity",
+        "message"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "forbidden_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "POS tags that are forbidden at this boundary"
+        },
+        "forbidden_words": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific words that are forbidden at this boundary"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Error message shown to user"
+        },
+        "severity": {
+          "$ref": "_common.schema.json#/definitions/error_severity"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        }
+      }
+    },
+    "particle_chain_entry": {
+      "description": "Valid particle chain entry",
+      "type": "object",
+      "required": [
+        "particles",
+        "meaning"
+      ],
+      "properties": {
+        "particles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sequence of particles in the chain"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "Semantic meaning of the chain"
+        },
+        "example": {
+          "type": "string",
+          "description": "Example usage in Myanmar"
+        },
+        "translation": {
+          "type": "string",
+          "description": "English translation of example"
+        }
+      }
+    },
+    "invalid_particle_chain_entry": {
+      "description": "Invalid particle chain entry",
+      "type": "object",
+      "required": [
+        "particles",
+        "severity",
+        "message"
+      ],
+      "properties": {
+        "particles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sequence of particles that form an invalid chain"
+        },
+        "severity": {
+          "$ref": "_common.schema.json#/definitions/error_severity"
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message for this invalid chain"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "suggestion": {
+          "type": "string",
+          "description": "Suggested correction"
+        },
+        "examples": {
+          "type": "object",
+          "properties": {
+            "incorrect": {
+              "type": "string"
+            },
+            "correct": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "register_check_entry": {
+      "description": "Register consistency check rule",
+      "type": "object",
+      "required": [
+        "pattern",
+        "severity",
+        "message"
+      ],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Pattern name for the check"
+        },
+        "severity": {
+          "$ref": "_common.schema.json#/definitions/error_severity"
+        },
+        "message": {
+          "type": "string",
+          "description": "Message for the register issue"
+        },
+        "suggestion": {
+          "type": "string",
+          "description": "Suggested correction"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "examples": {
+          "type": "object",
+          "properties": {
+            "mixed": {
+              "type": "string"
+            },
+            "formal": {
+              "type": "string"
+            },
+            "colloquial": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "clause_rule_entry": {
+      "description": "Clause/construction rule entry",
+      "type": "object",
+      "required": [
+        "pattern",
+        "severity",
+        "message"
+      ],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Pattern for the clause/construction"
+        },
+        "severity": {
+          "$ref": "_common.schema.json#/definitions/error_severity"
+        },
+        "message": {
+          "type": "string",
+          "description": "Description of the construction"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "examples": {
+          "type": "object",
+          "properties": {
+            "correct": {
+              "type": "string"
+            },
+            "translation": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

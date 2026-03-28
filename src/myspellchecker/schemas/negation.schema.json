@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/negation/v1.0",
+  "title": "Myanmar Negation Rules Schema",
+  "description": "JSON Schema for validating negation.yaml - Negation patterns and validation rules",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "prefix",
+    "endings",
+    "typo_map",
+    "auxiliaries",
+    "common_verbs",
+    "register_map"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "negation",
+      "description": "Category type (must be 'negation')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "prefix": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The universal negation prefix marker"
+    },
+    "endings": {
+      "description": "Negative endings that follow the verb in negation constructions",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ending_entry"
+      }
+    },
+    "typo_map": {
+      "description": "Typo corrections for negative endings (incorrect -> correct)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Correct form of the negative ending"
+      }
+    },
+    "auxiliaries": {
+      "description": "Auxiliary verbs that can appear between negation prefix and ending",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Description of the auxiliary's function"
+      }
+    },
+    "common_verbs": {
+      "description": "Common verbs that follow the negation prefix directly (verb -> meaning)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "description": "English meaning of the verb"
+      }
+    },
+    "register_map": {
+      "description": "Register classification for negation patterns (pattern -> register)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "enum": [
+          "formal",
+          "colloquial"
+        ],
+        "description": "Register level of the negation pattern"
+      }
+    }
+  },
+  "definitions": {
+    "ending_entry": {
+      "description": "A negative ending with type and description",
+      "type": "object",
+      "required": [
+        "type",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Category of the negative ending (e.g., standard_negative, prohibition)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Explanation of the negative ending"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/corruption-weights/v1.0",
+  "title": "Myanmar Corruption Weights Schema",
+  "description": "JSON Schema for validating corruption_weights.yaml - Synthetic error generation weights for training",
+
+  "type": "object",
+  "required": ["version", "category", "corruption_ratio", "weights"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "corruption_weights",
+      "description": "Category type (must be 'corruption_weights')"
+    },
+
+    "corruption_ratio": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Fraction of tokens to corrupt during synthetic error generation"
+    },
+
+    "weights": {
+      "description": "Error type weights for synthetic error generation (must sum to 1.0)",
+      "type": "object",
+      "required": [
+        "homophone_swap",
+        "word_swap",
+        "particle_confusion",
+        "medial_confusion",
+        "char_deletion",
+        "aspirated_confusion",
+        "typo_pattern",
+        "similar_char_swap",
+        "char_insertion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "homophone_swap": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for homophone swap corruption"
+        },
+        "word_swap": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for word swap corruption"
+        },
+        "particle_confusion": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for particle confusion corruption"
+        },
+        "medial_confusion": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for medial confusion corruption"
+        },
+        "char_deletion": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for character deletion corruption"
+        },
+        "aspirated_confusion": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for aspirated confusion corruption"
+        },
+        "typo_pattern": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for typo pattern corruption"
+        },
+        "similar_char_swap": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for similar character swap corruption"
+        },
+        "char_insertion": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for character insertion corruption"
+        }
+      }
+    }
+  }
+}

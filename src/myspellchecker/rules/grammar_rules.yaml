@@ -1,0 +1,652 @@
+# Myanmar Grammar Rules - Version 1.0
+# Syntactic grammar validation rules
+#
+# This file contains grammar rules for syntactic validation:
+# - Invalid POS sequences (V-V, P-P, N-N patterns)
+# - HuggingFace Transformer tag patterns (PPM, PART)
+# - Required particles between nouns and verbs
+# - Sentence-final particle requirements
+# - Particle chain rules (valid/invalid combinations)
+# - Register-specific endings (formal vs colloquial)
+# - Clause linkage patterns
+# - Negation placement rules
+# - Classifier agreement
+#
+# Common Burmese grammar patterns
+#
+# Schema: https://myspellchecker.dev/schemas/grammar-rules/v1.0
+
+version: "1.0.0"
+category: "grammar_rules"
+description: "Syntactic grammar validation rules for Myanmar text"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-01-25"
+  total_entries: 45
+  source: "Clause and particle grammar patterns"
+
+# ============================================================
+# GRAMMAR VALIDATION RULES
+# Syntactic patterns and requirements
+# ============================================================
+
+rules:
+  # Sentence Boundary Constraints
+  sentence_start_constraints:
+    - forbidden_tags: ["P_OBJ", "P_POSS", "P_BEN"]
+      forbidden_words: ["ကို", "ရဲ့", "အတွက်", "ကြောင့်"]
+      severity: "error"
+      message: "Sentence usually cannot start with this particle"
+      confidence: 0.90
+
+    # Additional sentence start constraints
+    - forbidden_tags: ["P_SRC", "P_CAUS"]
+      forbidden_words: ["မှ", "ကနေ", "လို့", "ဆိုလို့"]
+      severity: "error"
+      message: "Source/causal particles cannot start a sentence"
+      confidence: 0.85
+
+    - forbidden_tags: ["P_CONJ"]
+      forbidden_words: ["လည်း", "တော့", "ပဲ"]
+      severity: "warning"
+      message: "Conjunctive particles rarely start sentences"
+      confidence: 0.70
+
+  sentence_end_constraints:
+    - forbidden_tags: ["P_SUBJ", "P_OBJ", "P_COM"]
+      forbidden_words: ["က", "ကို", "နှင့်", "နဲ့"]
+      severity: "error"
+      message: "Sentence cannot end with this particle (expects completion)"
+      confidence: 0.90
+
+    # Additional sentence end constraints
+    - forbidden_tags: ["P_POSS", "P_SRC"]
+      forbidden_words: ["ရဲ့", "၏", "မှ", "ကနေ"]
+      severity: "error"
+      message: "Possessive/source particles cannot end a sentence"
+      confidence: 0.90
+
+    - forbidden_tags: ["P_BEN"]
+      forbidden_words: ["အတွက်", "အလို့ငှာ"]
+      severity: "warning"
+      message: "Benefactive particles usually don't end sentences"
+      confidence: 0.75
+
+  # Invalid POS Sequences
+  invalid_sequences:
+    - pattern: "V-V"
+      severity: "info"
+      message: "Consecutive verbs (Serial Verb Construction?)"
+      suggestion: "Check if particle is needed if not an SVC"
+      confidence: 0.50
+      examples:
+        incorrect: "သွား စား"
+        correct: "သွားပြီး စားတယ်"
+        translation: "went and then ate"
+      exceptions: [
+        "သွား", "လာ", "နေ", "ပေး", "လိုက်", "ကြည့်", "ပြ", "စမ်း", 
+        "ချင်", "ထား", "မိ", "ရ", "တတ်", "နိုင်", "စေ", "ဦး"
+      ]
+
+    - pattern: "P-P"
+      severity: "info"
+      message: "Consecutive particles (check if compatible)"
+      suggestion: "Valid for particle chains (e.g. Tense + Mood)"
+      confidence: 0.50
+
+    # HuggingFace Transformer Tags (coarse particle tags)
+    # PPM = Postpositional Marker (case markers like က, ကို, မှာ)
+    # PART = Particle (general particles like ပါ, များ)
+    - pattern: "PPM-PPM"
+      severity: "info"
+      message: "Consecutive postpositional markers (check if valid particle chain)"
+      suggestion: "Some particle chains are valid (e.g. case + topic)"
+      confidence: 0.50
+
+    - pattern: "PART-PART"
+      severity: "info"
+      message: "Consecutive particles (check if compatible)"
+      suggestion: "Valid for particle chains (e.g. plural + politeness)"
+      confidence: 0.50
+
+    - pattern: "PPM-V"
+      severity: "warning"
+      message: "Postpositional marker before verb is unusual"
+      suggestion: "Check word order - particles usually follow their head"
+      confidence: 0.75
+
+    - pattern: "PART-V"
+      severity: "info"
+      message: "Particle before verb (may be auxiliary construction)"
+      suggestion: "Valid in some auxiliary verb constructions"
+      confidence: 0.40
+
+    - pattern: "PPM-N"
+      severity: "info"
+      message: "Postpositional marker before noun (check structure)"
+      suggestion: "May indicate embedded clause or quotation"
+      confidence: 0.40
+
+    # Fine-grained Particle Errors
+    - pattern: "P_SENT-P_SENT"
+      severity: "error"
+      message: "Double sentence ending particles"
+      suggestion: "Remove one ending particle"
+      confidence: 0.98
+      examples:
+        incorrect: "သွားသည် တယ်"
+        correct: "သွားသည် / သွားတယ်"
+
+    - pattern: "P_PAST-P_FUT"
+      severity: "error"
+      message: "Conflicting tense markers (Past + Future)"
+      suggestion: "Choose one tense"
+      confidence: 0.98
+      examples:
+        incorrect: "သွားခဲ့မယ်"
+        correct: "သွားခဲ့တယ် / သွားမယ်"
+
+    - pattern: "NUM-N"
+      severity: "warning"
+      message: "Number before Noun without classifier (may be valid in dates, prices, measures)"
+      suggestion: "Consider Noun + Number + Classifier pattern"
+      confidence: 0.75
+      examples:
+        incorrect: "တစ် လူ"
+        correct: "လူ တစ် ယောက်"
+        translation: "one person"
+
+    - pattern: "V-P_NEG"
+      severity: "error"
+      message: "Negation prefix 'မ' cannot follow a verb"
+      suggestion: "Place 'မ' before the verb"
+      confidence: 0.95
+      examples:
+        incorrect: "သွား မ"
+        correct: "မသွား"
+        translation: "not go"
+
+    - pattern: "N-N"
+      severity: "info"
+      message: "Consecutive nouns (Compound noun?)"
+      suggestion: "Valid if compound, otherwise consider particle"
+      confidence: 0.40
+      examples:
+        ambiguous: "စာအုပ် ဆရာ"
+        better: "စာအုပ် ရဲ့ ဆရာ / ဆရာ့ စာအုပ်"
+        translation: "teacher's book"
+
+    - pattern: "ADJ-V"
+      severity: "warning"
+      message: "Adjective before verb without noun may be unusual"
+      confidence: 0.65
+
+    - pattern: "NUM-V"
+      severity: "warning"
+      message: "Number before verb without classifier"
+      suggestion: "Add classifier or restructure"
+      confidence: 0.75
+
+    - pattern: "P-V"
+      severity: "warning"
+      message: "Particle cannot directly precede verb"
+      confidence: 0.85
+
+    # Particle sequence rules
+    - pattern: "P_POSS-P_SUBJ"
+      severity: "error"
+      message: "Possessive particle cannot be immediately followed by Subject marker"
+      suggestion: "Noun likely missing between them"
+      confidence: 0.95
+      examples:
+        incorrect: "ရဲ့ က"
+        correct: "ရဲ့ အဖေ က"
+
+    - pattern: "P_POSS-P_OBJ"
+      severity: "error"
+      message: "Possessive particle cannot be immediately followed by Object marker"
+      suggestion: "Noun likely missing between them"
+      confidence: 0.95
+
+    - pattern: "P_SUBJ-P_OBJ"
+      severity: "warning"
+      message: "Subject and Object markers adjacent (unlikely)"
+      confidence: 0.90
+
+    - pattern: "P_OBJ-P_SUBJ"
+      severity: "warning"
+      message: "Object and Subject markers adjacent (unlikely)"
+      confidence: 0.90
+
+    - pattern: "P_LOC-P_LOC"
+      severity: "warning"
+      message: "Multiple location particles"
+      confidence: 0.85
+
+    # Interjection (INT) patterns - Myanmar common interjections
+    # Examples: အိုး (Oh!), ဟေ့ (Hey!), အော် (Oh/Ah!), ကွာ (informal)
+    - pattern: "INT-INT"
+      severity: "info"
+      message: "Consecutive interjections (emphatic?)"
+      suggestion: "Multiple interjections may indicate emphasis or emotion"
+      confidence: 0.30
+      examples:
+        acceptable: "အိုး ဟယ်"
+        translation: "Oh hey!"
+
+    - pattern: "INT-P"
+      severity: "info"
+      message: "Interjection followed by particle"
+      suggestion: "Interjections can be followed by particles like ပါ for politeness"
+      confidence: 0.20
+
+    - pattern: "N-INT"
+      severity: "info"
+      message: "Noun followed by interjection"
+      suggestion: "May indicate vocative or exclamation"
+      confidence: 0.40
+      examples:
+        acceptable: "မောင်မောင် ဟေ့"
+        translation: "Hey Maung Maung!"
+
+  # Required Particles
+  required_particles:
+    - pattern: "N-V"
+      required_one_of: ["က", "ကို", "မှာ", "မှ", "သည်"]
+      severity: "warning"
+      message: "Noun-verb sequence usually needs case particle"
+      confidence: 0.75
+      examples:
+        questionable: "သူ သွားတယ်"
+        better: "သူက သွားတယ်"
+        translation: "he went"
+
+  # Sentence-Final Constraints
+  sentence_final_required:
+    - pattern: "V$"
+      required_one_of:
+        - "တယ်"
+        - "ပါတယ်"
+        - "သည်"
+        - "ပါသည်"
+        - "မယ်"
+        - "ပါမယ်"
+        - "ပြီ"
+        # Question particles
+        - "မလဲ"
+        - "လား"
+        - "သလား"
+        # Negative particles
+        - "ဘူး"
+        - "ပါဘူး"
+        # Discourse/emphatic particles
+        - "ပဲ"
+        - "ပေါ့"
+        - "လေ"
+        - "စေ"
+        - "ပါစေ"
+        - "ပါပြီ"
+      severity: "warning"
+      message: "Verb at sentence end usually needs final particle"
+      confidence: 0.80
+
+  # ============================================================
+  # PARTICLE CHAIN RULES
+  # Valid and invalid particle combinations
+  # ============================================================
+  particle_chains:
+    # Valid particle chains (informational)
+    valid_chains:
+      - particles: ["က", "တော့"]
+        meaning: "Subject + topic/contrast"
+        example: "သူကတော့ သွားတယ်"
+        translation: "As for him, (he) went"
+
+      - particles: ["ကို", "လည်း"]
+        meaning: "Object + also"
+        example: "သူ့ကိုလည်း ခေါ်"
+        translation: "Call him too"
+
+      - particles: ["မှာ", "တော့"]
+        meaning: "Location + topic"
+        example: "ဒီမှာတော့ ရှိတယ်"
+        translation: "As for here, it's there"
+
+      - particles: ["နဲ့", "တစ်ခါတည်း"]
+        meaning: "With + at same time"
+        example: "လာနဲ့တစ်ခါတည်း ယူလာ"
+        translation: "Bring it when you come"
+
+    # Invalid particle chains
+    invalid_chains:
+      - particles: ["က", "ကို"]
+        severity: "error"
+        message: "Subject marker cannot be followed by object marker"
+        confidence: 0.95
+        examples:
+          incorrect: "သူကကို"
+          correct: "သူ့ကို / သူက"
+
+      - particles: ["ကို", "က"]
+        severity: "error"
+        message: "Object marker cannot be followed by subject marker"
+        confidence: 0.95
+
+      - particles: ["မှာ", "မှာ"]
+        severity: "error"
+        message: "Duplicate location marker"
+        confidence: 0.98
+
+      - particles: ["ကို", "ကို"]
+        severity: "error"
+        message: "Duplicate object marker"
+        confidence: 0.98
+
+      - particles: ["တယ်", "သည်"]
+        severity: "error"
+        message: "Mixed colloquial and formal endings"
+        confidence: 0.95
+        examples:
+          incorrect: "သွားတယ်သည်"
+          correct: "သွားတယ် / သွားသည်"
+
+  # ============================================================
+  # REGISTER CONSISTENCY RULES
+  # Formal vs colloquial mixing checks
+  # ============================================================
+  register_rules:
+    formal_endings: ["သည်", "ပါသည်", "မည်", "ပါမည်", "၏"]
+    colloquial_endings: ["တယ်", "ပါတယ်", "မယ်", "ပါမယ်", "ဘူး"]
+    checks:
+      - pattern: "formal_with_colloquial"
+        severity: "info"
+        message: "Mixed formal and colloquial register in same sentence"
+        suggestion: "Consider using consistent register throughout"
+        confidence: 0.85
+        examples:
+          mixed: "သူက သွားသည်တယ်"
+          formal: "သူက သွားသည်"
+          colloquial: "သူက သွားတယ်"
+
+  # ============================================================
+  # CLAUSE LINKAGE RULES
+  # Subordination and coordination patterns
+  # ============================================================
+  clause_linkage:
+    # Causal clauses with လို့
+    - pattern: "V-လို့-V"
+      severity: "info"
+      message: "Causal clause with လို့ (because)"
+      confidence: 0.50
+      examples:
+        correct: "လာလို့ ဝမ်းသာတယ်"
+        translation: "I'm happy because (you) came"
+
+    # Conditional clauses with ရင်
+    - pattern: "V-ရင်-V"
+      severity: "info"
+      message: "Conditional clause with ရင် (if)"
+      confidence: 0.50
+      examples:
+        correct: "လာရင် ပြောပါ"
+        translation: "Tell me if (you) come"
+
+    # Formal conditional with လျှင်
+    - pattern: "V-လျှင်-V"
+      severity: "info"
+      message: "Formal conditional clause with လျှင် (if)"
+      confidence: 0.50
+
+    # Sequential with ပြီး
+    - pattern: "V-ပြီး-V"
+      severity: "info"
+      message: "Sequential clause with ပြီး (after/then)"
+      confidence: 0.50
+      examples:
+        correct: "စားပြီး သွားမယ်"
+        translation: "I'll go after eating"
+
+    # Topic/contrast with တော့
+    - pattern: "N-တော့"
+      severity: "info"
+      message: "Topic or contrast marker"
+      confidence: 0.40
+
+    # Also/too with လည်း
+    - pattern: "N-လည်း"
+      severity: "info"
+      message: "Additive particle (also/too)"
+      confidence: 0.40
+
+  # ============================================================
+  # NEGATION RULES
+  # Proper negation placement
+  # ============================================================
+  negation_rules:
+    # Standard negation pattern
+    - pattern: "မ-V-ဘူး"
+      severity: "info"
+      message: "Standard negative construction"
+      confidence: 0.90
+      examples:
+        correct: "မသွားဘူး"
+        translation: "don't go / won't go"
+
+    # Imperative negation
+    - pattern: "မ-V-နဲ့"
+      severity: "info"
+      message: "Negative imperative (don't)"
+      confidence: 0.85
+      examples:
+        correct: "မသွားနဲ့"
+        translation: "don't go!"
+
+    # Negative without ဘူး (error)
+    - pattern: "မ-V$"
+      severity: "warning"
+      message: "Negative verb may need ဘူး ending"
+      suggestion: "Add ဘူး for complete negation"
+      confidence: 0.70
+      examples:
+        questionable: "မသွား"
+        better: "မသွားဘူး"
+        translation: "don't go"
+
+    # Double negation (error)
+    - pattern: "မ-မ"
+      severity: "error"
+      message: "Double negation prefix"
+      confidence: 0.95
+
+  # ============================================================
+  # CLASSIFIER RULES
+  # Numeral-classifier-noun agreement
+  # ============================================================
+  classifier_rules:
+    - pattern: "NUM-CLF-N"
+      severity: "info"
+      message: "Standard classifier construction"
+      confidence: 0.80
+      examples:
+        correct: "လူ သုံးယောက်"
+        translation: "three people"
+
+    - pattern: "N-NUM-CLF"
+      severity: "info"
+      message: "Alternative classifier order (noun first)"
+      confidence: 0.80
+
+    - pattern: "NUM-N"
+      severity: "warning"
+      message: "Numeral before noun without classifier"
+      suggestion: "Add appropriate classifier between numeral and noun"
+      confidence: 0.85
+      examples:
+        questionable: "သုံး လူ"
+        correct: "လူ သုံးယောက်"
+
+    - pattern: "CLF-NUM"
+      severity: "error"
+      message: "Classifier before numeral (wrong order)"
+      suggestion: "Classifier should follow numeral"
+      confidence: 0.95
+      examples:
+        incorrect: "ယောက် သုံး"
+        correct: "သုံးယောက်"
+
+# ============================================================
+# PARTICLE TAG DEFINITIONS
+# Mapping words to specific particle tags for validation
+# ============================================================
+particle_tags:
+  # Possessive
+  "ရဲ့": "P_POSS"
+  "၏": "P_POSS" # Also used as P_SENT in literary, but P_POSS is common inline
+
+  # Object markers
+  "ကို": "P_OBJ"
+  "အား": "P_OBJ"
+
+  # Subject marker
+  "က": "P_SUBJ"
+
+  # Location markers
+  "မှာ": "P_LOC"
+  "၌": "P_LOC"
+  "တွင်": "P_LOC"
+  # Removed: "ဝယ်": "P_LOC" — "ဝယ်" is overwhelmingly the verb "to buy"
+  # in modern Myanmar. The archaic locative usage is extremely rare.
+  # If needed, handle via ambiguous_words with context-dependent disambiguation.
+
+  # Source markers
+  "မှ": "P_SRC"
+  "ကနေ": "P_SRC"
+
+  # Benefactive/Purpose
+  "အတွက်": "P_BEN"
+  "အလို့ငှာ": "P_BEN"
+
+  # Causal
+  "ကြောင့်": "P_CAUS"
+  "လို့": "P_CAUS"
+  "ဆိုလို့": "P_CAUS"
+
+  # Conjunctive/Comitative
+  "နှင့်": "P_CONJ"
+  "နဲ့": "P_CONJ"  # also P_PROH (prohibitive "don't") — see particles.yaml for canonical POS
+
+  # Topic/Contrast
+  "တော့": "P_TOP"
+  "လည်း": "P_ADD"  # Additive (also/too)
+  "ပဲ": "P_EMPH"   # Emphatic (only/just)
+
+  # Conditional
+  "ရင်": "P_COND"
+  "လျှင်": "P_COND"
+
+  # Sequential
+  "ပြီး": "P_SEQ"
+
+  # Sentence endings (colloquial)
+  "တယ်": "P_SENT"
+  "ပါတယ်": "P_SENT"
+  "မယ်": "P_SENT"
+  "ပါမယ်": "P_SENT"
+  "ပြီ": "P_SENT"
+  "ဘူး": "P_NEG_SENT"
+
+  # Sentence endings (formal)
+  "သည်": "P_SENT" # Ambiguous, but treating as P_SENT for end checks is often safer
+  "ပါသည်": "P_SENT"
+  "မည်": "P_SENT"
+  "ပါမည်": "P_SENT"
+
+  # Imperative
+  "ပါ": "P_POL"    # Politeness marker
+
+# ============================================================
+# INTERJECTION TAG DEFINITIONS
+# Common Myanmar interjections/exclamations
+# ============================================================
+interjection_tags:
+  "အိုး": "INT"      # Oh! (surprise, realization)
+  "ဟေ့": "INT"       # Hey! (calling attention)
+  "ဟယ်": "INT"       # Hey! (informal attention)
+  "အော်": "INT"      # Oh!/Ah! (exclamation)
+  "အော": "INT"       # Ah! (exclamation variant)
+  "ကွာ": "INT"       # Emphatic/informal particle (often sentence-final)
+  "ဟုတ်လား": "INT"   # Really? (surprise/question interjection)
+  "ဟင်": "INT"       # What?/Huh? (surprise, confusion)
+  "ဟား": "INT"       # Ha! (laughter/exclamation)
+  "အမလေး": "INT"    # Oh my! (feminine exclamation)
+  # Removed: "အရေး" is a noun meaning "matter/importance", not an interjection
+
+# ============================================================
+# STRUCTURE CONJUNCTIONS
+# Clause-linking conjunctions for structure detection (G03).
+# Used by StructureDetectionMixin._detect_sentence_structure_issues
+# to identify valid conjunction/linker tokens between sentence-final
+# particles.
+# ============================================================
+structure_conjunctions:
+  - "ပြီး"
+  - "ပြီးတော့"
+  - "လို့"
+  - "ဆိုတာ"
+  - "ဆိုပြီး"
+  - "ဆိုတော့"
+  - "ဆိုရင်"
+  - "ကြောင့်"
+  - "တော့"
+  - "ရင်"
+  - "လျှင်"
+  - "သော်လည်း"
+  - "ပေမယ့်"
+  - "ဒါပေမယ့်"
+  - "လည်း"
+  - "ဟု"
+  - "၍"
+
+# ============================================================
+# SUFFIX SAFE
+# Unambiguous sentence-final suffixes for structure detection.
+# Used by StructureDetectionMixin to identify sentence-final
+# tokens via suffix matching.
+# ============================================================
+suffix_safe:
+  - "ပါသည်"
+  - "ပါတယ်"
+  - "ပါမည်"
+  - "ပါမယ်"
+  - "ပါသည"
+  - "ပါတယ"
+  - "ပါမည"
+  - "ပါမယ"
+  - "တယ်"
+  - "မယ်"
+  - "တယ"
+  - "မယ"
+  - "ပြီ"
+  - "ပါပြီ"
+
+# ============================================================
+# WORD ORDER VERB ENDINGS
+# Verb endings for word-order inversion detection (G04).
+# Used by StructureDetectionMixin._detect_sentence_structure_issues
+# to identify verb-fronted object/complement phrases.
+# ============================================================
+word_order_verb_endings:
+  - "ခဲ့သည်"
+  - "သည်"
+  - "တယ်"
+  - "မယ်"
+  - "ခဲ့တယ်"
+  - "ခဲ့မယ်"
+  - "ပါသည်"
+  - "ပါတယ်"
+
+# ============================================================
+# MORPHOLOGICAL RULES
+# Suffix patterns and word formation
+# ============================================================

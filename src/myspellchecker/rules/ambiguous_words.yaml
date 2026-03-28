@@ -1,0 +1,84 @@
+# Myanmar Ambiguous Words - Version 1.0
+# Words that can function as multiple parts of speech
+#
+# This file contains word mappings to their possible POS tags.
+# Used for context-aware disambiguation.
+#
+# Schema: https://myspellchecker.dev/schemas/ambiguous-words/v1.0
+
+version: "1.0.0"
+category: "ambiguous_words"
+description: "Words with multiple potential Part-of-Speech tags"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2025-12-30"
+
+# ============================================================
+# AMBIGUOUS WORDS
+# Format: word: [tag1, tag2, ...]
+# ============================================================
+ambiguous_words:
+  # Noun-Verb Ambiguity
+  "ကြီး": ["N", "V", "ADJ"]  # big/the big one/to grow
+  "ပြော": ["N", "V"]         # speech/to speak
+  "ရေး": ["N", "V"]          # matter, affair/to write
+  "လုပ်": ["N", "V"]         # work, job/to do, to make
+  "စား": ["N", "V"]          # food/to eat
+  "သွား": ["N", "V"]         # tooth/to go
+  "ပေး": ["N", "V"]          # gift/to give
+  "ယူ": ["N", "V"]           # possession/to take
+  "ကြည့်": ["N", "V"]        # look/to watch
+  "ကြား": ["N", "V"]         # middle/to hear
+  "ထိုင်": ["N", "V"]        # seat/to sit
+  "ရပ်": ["N", "V"]          # ward, stop/to stop
+  "ရှာ": ["N", "V"]          # search/to search
+  "မေး": ["N", "V"]          # question/to ask
+  "ဖတ်": ["N", "V"]          # reading/to read
+  "ရေ": ["N"]                # water (note: "to write" is ရေး with visarga)
+  "သင်": ["N", "V", "PRON"]  # lesson/to teach/you
+  "အား": ["N", "V", "P_OBJ"] # strength/to be free/object marker
+  "နေ": ["N", "V", "P_SENT"] # sun/to live, stay/progressive
+
+  # Adjective-Verb Ambiguity
+  "ကောင်း": ["ADJ", "V"]     # good/to be good
+  "ဆိုး": ["ADJ", "V"]        # bad/to be bad
+  "ရှည်": ["ADJ", "V"]        # long/to lengthen
+  "တို": ["ADJ", "V"]         # short/to shorten
+  "ဝ": ["ADJ", "V"]           # fat/to fatten
+  "ချစ်": ["ADJ", "V"]        # beloved/to love
+  "ပူ": ["ADJ", "V"]          # hot/to be hot
+  "အေး": ["ADJ", "V"]         # cold/to be cold
+  "မြင့်": ["ADJ", "V"]       # high/to rise
+  "နိမ့်": ["ADJ", "V"]       # low/to lower
+  "ကျယ်": ["ADJ", "V"]        # wide/to widen
+  "ကျဉ်း": ["ADJ", "V"]       # narrow/to narrow
+  "ပါး": ["ADJ", "V", "N"]   # thin/cheek/to be thin
+  "ထူ": ["ADJ", "V"]          # thick/to thicken
+  "သန့်": ["ADJ", "V"]        # clean/to clean
+  "ညစ်": ["ADJ", "V"]        # dirty/to dirty
+  "လှ": ["ADJ", "V"]          # beautiful/to be beautiful
+  "ရိုင်း": ["ADJ", "V"]      # wild, rude/to be wild
+  "ယဉ်": ["ADJ", "V"]         # polite/to be polite
+  "မာ": ["ADJ", "V"]          # hard/to harden
+
+  # Adjective-Noun Ambiguity
+  "အဖြူ": ["ADJ", "N"]       # white/the white one
+  "အနီ": ["ADJ", "N"]        # red/the red one
+  "အစိမ်း": ["ADJ", "N"]     # green/the green one
+  "အဝါ": ["ADJ", "N"]        # yellow/the yellow one
+  "အနက်": ["ADJ", "N"]       # black/the black one
+  "အပြာ": ["ADJ", "N"]       # blue/the blue one
+  "အလှ": ["ADJ", "N"]        # beautiful/beauty
+
+  # Adverb-Noun Ambiguity
+  "ယခု": ["ADV", "N"]        # now/the present
+  "အခု": ["ADV", "N"]        # now/the present (colloquial)
+  "ယနေ့": ["ADV", "N"]       # today/this day
+  "မနက်": ["ADV", "N"]       # morning/tomorrow
+  "ည": ["ADV", "N"]          # night/at night
+
+  # Multi-category
+  "တိုး": ["ADJ", "N", "V"]  # increased/increase/to increase
+  "လျော့": ["ADJ", "N", "V"] # reduced/reduction/to reduce
+  "ပြည့်": ["ADJ", "N", "V"] # full/fullness/to fill

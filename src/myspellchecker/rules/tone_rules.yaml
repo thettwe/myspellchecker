@@ -1,0 +1,507 @@
+# Myanmar Tone Rules - Version 1.0
+# Tone ambiguity patterns and common tone mark errors
+#
+# This file contains:
+# - Tone-ambiguous words with context patterns for disambiguation
+# - Common tone mark errors (missing/wrong tone marks)
+#
+# Schema: https://myspellchecker.dev/schemas/tone-rules/v1.0
+
+version: "1.0.0"
+category: "tone_rules"
+description: "Myanmar tone ambiguity and error patterns"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2025-12-30"
+
+# ============================================================
+# TONE AMBIGUITY RULES
+# Format: word -> context_type -> (patterns, correct_form, meaning)
+# ============================================================
+ambiguous_words:
+  # ကျ - "to fall" (verb)
+  "ကျ":
+    verb:
+      patterns: ["တယ်", "သည်", "မယ်", "ခဲ့", "နေ", "ပြီ", "လိုက်", "သွား"]
+      correct_form: "ကျ"
+      meaning: "to fall (verb)"
+    # Note: ကျောင်း (school) vs ကြောင်း (reason) confusion is handled
+    # in ambiguous_words.yaml, not here under ကျ.
+
+  # မ - female prefix vs negative prefix
+  "မ":
+    female:
+      patterns: ["သမီး", "မိန်းမ", "မယား", "မိဘ", "အမ"]
+      correct_form: "မ"
+      meaning: "female prefix"
+    negative:
+      patterns: ["ဘူး", "ဟုတ်ဘူး", "ရဘူး", "တော့ဘူး"]
+      correct_form: "မ"
+      meaning: "negative prefix"
+
+  # သား - son (in family context)
+  # Note: The Myanmar word for "tiger" is "ကျား", NOT "သား့".
+  # The previous animal context correction was removed as linguistically incorrect.
+  "သား":
+    family:
+      patterns: ["သမီး", "မိသား", "သားသမီး", "လင်", "မယား", "မိဘ", "အဖေ", "အမေ"]
+      correct_form: "သား"
+      meaning: "son"
+
+  # က - subject marker vs letter name
+  "က":
+    particle:
+      patterns: ["ကို", "ကြောင့်", "နဲ့", "မှာ", "တွင်", "၌"]
+      correct_form: "က"
+      meaning: "subject marker"
+    letter:
+      patterns: ["အက္ခရာ", "စာလုံး", "ခ", "ဂ", "ဃ", "င"]
+      correct_form: "က"
+      meaning: "letter Ka"
+
+  # ငါ - I/me vs fish (ငါး)
+  "ငါ":
+    pronoun:
+      patterns: ["ငါ့", "က", "ကို", "အတွက်", "ရဲ့"]
+      correct_form: "ငါ"
+      meaning: "I/me"
+    fish_missing_tone:
+      patterns: ["ကောင်", "ငုတ်", "ပင်လယ်", "ရေ", "ချက်", "ကြော်"]
+      correct_form: "ငါး"  # Fish needs high tone mark
+      meaning: "fish"
+
+  # သံ - sound/iron vs three (သုံး)
+  "သံ":
+    sound_metal:
+      patterns: ["သံစဉ်", "သံရုံး", "သံချပ်", "ကြား", "ထွက်"]
+      correct_form: "သံ"
+      meaning: "sound/iron"
+    number_error:
+      patterns: ["ခု", "ယောက်", "ကောင်", "လုံး", "စု"]
+      correct_form: "သုံး"  # Three (number)
+      meaning: "three"
+
+  # ခု - classifier vs now
+  "ခု":
+    classifier:
+      patterns: ["တစ်", "နှစ်", "သုံး", "လေး", "ငါး", "ယောက်"]
+      correct_form: "ခု"
+      meaning: "classifier"
+    now:
+      patterns: ["အခု", "ယခု", "ဒီ"]
+      correct_form: "ခု"
+      meaning: "now/this moment"
+
+  # ပဲ - only/bean
+  "ပဲ":
+    emphasis:
+      patterns: ["တယ်", "ပါ", "သည်", "ဘဲ", "လိုပဲ"]
+      correct_form: "ပဲ"
+      meaning: "only/just (emphasis)"
+    bean:
+      patterns: ["စိုက်", "ပင်", "စေ့", "ထောင်း", "ဆီ"]
+      correct_form: "ပဲ"
+      meaning: "bean/pea"
+
+  # တော် - royal/suitable vs forest (တော)
+  "တော်":
+    royal:
+      patterns: ["မင်း", "နန်း", "ဘုရင်", "မိဖုရား"]
+      correct_form: "တော်"
+      meaning: "royal/honorific"
+    suitable:
+      patterns: ["ပြီ", "သင့်", "ကောင်း", "လောက်"]
+      correct_form: "တော်"
+      meaning: "suitable/enough"
+
+  # တော - forest
+  "တော":
+    forest:
+      patterns: ["ထဲ", "အုပ်", "တောင်", "သစ်", "ပင်", "တိရစ္ဆာန်"]
+      correct_form: "တော"
+      meaning: "forest"
+
+  # ============================================================
+  # ADDITIONAL TONE RULES
+  # ============================================================
+
+  # မှ - from vs မှာ - at/order vs မှား - wrong
+  "မှ":
+    from_particle:
+      patterns: ["က", "နေ", "သည်", "ကနေ"]
+      correct_form: "မှ"
+      meaning: "from (particle)"
+    at_particle_error:
+      patterns: ["ရှိ", "နေ", "ထိုင်", "တွေ့"]
+      correct_form: "မှာ"
+      meaning: "at (particle)"
+    wrong_error:
+      patterns: ["ယွင်း", "နေ", "သွား", "လုပ်"]
+      correct_form: "မှား"
+      meaning: "wrong/error"
+
+  "မှာ":
+    at_particle:
+      patterns: ["ရှိ", "နေ", "ထိုင်", "စား", "အိမ်"]
+      correct_form: "မှာ"
+      meaning: "at (particle)"
+    order_verb:
+      patterns: ["လိုက်", "ထား", "စရာ", "ကြား"]
+      correct_form: "မှာ"
+      meaning: "to order"
+    # Removed from_error (မှာ→မှ): this correction is almost always wrong.
+    # The reverse (မှ→မှာ or မာ→မှာ) is the common error, handled in typo_corrections.yaml.
+
+  "မှား":
+    wrong_verb:
+      patterns: ["သွား", "ယွင်း", "လုပ်", "ပြော"]
+      correct_form: "မှား"
+      meaning: "to be wrong"
+
+  # စ - start vs စား - eat
+  "စ":
+    start_verb:
+      patterns: ["ပြု", "လုပ်", "တင်", "ကတည်းက"]
+      correct_form: "စ"
+      meaning: "to start/beginning"
+    eat_error:
+      patterns: ["သောက်", "ပွဲ", "စရာ", "ချင်", "ပြီး"]
+      correct_form: "စား"
+      meaning: "to eat (error)"
+
+  "စား":
+    eat_verb:
+      patterns: ["သောက်", "ပွဲ", "စရာ", "ချင်", "ပြီး", "နေ"]
+      correct_form: "စား"
+      meaning: "to eat"
+    start_error:
+      patterns: ["ပြု", "လုပ်", "ကတည်းက"]
+      correct_form: "စ"
+      meaning: "to start (error)"
+
+  # ခ - wait/letter vs ခါ - shake/time vs ခါး - bitter/waist
+  "ခ":
+    letter_wait:
+      patterns: ["ခဏ", "ခရီး", "ခဲ", "က်"]
+      correct_form: "ခ"
+      meaning: "letter Kha / to wait (short form)"
+    time_error:
+      patterns: ["တိုင်း", "လေ", "စ"]
+      correct_form: "ခါ"
+      meaning: "time/occasion (error)"
+
+  "ခါ":
+    time_occasion:
+      patterns: ["တိုင်း", "လေ", "စ", "မိုး", "နွေ"]
+      correct_form: "ခါ"
+      meaning: "time/occasion/season"
+    shake_verb:
+      patterns: ["ရမ်း", "လိုက်", "ချ"]
+      correct_form: "ခါ"
+      meaning: "to shake"
+
+  "ခါး":
+    bitter_waist:
+      patterns: ["သီး", "နာ", "ပတ်", "တောင်း"]
+      correct_form: "ခါး"
+      meaning: "bitter / waist"
+
+  # ပ - letter vs ပါ - include/polite
+  "ပ":
+    letter:
+      patterns: ["အက္ခရာ", "စာလုံး"]
+      correct_form: "ပ"
+      meaning: "letter Pa"
+    polite_error:
+      patterns: ["တယ်", "မယ်", "ပြီ", "သွား", "လာ"]
+      correct_form: "ပါ"
+      meaning: "polite particle (error)"
+
+  "ပါ":
+    polite_particle:
+      patterns: ["တယ်", "မယ်", "ပြီ", "သွား", "လာ", "စေ"]
+      correct_form: "ပါ"
+      meaning: "polite particle / to include"
+
+  # သူ - he vs သူ့ - his
+  "သူ":
+    pronoun_subj:
+      patterns: ["က", "သည်", "မှာ", "သွား", "လာ", "ပြော"]
+      correct_form: "သူ"
+      meaning: "he/she (subject)"
+    pronoun_poss_error:
+      patterns: ["အိမ်", "ကား", "မိဘ", "စာအုပ်", "အဖေ"]
+      correct_form: "သူ့"
+      meaning: "his/her (possessive error)"
+
+  "သူ့":
+    pronoun_poss:
+      patterns: ["အိမ်", "ကား", "မိဘ", "စာအုပ်", "နေရာ", "အတွက်"]
+      correct_form: "သူ့"
+      meaning: "his/her (possessive)"
+    pronoun_subj_error:
+      patterns: ["က", "သည်", "သွား", "လာ"]
+      correct_form: "သူ"
+      meaning: "he/she (subject error)"
+
+  # န - letter vs နာ - pain vs နား - ear/rest/near
+  "န":
+    letter:
+      patterns: ["ငယ်", "အက္ခရာ"]
+      correct_form: "န"
+      meaning: "letter Na"
+    pain_error:
+      patterns: ["ကျင်", "တယ်", "နေ", "ဆေး"]
+      correct_form: "နာ"
+      meaning: "pain (error)"
+
+  "နာ":
+    pain_verb:
+      patterns: ["ကျင်", "တယ်", "နေ", "ဆေး", "ခံ"]
+      correct_form: "နာ"
+      meaning: "to hurt/pain"
+    ear_error:
+      patterns: ["ထောင်", "လည်", "ရွက်", "ကွင်း"]
+      correct_form: "နား"
+      meaning: "ear (error)"
+
+  "နား":
+    ear_rest_near:
+      patterns: ["ထောင်", "လည်", "ရွက်", "ကွင်း", "နေ", "ယူ", "မှာ"]
+      correct_form: "နား"
+      meaning: "ear / to rest / near"
+
+  # မ - neg/female (already exists, extending) vs မဲ့ - without
+  "မဲ့":
+    without:
+      patterns: ["အ", "မျက်", "နှာ", "ပြုံး"]
+      correct_form: "မဲ့"
+      meaning: "without / to smile wryly"
+
+  # လ - moon/letter vs လာ - come
+  "လ":
+    moon_month:
+      patterns: ["မင်း", "သာ", "ပြည့်", "ကွယ်", "တစ်", "နှစ်"]
+      correct_form: "လ"
+      meaning: "moon / month"
+    come_error:
+      patterns: ["ခဲ့", "မယ်", "နေ", "ပြီ", "ကြ"]
+      correct_form: "လာ"
+      meaning: "to come (error)"
+
+  "လာ":
+    come_verb:
+      patterns: ["ခဲ့", "မယ်", "နေ", "ပြီ", "ကြ", "ရောက်"]
+      correct_form: "လာ"
+      meaning: "to come"
+
+  # ထ - rise vs ထား - keep/put
+  "ထ":
+    rise_verb:
+      patterns: ["ရပ်", "လိုက်", "ကြ", "ပါ", "သွား"]
+      correct_form: "ထ"
+      meaning: "to rise/stand up"
+    keep_error:
+      patterns: ["ရှိ", "သို", "လိုက်", "ခဲ့", "မယ်"]
+      correct_form: "ထား"
+      meaning: "to keep (error)"
+
+  "ထား":
+    keep_verb:
+      patterns: ["ရှိ", "သို", "လိုက်", "ခဲ့", "မယ်", "သမျှ"]
+      correct_form: "ထား"
+      meaning: "to keep/put"
+
+  # နေ - stay/sun vs နေ့ - day
+  "နေ":
+    stay_sun:
+      patterns: ["ထိုင်", "ကောင်း", "ပူ", "ထွက်", "ဝင်"]
+      correct_form: "နေ"
+      meaning: "to stay / sun"
+    day_error:
+      patterns: ["တိုင်း", "လည်", "ခင်း", "ရက်"]
+      correct_form: "နေ့"
+      meaning: "day (error)"
+
+  "နေ့":
+    day_noun:
+      patterns: ["တိုင်း", "လည်", "ခင်း", "ရက်", "စွဲ"]
+      correct_form: "နေ့"
+      meaning: "day"
+
+  # ပေ - give(old)/measuring vs ပေး - give
+  "ပေ":
+    measure_give:
+      patterns: ["တံ", "မီတာ", "ပေ"]
+      correct_form: "ပေ"
+      meaning: "foot (measure) / give (archaic)"
+    give_error:
+      patterns: ["လိုက်", "မယ်", "ပါ", "ကမ်း"]
+      correct_form: "ပေး"
+      meaning: "to give (error)"
+
+  "ပေး":
+    give_verb:
+      patterns: ["လိုက်", "မယ်", "ပါ", "ကမ်း", "စာ"]
+      correct_form: "ပေး"
+      meaning: "to give"
+
+  # ရေ - water vs ရေး - write vs ရေ့ - front(slang)
+  "ရေ":
+    water_noun:
+      patterns: ["သောက်", "ချိုး", "ကူး", "ခဲ", "နွေး"]
+      correct_form: "ရေ"
+      meaning: "water"
+    write_error:
+      patterns: ["သား", "လိုက်", "မယ်", "ထား"]
+      correct_form: "ရေး"
+      meaning: "to write (error)"
+
+  "ရေး":
+    write_affair:
+      patterns: ["သား", "လိုက်", "မယ်", "ထား", "ရာ", "အ"]
+      correct_form: "ရေး"
+      meaning: "to write / affair"
+
+  # ဆ - letter vs ဆာ - hungry vs ဆား - salt
+  "ဆ":
+    letter_sa:
+      patterns: ["လုံး", "ကွဲ", "လိမ်"]
+      correct_form: "ဆ"
+      meaning: "letter Sa"
+    hungry_error:
+      patterns: ["လောင်", "နေ", "ပြီ"]
+      correct_form: "ဆာ"
+      meaning: "hungry (error)"
+
+  "ဆာ":
+    hungry_verb:
+      patterns: ["လောင်", "နေ", "ပြီ", "မွတ်"]
+      correct_form: "ဆာ"
+      meaning: "hungry"
+
+  "ဆား":
+    salt_noun:
+      patterns: ["ငန်", "ခါး", "ထည့်", "နယ်"]
+      correct_form: "ဆား"
+      meaning: "salt"
+
+  # ဘ - letter vs ဘာ - what
+  "ဘ":
+    letter_ba:
+      patterns: ["ကုန်း", "အက္ခရာ"]
+      correct_form: "ဘ"
+      meaning: "letter Ba"
+    what_error:
+      patterns: ["လဲ", "လုပ်", "ဖြစ်", "မှ"]
+      correct_form: "ဘာ"
+      meaning: "what (error)"
+
+  "ဘာ":
+    what_ques:
+      patterns: ["လဲ", "လုပ်", "ဖြစ်", "မှ", "မ"]
+      correct_form: "ဘာ"
+      meaning: "what"
+
+  # ညာ - right/cheat vs ည - night
+  "ညာ":
+    right_cheat:
+      patterns: ["ဘက်", "လက်", "တာ", "မိ"]
+      correct_form: "ညာ"
+      meaning: "right (side) / to cheat"
+    night_error:
+      patterns: ["နေ", "ခင်း", "ဘက်", "လုံး"]
+      correct_form: "ည"
+      meaning: "night (error)"
+
+  "ည":
+    night_noun:
+      patterns: ["နေ", "ခင်း", "ဘက်", "လုံး", "စာ"]
+      correct_form: "ည"
+      meaning: "night"
+
+  # အ - A vs အား - strength/free
+  "အ":
+    noun_prefix:
+      patterns: ["လုပ်", "ကိုင်", "စာ", "အိမ်"]
+      correct_form: "အ"
+      meaning: "noun prefix (Ah)"
+    strength_error:
+      patterns: ["ကစား", "နာ", "ပေး", "မ"]
+      correct_form: "အား"
+      meaning: "strength/sports (error)"
+
+  "အား":
+    strength_free:
+      patterns: ["ကစား", "နာ", "ပေး", "မ", "လပ်"]
+      correct_form: "အား"
+      meaning: "strength / to be free / to"
+
+  # မှု - case vs မူ - policy/behavior
+  "မှု":
+    case_act:
+      patterns: ["ခင်း", "ကိစ္စ", "ပြု", "လုပ်"]
+      correct_form: "မှု"
+      meaning: "case / act / nominalizer"
+    policy_error:
+      patterns: ["ဝါဒ", "ယာ", "ရင်း"]
+      correct_form: "မူ"
+      meaning: "policy / original (error)"
+
+  "မူ":
+    policy_behavior:
+      patterns: ["ဝါဒ", "ယာ", "ရင်း", "ပျက်"]
+      correct_form: "မူ"
+      meaning: "policy / behavior / original"
+
+  # ဖ - father(short) vs ဖာ - cover/patch
+  "ဖ":
+    father_short:
+      patterns: ["ခင်", "ဘ"]
+      correct_form: "ဖ"
+      meaning: "father (short)"
+    patch_error:
+      patterns: ["ထေး", "လိုက်", "ပိတ်"]
+      correct_form: "ဖာ"
+      meaning: "to patch (error)"
+
+  "ဖာ":
+    patch_cover:
+      patterns: ["ထေး", "လိုက်", "ပိတ်", "သည်"]
+      correct_form: "ဖာ"
+      meaning: "to patch / cover"
+
+  # မဲ - vote/black vs မဲ့ - without
+  "မဲ":
+    vote_black:
+      patterns: ["ပေး", "ထည့်", "နက်", "ရုံ"]
+      correct_form: "မဲ"
+      meaning: "vote / black"
+    without_error:
+      patterns: ["နေ", "သွား"]
+      correct_form: "မဲ့"
+      meaning: "without (error)"
+
+
+
+# ============================================================
+# COMMON TONE ERRORS
+# Format: incorrect -> correct
+# ============================================================
+tone_errors:
+  # Missing visarga (း)
+  "ငါ": "ငါး"   # fish/five (when in number context)
+  # Removed: "သား": "သား့" — "သား" (son/offspring) is correct; tiger is "ကျား" not "သား့"
+  "သုံ": "သုံး"   # three
+  # Note: လေ -> လေး only applies in numeral contexts (e.g., after တစ်, နှစ်, သုံး).
+  # Without context, လေ is valid (wind/air, emphasis particle). Requires context check.
+  # "လေ": "လေး"   # four (CONTEXT-DEPENDENT: numeral context only)
+  # Note: ခြေး -> ခွေး is a medial confusion (ya-yit ြ vs wa-hswe ွ), not a tone error.
+  # Kept here for correction purposes but this is technically a medial error.
+  "ခြေး": "ခွေး"  # dog — medial confusion (ခွေး with wa-hswe, not ခြေး with ya-yit)
+  # Common particle errors
+  # Note: လာ -> လား only applies in sentence-final position.
+  # Without context, လာ is a common verb meaning "to come". Requires context check.
+  # "လာ": "လား"   # question particle (CONTEXT-DEPENDENT: sentence-final only)
+  "သလာ": "သလား" # question particle

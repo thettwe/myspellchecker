@@ -1,0 +1,388 @@
+# Myanmar Classifiers - Version 1.0
+# Numeral classifiers organized by category with compatible noun examples
+#
+# This file contains classifiers organized into categories:
+# - People, Animals, Objects, Vehicles, Books/Documents
+# - Containers, Clothing, Times, Places, Plants
+# - Abstract concepts, Measurements, Weapons
+# - Food, Tools/Household, Modern units
+#
+# Expanded with more noun examples and modern classifiers
+#
+# Schema: https://myspellchecker.dev/schemas/classifiers/v1.0
+
+version: "1.0.0"
+category: "classifiers"
+description: "Myanmar numeral classifiers with categories and examples"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-01-25"
+  total_entries: 74
+  source: "Expanded with domain-specific classifiers and noun pairs"
+
+# ============================================================
+# CLASSIFIER SYSTEM
+# Pattern: Numeral + Classifier + Noun (e.g., သုံး ယောက် = 3 persons)
+# ============================================================
+classifiers:
+  people:
+    - word: "ယောက်"
+      type: "general"
+      description: "general people classifier"
+      examples: ["လူ", "ကလေး", "မိန်းကလေး", "ယောက်ျား", "ကျောင်းသား", "သူငယ်ချင်း", "အလုပ်သမား"]
+    - word: "ဦး"
+      type: "polite"
+      description: "polite people classifier"
+      examples: ["လူကြီး", "ဆရာ", "ဧည့်သည်", "ဆရာဝန်", "ရဲ", "စစ်သား", "ဦးလေး", "ကျောင်းသား", "လူ", "ကလေး"]
+    - word: "ပါး"
+      type: "sacred"
+      description: "royalty/monks classifier"
+      examples: ["ဘုရင်", "ဘုန်းကြီး", "ရဟန်း", "ရှင်", "ကိုရင်"]
+
+  animals:
+    - word: "ကောင်"
+      type: "general"
+      description: "animals/insects classifier"
+      examples: ["ခွေး", "ကြောင်", "ငှက်", "ပိုး", "ဆင်", "မြင်း", "ကျား", "ငါး", "နွား", "ကြက်"]
+
+  objects:
+    - word: "ခု"
+      type: "general"
+      description: "general objects classifier"
+      examples: ["ကုလားထိုင်", "စားပွဲ", "အိမ်", "ခုတင်", "ကုတင်", "ကျောင်း"]
+    - word: "ဆိုင်း"
+      type: "orchestra"
+      description: "orchestras/gongs/suspended objects classifier"
+      examples: ["ဆိုင်းဝိုင်း", "ဗုံ", "ရွှေဆိုင်း"]
+
+  round:
+    - word: "လုံး"
+      type: "round"
+      description: "round objects classifier"
+      examples: ["ဘောလုံး", "ပန်းသီး", "ခေါင်း", "အိုး", "သရက်သီး", "အိမ်", "သေတ္တာ"]
+
+  flat:
+    - word: "ချပ်"
+      type: "flat"
+      description: "flat/thin objects classifier"
+      examples: ["စက္ကူ", "အဝတ်", "ဓာတ်ပုံ", "မှန်", "ပေါင်မုန့်", "ပျဉ်", "သွပ်"]
+    - word: "ရွက်"
+      type: "sheet"
+      description: "sheets/leaves classifier"
+      examples: ["စက္ကူ", "ရွက်", "လှေ", "ရွှေ"]
+
+  long:
+    - word: "ခြောင်း"
+      type: "long"
+      description: "long objects classifier"
+      examples: ["ဘောပင်", "ခဲတံ", "တုတ်", "မြစ်", "ချောင်း", "ကလောင်"]
+
+  vehicles:
+    - word: "စင်း"
+      type: "general"
+      description: "vehicles/boats classifier"
+      examples: ["ကား", "သင်္ဘော", "လှေ", "လေယာဉ်", "ရထား"]
+    - word: "စီး"
+      type: "alt"
+      description: "vehicles (alt) classifier"
+      examples: ["ကား", "စက်ဘီး", "ဆိုင်ကယ်", "ထော်လာဂျီ", "လှည်း"]
+    - word: "တွဲ"
+      type: "carriage"
+      description: "train carriages/attached items classifier"
+      examples: ["ရထား"]
+
+  books:
+    - word: "အုပ်"
+      type: "bound"
+      description: "books/groups classifier"
+      examples: ["စာအုပ်", "မဂ္ဂဇင်း", "သတင်းစာ"]
+    - word: "စောင်"
+      type: "document"
+      description: "letters/documents classifier"
+      examples: ["စာ", "အစီရင်ခံစာ", "လျှောက်လွှာ"]
+    - word: "ပုဒ်"
+      type: "article"
+      description: "articles/sentences/verses classifier"
+      examples: ["ဆောင်းပါး", "အပိုဒ်", "ပုဒ်မ", "ဝါကျ"]
+    - word: "မျက်နှာ"
+      type: "page"
+      description: "pages classifier"
+      examples: ["စာမျက်နှာ"]
+
+  containers:
+    - word: "ခွက်"
+      type: "cup"
+      description: "cups/bowls classifier"
+      examples: ["လက်ဖက်ရည်", "ကော်ဖီ", "ထမင်း"]
+    - word: "ပုလင်း"
+      type: "bottle"
+      description: "bottles classifier"
+      examples: ["ရေ", "အရက်", "ဆီ"]
+    - word: "ထုပ်"
+      type: "package"
+      description: "packages classifier"
+      examples: ["ဆေး", "မုန့်", "ပစ္စည်း"]
+    - word: "အိတ်"
+      type: "bag"
+      description: "bags classifier"
+      examples: ["ဆန်", "သကြား", "ထမင်း"]
+    - word: "ဘူး"
+      type: "box"
+      description: "cans/boxes classifier"
+      examples: ["ကိတ်မုန့်", "ဆေး", "မက်ခ်"]
+
+  clothing:
+    - word: "ထည်"
+      type: "item"
+      description: "clothing classifier"
+      examples: ["အင်္ကျီ", "ဘောင်းဘီ", "လုံချည်"]
+    - word: "စုံ"
+      type: "set"
+      description: "sets/pairs classifier"
+      examples: ["အဝတ်အစား", "ဖိနပ်"]
+    - word: "ရံ"
+      type: "pair"
+      description: "shoes/earrings pairs"
+      examples: ["ဖိနပ်", "နားကပ်"]
+
+  times:
+    - word: "ခါ"
+      type: "occasion"
+      description: "times/occasions classifier"
+      examples: ["အကြိမ်"]
+    - word: "ကြိမ်"
+      type: "occasion_formal"
+      description: "times (formal) classifier"
+      examples: ["အခါ"]
+    - word: "နေ့"
+      type: "day"
+      description: "days classifier"
+      examples: []
+    - word: "လ"
+      type: "month"
+      description: "months classifier"
+      examples: []
+    - word: "နှစ်"
+      type: "year"
+      description: "years classifier"
+      examples: []
+    - word: "ရက်"
+      type: "day_duration"
+      description: "days (duration) classifier"
+      examples: []
+
+  places:
+    - word: "နေရာ"
+      type: "general"
+      description: "places classifier"
+      examples: ["အိမ်", "ဆိုင်", "ရုံး"]
+    - word: "ခန်း"
+      type: "room"
+      description: "rooms classifier"
+      examples: ["အခန်း", "ဟိုတယ်"]
+    - word: "ထပ်"
+      type: "floor"
+      description: "floors/layers classifier"
+      examples: ["အထပ်", "ကိတ်"]
+    - word: "လမ်း"
+      type: "road"
+      description: "roads/streets classifier"
+      examples: ["လမ်း"]
+
+  plants:
+    - word: "ပင်"
+      type: "plant"
+      description: "trees/plants classifier"
+      examples: ["သစ်ပင်", "ပန်းပင်", "ငှက်ပျော"]
+    - word: "ပွင့်"
+      type: "flower"
+      description: "flowers classifier"
+      examples: ["ပန်း", "နှင်းဆီ"]
+    - word: "တောင့်"
+      type: "stalk"
+      description: "stalks/ears/bullets classifier"
+      examples: ["ပြောင်း", "စပါး", "ကျည်"]
+    - word: "သီး"
+      type: "fruit"
+      description: "fruits classifier"
+      examples: ["ပန်းသီး", "သရက်သီး"]
+
+  weapons:
+    - word: "လက်"
+      type: "general"
+      description: "weapons/tools/hand measurements classifier"
+      examples: ["သေနတ်", "ဓား", "လှံ"]
+
+  abstract:
+    - word: "မျိုး"
+      type: "kind"
+      description: "kinds/types classifier"
+      examples: ["အမျိုးအစား"]
+    - word: "ခွန်း"
+      type: "word"
+      description: "words/speeches classifier"
+      examples: ["စကား", "မေးခွန်း"]
+    - word: "တောင်"
+      type: "unit"
+      description: "cubit measurement classifier"
+      examples: []
+
+  measurements:
+    - word: "ပိဿာ"
+      type: "weight"
+      description: "viss (1.6kg) classifier"
+      examples: ["ဆန်", "အသား", "ငါး"]
+    - word: "ကျပ်"
+      type: "currency"
+      description: "kyat currency classifier"
+      examples: ["ငွေ", "ဈေး"]
+    - word: "ပြား"
+      type: "currency_small"
+      description: "pya (cents) classifier"
+      examples: []
+    - word: "မိုင်"
+      type: "distance"
+      description: "mile classifier"
+      examples: ["အကွာအဝေး"]
+    - word: "ပေ"
+      type: "distance"
+      description: "feet classifier"
+      examples: ["အမြင့်", "အရှည်"]
+    - word: "လက်မ"
+      type: "distance"
+      description: "inch classifier"
+      examples: ["အရှည်", "အကျယ်"]
+    # Modern metric units
+    - word: "ကီလို"
+      type: "weight_metric"
+      description: "kilogram classifier"
+      examples: ["ဆန်", "အသား", "သကြား", "ဆား"]
+    - word: "ဂရမ်"
+      type: "weight_small"
+      description: "gram classifier"
+      examples: ["ရွှေ", "ဆေး"]
+    - word: "လီတာ"
+      type: "volume"
+      description: "liter classifier"
+      examples: ["ရေ", "ဆီ", "နို့", "ဓာတ်ဆီ"]
+    - word: "မီလီလီတာ"
+      type: "volume_small"
+      description: "milliliter classifier"
+      examples: ["ဆေး", "အရက်"]
+    - word: "မီတာ"
+      type: "length"
+      description: "meter classifier"
+      examples: ["အရှည်", "အမြင့်", "အကွာအဝေး"]
+    - word: "စင်တီမီတာ"
+      type: "length_small"
+      description: "centimeter classifier"
+      examples: ["အကျယ်", "အထူ"]
+    - word: "ကီလိုမီတာ"
+      type: "length_large"
+      description: "kilometer classifier"
+      examples: ["အကွာအဝေး", "ခရီး"]
+
+  # Food and cooking
+  food:
+    - word: "ပွဲ"
+      type: "dish"
+      description: "dishes/servings classifier"
+      examples: ["ထမင်း", "ဟင်း", "အစာ", "အချို"]
+    - word: "တုံး"
+      type: "chunk"
+      description: "chunks/pieces (large) classifier"
+      examples: ["အသား", "ခေါင်းလောင်း", "ရေခဲ"]
+    - word: "ဖတ်"
+      type: "slice"
+      description: "slices classifier"
+      examples: ["ပေါင်မုန့်", "ကိတ်မုန့်", "သခွားသီး"]
+    - word: "မွှာ"
+      type: "clove"
+      description: "cloves/segments classifier"
+      examples: ["ကြက်သွန်", "သံပရာ", "လိမ္မော်"]
+    - word: "တန်း"
+      type: "row"
+      description: "rows/strings classifier"
+      examples: ["ပဲ", "မုန့်"]
+    - word: "စက်"
+      type: "drop"
+      description: "drops classifier"
+      examples: ["ရေ", "သွေး", "ဆေး"]
+      # Note: The classifier for drops is စက် (as in ရေတစ်စက် = one drop of water).
+      # တစ် is the numeral "one", not a classifier.
+
+  # Tools and household items
+  tools:
+    - word: "ချောင်း"
+      type: "stick"
+      description: "sticks/rods classifier"
+      examples: ["တုတ်", "ဓား", "ဘောပင်", "ခဲတံ", "ရိုး", "ကလောင်"]
+    - word: "စုံ"
+      type: "set"
+      description: "sets/complete collections classifier"
+      examples: ["ဆေးပုံး", "ကုလားထိုင်", "အိုး"]
+    - word: "အစ"
+      type: "piece"
+      description: "pieces/parts classifier"
+      examples: ["ပစ္စည်း", "အပိုင်း"]
+    - word: "ဆစ်"
+      type: "section"
+      description: "sections/joints classifier"
+      examples: ["ကြိုး", "ပိုက်", "ဝါး"]
+
+  # Buildings and structures
+  buildings:
+    - word: "လုံး"
+      type: "building"
+      description: "buildings/houses classifier"
+      examples: ["အိမ်", "တိုက်", "ဘုရား"]
+    - word: "အောင်"
+      type: "monastery"
+      description: "monasteries classifier"
+      examples: ["ဘုန်းကြီးကျောင်း", "ကျောင်း"]
+    - word: "ဆိုင်"
+      type: "shop"
+      description: "shops/stores classifier"
+      examples: ["ဆိုင်", "ဈေးဆိုင်"]
+
+  # Religion and sacred objects
+  religion:
+    - word: "ဆူ"
+      type: "sacred_object"
+      description: "pagodas/buddha images classifier"
+      examples: ["ဘုရား", "စေတီ", "ရုပ်ပွားတော်", "ဆင်းတုတော်"]
+
+  # Body parts and actions
+  body_actions:
+    - word: "ချက်"
+      type: "hit"
+      description: "hits/strokes classifier"
+      examples: ["ပေါက်", "ထိုး", "ရိုက်"]
+    - word: "လှမ်း"
+      type: "step"
+      description: "steps/strides classifier"
+      examples: ["ခြေလှမ်း"]
+    - word: "စုတ်"
+      type: "sip"
+      description: "sips/puffs classifier"
+      examples: ["ရေ", "ဆေးလိပ်"]
+    - word: "ကိုက်"
+      type: "bite"
+      description: "bites classifier"
+      examples: ["အစာ", "မုန့်"]
+
+  # Electronics and modern items
+  electronics:
+    - word: "လုံး"
+      type: "device"
+      description: "devices/gadgets classifier"
+      examples: ["ဖုန်း", "ကွန်ပျူတာ", "တီဗီ"]
+    - word: "ပိုင်း"
+      type: "episode"
+      description: "episodes/parts classifier"
+      examples: ["ဇာတ်ကား", "ဇာတ်လမ်း"]
+    - word: "ပုဒ်"
+      type: "song"
+      description: "songs/poems classifier"
+      examples: ["သီချင်း", "ကဗျာ"]

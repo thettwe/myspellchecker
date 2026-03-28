@@ -1,0 +1,113 @@
+# Myanmar Tense Markers - Version 1.0
+# Temporal adverbs and sentence-final particle correction mappings
+# for tense mismatch detection.
+#
+# Used by TenseDetectionMixin to detect conflicts between temporal
+# adverbs (future/past/habitual/present) and verb markers (SFPs).
+#
+# All text uses post-normalization Unicode forms (tall AA U+102B -> U+102C).
+# The loader applies _norm_set() / _norm_dict() after loading.
+
+version: "1.0.0"
+category: "tense_markers"
+description: >
+  Temporal adverbs by tense category and sentence-final particle
+  correction maps for tense mismatch detection.
+
+metadata:
+  created_date: "2026-03-19"
+  last_updated: "2026-03-19"
+  source: >
+    Extracted from hardcoded constants in
+    core/detectors/sentence_mixins/tense_detection_mixin.py
+  notes: >
+    Adverb lists support prefix matching (e.g. "လာမယ့်နှစ်တွင်"
+    contains "လာမယ့်နှစ်" as a prefix). SFP correction maps are
+    directional: past/present -> future and future -> past/present.
+
+# ============================================================
+# TEMPORAL ADVERBS
+# Grouped by tense/aspect category.
+# ============================================================
+temporal_adverbs:
+  future:
+    - "မနက်ဖြန်"
+    - "မနက်ဖန်"          # common misspelling (missing ya-yit)
+    - "နောက်နေ့"
+    - "နောက်ရက်"
+    - "နောက်အပတ်"
+    - "နောက်လ"
+    - "နောက်နှစ်"
+    - "မကြာခင်"
+    - "မကြာမီ"
+    - "နောင်"
+    - "သန်ဖြန်"
+    - "လာမယ့်နှစ်"
+    - "လာမယ့်လ"
+    - "လာမယ့်အပတ်"
+    - "လာမည့်နှစ်"
+    - "လာမည့်လ"
+    - "လာမည့်အပတ်"
+
+  past:
+    - "မနေ့က"
+    - "မနေ့"
+    - "တစ်နေ့က"
+    - "အရင်"
+    - "အရင်က"
+    - "အရင်တုန်းက"
+    - "တုန်းက"
+    - "ယခင်"
+    - "ယခင်က"
+    - "တမြန်နေ့က"
+    - "ယနေ့နံနက်က"
+    - "ယနေ့က"
+    - "ပြီးခဲ့သော"
+    - "ပြီးခဲ့သည့်"
+    - "ပြီးခဲ့တဲ့"
+    - "လွန်ခဲ့သော"
+    - "လွန်ခဲ့သည့်"
+    - "လွန်ခဲ့တဲ့"
+
+  habitual:
+    - "နေ့တိုင်း"
+    - "အမြဲ"
+    - "အမြဲတမ်း"
+    - "ပုံမှန်"
+    - "မကြာခဏ"
+    - "နှစ်တိုင်း"
+    - "လတိုင်း"
+    - "အပတ်တိုင်း"
+    - "မနက်တိုင်း"
+    - "ညတိုင်း"
+    - "ညနေတိုင်း"
+
+  present:
+    - "အခု"
+    - "အခုတော့"
+    - "ယခု"
+    - "ယခုတော့"
+    - "လက်ရှိ"
+    - "လက်ရှိမှာ"
+    - "လက်ရှိတွင်"
+
+# ============================================================
+# SFP CORRECTIONS
+# Sentence-final particle correction maps by direction.
+# ============================================================
+sfp_corrections:
+  # When future adverb is present but SFP is past/present
+  past_present_to_future:
+    "တယ်": "မယ်"
+    "ပါတယ်": "ပါမယ်"
+    "သည်": "မည်"
+    "ပါသည်": "ပါမည်"
+
+  # When past adverb is present but SFP is future
+  future_to_past_present:
+    "မယ်": "တယ်"
+    "ပါမယ်": "ပါတယ်"
+    "မည်": "သည်"
+    "ပါမည်": "ပါသည်"
+    "လိမ့်မည်": "သည်"
+    "လိမ့်မယ်": "တယ်"

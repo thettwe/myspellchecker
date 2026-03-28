@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/medial-swap-pairs/v1.0",
+  "title": "Myanmar Medial Swap Pairs Schema",
+  "description": "JSON Schema for validating medial_swap_pairs.yaml - Medial consonant swap pairs for candidate generation",
+
+  "type": "object",
+  "required": ["version", "category", "description", "swap_pairs", "insertions", "deletions", "anusvara"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "medial_swap",
+      "description": "Category type (must be 'medial_swap')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "swap_pairs": {
+      "description": "Bidirectional medial swap pairs for candidate generation",
+      "type": "array",
+      "items": { "$ref": "#/definitions/swap_pair_entry" }
+    },
+
+    "insertions": {
+      "description": "Medial insertion rules for generating variants with an added medial",
+      "type": "array",
+      "items": { "$ref": "#/definitions/medial_operation_entry" }
+    },
+
+    "deletions": {
+      "description": "Medial deletion rules for generating variants with a removed medial",
+      "type": "array",
+      "items": { "$ref": "#/definitions/medial_operation_entry" }
+    },
+
+    "anusvara": {
+      "description": "Anusvara (U+1036) insertion/deletion weights",
+      "type": "object",
+      "required": ["insert_weight", "delete_weight"],
+      "additionalProperties": false,
+      "properties": {
+        "insert_weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for anusvara insertion"
+        },
+        "delete_weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight for anusvara deletion"
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "swap_pair_entry": {
+      "description": "A bidirectional medial swap pair",
+      "type": "object",
+      "required": ["from", "to", "label", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source medial character (Unicode)"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target medial character (Unicode)"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label for the swap"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Likelihood weight (higher = more likely confusion)"
+        }
+      }
+    },
+
+    "medial_operation_entry": {
+      "description": "A medial insertion or deletion operation",
+      "type": "object",
+      "required": ["medial", "label", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "medial": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Medial character to insert or delete (Unicode)"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label for the operation"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Likelihood weight (higher = more likely confusion)"
+        }
+      }
+    }
+  }
+}

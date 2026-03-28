@@ -1,0 +1,236 @@
+# Myanmar Compound Confusion Corrections - Version 1.0
+# Compound word confusion detection patterns for ha-htoe, aspiration,
+# consonant, and suffix-level confusions.
+#
+# Four categories:
+#   1. ha_htoe_compounds — missing ha-htoe (ှ) on a compound component
+#   2. aspirated_compounds — wrong aspiration on initial consonant
+#   3. consonant_confusion_compounds — visual/phonetic consonant confusion
+#   4. suffix_confusion_replacements — abstract suffix confusions
+#
+# Format for compound maps: pattern -> {wrong: ..., correct: ...}
+#   pattern = the wrong compound form (post-normalization)
+#   wrong   = the incorrect component within the pattern
+#   correct = the correct component to suggest
+#
+# Format for suffix map: wrong_suffix -> correct_suffix (string or list)
+#
+# The optional 'overlap' field tags entries that may be redundant with
+# existing algorithmic detectors (informational only — entries are NOT
+# removed without validation).
+#
+# All text uses post-normalization Unicode forms (tall AA U+102B -> U+102C).
+# The loader applies _norm_dict_tuple() / _norm_dict() after loading.
+
+version: "1.0.0"
+category: "compound_confusion"
+description: >
+  Compound confusion corrections for Myanmar text.
+  Keys are incorrect compound forms, values specify wrong/correct components.
+
+metadata:
+  created_date: "2026-03-19"
+  last_updated: "2026-03-19"
+  source: >
+    Extracted from hardcoded dicts in
+    core/detectors/post_norm_mixins/compound_detection_mixin.py
+  notes: >
+    19 overlap-tagged entries were removed after validation confirmed
+    they are fully redundant with existing algorithmic detectors
+    (missing_visarga, medial_confusion, vowel_confusion, missing_anusvara).
+  removed_count: 19
+  remaining_count: 33
+
+# ============================================================
+# HA-HTOE COMPOUNDS
+# Missing ha-htoe (ှ) on a compound component.
+# ============================================================
+ha_htoe_compounds:
+  "နာခောင်း":           # pain -> nose (ha-htoe on na)
+    wrong: "နာ"
+    correct: "နှာ"
+  "နူနာ":               # leprosy (missing ha-htoe)
+    wrong: "နူ"
+    correct: "နှူ"
+  "ငက်ကို":            # bird + object marker: missing ha-htoe
+    wrong: "ငက်"
+    correct: "ငှက်"
+  "လျာက်":             # walk (missing ha-htoe + vowel change)
+    wrong: "လျာက်"
+    correct: "လျှောက်"
+  "ပိုးမွား":            # bee (missing ha-htoe on ma)
+    wrong: "မွား"
+    correct: "မွှား"
+
+# ============================================================
+# ASPIRATED COMPOUNDS
+# Wrong aspiration on initial consonant.
+# ============================================================
+aspirated_compounds:
+  "ကောင်းဆောင်":      # good+hall -> head+lead: leader
+    wrong: "ကောင်း"
+    correct: "ခောင်း"
+  "ကောင်းကိုက်":      # good+bite -> head+ache: headache
+    wrong: "ကောင်း"
+    correct: "ခောင်း"
+  "ကောက်ဆွဲ":         # pick -> noodle: noodles
+    wrong: "ကောက်"
+    correct: "ခောက်"
+  # ba -> pha aspiration (open)
+  # NOTE: Uses Unicode escapes for post-norm form
+  "\u1018\u103d\u1004\u103a\u1037\u1015\u102b":
+    wrong: "\u1018\u103d\u1004\u103a\u1037"
+    correct: "\u1016\u103d\u1004\u103a\u1037"
+
+# ============================================================
+# CONSONANT CONFUSION COMPOUNDS
+# Visual/phonetic consonant confusion in compound words.
+# ============================================================
+consonant_confusion_compounds:
+  # 33 entries remaining after redundancy audit.
+  # 19 entries removed — confirmed redundant with existing algorithmic
+  # detectors (missing_visarga, medial_confusion, vowel_confusion,
+  # missing_anusvara).
+
+  # --- Visual similarity ---
+  "ဂစားကွင်း":         # ga -> ka visual confusion: playground
+    wrong: "ဂစား"
+    correct: "ကစား"
+  "သဘာ\u1040":         # digit zero -> wa: nature
+    wrong: "သဘာ\u1040"
+    correct: "သဘာ\u101d"
+
+  # --- Full compound match ---
+  "ကျမ်းမာ":           # scripture -> health: healthy
+    wrong: "ကျမ်းမာ"
+    correct: "ကျန်းမာ"
+
+  # --- Loanword misspellings ---
+  "ဒီမိုကရေဆီ":       # democracy (sa -> ca confusion)
+    wrong: "ဒီမိုကရေဆီ"
+    correct: "ဒီမိုကရေစီ"
+
+  # --- Wrong compound component ---
+  "ပြောင်းလည်း":       # also/too vs change
+    wrong: "ပြောင်းလည်း"
+    correct: "ပြောင်းလဲ"
+
+  # --- Context-dependent confusable: screen -> picture ---
+  "ကာ ရေး":
+    wrong: "ကာ"
+    correct: "ကား"
+  "ကာ ဆွဲ":
+    wrong: "ကာ"
+    correct: "ကား"
+  "ကာ ရိုက်":
+    wrong: "ကာ"
+    correct: "ကား"
+
+  # --- Nasal swap ---
+  "ကြန်း":             # rough/coarse (nasal swap)
+    wrong: "ကြန်း"
+    correct: "ကြမ်း"
+
+  # --- Final consonant confusion ---
+  "ဂုန်သိက္ခာ":         # jute -> honor: dignity (Pali retroflex)
+    wrong: "ဂုန်"
+    correct: "ဂုဏ်"
+
+  # --- Missing ha-htoe in morpheme ---
+  "သတ်မတ်":            # set/determine (missing ha-htoe)
+    wrong: "မတ်"
+    correct: "မှတ်"
+
+  # --- Ha-htoe on la ---
+  "လာကို ကိုက်":       # flea bite
+    wrong: "လာ"
+    correct: "လှာ"
+
+  # --- Consonant confusion (ma <-> na) ---
+  "ဖမ်တီး":            # create (ma -> na)
+    wrong: "ဖမ်"
+    correct: "ဖန်"
+  "ကုမ်ပဏီ":           # company (ma -> na)
+    wrong: "ကုမ်"
+    correct: "ကုန်"
+  "ခွမ်း":              # question (ma -> na)
+    wrong: "ခွမ်း"
+    correct: "ခွန်း"
+  "ဆမ်းစစ်":           # analyze (ma -> na)
+    wrong: "ဆမ်း"
+    correct: "ဆန်း"
+
+  # --- Aspirated confusion ---
+  "ဒါတ်":              # spirit (da -> dha)
+    wrong: "ဒါ"
+    correct: "ဓာ"
+
+  # --- DB-present confusables ---
+  "ဖွံဖြိုး":            # develop (missing dot)
+    wrong: "ဖွံ"
+    correct: "ဖွံ့"
+  "ယဉ်ကျေးမူ":         # culture (suffix confusion)
+    wrong: "မူ"
+    correct: "မှု"
+
+  # --- Pali loanword missing vowel ---
+  "ရောဂကို":
+    wrong: "ရောဂ"
+    correct: "ရောဂါ"
+  "ရောဂကြောင့်":
+    wrong: "ရောဂ"
+    correct: "ရောဂါ"
+
+  # --- Two-edit compounds ---
+  "ပျိုးကျင်း":         # lay/spread
+    wrong: "ကျင်း"
+    correct: "ခင်း"
+
+  # --- Loanword ba/ba confusion ---
+  "ဆာဘာ":             # server
+    wrong: "ဆာဘာ"
+    correct: "ဆာဗာ"
+
+  # --- Missing diacritics ---
+  "ဖွဖြိုး":            # develop (missing diacritics)
+    wrong: "ဖွ"
+    correct: "ဖွံ့"
+
+  # --- compound-internal confusion ---
+  "ချွဲခြမ်း":           # analyze (ya-pin confusion)
+    wrong: "ချွဲ"
+    correct: "ခွဲ"
+  "ထင်သွင်း":           # submit (aspiration confusion)
+    wrong: "ထင်"
+    correct: "တင်"
+  "ထင်ရှား":            # aspiration confusion variant
+    wrong: "ထင်"
+    correct: "တင်"
+  "သပ်မှတ်":            # define (final consonant confusion)
+    wrong: "သပ်"
+    correct: "သတ်"
+  "ဂိုးသင်း":            # score goal (missing wa-hswe)
+    wrong: "သင်း"
+    correct: "သွင်း"
+  "ခေါင်ယူ":            # call/summon (wrong ending)
+    wrong: "ခေါင်"
+    correct: "ခေါ်"
+  "တွမ်းထုပ်":           # push out (wrap -> remove)
+    wrong: "ထုပ်"
+    correct: "ထုတ်"
+  "ဆရာ သိ သွား":       # go to teacher (know -> toward)
+    wrong: "သိ"
+    correct: "ဆီ"
+  "ဆရာ သိ လာ":        # come to teacher
+    wrong: "သိ"
+    correct: "ဆီ"
+
+# ============================================================
+# SUFFIX CONFUSION REPLACEMENTS
+# Generic suffix-level confusion repairs for invalid tokens.
+# Format: wrong_suffix -> correct_suffix
+# ============================================================
+suffix_confusion_replacements:
+  "ရည": "ရည်"
+  "မူ": "မှု"
+  "ချတ်": "ချက်"

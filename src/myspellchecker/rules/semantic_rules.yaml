@@ -1,0 +1,74 @@
+# Myanmar Semantic Rules - Version 1.0
+# Semantic validation rules for agent implausibility and classifier agreement
+#
+# This file contains:
+# - Implausible subject+action patterns (inanimate subject with human action)
+# - Animacy noun hints (animate vs inanimate) for classifier fallback
+#
+# Schema: https://myspellchecker.dev/schemas/semantic-rules/v1.0
+
+version: "1.0.0"
+category: "semantic_rules"
+description: "Semantic validation rules for Myanmar text"
+
+metadata:
+  created_date: "2026-03-19"
+  last_updated: "2026-03-19"
+  source: "Agent implausibility and classifier agreement patterns"
+
+# ============================================================
+# IMPLAUSIBLE SUBJECTS
+# Inanimate nouns paired with human-only actions.
+# Each entry maps a subject word to:
+#   - suggestion: the corrected (animate) subject
+#   - action_cues: action tokens that trigger the error
+# ============================================================
+
+implausible_subjects:
+  "ကုလားထိုင်":
+    suggestion: "သူ"
+    action_cues: ["စာဖတ်", "ချက်ပေး", "စား"]
+  "စားပွဲ":
+    suggestion: "သူ"
+    action_cues: ["စာဖတ်", "ချက်ပေး", "စား"]
+  "ငါး":
+    suggestion: "လူ"
+    action_cues: ["ကော်ဖီ", "ကိတ်မုန့်", "စာမေးပွဲ", "ချက်ပေး", "စာဖတ်", "စား"]
+  "ကြောင်":
+    suggestion: "ကျောင်းသား"
+    action_cues: ["စာမေးပွဲ", "ဖြေ"]
+  "ကျောက်တုံး":
+    suggestion: "တောင်သူ"
+    action_cues: ["ရိတ်", "စိုက်", "ရေလောင်း", "ထွန်"]
+
+# ============================================================
+# ANIMACY HINTS
+# Used for NUM+CLF merged-token classifier mismatch fallback.
+# When the grammar classifier checker has no explicit mapping,
+# these hints determine animate (ဦး) vs inanimate (လုံး) default.
+# ============================================================
+
+animacy_hints:
+  animate:
+    - "လူ"
+    - "သူ"
+    - "သား"
+    - "သမီး"
+    - "ဝင်"
+    - "ဆရာ"
+    - "ဆရာမ"
+    - "ဝန်ထမ်း"
+    - "အရာရှိ"
+    - "ကျောင်းသား"
+    - "ကျောင်းသူ"
+  inanimate:
+    - "စက်"
+    - "ယာဉ်"
+    - "ဆာဗာ"
+    - "ရူတာ"
+    - "ဖုန်း"
+    - "ကွန်ပျူတာ"
+    - "ဒေတာ"
+    - "စနစ်"
+    - "ဖိုင်"
+    - "ကိရိယာ"

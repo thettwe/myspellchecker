@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/ambiguous-words/v1.0",
+  "title": "Myanmar Ambiguous Words Schema",
+  "description": "JSON Schema for validating ambiguous_words.yaml - Words with multiple POS tags",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "ambiguous_words"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "ambiguous_words",
+      "description": "Category type (must be 'ambiguous_words')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "ambiguous_words": {
+      "description": "Mapping of Myanmar words to their possible POS tags",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "_common.schema.json#/definitions/pos_tag"
+        },
+        "minItems": 1,
+        "description": "List of possible POS tags for this word"
+      }
+    }
+  }
+}

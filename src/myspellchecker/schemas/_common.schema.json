@@ -1,0 +1,254 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/_common/v1.0",
+  "title": "Common Schema Definitions for Myanmar Linguistic Rules",
+  "description": "Shared schema definitions referenced by category-specific schemas",
+
+  "definitions": {
+    "confidence_score": {
+      "description": "Confidence score for rule accuracy (0.0 = no confidence, 1.0 = absolute confidence)",
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+
+    "formality_level": {
+      "description": "Formality level of linguistic expression",
+      "type": "string",
+      "enum": ["colloquial", "neutral", "formal", "polite", "literary"]
+    },
+
+    "pos_tag": {
+      "description": "Part-of-speech tag following P_* or other tag conventions",
+      "type": "string",
+      "pattern": "^[A-Z][A-Z_]*$"
+    },
+
+    "error_severity": {
+      "description": "Severity level for grammar errors",
+      "type": "string",
+      "enum": ["error", "warning", "info"]
+    },
+
+    "example": {
+      "description": "Example usage with Myanmar text and English translation",
+      "type": "object",
+      "required": ["correct", "translation"],
+      "properties": {
+        "correct": {
+          "type": "string",
+          "description": "Correct Myanmar text example"
+        },
+        "incorrect": {
+          "type": "string",
+          "description": "Incorrect Myanmar text example (optional)"
+        },
+        "translation": {
+          "type": "string",
+          "description": "English translation of the example"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "metadata": {
+      "description": "Metadata section for YAML files",
+      "type": "object",
+      "required": ["created_date"],
+      "properties": {
+        "created_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when the file was created (YYYY-MM-DD)"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when the file was last updated (YYYY-MM-DD)"
+        },
+        "total_entries": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of rules/entries in the file"
+        },
+        "source": {
+          "type": "string",
+          "description": "Migration source or origin of the rules"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes about the rules"
+        },
+        "changes": {
+          "description": "Log of recent changes",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "description": "Date of the change (YYYY-MM-DD)"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description of the change"
+                  }
+                },
+                "required": ["date", "description"],
+                "additionalProperties": false
+              }
+            }
+          ]
+        },
+        "remaining_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of remaining entries after cleanup"
+        },
+        "removed_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of entries removed during cleanup"
+        },
+        "total_unconditional": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of unconditional entries"
+        },
+        "total_contextual": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of contextual entries"
+        },
+        "total_colloquial": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of colloquial entries"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the metadata"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "version_info": {
+      "description": "Version information for YAML file",
+      "type": "object",
+      "required": ["version", "category"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Schema version in semver format (e.g., '1.0.0')"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "ambiguous_words",
+            "aspects",
+            "classifiers",
+            "collocations",
+            "compound_confusion",
+            "compounds",
+            "confusable_pairs",
+            "confusion_matrix",
+            "corruption_weights",
+            "detector_confidences",
+            "grammar_rules",
+            "homophone_confusion",
+            "homophones",
+            "medial_confusion",
+            "medial_swap",
+            "morphology",
+            "morphotactics",
+            "negation",
+            "orthographic_corrections",
+            "particles",
+            "pos_inference",
+            "pronouns",
+            "register",
+            "rerank_rules",
+            "semantic_rules",
+            "stacking_pairs",
+            "tense_markers",
+            "tone_rules",
+            "typo_corrections"
+          ],
+          "description": "Rule category type"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the file contents"
+        }
+      }
+    },
+
+    "context_constraint": {
+      "description": "Contextual constraint for when a rule applies",
+      "type": "string",
+      "enum": [
+        "after_noun",
+        "after_verb",
+        "before_noun",
+        "before_verb",
+        "after_consonant",
+        "sentence_final",
+        "sentence_final_after_verb",
+        "sentence_initial",
+        "after_particle",
+        "standalone",
+        "context_dependent",
+        "any"
+      ]
+    },
+
+    "error_type": {
+      "description": "Type of spelling/grammar error",
+      "type": "string",
+      "enum": [
+        "missing_ha_htoe",
+        "missing_asat",
+        "missing_visarga",
+        "missing_anusvara",
+        "missing_dot_below",
+        "missing_e_vowel",
+        "medial_confusion",
+        "medial_typo",
+        "medial_check",
+        "tone_confusion",
+        "character_confusion",
+        "ya_pin_ra_yit",
+        "ra_yit_ya_pin",
+        "double_asat",
+        "wrong_order",
+        "wrong_vowel",
+        "vowel_typo",
+        "vowel_check",
+        "vowel_medial_confusion",
+        "confusion_with_good",
+        "classifier_typo",
+        "negation_typo",
+        "particle_typo",
+        "particle_variant",
+        "particle_check",
+        "question_particle",
+        "consonant_typo",
+        "spacing_error",
+        "visual_confusion",
+        "character_composition",
+        "ocr_confusion",
+        "ocr_noise",
+        "zero_wa_confusion",
+        "incomplete_stacking",
+        "other"
+      ]
+    }
+  }
+}

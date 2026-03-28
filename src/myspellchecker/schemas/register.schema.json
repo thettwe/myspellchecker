@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/register/v1.0",
+  "title": "Myanmar Register Rules Schema",
+  "description": "JSON Schema for validating register.yaml - Formal vs colloquial register mappings",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "register_pairs", "formal_words", "colloquial_words", "neutral_words"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "register",
+      "description": "Category type (must be 'register')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "register_pairs": {
+      "description": "Direct mappings between formal and colloquial equivalents",
+      "type": "array",
+      "items": { "$ref": "#/definitions/register_pair_entry" }
+    },
+
+    "formal_words": {
+      "description": "Words exclusive to formal register",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+
+    "colloquial_words": {
+      "description": "Words exclusive to colloquial register",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+
+    "neutral_words": {
+      "description": "Words used in both formal and colloquial registers",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+
+    "vocabulary_pairs": {
+      "description": "Informal/slang vocabulary with formal equivalents",
+      "type": "array",
+      "items": { "$ref": "#/definitions/vocabulary_pair_entry" }
+    },
+
+    "vocabulary_exempt": {
+      "description": "Multi-word patterns exempt from vocabulary-level register errors",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "sentence_final_particles": {
+      "description": "Sentence-final particles grouped by register",
+      "type": "object",
+      "properties": {
+        "formal": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "colloquial": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "discourse": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "literary_markers": {
+      "description": "Words/particles signalling literary/formal register",
+      "type": "object",
+      "properties": {
+        "particles": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "adverbs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "determiners": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "pronouns": {
+      "description": "Pronoun sets grouped by register",
+      "type": "object",
+      "properties": {
+        "formal": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "colloquial": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "first_person_all": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "discourse_particles": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "informal_particles": {
+      "description": "Casual sentence-ending particles that clash with honorifics",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "formal_context": {
+      "description": "Lexical cues signalling official/formal context",
+      "type": "object",
+      "properties": {
+        "words": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "stems": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "full_form_stems": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "suffix_eligible_types": {
+      "description": "Register pair types eligible for suffix-based detection",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+
+  "definitions": {
+    "register_pair_entry": {
+      "description": "A formal-colloquial register pair",
+      "type": "object",
+      "required": ["formal", "colloquial", "type"],
+      "additionalProperties": false,
+
+      "properties": {
+        "formal": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Formal (written) form"
+        },
+
+        "colloquial": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Colloquial (spoken) form"
+        },
+
+        "type": {
+          "type": "string",
+          "description": "Grammatical type of the pair (e.g., statement_ending, plural_marker)"
+        }
+      }
+    },
+
+    "vocabulary_pair_entry": {
+      "description": "A colloquial vocabulary word with its formal equivalent",
+      "type": "object",
+      "required": ["colloquial", "formal_equivalent"],
+      "additionalProperties": false,
+
+      "properties": {
+        "colloquial": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Colloquial/slang word"
+        },
+        "formal_equivalent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Formal equivalent"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English meaning"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of vocabulary pair"
+        }
+      }
+    }
+  }
+}

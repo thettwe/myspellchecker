@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/homophone-confusion/v1.0",
+  "title": "Myanmar Homophone Confusion Schema",
+  "description": "JSON Schema for validating homophone_confusion.yaml - Context-dependent homophone disambiguation rules",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "homophone_confusion",
+      "description": "Category type (must be 'homophone_confusion')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "aukmyit_context": {
+      "description": "Missing dot-below (aukmyit) rules. Keys are wrong forms (without dot-below), flagged when followed by right-context triggers.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/right_context_entry"
+      }
+    },
+
+    "extra_aukmyit_context": {
+      "description": "Extra dot-below rules. Keys are wrong forms (with extra dot-below), flagged when followed by right-context triggers.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/right_context_entry"
+      }
+    },
+
+    "left_context_homophones": {
+      "description": "Homophones where correct form depends on preceding word(s). Keys are wrong forms.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/left_context_entry"
+      }
+    },
+
+    "left_suffix_triggers": {
+      "description": "Suffix-based trigger generalization for left-context homophones. Keys are wrong forms.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/left_suffix_entry"
+      }
+    }
+  },
+
+  "definitions": {
+    "right_context_entry": {
+      "description": "A right-context homophone rule",
+      "type": "object",
+      "required": ["correct", "triggers"],
+      "additionalProperties": false,
+      "properties": {
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct form to suggest"
+        },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Right-context words that trigger this rule"
+        }
+      }
+    },
+
+    "left_context_entry": {
+      "description": "A left-context homophone rule",
+      "type": "object",
+      "required": ["correct", "triggers"],
+      "additionalProperties": false,
+      "properties": {
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct form to suggest"
+        },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Preceding words that trigger this rule"
+        }
+      }
+    },
+
+    "left_suffix_entry": {
+      "description": "A suffix-based left-context trigger rule",
+      "type": "object",
+      "required": ["correct", "suffixes"],
+      "additionalProperties": false,
+      "properties": {
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct form to suggest"
+        },
+        "suffixes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Suffixes on preceding words that trigger this rule"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/compound-confusion/v1.0",
+  "title": "Myanmar Compound Confusion Schema",
+  "description": "JSON Schema for validating compound_confusion.yaml - Compound word confusion detection patterns",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "ha_htoe_compounds", "aspirated_compounds", "consonant_confusion_compounds", "suffix_confusion_replacements"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "compound_confusion",
+      "description": "Category type (must be 'compound_confusion')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "ha_htoe_compounds": {
+      "description": "Missing ha-htoe (ှ) on a compound component. Keys are wrong compound forms, values specify wrong/correct components.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/compound_correction_entry"
+      }
+    },
+
+    "aspirated_compounds": {
+      "description": "Wrong aspiration on initial consonant. Keys are wrong compound forms, values specify wrong/correct components.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/compound_correction_entry"
+      }
+    },
+
+    "consonant_confusion_compounds": {
+      "description": "Visual/phonetic consonant confusion in compound words. Keys are wrong compound forms, values specify wrong/correct components.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/compound_correction_entry"
+      }
+    },
+
+    "suffix_confusion_replacements": {
+      "description": "Generic suffix-level confusion repairs. Keys are wrong suffixes, values are correct suffixes.",
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1
+          }
+        ]
+      }
+    }
+  },
+
+  "definitions": {
+    "compound_correction_entry": {
+      "description": "Compound confusion correction specifying wrong and correct components",
+      "type": "object",
+      "required": ["wrong", "correct"],
+      "properties": {
+        "wrong": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The incorrect component within the compound"
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct component to suggest"
+        },
+        "overlap": {
+          "type": "string",
+          "description": "Tag indicating potential redundancy with existing algorithmic detectors"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

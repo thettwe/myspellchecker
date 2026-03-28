@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/tone-rules/v1.0",
+  "title": "Myanmar Tone Rules Schema",
+  "description": "JSON Schema for validating tone_rules.yaml - Tone ambiguity patterns and common tone mark errors",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "ambiguous_words"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "tone_rules",
+      "description": "Category type (must be 'tone_rules')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "ambiguous_words": {
+      "description": "Tone-ambiguous words with context-based disambiguation rules",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "description": "Context types for this ambiguous word (e.g., verb, pronoun, particle)",
+        "additionalProperties": {
+          "$ref": "#/definitions/disambiguation_entry"
+        }
+      }
+    },
+    "tone_errors": {
+      "description": "Common tone mark errors mapping incorrect form to correct form",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Correct form of the word"
+      }
+    }
+  },
+  "definitions": {
+    "disambiguation_entry": {
+      "description": "Context-based disambiguation rule for a tone-ambiguous word",
+      "type": "object",
+      "required": [
+        "patterns",
+        "correct_form",
+        "meaning"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Context words that indicate this meaning"
+        },
+        "correct_form": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correct form of the word in this context"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "English meaning in this context"
+        }
+      }
+    }
+  }
+}

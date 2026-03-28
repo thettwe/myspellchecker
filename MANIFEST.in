@@ -1,0 +1,21 @@
+# Include Cython source files for building extensions from sdist
+recursive-include src/myspellchecker *.pyx *.pxd
+
+# Include YAML rule files
+recursive-include src/myspellchecker/rules *.yaml
+
+# Include JSON schema files
+recursive-include src/myspellchecker/schemas *.json
+
+# Include package data
+include src/myspellchecker/py.typed
+
+# Include data files
+recursive-include src/myspellchecker/data *.json
+
+# Include project metadata
+include LICENSE
+include README.md
+include CHANGELOG.md
+include pyproject.toml
+include setup.py

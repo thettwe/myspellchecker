@@ -1,0 +1,75 @@
+# Detector Confidence Scores - Version 1.0
+# Confidence values for text-level detectors by error type.
+# Higher values = more confident in the detection.
+#
+# These are internal heuristic values used to weight detection results.
+
+version: "1.0.0"
+category: "detector_confidences"
+description: "Confidence scores for text-level detectors"
+
+metadata:
+  created_date: "2026-03-14"
+  last_updated: "2026-03-14"
+
+# ============================================================
+# CONFIDENCE SCORES BY ERROR TYPE
+# ============================================================
+confidences:
+  # Pre-normalization errors
+  zawgyi_detected: 0.95
+  zero_width_chars: 0.95
+
+  # Diacritic / structural errors
+  missing_asat: 0.90
+  missing_visarga: 0.90
+  vowel_after_asat: 1.0
+  broken_virama: 0.95
+  broken_stacking: 0.90
+  broken_compound_space: 0.90
+  medial_order: 0.95
+  duplicate_diacritic: 1.0
+  leading_vowel_e: 0.95
+  incomplete_stacking: 0.90
+  missing_stacking: 0.90
+
+  # Medial confusion
+  medial_confusion_unconditional: 0.85
+  medial_confusion_contextual: 0.80
+
+  # Colloquial / particle errors
+  colloquial_contraction: 0.85
+  particle_confusion: 0.80
+
+  # Compound / confusable errors
+  ha_htoe_confusion: 0.70
+
+  # Grammar / structural errors
+  dangling_particle: 0.75
+  dangling_word: 0.80
+  missing_conjunction: 0.80
+  tense_mismatch_future: 0.90
+  tense_mismatch_past: 0.85
+  register_mixing: 0.85
+  negation_sfp_mismatch: 0.95
+  merged_sfp_conjunction: 0.90
+  aspect_adverb_conflict: 0.85
+
+  # Semantic errors
+  semantic_implausibility: 0.72
+
+  # Punctuation errors
+  duplicate_punctuation: 0.99
+  wrong_punctuation: 0.98
+  missing_punctuation: 0.90
+
+  # Syllable validator confidence values
+  broken_virama_fix: 0.90
+  digit_letter_confusion: 0.95
+  aspiration_confusion: 0.85
+  missing_diacritic_compound: 0.85
+  unknown_compound_segment: 0.85
+  informal_with_honorific: 0.85
+  informal_h_after_completive: 0.85
+  broken_compound_morpheme: 0.88
+  missegmented_confusable: 0.88

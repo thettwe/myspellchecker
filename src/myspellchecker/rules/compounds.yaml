@@ -1,0 +1,734 @@
+# Myanmar Compound Word Rules - Version 1.0
+# Patterns and definitions for compound word formation
+#
+# This file contains:
+# - Noun-Noun compounds (head-modifier)
+# - Verb-Verb compounds (serial/complementary)
+# - Reduplication patterns
+# - Prefixes and Suffixes for compound formation
+# - Common compound typos
+#
+# Schema: https://myspellchecker.dev/schemas/compounds/v1.0
+
+version: "1.0.0"
+category: "compounds"
+description: "Myanmar compound word patterns and rules"
+
+metadata:
+  created_date: "2025-12-30"
+  last_updated: "2026-03-08"
+
+# ============================================================
+# COMPOUND DEFINITIONS
+# ============================================================
+
+noun_compounds:
+  # Place compounds
+  - components: ["ပန်း", "ခြံ"]
+    compound: "ပန်းခြံ"
+    meaning: "flower garden"
+  - components: ["ကျောင်း", "သား"]
+    compound: "ကျောင်းသား"
+    meaning: "student (male)"
+  - components: ["ကျောင်း", "သူ"]
+    compound: "ကျောင်းသူ"
+    meaning: "student (female)"
+  - components: ["စာ", "အုပ်"]
+    compound: "စာအုပ်"
+    meaning: "book"
+  - components: ["ရေ", "ခဲ"]
+    compound: "ရေခဲ"
+    meaning: "ice"
+
+  # Time compounds
+  - components: ["မနက်", "စာ"]
+    compound: "မနက်စာ"
+    meaning: "breakfast"
+  - components: ["ည", "စာ"]
+    compound: "ညစာ"
+    meaning: "dinner"
+  - components: ["နေ့", "လည်"]
+    compound: "နေ့လည်"
+    meaning: "noon"
+
+  # Body part compounds
+  - components: ["လက်", "သည်း"]
+    compound: "လက်သည်း"
+    meaning: "fingernail"
+  - components: ["ခြေ", "ဖဝါး"]
+    compound: "ခြေဖဝါး"
+    meaning: "sole of foot"
+
+  # Relationship compounds
+  - components: ["မိ", "ဘ"]
+    compound: "မိဘ"
+    meaning: "parents (Pali: mata + pita)"
+
+verb_compounds:
+  # Action sequences
+  - components: ["စား", "သောက်"]
+    compound: "စားသောက်"
+    meaning: "dine"
+  - components: ["သွား", "လာ"]
+    compound: "သွားလာ"
+    meaning: "travel/commute"
+  - components: ["လုပ်", "ကိုင်"]
+    compound: "လုပ်ကိုင်"
+    meaning: "work/manage"
+  - components: ["ရှာ", "ဖွေ"]
+    compound: "ရှာဖွေ"
+    meaning: "search for"
+
+  # Complementary actions
+  - components: ["ဝယ်", "ရောင်း"]
+    compound: "ဝယ်ရောင်း"
+    meaning: "trade"
+  - components: ["ပေး", "ယူ"]
+    compound: "ပေးယူ"
+    meaning: "exchange"
+  - components: ["သင်", "ကြား"]
+    compound: "သင်ကြား"
+    meaning: "educate"
+
+  # Discovery/finding
+  - components: ["တွေ့", "ရှိ"]
+    compound: "တွေ့ရှိ"
+    meaning: "discover/find"
+
+  # Intensification
+  - components: ["ကြိုး", "စား"]
+    compound: "ကြိုးစား"
+    meaning: "strive"
+  - components: ["အား", "ထုတ်"]
+    compound: "အားထုတ်"
+    meaning: "exert effort"
+
+adjective_compounds:
+  # Adjective + intensifier suffix
+  - components: ["ကြီး", "မား"]
+    compound: "ကြီးမား"
+    meaning: "large/great (ကြီး + မား intensifier)"
+
+reduplication:
+  # Complete reduplication
+  - base: "ဖြေး"
+    reduplicated: "ဖြေးဖြေး"
+    type: "complete"
+    meaning: "slowly"
+  - base: "မြန်"
+    reduplicated: "မြန်မြန်"
+    type: "complete"
+    meaning: "quickly"
+  - base: "လှ"
+    reduplicated: "လှလှ"
+    type: "complete"
+    meaning: "beautifully"
+  - base: "ကောင်း"
+    reduplicated: "ကောင်းကောင်း"
+    type: "complete"
+    meaning: "well"
+  - base: "ရှင်း"
+    reduplicated: "ရှင်းရှင်း"
+    type: "complete"
+    meaning: "clearly"
+
+  # Note: တွေ့ရှိ and ကြီးမား were previously listed here as "partial reduplication"
+  # but they are NOT reduplication. They have been moved to their correct sections:
+  # - တွေ့ရှိ -> verb_compounds (compound verb: တွေ့ + ရှိ)
+  # - ကြီးမား -> adjective_compounds (adjective + intensifier: ကြီး + မား)
+
+prefixes:
+  - prefix: "အ"
+    type: "nominalizer"
+    description: "Converts verbs/adjectives to nouns"
+  - prefix: "အား"
+    type: "intensive"
+    description: "Intensive/emphasis prefix"
+  - prefix: "မ"
+    type: "negation"
+    description: "Negates following word"
+  # Note: The following location words are postpositional/relational nouns
+  # in Myanmar grammar, not true prefixes. They follow the noun they modify
+  # (e.g., အိမ်အထဲ "inside the house"). Listed here for compound formation patterns.
+  - prefix: "အထဲ"
+    type: "inside"
+    description: "Relational noun - inside (postpositional)"
+  - prefix: "အပြင်"
+    type: "outside"
+    description: "Relational noun - outside (postpositional)"
+  - prefix: "အပေါ်"
+    type: "above"
+    description: "Relational noun - above (postpositional)"
+  - prefix: "အောက်"
+    type: "below"
+    description: "Relational noun - below (postpositional)"
+  - prefix: "အရှေ့"
+    type: "front"
+    description: "Relational noun - front (postpositional)"
+  - prefix: "အနောက်"
+    type: "back"
+    description: "Relational noun - back (postpositional)"
+  # Note: အခု is a temporal adverb, not a morphological prefix.
+  - prefix: "အခု"
+    type: "now"
+    description: "Temporal adverb - now/current"
+  - prefix: "အရင်"
+    type: "before"
+    description: "Temporal adverb - before/prior"
+  - prefix: "အချိန်"
+    type: "time"
+    description: "Temporal adverb - during/at time"
+
+suffixes:
+  - suffix: "ခြင်း"
+    type: "nominalization"
+    description: "Action nominalizer"
+  - suffix: "မှု"
+    type: "abstract_noun"
+    description: "Abstract noun suffix"
+  - suffix: "ရေး"
+    type: "affair"
+    description: "Matter/affair suffix"
+  - suffix: "ရာ"
+    type: "place/matter"
+    description: "Place or matter suffix"
+  - suffix: "သူ"
+    type: "agent"
+    description: "Person who does action"
+  - suffix: "သား"
+    type: "son/agent"
+    description: "Male person/agent"
+  - suffix: "သမား"
+    type: "professional"
+    description: "Professional/expert"
+  - suffix: "သည်"
+    type: "sentence_final_particle"
+    description: "Formal verb ending / topic marker"
+    # Note: သည် is primarily a sentence-final particle (formal register)
+    # or topic/relative clause marker. The archaic agentive use (e.g., လက်သည်
+    # "craftsman") is non-productive/fossilized and should not be relied upon.
+  - suffix: "မယ်"
+    type: "female"
+    description: "Female person"
+  - suffix: "ချက်"
+    type: "manner"
+    description: "Way/manner of action"
+  - suffix: "ပုံ"
+    type: "style"
+    description: "Style/shape suffix"
+  - suffix: "လုံး"
+    type: "whole"
+    description: "Entire/complete"
+  - suffix: "မျိုး"
+    type: "kind"
+    description: "Type/kind suffix"
+  - suffix: "ဝန်း"
+    type: "around"
+    description: "Surrounding area"
+  - suffix: "ဆန့်"
+    type: "opposition"
+    description: "Against/opposing"
+  - suffix: "ပတ်"
+    type: "around"
+    description: "Around/surrounding"
+  - suffix: "စက်"
+    type: "machine"
+    description: "Machine/device suffix"
+  - suffix: "ပစ္စည်း"
+    type: "thing"
+    description: "Object/item suffix"
+
+typos:
+  - incorrect: "ပန်ခြံ"
+    correct: "ပန်းခြံ"
+    type: "missing_tone"
+  - incorrect: "ကျောင်သား"
+    correct: "ကျောင်းသား"
+    type: "missing_visarga"
+  - incorrect: "စာအပ်"
+    correct: "စာအုပ်"
+    type: "wrong_vowel"
+  - incorrect: "လက်သည"
+    correct: "လက်သည်း"
+    type: "missing_tone"
+  - incorrect: "ဖြေဖြေး"
+    correct: "ဖြေးဖြေး"
+    type: "inconsistent_reduplication"
+  - incorrect: "မြန်မြ"
+    correct: "မြန်မြန်"
+    type: "incomplete_reduplication"
+
+# ============================================================
+# COMPOUND CONFUSION DICTS
+# ============================================================
+# These sections consolidate compound confusion patterns
+# previously hardcoded in spellchecker.py.
+# All pattern strings use post-normalization forms.
+
+ha_htoe_compounds:
+  # Compounds where the first component is missing ha-htoe (ှ)
+  # Format: pattern (post-normalization) → wrong_component → correct_component
+  - pattern: "နာခောင်း"
+    wrong: "နာ"
+    correct: "နှာ"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "pain → nose (ha-htoe on na)"
+  - pattern: "နူနာ"
+    wrong: "နူ"
+    correct: "နှူ"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "နူ → နှူ (leprosy, missing ha-htoe)"
+  - pattern: "ငက်ကို"
+    wrong: "ငက်"
+    correct: "ငှက်"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "bird + object marker: missing ha-htoe"
+  - pattern: "လျာက်"
+    wrong: "လျာက်"
+    correct: "လျှောက်"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "walk (missing ha-htoe + vowel change)"
+  # v2.3 — YAML migration gap fixes
+  - pattern: "ပိုးမွား"
+    wrong: "မွား"
+    correct: "မွှား"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "ပိုးမွှား (insect pest) — missing ha-htoe on မ"
+
+aspirated_compounds:
+  # Compounds where the initial consonant should be aspirated
+  # Format: pattern (post-normalization) → wrong_component → correct_component
+  - pattern: "ကောင်းဆောင်"
+    wrong: "ကောင်း"
+    correct: "ခောင်း"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "good+hall → head+lead: ခေါင်းဆောင် (leader)"
+  - pattern: "ကောင်းကိုက်"
+    wrong: "ကောင်း"
+    correct: "ခောင်း"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "good+bite → head+ache (headache)"
+  - pattern: "ကောက်ဆွဲ"
+    wrong: "ကောက်"
+    correct: "ခောက်"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "pick→noodle: ခေါက်ဆွဲ (noodles)"
+  - pattern: "ဘွင့်ပါ"
+    wrong: "ဘွင့်"
+    correct: "ဖွင့်"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "ဘွင့် → ဖွင့် (open, ba→pha aspiration)"
+  # v2.3 — aspirated confusion in compound
+  - pattern: "စစ်စေး"
+    wrong: "စေး"
+    correct: "ဆေး"
+    error_type: "ha_htoe_confusion"
+    confidence: 0.90
+    meaning: "aspirated: စစ်ဆေး (examine, f=103K)"
+
+consonant_confusion_compounds:
+  # Compounds where one component is visually or phonetically confusable
+  - pattern: "ဂစားကွင်း"
+    wrong: "ဂစား"
+    correct: "ကစား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ဂ→က visual confusion: ကစားကွင်း (playground)"
+  - pattern: "ကျမ်းမာ"
+    wrong: "ကျမ်းမာ"
+    correct: "ကျန်းမာ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "scripture→health: ကျန်းမာ (healthy)"
+  - pattern: "ကြွေးစား"
+    wrong: "ကြွေးစား"
+    correct: "ကျွေးစား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "owe+eat → treat/feed (ya-yit→ya-pin)"
+  - pattern: "သဘာ၀"
+    wrong: "သဘာ၀"
+    correct: "သဘာဝ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "digit zero→wa: သဘာဝ (nature)"
+  - pattern: "ဒီမိုကရေဆီ"
+    wrong: "ဒီမိုကရေဆီ"
+    correct: "ဒီမိုကရေစီ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "democracy (ဆ→စ confusion)"
+  - pattern: "ပြောင်းလည်း"
+    wrong: "ပြောင်းလည်း"
+    correct: "ပြောင်းလဲ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "Wrong compound component: လည်း (also) vs လဲ (change)"
+  - pattern: "ကာ ရေး"
+    wrong: "ကာ"
+    correct: "ကား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ကာ before ရေး (write/draw) → ကား (picture)"
+  - pattern: "ကာ ဆွဲ"
+    wrong: "ကာ"
+    correct: "ကား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ကာ before ဆွဲ (draw) → ကား (picture)"
+  - pattern: "ကာ ရိုက်"
+    wrong: "ကာ"
+    correct: "ကား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ကာ before ရိုက် (shoot) → ကား (film)"
+  - pattern: "ပြော်ရွင်"
+    wrong: "ပြော်"
+    correct: "ပျော်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "mistake→happy: ပျော်ရွင် (happy, medial swap)"
+  - pattern: "ကြန်း"
+    wrong: "ကြန်း"
+    correct: "ကြမ်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "rough/coarse (nasal swap)"
+  - pattern: "ဘောလုး"
+    wrong: "ဘောလုး"
+    correct: "ဘောလုံး"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "football (missing anusvara ံ)"
+  - pattern: "ဂုန်သိက္ခာ"
+    wrong: "ဂုန်"
+    correct: "ဂုဏ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "jute → honor: ဂုဏ်သိက္ခာ (dignity)"
+  - pattern: "မနက်ဖန်"
+    wrong: "ဖန်"
+    correct: "ဖြန်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "tomorrow morning — ဖန်→ဖြန် (ya-yit missing)"
+  - pattern: "နေပီ"
+    wrong: "ပီ"
+    correct: "ပြီ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "progressive+completed — always ပြီ not ပီ"
+  - pattern: "သတ်မတ်"
+    wrong: "မတ်"
+    correct: "မှတ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "kill+March → set/determine (missing ha-htoe)"
+  - pattern: "တင်သွင်"
+    wrong: "သွင်"
+    correct: "သွင်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "submit (missing visarga): တင်သွင်း"
+  - pattern: "ဘူရား"
+    wrong: "ဘူရား"
+    correct: "ဘုရား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "vowel u/uu confusion in religious noun"
+  - pattern: "လာကို ကိုက်"
+    wrong: "လာ"
+    correct: "လှာ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "flea bite: လှာကို ကိုက် (tongue)"
+  # v1.4 — Compound morpheme confusions
+  # Consonant confusion (ma↔na) in compound morphemes
+  - pattern: "ဖမ်တီး"
+    wrong: "ဖမ်"
+    correct: "ဖန်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ma→na: ဖန်တီး (create, f=114K)"
+  - pattern: "ဆမ်းစစ်"
+    wrong: "ဆမ်း"
+    correct: "ဆန်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ma→na: ဆန်းစစ် (analyze, f=13K)"
+  - pattern: "ခွမ်း"
+    wrong: "ခွမ်း"
+    correct: "ခွန်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ma→na: မေးခွန်း (question, f=47K)"
+  - pattern: "ထုတ်ကုမ်"
+    wrong: "ကုမ်"
+    correct: "ကုန်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ma→na: ထုတ်ကုန် (product, f=88K)"
+  # Missing visarga in compound morphemes
+  - pattern: "ဆုံဖြတ်"
+    wrong: "ဆုံ"
+    correct: "ဆုံး"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: ဆုံးဖြတ် (decide, f=49K)"
+  - pattern: "စွမ်ဆောင်"
+    wrong: "စွမ်"
+    correct: "စွမ်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: စွမ်းဆောင် (capability, f=49K)"
+  - pattern: "တိုတက်"
+    wrong: "တို"
+    correct: "တိုး"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: တိုးတက် (progress, f=101K)"
+  - pattern: "သင်တန်"
+    wrong: "တန်"
+    correct: "တန်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: သင်တန်း (course, f=69K)"
+  - pattern: "သင်ကြာ"
+    wrong: "ကြာ"
+    correct: "ကြား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: သင်ကြား (teach, f=35K)"
+  - pattern: "အင်အာ"
+    wrong: "အာ"
+    correct: "အား"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: အင်အား (strength, f=61K)"
+  # Vowel confusion in compounds
+  - pattern: "ပြူပြင်"
+    wrong: "ပြူ"
+    correct: "ပြု"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "UU→U: ပြုပြင် (repair, f=53K)"
+  - pattern: "ကူသ"
+    wrong: "ကူ"
+    correct: "ကု"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "UU→U: ကုသ (treat, f=46K)"
+  - pattern: "ရှာဖွဲ"
+    wrong: "ဖွဲ"
+    correct: "ဖွေ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "AI→E: ရှာဖွေ (search, f=118K)"
+  - pattern: "ဝင်ငွဲ"
+    wrong: "ငွဲ"
+    correct: "ငွေ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "AI→E: ဝင်ငွေ (income, f=34K)"
+  # Medial confusion in compounds
+  - pattern: "ဆင်ချင်"
+    wrong: "ချင်"
+    correct: "ခြင်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ya-pin→ya-yit: ဆင်ခြင် (consider, f=8K)"
+  # Aspirated confusion in compounds
+  - pattern: "စိတ်ဒါတ်"
+    wrong: "ဒါ"
+    correct: "ဓာ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "da→dha: စိတ်ဓာတ် (spirit, f=18K)"
+  # Anusvara confusion
+  - pattern: "ထောက်ပန့်"
+    wrong: "ပန့်"
+    correct: "ပံ့"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "na+dot→anusvara: ထောက်ပံ့ (support, f=74K)"
+  # DB-present confusables
+  - pattern: "ဖွံဖြိုး"
+    wrong: "ဖွံ"
+    correct: "ဖွံ့"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing dot: ဖွံ့ဖြိုး (develop, f=57K)"
+  - pattern: "ယဉ်ကျေးမူ"
+    wrong: "မူ"
+    correct: "မှု"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "suffix confusion: ယဉ်ကျေးမှု (culture, f=41K)"
+  # v2.3 — YAML migration gap fixes + new patterns
+  - pattern: "ဖွဖြိုး"
+    wrong: "ဖွ"
+    correct: "ဖွံ့"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing anusvara+dot: ဖွံ့ဖြိုး (develop, f=57K)"
+  - pattern: "ဆာဘာ"
+    wrong: "ဆာဘာ"
+    correct: "ဆာဗာ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "loanword ဘ/ဗ confusion: ဆာဗာ (server)"
+  - pattern: "ရောဂကို"
+    wrong: "ရောဂ"
+    correct: "ရောဂါ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "Pali loanword missing vowel: ရောဂါ (disease)"
+  - pattern: "ရောဂကြောင့်"
+    wrong: "ရောဂ"
+    correct: "ရောဂါ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "Pali loanword missing vowel: ရောဂါ (disease)"
+  - pattern: "ရောဂ ကူးစက်"
+    wrong: "ရောဂ"
+    correct: "ရောဂါ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "Pali loanword missing vowel: ရောဂါ (disease transmission)"
+  - pattern: "ကိုယခံ"
+    wrong: "ကိုယ"
+    correct: "ကိုယ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing asat: ကိုယ်ခံ (immunity/resistance, f=2K)"
+  - pattern: "ရာဖွေ"
+    wrong: "ရာ"
+    correct: "ရှာ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "hundred→search: ရှာဖွေ (search, f=118K)"
+  - pattern: "ဆုံခန်း"
+    wrong: "ဆုံ"
+    correct: "ဆုံး"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing visarga: ဆုံးခန်းတိုင် (until the end)"
+  - pattern: "ကိုင်တွဲ"
+    wrong: "တွဲ"
+    correct: "တွယ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "wrong final: ကိုင်တွယ် (handle/deal with, f=24K)"
+  - pattern: "ပါင်းစပ်"
+    wrong: "ပါင်း"
+    correct: "ပေါင်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing E vowel: ပေါင်းစပ် (combine, f=32K)"
+  - pattern: "တွမ်းထုပ်"
+    wrong: "ထုပ်"
+    correct: "ထုတ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "morpheme-level: ထုပ်→ထုတ် in တွန်းထုတ် (push out)"
+  # v2.3 — FN batch: compound-internal confusion
+  - pattern: "ချွဲခြမ်း"
+    wrong: "ချွဲ"
+    correct: "ခွဲ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "ya-pin confusion: ခွဲခြမ်းစိတ်ဖြာ (analyze in detail)"
+  - pattern: "ထင်သွင်း"
+    wrong: "ထင်"
+    correct: "တင်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "aspiration confusion: တင်သွင်း (submit/present)"
+  - pattern: "သပ်မှတ်"
+    wrong: "သပ်"
+    correct: "သတ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "final consonant: သတ်မှတ် (define/determine)"
+  - pattern: "ဂိုးသင်း"
+    wrong: "သင်း"
+    correct: "သွင်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing wa-hswe: ဂိုးသွင်း (score a goal)"
+  - pattern: "ခေါင်ယူ"
+    wrong: "ခေါင်"
+    correct: "ခေါ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "wrong ending: ခေါ်ယူ (call/summon)"
+  - pattern: "ဆရာ သိ သွား"
+    wrong: "သိ"
+    correct: "ဆီ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "directional: ဆရာဆီ သွား (go to the teacher)"
+  - pattern: "ဆရာ သိ လာ"
+    wrong: "သိ"
+    correct: "ဆီ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "directional: ဆရာဆီ လာ (come to the teacher)"
+  # v2.3 — recovering confusable TPs as compound entries
+  - pattern: "သမတကြီး"
+    wrong: "သမတ"
+    correct: "သမ္မတ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "broken stacking: သမ္မတ (president, f=6K)"
+  - pattern: "သမတသည်"
+    wrong: "သမတ"
+    correct: "သမ္မတ"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "broken stacking: သမ္မတ (president, f=6K)"
+  - pattern: "ကရီးသွား"
+    wrong: "ကရီး"
+    correct: "ခရီး"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "aspirated: ခရီးသွား (traveler, f=87K)"
+  - pattern: "ဖြတ်သမ်း"
+    wrong: "သမ်း"
+    correct: "သန်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "wrong final ma→na: ဖြတ်သန်း (pass through, f=31K)"
+  - pattern: "ချက်ပုတ်"
+    wrong: "ပုတ်"
+    correct: "ပြုတ်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing ya-pin: ချက်ပြုတ် (cook, f=8K)"
+  - pattern: "ပျိုးကျင်း"
+    wrong: "ကျင်း"
+    correct: "ခင်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "compound: ပျိုးခင်း (nursery, f=2K)"
+  - pattern: "ပန်လာ"
+    wrong: "ပန်"
+    correct: "ပြန်"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "missing ya-pin: ပြန်လာ (come back, f=110K)"
+  - pattern: "ဖြန်းချင်း"
+    wrong: "ချင်း"
+    correct: "ခြင်း"
+    error_type: "confusable_error"
+    confidence: 0.90
+    meaning: "medial ya-yit→ya-pin: ဖြန်းခြင်း (spraying, nominalizer)"

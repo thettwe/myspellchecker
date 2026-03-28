@@ -1,0 +1,167 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/orthographic-corrections/v1.0",
+  "title": "Myanmar Orthographic Corrections Schema",
+  "description": "JSON Schema for validating orthographic_corrections.yaml - Orthographic correction rules for medial confusion, vowel reorder, and stacking errors",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata",
+    "medial_confusion_unconditional"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.0.0')"
+    },
+    "category": {
+      "type": "string",
+      "const": "orthographic_corrections",
+      "description": "Category type (must be 'orthographic_corrections')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "medial_confusion_unconditional": {
+      "description": "Medial consonant confusion pairs where the wrong form is always incorrect (no context needed). When 'correct' is a list, order matters — first entry is the preferred suggestion.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/unconditional_entry"
+      }
+    },
+    "medial_confusion_contextual": {
+      "description": "Medial consonant confusion pairs triggered only when followed by specific context tokens.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/contextual_entry"
+      }
+    },
+    "aukmyit_confusion": {
+      "description": "Missing or extra dot-below (့) creating a valid but wrong word. Context-dependent corrections.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/contextual_entry"
+      }
+    },
+    "vowel_reorder": {
+      "description": "Pre-normalization vowel ordering errors detected before Unicode normalization silently fixes them.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/unconditional_entry"
+      }
+    },
+    "colloquial_contractions": {
+      "description": "Informal/casual spelling mapped to standard forms.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/unconditional_entry"
+      }
+    },
+    "stacking_completions": {
+      "description": "Incomplete Pali/Sanskrit consonant stacking corrections.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/unconditional_entry"
+      }
+    }
+  },
+  "definitions": {
+    "correction_value": {
+      "description": "Correction target — a single string or an ordered list of strings (first = preferred suggestion)",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "unconditional_entry": {
+      "description": "Unconditional orthographic correction — always applies regardless of context",
+      "type": "object",
+      "required": [
+        "incorrect",
+        "correct",
+        "meaning",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "incorrect": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incorrect Myanmar text (the error form)"
+        },
+        "correct": {
+          "$ref": "#/definitions/correction_value",
+          "description": "Correct Myanmar text — string or ordered list (first = preferred)"
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 3,
+          "description": "English meaning or explanation of the correction"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        }
+      }
+    },
+    "contextual_entry": {
+      "description": "Context-dependent orthographic correction — applies only when followed by specific tokens",
+      "type": "object",
+      "required": [
+        "incorrect",
+        "correct",
+        "followed_by",
+        "meaning",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "incorrect": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incorrect Myanmar text (the error form)"
+        },
+        "correct": {
+          "$ref": "#/definitions/correction_value",
+          "description": "Correct Myanmar text — string or ordered list (first = preferred)"
+        },
+        "followed_by": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "Context tokens that must follow for this correction to trigger"
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 3,
+          "description": "English meaning or explanation of the correction"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        }
+      }
+    }
+  }
+}

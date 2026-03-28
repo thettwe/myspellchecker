@@ -1,0 +1,228 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel", "Cython>=3.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myspellchecker"
+version = "1.0.0"
+description = "High-performance Myanmar (Burmese) spell checker with syllable-first architecture"
+readme = "README.md"
+# NOTE: Codebase uses Python 3.10+ syntax (PEP 604 unions like `str | None`).
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Thet Twe Aung", email = "thettweaung@gmail.com"}
+]
+keywords = ["myanmar", "burmese", "spell-checker", "nlp", "language-processing"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Text Processing :: Linguistic",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+dependencies = [
+    # Core dependencies (required for spell checking)
+    "numpy>=1.22.0",  # CVE-2021-41496 fixed in 1.22.0
+    "python-crfsuite>=0.9.7",
+    "rich>=13.0.0",  # Terminal formatting, colors, and progress bars
+    "pyyaml>=6.0.0",  # YAML parsing for grammar rules (required)
+    # Configuration validation (Pydantic v2)
+    "pydantic>=2.0.0,<3.0.0",  # Type-safe configuration with rich validation
+    # Zawgyi detection and conversion (required for Myanmar language support)
+    "myanmartools>=1.2.1",  # Google's statistical Zawgyi detector (~95% accuracy)
+    "python-myanmar>=1.0.0",  # Zawgyi-to-Unicode conversion
+]
+
+[project.scripts]
+myspellchecker = "myspellchecker.cli:main"
+
+[project.optional-dependencies]
+# Dictionary building pipeline (myspellchecker build)
+build = [
+    "pyarrow>=14.0.1",  # CVE-2023-47248 fixed in 14.0.1
+    "duckdb>=1.0.0",  # Fast OLAP database for build pipeline aggregations
+    "xxhash>=3.0.0",  # Fast non-cryptographic hashing for dedup
+    "tqdm>=4.65.0",  # Progress bars for data pipeline
+    "cached-path>=1.2.0",  # Resource downloading and caching
+]
+
+# AI features (Semantic Context Checking)
+ai = [
+    "onnxruntime>=1.15.0",
+    "tokenizers>=0.13.0",
+]
+
+# Transformer-based POS tagging (Optional)
+transformers = [
+    "transformers>=4.30.0",
+    "torch>=2.6.0",  # CVE-2025-32434 RCE fixed in 2.6.0
+]
+
+# Complete AI stack (Semantic + Transformer POS)
+ai-full = [
+    "onnxruntime>=1.15.0",
+    "tokenizers>=0.13.0",
+    "transformers>=4.30.0",
+    "torch>=2.6.0",
+]
+
+# Training dependencies (for custom model training)
+# Includes ONNX export dependencies since training pipeline exports to ONNX
+train = [
+    "transformers>=4.30.0",
+    "datasets>=2.14.0",
+    "accelerate>=0.21.0",
+    "torch>=2.6.0",
+    "onnx>=1.14.0",         # ONNX model format (required by onnxruntime.quantization)
+    "onnxruntime>=1.15.0",  # For ONNX export step
+    "onnxscript>=0.1.0",    # Required by torch.onnx.export
+    "tokenizers>=0.13.0",   # For BPE tokenizer training
+]
+
+dev = [
+    # Testing
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-xdist>=3.0.0",  # Parallel test execution
+    "pytest-timeout>=2.2.0",  # Abort hanging tests
+    "hypothesis>=6.0.0",    # Property-based testing
+    "freezegun>=1.2.0",     # Time mocking for TTL/sleep tests
+
+    # Type checking and linting
+    "mypy>=1.0.0",
+    "ruff>=0.3.0",
+
+    # AI Training (Only needed for model development, not usage)
+    "transformers>=4.30.0",
+    "datasets>=2.14.0",
+    "accelerate>=0.21.0",
+    "torch>=2.6.0",
+]
+
+# Note: pyyaml is now a core dependency (required for grammar rules)
+
+[project.urls]
+Homepage = "https://github.com/thettwe/my-spellchecker"
+Documentation = "https://docs.myspellchecker.com/"
+Repository = "https://github.com/thettwe/my-spellchecker"
+"Bug Tracker" = "https://github.com/thettwe/my-spellchecker/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+myspellchecker = [
+    "py.typed",
+    "**/*.pyx",
+    "**/*.pxd",
+    "data/*.onnx",
+    "data/*.json",
+    "data/models/*.mmap",
+    "rules/*.yaml",
+    "schemas/*.json",
+]
+
+[tool.pytest.ini_options]
+# testpaths intentionally omitted — specify paths explicitly on CLI:
+#   pytest tests/              → full suite
+#   pytest tests/test_foo.py   → single file
+#   pytest tests/ -m unit      → unit tests only
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+# Coverage is opt-in: pytest --cov=myspellchecker --cov-report=term-missing --cov-fail-under=75
+addopts = [
+    "--strict-markers",
+    "-m", "not slow",       # Skip slow tests by default; run with: pytest -m slow
+]
+norecursedirs = ["scripts", ".git", "venv", "*.egg-info", "__pycache__", ".tox", "dist", "build"]
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "e2e: marks tests as end-to-end tests",
+    "benchmark: marks tests as benchmarks/performance checks",
+]
+filterwarnings = [
+    "ignore:builtin type SwigPyPacked:DeprecationWarning",
+    "ignore:builtin type SwigPyObject:DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src/myspellchecker"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    # Hard-to-test files requiring optional dependencies (torch, transformers)
+    "src/myspellchecker/training/trainer.py",
+    "src/myspellchecker/algorithms/pos_tagger_transformer.py",
+    "src/myspellchecker/text/ner_model.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "src/myspellchecker/training/trainer.py",
+    "src/myspellchecker/algorithms/pos_tagger_transformer.py",
+    "src/myspellchecker/text/ner_model.py",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# Enable Pyflakes (F), pycodestyle (E, W), isort (I), and bugbear (B)
+select = ["E", "F", "W", "I", "B"]
+ignore = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+ignore_missing_imports = true
+exclude = [
+    "^tests/",
+    "^benchmarks/",
+    "^venv",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "pycrfsuite.*",
+    "myanmartools.*",
+    "duckdb.*",
+    "pyarrow.*",
+    "onnxruntime.*",
+    "transformers.*",
+    "torch.*",
+    "cached_path.*",
+]
+ignore_missing_imports = true
