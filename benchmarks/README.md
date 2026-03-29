@@ -1,4 +1,4 @@
-# Myanmar Spell Checker Benchmark
+# mySpellChecker Benchmark
 
 Benchmark suite for evaluating the myspellchecker error detection and suggestion pipeline.
 489 hand-annotated Myanmar sentences covering syllable errors, word errors, grammar errors,
