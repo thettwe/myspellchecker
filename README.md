@@ -199,6 +199,7 @@ Full documentation is available at **[docs.myspellchecker.com](https://docs.mysp
 *   **[Contributing](https://docs.myspellchecker.com/development/contributing)**: Contribution guidelines.
 *   **[Naming Conventions](https://docs.myspellchecker.com/development/naming-conventions)**: Code naming standards.
 *   **[Testing](https://docs.myspellchecker.com/development/testing)**: Test suite and coverage.
+*   **[Benchmarks](https://docs.myspellchecker.com/development/benchmarks)**: Benchmark suite and scoring methodology.
 *   **[Cython Dev Guide](https://docs.myspellchecker.com/development/cython-guide)**: Working with Cython extensions.
 *   **[Cython Reference](https://docs.myspellchecker.com/guides/cython)**: Cython patterns and optimization.
 *   **[CLI Formatting](https://docs.myspellchecker.com/guides/cli-formatting)**: CLI output formatting internals.
@@ -476,8 +477,11 @@ This project builds upon the work of several open-source projects and researcher
 | Resource | Author | Description | Link |
 |----------|--------|-------------|------|
 | **Myanmar POS Model** | Chuu Htet Naing | XLM-RoBERTa-based POS tagger (93.37% accuracy) | [HuggingFace](https://huggingface.co/chuuhtetnaing/myanmar-pos-model) |
+| **Myanmar Text Segmentation Model** | Chuu Htet Naing | Transformer-based word segmenter | [HuggingFace](https://huggingface.co/chuuhtetnaing/myanmar-text-segmentation-model) |
 | **myWord Segmentation** | Ye Kyaw Thu | Viterbi-based Myanmar word segmentation | [GitHub](https://github.com/ye-kyaw-thu/myWord) |
+| **myPOS** | Ye Kyaw Thu | POS corpus used for CRF training | [GitHub](https://github.com/ye-kyaw-thu/myPOS) |
 | **CRF Word Segmenter** | Ye Kyaw Thu | CRF-based syllable-to-word segmentation model | [GitHub](https://github.com/ye-kyaw-thu) |
+| **myanmartools** | Google | Zawgyi detection and conversion | [GitHub](https://github.com/google/myanmar-tools) |
 
 ### Key Dependencies
 
@@ -491,6 +495,7 @@ This project builds upon the work of several open-source projects and researcher
 | Algorithm | Author | Description | Link |
 |-----------|--------|-------------|------|
 | **SymSpell** | Wolf Garbe | Symmetric delete spelling correction algorithm. mySpellChecker includes a custom implementation with Myanmar-specific variant generation. | [GitHub](https://github.com/wolfgarbe/SymSpell) |
+| **SymSpell4Burmese** | Hlaing Myat Nwe et al. | Foundational research on adapting SymSpell for Burmese | [IEEE](https://ieeexplore.ieee.org/document/9678171/) |
 
 ### Citations
 
@@ -519,6 +524,28 @@ If you use mySpellChecker in your research, please cite the relevant works:
   year = {2012},
   publisher = {GitHub},
   url = {https://github.com/wolfgarbe/SymSpell}
+}
+
+@inproceedings{symspell4burmese,
+  title = {SymSpell4Burmese: Symmetric Delete Spelling Correction Algorithm for Burmese},
+  author = {Hlaing Myat Nwe and others},
+  year = {2021},
+  booktitle = {IEEE Conference},
+  url = {https://ieeexplore.ieee.org/document/9678171/}
+}
+
+@misc{yekyawthu-mypos,
+  author = {Ye Kyaw Thu},
+  title = {myPOS: POS Corpus for Myanmar Language},
+  publisher = {GitHub},
+  url = {https://github.com/ye-kyaw-thu/myPOS}
+}
+
+@misc{chuuhtetnaing-myanmar-segmentation,
+  author = {Chuu Htet Naing},
+  title = {Myanmar Text Segmentation Model},
+  publisher = {Hugging Face},
+  url = {https://huggingface.co/chuuhtetnaing/myanmar-text-segmentation-model}
 }
 ```
 
