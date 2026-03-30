@@ -437,8 +437,8 @@ The semantic model adds ~23ms mean latency but boosts recall from 94.7% to 99.6%
 
 ### Setup
 ```bash
-git clone https://github.com/thettwe/my-spellchecker.git
-cd my-spellchecker
+git clone https://github.com/thettwe/myspellchecker.git
+cd myspellchecker
 python -m venv venv
 source venv/bin/activate
 pip install -e ".[dev]"
@@ -470,7 +470,7 @@ See the [Development Guide](https://docs.myspellchecker.com/development/index) f
 
 ## Acknowledgments
 
-This project builds upon the work of several open-source projects and researchers. We gratefully acknowledge:
+mySpellChecker integrates tools and research from the Myanmar NLP community:
 
 ### Models & Resources
 
@@ -549,7 +549,7 @@ If you use mySpellChecker in your research, please cite the relevant works:
 }
 ```
 
-We thank these researchers and developers for making their work publicly available, enabling high-quality Myanmar language processing.
+Thanks to these researchers and developers for making their work publicly available, enabling high-quality Myanmar language processing.
 
 ## License
 
