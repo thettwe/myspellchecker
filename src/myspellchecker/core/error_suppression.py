@@ -214,18 +214,30 @@ class ErrorSuppressionMixin:
         """Suppress errors on fragments from valid Pali/Sanskrit virama stacking.
 
         Words containing valid consonant stacking via virama (U+1039), e.g.
-        မဂ္ဂဇင်း (magazine), ပစ္စည်း (things), break the syllable segmenter.
-        The resulting fragments (e.g. ``မ``) are flagged as invalid syllables.
-        This method finds valid stacking patterns, expands to word boundaries,
-        and suppresses all ``invalid_syllable`` errors within those words.
-        """
-        from myspellchecker.core.constants.myanmar_constants import STACKING_EXCEPTIONS
+        ဗုဒ္ဓ (Buddha), မဂ္ဂဇင်း (magazine), ပစ္စည်း (things), break the
+        syllable segmenter.  The resulting fragments (e.g. ``ဗု``, ``ဒ္ဓ``)
+        are flagged as invalid syllables or unknown words.
 
+        This method:
+        1. Validates stacking pairs against the YAML-loaded whitelist
+           (``rules/stacking_pairs.yaml``) via ``load_stacking_pairs()``.
+        2. Expands each valid stacking site to word boundaries.
+        3. Merges overlapping/adjacent ranges so that a word with multiple
+           stacking sites (e.g. ပစ္စည်း) produces one continuous range.
+        4. Suppresses both ``invalid_syllable`` and ``invalid_word`` errors
+           whose span falls entirely within a stacking word range.
+        """
         _VIRAMA = "\u1039"
         if _VIRAMA not in text:
             return
 
-        stacking_word_ranges: list[tuple[int, int]] = []
+        # Load comprehensive stacking pairs from YAML (with hardcoded fallback)
+        from myspellchecker.core.detection_rules import load_stacking_pairs
+
+        valid_pairs = load_stacking_pairs()
+
+        # --- Phase 1: find word ranges containing valid stacking sites ---
+        raw_ranges: list[tuple[int, int]] = []
         for i, ch in enumerate(text):
             if ch != _VIRAMA:
                 continue
@@ -233,26 +245,40 @@ class ErrorSuppressionMixin:
                 continue
             upper = text[i - 1]
             lower = text[i + 1]
-            if (upper, lower) not in STACKING_EXCEPTIONS:
+            if (upper, lower) not in valid_pairs:
                 continue
+            # Expand to word boundaries (space-delimited)
             start = i
             while start > 0 and text[start - 1] != " ":
                 start -= 1
             end = i + 1
             while end < len(text) and text[end] != " ":
                 end += 1
-            stacking_word_ranges.append((start, end))
+            raw_ranges.append((start, end))
 
-        if not stacking_word_ranges:
+        if not raw_ranges:
             return
 
+        # --- Phase 2: merge overlapping / adjacent ranges ---
+        raw_ranges.sort()
+        merged: list[tuple[int, int]] = [raw_ranges[0]]
+        for rs, re in raw_ranges[1:]:
+            prev_s, prev_e = merged[-1]
+            if rs <= prev_e:
+                # Overlapping or contiguous — extend
+                merged[-1] = (prev_s, max(prev_e, re))
+            else:
+                merged.append((rs, re))
+
+        # --- Phase 3: suppress syllable AND word errors within ranges ---
+        _SUPPRESSIBLE = frozenset({ET_SYLLABLE, ET_WORD})
         to_remove: set[int] = set()
         for idx, e in enumerate(errors):
-            if getattr(e, "error_type", "") != ET_SYLLABLE:
+            if getattr(e, "error_type", "") not in _SUPPRESSIBLE:
                 continue
             e_start = e.position
             e_end = e_start + (len(e.text) if e.text else 0)
-            for ws, we in stacking_word_ranges:
+            for ws, we in merged:
                 if e_start >= ws and e_end <= we:
                     to_remove.add(idx)
                     break
