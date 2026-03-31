@@ -102,3 +102,1211 @@ collocations:
     window: 3
     notes: "Clear example, not sweet example"
 
+  # --- heavy vs thick (book/knowledge context) ---
+  - wrong_word: "ထူထဲသော"
+    correct_word: "နက်နဲသော"
+    context_words: ["ဗဟုသုတ", "အသိပညာ"]
+    direction: "right"
+    window: 3
+    notes: "Deep knowledge, not thick knowledge"
+
+  # --- strong vs loud (voice context) ---
+  - wrong_word: "ခိုင်မာသော"
+    correct_word: "ကျယ်လောင်သော"
+    context_words: ["အသံ", "ဟစ်"]
+    direction: "right"
+    window: 3
+    notes: "Loud voice, not strong voice"
+
+  # --- wide vs bright (future context) ---
+  - wrong_word: "ကျယ်ဝန်းသော"
+    correct_word: "တောက်ပသော"
+    context_words: ["အနာဂတ်", "ရှေ့ရေး"]
+    direction: "right"
+    window: 3
+    notes: "Bright future, not wide future"
+
+  # --- deep vs close (friendship context) ---
+  - wrong_word: "နက်သော"
+    correct_word: "ရင်းနှီးသော"
+    context_words: ["ခင်မင်", "မိတ်ဆွေ"]
+    direction: "right"
+    window: 3
+    notes: "Close friendship, not deep friendship"
+
+  # --- beautiful vs correct (answer context) ---
+  - wrong_word: "လှပသော"
+    correct_word: "မှန်ကန်သော"
+    context_words: ["အဖြေ", "ဖြေဆို"]
+    direction: "right"
+    window: 3
+    notes: "Correct answer, not beautiful answer"
+
+  # --- fat vs rich (experience context) ---
+  - wrong_word: "ဝသော"
+    correct_word: "ကြွယ်ဝသော"
+    context_words: ["အတွေ့အကြုံ", "အရင်းအမြစ်"]
+    direction: "right"
+    window: 3
+    notes: "Rich experience, not fat experience"
+
+  # --- soft vs gentle (wind context) ---
+  - wrong_word: "ပျော့သော"
+    correct_word: "ညင်သာသော"
+    context_words: ["လေ", "တိုက်"]
+    direction: "both"
+    window: 3
+    notes: "Gentle wind, not soft wind"
+
+  # --- long vs tall (person height context) ---
+  - wrong_word: "ရှည်သော"
+    correct_word: "ရှည်မြင့်သော"
+    context_words: ["လူ", "ကျောင်းသား"]
+    direction: "right"
+    window: 3
+    notes: "Tall person uses ရှည်မြင့်, not just ရှည်"
+
+  # --- eat vs take (medicine context) ---
+  - wrong_word: "စား"
+    correct_word: "သောက်"
+    context_words: ["ဆေး", "ဆေးဝါး"]
+    direction: "right"
+    window: 3
+    notes: "Take medicine (သောက်), not eat medicine (စား)"
+
+  # --- cut vs break (relationship context) ---
+  - wrong_word: "ဖြတ်"
+    correct_word: "ဖြိုခွဲ"
+    context_words: ["ဆက်ဆံရေး", "ပေါင်းသင်း"]
+    direction: "right"
+    window: 3
+    notes: "Break relationship (ဖြိုခွဲ), not cut it (ဖြတ်)"
+
+  # --- thick vs deep (sleep context) ---
+  - wrong_word: "ထူသော"
+    correct_word: "ပြင်းသော"
+    context_words: ["အိပ်", "အိပ်ပျော်"]
+    direction: "right"
+    window: 3
+    notes: "Deep/sound sleep, not thick sleep"
+
+  # --- heavy vs serious (illness context) ---
+  - wrong_word: "လေးသော"
+    correct_word: "ပြင်းထန်သော"
+    context_words: ["ရောဂါ", "ဖျားနာ"]
+    direction: "right"
+    window: 3
+    notes: "Severe illness, not heavy illness"
+
+  # --- boil vs anger (anger context) ---
+  - wrong_word: "ကျို"
+    correct_word: "ထွက်"
+    context_words: ["စိတ်ဆိုး", "ဒေါသ"]
+    direction: "left"
+    window: 3
+    notes: "Anger erupts (ထွက်), not boils (ကျို)"
+
+  # --- wide vs comprehensive (plan context) ---
+  - wrong_word: "ကျယ်သော"
+    correct_word: "ပြည့်စုံသော"
+    context_words: ["အစီအစဉ်", "စီမံကိန်း"]
+    direction: "right"
+    window: 3
+    notes: "Comprehensive plan, not wide plan"
+
+  # --- run vs manage (organization context) ---
+  - wrong_word: "ပြေး"
+    correct_word: "စီမံ"
+    context_words: ["အဖွဲ့အစည်း", "ကုမ္ပဏီ"]
+    direction: "right"
+    window: 3
+    notes: "Manage organization (စီမံ), not run it (ပြေး)"
+
+  # --- open vs start (meeting context) ---
+  - wrong_word: "ဖွင့်"
+    correct_word: "ကျင်းပ"
+    context_words: ["အစည်းအဝေး", "ညီလာခံ"]
+    direction: "right"
+    window: 3
+    notes: "Hold a meeting (ကျင်းပ), not open it (ဖွင့်)"
+
+  # --- throw vs express (opinion context) ---
+  - wrong_word: "ပစ်"
+    correct_word: "ထုတ်ဖော်"
+    context_words: ["အမြင်", "ထင်မြင်ချက်"]
+    direction: "right"
+    window: 3
+    notes: "Express opinion (ထုတ်ဖော်), not throw it (ပစ်)"
+
+  # --- wear vs assume (responsibility context) ---
+  - wrong_word: "ဝတ်"
+    correct_word: "ယူ"
+    context_words: ["တာဝန်", "ဝတ္တရား"]
+    direction: "right"
+    window: 3
+    notes: "Take responsibility (ယူ), not wear it (ဝတ်)"
+
+  # --- catch vs understand (lesson context) ---
+  - wrong_word: "ဖမ်း"
+    correct_word: "နားလည်"
+    context_words: ["သင်ခန်းစာ", "ဘာသာ"]
+    direction: "right"
+    window: 3
+    notes: "Understand lesson (နားလည်), not catch it (ဖမ်း)"
+
+  # --- hit vs reach (goal context) ---
+  - wrong_word: "ရိုက်"
+    correct_word: "ရောက်ရှိ"
+    context_words: ["ပန်းတိုင်", "ရည်မှန်းချက်"]
+    direction: "right"
+    window: 3
+    notes: "Reach a goal (ရောက်ရှိ), not hit it (ရိုက်)"
+
+  # --- carry vs bear (responsibility weight context) ---
+  - wrong_word: "ထမ်း"
+    correct_word: "ထမ်းဆောင်"
+    context_words: ["တာဝန်", "ကိုယ်ကျိုး"]
+    direction: "right"
+    window: 3
+    notes: "Bear responsibility uses ထမ်းဆောင်, not just ထမ်း"
+
+  # --- see vs meet (person context) ---
+  - wrong_word: "မြင်"
+    correct_word: "တွေ့"
+    context_words: ["ဆရာ", "မိဘ", "ကြိုဆို"]
+    direction: "right"
+    window: 3
+    notes: "Meet a person (တွေ့), not see them (မြင်)"
+
+  # --- push vs promote (interest/progress context) ---
+  - wrong_word: "တွန်း"
+    correct_word: "မြှင့်တင်"
+    context_words: ["ဖွံ့ဖြိုး", "တိုးတက်"]
+    direction: "right"
+    window: 3
+    notes: "Promote development (မြှင့်တင်), not push it (တွန်း)"
+
+  # --- pull vs attract (attention context) ---
+  - wrong_word: "ဆွဲ"
+    correct_word: "ဆွဲဆောင်"
+    context_words: ["စိတ်ဝင်စား", "အာရုံ"]
+    direction: "right"
+    window: 3
+    notes: "Attract attention (ဆွဲဆောင်), not pull it (ဆွဲ)"
+
+  # --- hard vs difficult (exam context) ---
+  - wrong_word: "မာသော"
+    correct_word: "ခက်ခဲသော"
+    context_words: ["စာမေးပွဲ", "မေးခွန်း"]
+    direction: "right"
+    window: 3
+    notes: "Difficult exam, not hard (physically) exam"
+
+  # --- big vs great (opportunity context) ---
+  - wrong_word: "ကြီးသော"
+    correct_word: "ကောင်းမွန်သော"
+    context_words: ["အခွင့်အရေး", "အခွင့်အလမ်း"]
+    direction: "right"
+    window: 3
+    notes: "Great opportunity, not big opportunity"
+
+  # --- wet vs damp (weather humid context) ---
+  - wrong_word: "စိုသော"
+    correct_word: "စိုထိုင်းသော"
+    context_words: ["ရာသီဥတု", "လေထု"]
+    direction: "right"
+    window: 3
+    notes: "Humid weather, not wet weather"
+
+  # --- short vs brief (speech context) ---
+  - wrong_word: "တိုသော"
+    correct_word: "အကျဉ်းချုပ်"
+    context_words: ["မိန့်ခွန်း", "ဟောပြော"]
+    direction: "right"
+    window: 3
+    notes: "Brief speech (အကျဉ်းချုပ်), not short speech"
+
+  # --- write vs compose (music context) ---
+  - wrong_word: "ရေး"
+    correct_word: "ရေးစပ်"
+    context_words: ["သီချင်း", "တေးဂီတ"]
+    direction: "right"
+    window: 3
+    notes: "Compose music (ရေးစပ်), not just write it (ရေး)"
+
+  # --- send vs submit (application context) ---
+  - wrong_word: "ပို့"
+    correct_word: "တင်သွင်း"
+    context_words: ["လျှောက်လွှာ", "အဆိုပြု"]
+    direction: "right"
+    window: 3
+    notes: "Submit application (တင်သွင်း), not send it (ပို့)"
+
+  # --- give vs award (prize context) ---
+  - wrong_word: "ပေး"
+    correct_word: "ချီးမြှင့်"
+    context_words: ["ဆု", "ဂုဏ်ပြု"]
+    direction: "right"
+    window: 3
+    notes: "Award a prize (ချီးမြှင့်), not give it (ပေး)"
+
+  # --- call vs convene (assembly context) ---
+  - wrong_word: "ခေါ်"
+    correct_word: "ကျင်းပ"
+    context_words: ["ညီလာခံ", "ပွဲတော်"]
+    direction: "right"
+    window: 3
+    notes: "Convene assembly (ကျင်းပ), not call it (ခေါ်)"
+
+  # --- drop vs reduce (price lowering context) ---
+  - wrong_word: "ချ"
+    correct_word: "လျှော့ချ"
+    context_words: ["ဈေးနှုန်း", "ကုန်ကျစရိတ်"]
+    direction: "right"
+    window: 3
+    notes: "Reduce price (လျှော့ချ), not just drop (ချ)"
+
+  # --- break vs violate (law context) ---
+  - wrong_word: "ချိုး"
+    correct_word: "ချိုးဖောက်"
+    context_words: ["ဥပဒေ", "စည်းကမ်း"]
+    direction: "right"
+    window: 3
+    notes: "Violate law (ချိုးဖောက်), not break it (ချိုး)"
+
+  # --- look vs investigate (case context) ---
+  - wrong_word: "ကြည့်"
+    correct_word: "စုံစမ်းစစ်ဆေး"
+    context_words: ["အမှု", "ရာဇဝတ်"]
+    direction: "right"
+    window: 3
+    notes: "Investigate a case (စုံစမ်းစစ်ဆေး), not look at it (ကြည့်)"
+
+  # --- touch vs affect (emotion/life context) ---
+  - wrong_word: "ထိ"
+    correct_word: "ထိခိုက်"
+    context_words: ["ဘဝ", "လူမှု"]
+    direction: "right"
+    window: 3
+    notes: "Affect life (ထိခိုက်), not touch it (ထိ)"
+
+  # --- build vs establish (nation context) ---
+  - wrong_word: "ဆောက်"
+    correct_word: "တည်ထောင်"
+    context_words: ["နိုင်ငံ", "အဖွဲ့အစည်း"]
+    direction: "right"
+    window: 3
+    notes: "Establish a nation (တည်ထောင်), not build it (ဆောက်)"
+
+  # --- turn vs transform (society context) ---
+  - wrong_word: "လှည့်"
+    correct_word: "ပြောင်းလဲ"
+    context_words: ["လူ့အဖွဲ့အစည်း", "စနစ်"]
+    direction: "right"
+    window: 3
+    notes: "Transform society (ပြောင်းလဲ), not turn it (လှည့်)"
+
+  # --- hold vs conduct (ceremony context) ---
+  - wrong_word: "ကိုင်"
+    correct_word: "ကျင်းပ"
+    context_words: ["အခမ်းအနား", "မင်္ဂလာ"]
+    direction: "right"
+    window: 3
+    notes: "Conduct ceremony (ကျင်းပ), not hold it (ကိုင်)"
+
+  # --- wash vs cleanse (sin/guilt context) ---
+  - wrong_word: "ဆေး"
+    correct_word: "ဖယ်ရှား"
+    context_words: ["အပြစ်", "ကြွေးမြီ"]
+    direction: "right"
+    window: 3
+    notes: "Remove guilt (ဖယ်ရှား), not wash it (ဆေး)"
+
+  # --- raise vs nurture (child context) ---
+  - wrong_word: "မြှင့်"
+    correct_word: "ပြုစု"
+    context_words: ["ကလေး", "သားသမီး"]
+    direction: "right"
+    window: 3
+    notes: "Nurture children (ပြုစု), not raise/elevate them (မြှင့်)"
+
+  # --- close vs end (chapter/era context) ---
+  - wrong_word: "ပိတ်"
+    correct_word: "အဆုံးသတ်"
+    context_words: ["ခေတ်", "သမိုင်း"]
+    direction: "right"
+    window: 3
+    notes: "End an era (အဆုံးသတ်), not close it (ပိတ်)"
+
+  # --- move vs relocate (office/residence context) ---
+  - wrong_word: "ရွှေ့"
+    correct_word: "ပြောင်းရွှေ့"
+    context_words: ["ရုံး", "နေအိမ်"]
+    direction: "right"
+    window: 3
+    notes: "Relocate office (ပြောင်းရွှေ့), not just move (ရွှေ့)"
+
+  # --- listen vs obey (parent/authority context) ---
+  - wrong_word: "နား"
+    correct_word: "နာခံ"
+    context_words: ["မိဘ", "အကြီးအကဲ"]
+    direction: "right"
+    window: 3
+    notes: "Obey parents (နာခံ), not just listen (နား)"
+
+  # --- fly vs soar (economy/spirit context) ---
+  - wrong_word: "ပျံ"
+    correct_word: "တက်လာ"
+    context_words: ["စီးပွား", "စိတ်ဓာတ်"]
+    direction: "right"
+    window: 3
+    notes: "Economy soars (တက်လာ), not flies (ပျံ)"
+
+  # --- pour vs invest (money/capital context) ---
+  - wrong_word: "လောင်း"
+    correct_word: "ရင်းနှီးမြှုပ်နှံ"
+    context_words: ["အရင်းအနှီး", "ငွေကြေး"]
+    direction: "right"
+    window: 3
+    notes: "Invest capital (ရင်းနှီးမြှုပ်နှံ), not pour it (လောင်း)"
+
+  # --- sharp vs keen (intellect context) ---
+  - wrong_word: "ထက်သော"
+    correct_word: "ထက်မြက်သော"
+    context_words: ["ဉာဏ်", "ပညာ"]
+    direction: "right"
+    window: 3
+    notes: "Keen intellect (ထက်မြက်), not sharp (ထက်)"
+
+  # --- black vs dark (future/mood negative context) ---
+  - wrong_word: "မည်းသော"
+    correct_word: "မှောင်မိုက်သော"
+    context_words: ["အနာဂတ်", "ခေတ်"]
+    direction: "right"
+    window: 3
+    notes: "Dark future (မှောင်မိုက်), not black future (မည်း)"
+
+  # --- fast vs swift (decision context) ---
+  - wrong_word: "မြန်သော"
+    correct_word: "လျင်မြန်သော"
+    context_words: ["ဆုံးဖြတ်ချက်", "ချမှတ်"]
+    direction: "right"
+    window: 3
+    notes: "Swift decision (လျင်မြန်), not fast decision (မြန်)"
+
+  # --- narrow vs limited (scope context) ---
+  - wrong_word: "ကျဉ်းသော"
+    correct_word: "အကန့်အသတ်ရှိသော"
+    context_words: ["နယ်ပယ်", "စွမ်းရည်"]
+    direction: "right"
+    window: 3
+    notes: "Limited scope (အကန့်အသတ်ရှိ), not narrow scope (ကျဉ်း)"
+
+  # --- new vs fresh (approach/method context) ---
+  - wrong_word: "အသစ်သော"
+    correct_word: "ဆန်းသစ်သော"
+    context_words: ["နည်းလမ်း", "ချဉ်းကပ်"]
+    direction: "right"
+    window: 3
+    notes: "Innovative approach (ဆန်းသစ်), not new approach (အသစ်)"
+
+  # --- cook vs prepare (report/document context) ---
+  - wrong_word: "ချက်"
+    correct_word: "ပြင်ဆင်"
+    context_words: ["အစီရင်ခံစာ", "စာတမ်း"]
+    direction: "right"
+    window: 3
+    notes: "Prepare report (ပြင်ဆင်), not cook it (ချက်)"
+
+  # --- walk vs proceed (project context) ---
+  - wrong_word: "လျှောက်"
+    correct_word: "ဆက်လက်ဆောင်ရွက်"
+    context_words: ["စီမံကိန်း", "လုပ်ငန်း"]
+    direction: "right"
+    window: 3
+    notes: "Proceed with project (ဆက်လက်ဆောင်ရွက်), not walk (လျှောက်)"
+
+  # --- fight vs compete (market/business context) ---
+  - wrong_word: "ရန်ဖြစ်"
+    correct_word: "ယှဉ်ပြိုင်"
+    context_words: ["စီးပွားရေး", "စျေးကွက်"]
+    direction: "both"
+    window: 3
+    notes: "Compete in market (ယှဉ်ပြိုင်), not fight (ရန်ဖြစ်)"
+
+  # --- blow vs spread (news/rumor context) ---
+  - wrong_word: "မှုတ်"
+    correct_word: "ပြန့်နှံ့"
+    context_words: ["သတင်း", "ကောလာဟလ"]
+    direction: "left"
+    window: 3
+    notes: "News spreads (ပြန့်နှံ့), not blows (မှုတ်)"
+
+  # --- tie vs forge (alliance context) ---
+  - wrong_word: "ချည်"
+    correct_word: "ချုပ်ဆို"
+    context_words: ["မဟာမိတ်", "သဘောတူ"]
+    direction: "right"
+    window: 3
+    notes: "Forge alliance (ချုပ်ဆို), not tie it (ချည်)"
+
+  # --- light vs mild (punishment context) ---
+  - wrong_word: "ပေါ့သော"
+    correct_word: "သေးငယ်သော"
+    context_words: ["ပြစ်ဒဏ်", "အရေးယူ"]
+    direction: "right"
+    window: 3
+    notes: "Mild punishment (သေးငယ်), not light (ပေါ့)"
+
+  # --- flat vs stable (economy steady context) ---
+  - wrong_word: "ပြားသော"
+    correct_word: "တည်ငြိမ်သော"
+    context_words: ["စီးပွားရေး", "ငွေကြေး"]
+    direction: "right"
+    window: 3
+    notes: "Stable economy (တည်ငြိမ်), not flat (ပြား)"
+
+  # --- dry vs boring (lecture context) ---
+  - wrong_word: "ခြောက်သော"
+    correct_word: "ငြီးငွေ့ဖွယ်"
+    context_words: ["ပို့ချ", "ဟောပြော"]
+    direction: "right"
+    window: 3
+    notes: "Boring lecture (ငြီးငွေ့ဖွယ်), not dry (ခြောက်)"
+
+  # --- full vs complete (task context) ---
+  - wrong_word: "ပြည့်သော"
+    correct_word: "ပြီးပြည့်စုံသော"
+    context_words: ["လုပ်ငန်း", "တာဝန်"]
+    direction: "right"
+    window: 3
+    notes: "Complete task (ပြီးပြည့်စုံ), not full (ပြည့်)"
+
+  # --- white vs blank (page context) ---
+  - wrong_word: "ဖြူသော"
+    correct_word: "ဗလာ"
+    context_words: ["စာမျက်နှာ", "စာရွက်"]
+    direction: "right"
+    window: 3
+    notes: "Blank page (ဗလာ), not white page (ဖြူ)"
+
+  # --- hot vs trending (topic context) ---
+  - wrong_word: "ပူသော"
+    correct_word: "ခေတ်စားသော"
+    context_words: ["ခေါင်းစဉ်", "အကြောင်းအရာ"]
+    direction: "right"
+    window: 3
+    notes: "Trending topic (ခေတ်စား), not hot topic (ပူ)"
+
+  # --- shake vs tremble (earthquake context) ---
+  - wrong_word: "ခါ"
+    correct_word: "လှုပ်ခတ်"
+    context_words: ["မြေ", "ငလျင်"]
+    direction: "left"
+    window: 3
+    notes: "Earth trembles (လှုပ်ခတ်), not shakes (ခါ)"
+
+  # --- grow vs develop (skill context) ---
+  - wrong_word: "ပေါက်"
+    correct_word: "ဖွံ့ဖြိုးတိုးတက်"
+    context_words: ["ကျွမ်းကျင်", "အရည်အချင်း"]
+    direction: "right"
+    window: 3
+    notes: "Develop skills (ဖွံ့ဖြိုးတိုးတက်), not grow (ပေါက်)"
+
+  # --- keep vs maintain (health context) ---
+  - wrong_word: "ထိန်း"
+    correct_word: "ထိန်းသိမ်း"
+    context_words: ["ကျန်းမာ", "သန့်ရှင်း"]
+    direction: "right"
+    window: 3
+    notes: "Maintain health (ထိန်းသိမ်း), not just keep (ထိန်း)"
+
+  # --- stand vs withstand (pressure context) ---
+  - wrong_word: "ရပ်"
+    correct_word: "ခံနိုင်"
+    context_words: ["ဖိအား", "ဒဏ်"]
+    direction: "right"
+    window: 3
+    notes: "Withstand pressure (ခံနိုင်), not stand (ရပ်)"
+
+  # --- bend vs yield (authority context) ---
+  - wrong_word: "ကွေး"
+    correct_word: "အလိုက်သင့်ဆောင်ရွက်"
+    context_words: ["အာဏာ", "အမိန့်"]
+    direction: "right"
+    window: 3
+    notes: "Yield to authority (အလိုက်သင့်ဆောင်ရွက်), not bend (ကွေး)"
+
+  # --- red vs angry (face expression context) ---
+  - wrong_word: "နီသော"
+    correct_word: "ဒေါသထွက်သော"
+    context_words: ["မျက်နှာ", "ခံစား"]
+    direction: "right"
+    window: 3
+    notes: "Angry face (ဒေါသထွက်), not red face (နီ)"
+
+  # --- fill vs satisfy (requirement context) ---
+  - wrong_word: "ဖြည့်"
+    correct_word: "ဖြည့်ဆည်း"
+    context_words: ["လိုအပ်ချက်", "သတ်မှတ်ချက်"]
+    direction: "right"
+    window: 3
+    notes: "Satisfy requirements (ဖြည့်ဆည်း), not just fill (ဖြည့်)"
+
+  # --- dig vs research (academic context) ---
+  - wrong_word: "တူး"
+    correct_word: "သုတေသနပြု"
+    context_words: ["ပညာ", "လေ့လာ"]
+    direction: "right"
+    window: 3
+    notes: "Research academically (သုတေသနပြု), not dig (တူး)"
+
+  # --- lose vs miss (opportunity context) ---
+  - wrong_word: "ပျောက်"
+    correct_word: "လက်လွတ်"
+    context_words: ["အခွင့်အရေး", "ဈေးကွက်"]
+    direction: "right"
+    window: 3
+    notes: "Miss opportunity (လက်လွတ်), not lose it (ပျောက်)"
+
+  # --- slow vs gradual (progress context) ---
+  - wrong_word: "နှေးသော"
+    correct_word: "တဖြည်းဖြည်း"
+    context_words: ["တိုးတက်", "ပြောင်းလဲ"]
+    direction: "right"
+    window: 3
+    notes: "Gradual progress (တဖြည်းဖြည်း), not slow (နှေး)"
+
+  # --- thin vs flimsy (argument context) ---
+  - wrong_word: "ပါးသော"
+    correct_word: "ခိုင်လုံမှုမရှိသော"
+    context_words: ["အကြောင်းပြ", "ငြင်းခုံ"]
+    direction: "right"
+    window: 3
+    notes: "Flimsy argument (ခိုင်လုံမှုမရှိ), not thin (ပါး)"
+
+  # --- buy vs acquire (knowledge context) ---
+  - wrong_word: "ဝယ်"
+    correct_word: "ရရှိ"
+    context_words: ["အသိပညာ", "အတွေ့အကြုံ"]
+    direction: "right"
+    window: 3
+    notes: "Acquire knowledge (ရရှိ), not buy it (ဝယ်)"
+
+  # --- count vs consider (factor/aspect context) ---
+  - wrong_word: "ရေ"
+    correct_word: "ထည့်သွင်းစဉ်းစား"
+    context_words: ["အချက်", "အကြောင်းရင်း"]
+    direction: "right"
+    window: 3
+    notes: "Consider factors (ထည့်သွင်းစဉ်းစား), not count (ရေ)"
+
+  # --- sleep vs stagnate (economy context) ---
+  - wrong_word: "အိပ်"
+    correct_word: "ရပ်တန့်"
+    context_words: ["စီးပွားရေး", "ဖွံ့ဖြိုးမှု"]
+    direction: "right"
+    window: 3
+    notes: "Economy stagnates (ရပ်တန့်), not sleeps (အိပ်)"
+
+  # --- burn vs consume (resources context) ---
+  - wrong_word: "မီးရှို့"
+    correct_word: "ကုန်ဆုံး"
+    context_words: ["ရင်းနှီးငွေ", "ဘတ်ဂျက်"]
+    direction: "right"
+    window: 3
+    notes: "Consume budget (ကုန်ဆုံး), not burn it (မီးရှို့)"
+
+  # --- bury vs conceal (truth context) ---
+  - wrong_word: "မြှုပ်"
+    correct_word: "ဖုံးကွယ်"
+    context_words: ["အမှန်တရား", "သတင်းအချက်"]
+    direction: "right"
+    window: 3
+    notes: "Conceal truth (ဖုံးကွယ်), not bury it (မြှုပ်)"
+
+  # --- plant vs establish (foundation context) ---
+  - wrong_word: "စိုက်"
+    correct_word: "ချမှတ်"
+    context_words: ["အခြေခံ", "မူဝါဒ"]
+    direction: "right"
+    window: 3
+    notes: "Lay foundation/policy (ချမှတ်), not plant (စိုက်)"
+
+  # --- smooth vs successful (operation/process context) ---
+  - wrong_word: "ချောမွေ့သော"
+    correct_word: "အောင်မြင်သော"
+    context_words: ["ဆောင်ရွက်", "ခွဲစိတ်"]
+    direction: "right"
+    window: 3
+    notes: "Successful operation (အောင်မြင်), not smooth (ချောမွေ့)"
+
+  # --- crooked vs corrupt (official context) ---
+  - wrong_word: "ကောက်သော"
+    correct_word: "အကျင့်ပျက်သော"
+    context_words: ["အရာရှိ", "အစိုးရ"]
+    direction: "right"
+    window: 3
+    notes: "Corrupt official (အကျင့်ပျက်), not crooked (ကောက်)"
+
+  # --- cold vs indifferent (attitude context) ---
+  - wrong_word: "အေးသော"
+    correct_word: "ဂရုမစိုက်သော"
+    context_words: ["သဘောထား", "ဆက်ဆံ"]
+    direction: "right"
+    window: 3
+    notes: "Indifferent attitude (ဂရုမစိုက်), not cold (အေး)"
+
+  # --- clean vs honest (government/person integrity context) ---
+  - wrong_word: "သန့်သော"
+    correct_word: "ဖြောင့်မတ်သော"
+    context_words: ["အစိုးရ", "ခေါင်းဆောင်"]
+    direction: "right"
+    window: 3
+    notes: "Honest government (ဖြောင့်မတ်), not clean (သန့်)"
+
+  # --- split vs distribute (resource allocation context) ---
+  - wrong_word: "ခွဲ"
+    correct_word: "ခွဲဝေ"
+    context_words: ["ငွေကြေး", "သယံဇာတ"]
+    direction: "right"
+    window: 3
+    notes: "Distribute resources (ခွဲဝေ), not split (ခွဲ)"
+
+  # --- hang vs depend (outcome context) ---
+  - wrong_word: "ဆွဲချိတ်"
+    correct_word: "မူတည်"
+    context_words: ["ရလဒ်", "အဖြေ"]
+    direction: "right"
+    window: 3
+    notes: "Outcome depends (မူတည်), not hangs (ဆွဲချိတ်)"
+
+  # --- kick vs launch (campaign context) ---
+  - wrong_word: "ကန်"
+    correct_word: "စတင်"
+    context_words: ["လှုပ်ရှားမှု", "ပြပွဲ"]
+    direction: "right"
+    window: 3
+    notes: "Launch campaign (စတင်), not kick it (ကန်)"
+
+  # --- bite vs affect severely (drought/famine context) ---
+  - wrong_word: "ကိုက်"
+    correct_word: "ကျရောက်"
+    context_words: ["မွတ်သိပ်", "ခေါင်းပါး"]
+    direction: "left"
+    window: 3
+    notes: "Famine strikes (ကျရောက်), not bites (ကိုက်)"
+
+  # --- squeeze vs pressure (debtor context) ---
+  - wrong_word: "ညှစ်"
+    correct_word: "ဖိအားပေး"
+    context_words: ["ကြွေးမြီ", "အကြွေး"]
+    direction: "right"
+    window: 3
+    notes: "Pressure debtor (ဖိအားပေး), not squeeze (ညှစ်)"
+
+  # --- scatter vs disseminate (information context) ---
+  - wrong_word: "ဖြန့်"
+    correct_word: "ဖြန့်ဝေ"
+    context_words: ["သတင်းအချက်အလက်", "ပညာ"]
+    direction: "right"
+    window: 3
+    notes: "Disseminate information (ဖြန့်ဝေ), not scatter (ဖြန့်)"
+
+  # --- blind vs ignorant (situation context) ---
+  - wrong_word: "မျက်စိကန်းသော"
+    correct_word: "မသိနားမလည်သော"
+    context_words: ["အခြေအနေ", "ကမ္ဘာ့"]
+    direction: "right"
+    window: 3
+    notes: "Ignorant of situation (မသိနားမလည်), not blind (မျက်စိကန်း)"
+
+  # --- catch vs grasp (concept context) ---
+  - wrong_word: "ဖမ်းမိ"
+    correct_word: "သဘောပေါက်"
+    context_words: ["အယူအဆ", "သဘောတရား"]
+    direction: "right"
+    window: 3
+    notes: "Grasp concept (သဘောပေါက်), not catch (ဖမ်းမိ)"
+
+  # --- carry vs convey (message context) ---
+  - wrong_word: "ယူ"
+    correct_word: "ပို့ဆောင်"
+    context_words: ["သတင်းစကား", "ကြေညာချက်"]
+    direction: "right"
+    window: 3
+    notes: "Convey message (ပို့ဆောင်), not carry (ယူ)"
+
+  # --- sour vs deteriorated (relationship negative context) ---
+  - wrong_word: "ချဉ်သော"
+    correct_word: "ယိုယွင်းသော"
+    context_words: ["ဆက်ဆံရေး", "သံတမန်"]
+    direction: "right"
+    window: 3
+    notes: "Deteriorated relations (ယိုယွင်း), not sour (ချဉ်)"
+
+  # --- round vs comprehensive (education context) ---
+  - wrong_word: "လုံးသော"
+    correct_word: "ဘက်စုံ"
+    context_words: ["ပညာရေး", "သင်ကြား"]
+    direction: "right"
+    window: 3
+    notes: "Well-rounded education (ဘက်စုံ), not round (လုံး)"
+
+  # --- taste vs appreciate (art context) ---
+  - wrong_word: "အရသာခံ"
+    correct_word: "နှစ်သက်ခံစား"
+    context_words: ["အနုပညာ", "ယဉ်ကျေး"]
+    direction: "right"
+    window: 3
+    notes: "Appreciate art (နှစ်သက်ခံစား), not taste (အရသာခံ)"
+
+  # --- ripe vs mature (person context) ---
+  - wrong_word: "မှည့်သော"
+    correct_word: "ရင့်ကျက်သော"
+    context_words: ["လူ", "အတွေးအခေါ်"]
+    direction: "right"
+    window: 3
+    notes: "Mature person (ရင့်ကျက်), not ripe (မှည့်)"
+
+  # --- draw vs attract (investment context) ---
+  - wrong_word: "ဆွဲ"
+    correct_word: "ဆွဲဆောင်"
+    context_words: ["ရင်းနှီးမြှုပ်နှံ", "ခရီးသွား"]
+    direction: "right"
+    window: 3
+    notes: "Attract investment (ဆွဲဆောင်), not draw (ဆွဲ)"
+
+  # --- sit vs be located (building/city context) ---
+  - wrong_word: "ထိုင်"
+    correct_word: "တည်ရှိ"
+    context_words: ["မြို့", "ဗိမာန်"]
+    direction: "left"
+    window: 3
+    notes: "City is located (တည်ရှိ), not sits (ထိုင်)"
+
+  # --- swallow vs accept (criticism context) ---
+  - wrong_word: "မျို"
+    correct_word: "လက်ခံ"
+    context_words: ["ဝေဖန်", "အပြစ်ပြော"]
+    direction: "right"
+    window: 3
+    notes: "Accept criticism (လက်ခံ), not swallow (မျို)"
+
+  # --- sharp vs critical (analysis context) ---
+  - wrong_word: "ထက်သော"
+    correct_word: "ဝေဖန်ပိုင်းခြားနိုင်သော"
+    context_words: ["ခွဲခြမ်းစိတ်ဖြာ", "သုံးသပ်"]
+    direction: "right"
+    window: 3
+    notes: "Critical analysis (ဝေဖန်ပိုင်းခြား), not sharp (ထက်)"
+
+  # --- quiet vs peaceful (nation/country context) ---
+  - wrong_word: "တိတ်ဆိတ်သော"
+    correct_word: "ငြိမ်းချမ်းသော"
+    context_words: ["နိုင်ငံ", "ဒေသ"]
+    direction: "right"
+    window: 3
+    notes: "Peaceful country (ငြိမ်းချမ်း), not quiet (တိတ်ဆိတ်)"
+
+  # --- sink vs decline (morale context) ---
+  - wrong_word: "နစ်"
+    correct_word: "ကျဆင်း"
+    context_words: ["စိတ်ဓာတ်", "ယုံကြည်"]
+    direction: "left"
+    window: 3
+    notes: "Morale declines (ကျဆင်း), not sinks (နစ်)"
+
+  # --- mix vs confuse (concept confusion context) ---
+  - wrong_word: "ရောနှော"
+    correct_word: "ရောထွေး"
+    context_words: ["အဓိပ္ပာယ်", "အယူအဆ"]
+    direction: "right"
+    window: 3
+    notes: "Confuse concepts (ရောထွေး), not mix them (ရောနှော)"
+
+  # --- weigh vs evaluate (pros/cons context) ---
+  - wrong_word: "ချိန်"
+    correct_word: "ချိန်ဆ"
+    context_words: ["အကျိုးအပြစ်", "ကောင်းကျိုးဆိုးကျိုး"]
+    direction: "right"
+    window: 3
+    notes: "Evaluate pros/cons (ချိန်ဆ), not just weigh (ချိန်)"
+
+  # --- point vs indicate (data/evidence context) ---
+  - wrong_word: "ညွှန်"
+    correct_word: "ညွှန်ပြ"
+    context_words: ["အချက်အလက်", "သက်သေ"]
+    direction: "left"
+    window: 3
+    notes: "Data indicates (ညွှန်ပြ), not points (ညွှန်)"
+
+  # --- slow vs cautious (approach/strategy context) ---
+  - wrong_word: "နှေးကွေးသော"
+    correct_word: "ဆင်ခြင်တုံတရားရှိသော"
+    context_words: ["ချဉ်းကပ်", "မဟာဗျူဟာ"]
+    direction: "right"
+    window: 3
+    notes: "Cautious approach (ဆင်ခြင်), not slow (နှေးကွေး)"
+
+  # --- warm vs cordial (welcome context) ---
+  - wrong_word: "နွေးသော"
+    correct_word: "ခင်မင်ရင်းနှီးစွာ"
+    context_words: ["ကြိုဆို", "လက်ခံ"]
+    direction: "right"
+    window: 3
+    notes: "Cordial welcome (ခင်မင်ရင်းနှီးစွာ), not warm (နွေး)"
+
+  # --- feed vs nourish (mind/soul context) ---
+  - wrong_word: "ကျွေး"
+    correct_word: "ဖြည့်တင်း"
+    context_words: ["စိတ်", "ဉာဏ်"]
+    direction: "right"
+    window: 3
+    notes: "Nourish the mind (ဖြည့်တင်း), not feed (ကျွေး)"
+
+  # --- hide vs evade (tax context) ---
+  - wrong_word: "ပုန်း"
+    correct_word: "ရှောင်တိမ်း"
+    context_words: ["အခွန်", "တာဝန်"]
+    direction: "right"
+    window: 3
+    notes: "Evade tax (ရှောင်တိမ်း), not hide from (ပုန်း)"
+
+  # --- hang vs suspend (license context) ---
+  - wrong_word: "ချိတ်"
+    correct_word: "ဆိုင်းငံ့"
+    context_words: ["လိုင်စင်", "ခွင့်ပြု"]
+    direction: "right"
+    window: 3
+    notes: "Suspend license (ဆိုင်းငံ့), not hang (ချိတ်)"
+
+  # --- wear vs erode (trust context) ---
+  - wrong_word: "ဝတ်"
+    correct_word: "ပျက်စီး"
+    context_words: ["ယုံကြည်", "အားကိုး"]
+    direction: "right"
+    window: 3
+    notes: "Trust erodes (ပျက်စီး), not wears (ဝတ်)"
+
+  # --- crack vs solve (problem context) ---
+  - wrong_word: "ကွဲ"
+    correct_word: "ဖြေရှင်း"
+    context_words: ["ပြဿနာ", "အခက်အခဲ"]
+    direction: "right"
+    window: 3
+    notes: "Solve problem (ဖြေရှင်း), not crack it (ကွဲ)"
+
+  # --- spread vs deploy (troops/forces context) ---
+  - wrong_word: "ဖြန့်"
+    correct_word: "ချထား"
+    context_words: ["တပ်", "လုံခြုံ"]
+    direction: "right"
+    window: 3
+    notes: "Deploy troops (ချထား), not spread (ဖြန့်)"
+
+  # --- cool vs calm (emotion context) ---
+  - wrong_word: "အေး"
+    correct_word: "တည်ငြိမ်"
+    context_words: ["စိတ်", "ခံစားချက်"]
+    direction: "right"
+    window: 3
+    notes: "Calm emotions (တည်ငြိမ်), not cool (အေး)"
+
+  # --- pick vs select (candidate context) ---
+  - wrong_word: "ကောက်"
+    correct_word: "ရွေးချယ်"
+    context_words: ["ကိုယ်စားလှယ်", "လျှောက်ထား"]
+    direction: "right"
+    window: 3
+    notes: "Select candidate (ရွေးချယ်), not pick (ကောက်)"
+
+  # --- stiff vs formal (language/register context) ---
+  - wrong_word: "မာသော"
+    correct_word: "တရားဝင်သော"
+    context_words: ["ဘာသာစကား", "စာစီစာကုံး"]
+    direction: "right"
+    window: 3
+    notes: "Formal language (တရားဝင်), not stiff (မာ)"
+
+  # --- raw vs inexperienced (worker context) ---
+  - wrong_word: "စိမ်းသော"
+    correct_word: "အတွေ့အကြုံမရှိသော"
+    context_words: ["ဝန်ထမ်း", "အလုပ်သမား"]
+    direction: "right"
+    window: 3
+    notes: "Inexperienced worker (အတွေ့အကြုံမရှိ), not raw (စိမ်း)"
+
+  # --- shut vs suppress (voice/speech context) ---
+  - wrong_word: "ပိတ်"
+    correct_word: "ဖိနှိပ်"
+    context_words: ["လွတ်လပ်", "ဖော်ထုတ်"]
+    direction: "right"
+    window: 3
+    notes: "Suppress free speech (ဖိနှိပ်), not shut it (ပိတ်)"
+
+  # --- lean vs incline (opinion context) ---
+  - wrong_word: "ကိုင်း"
+    correct_word: "ယိမ်း"
+    context_words: ["ထင်မြင်ချက်", "သဘောထား"]
+    direction: "left"
+    window: 3
+    notes: "Incline toward opinion (ယိမ်း), not lean (ကိုင်း)"
+
+  # --- straight vs honest (personality context) ---
+  - wrong_word: "ဖြောင့်သော"
+    correct_word: "ရိုးသားသော"
+    context_words: ["လူ", "အကျင့်"]
+    direction: "right"
+    window: 3
+    notes: "Honest person (ရိုးသား), not straight (ဖြောင့်)"
+
+  # --- solid vs reliable (source context) ---
+  - wrong_word: "ခိုင်သော"
+    correct_word: "ယုံကြည်စိတ်ချရသော"
+    context_words: ["သတင်းရင်းမြစ်", "အထောက်အထား"]
+    direction: "right"
+    window: 3
+    notes: "Reliable source (ယုံကြည်စိတ်ချရ), not solid (ခိုင်)"
+
+  # --- empty vs vacant (position context) ---
+  - wrong_word: "ဗလာ"
+    correct_word: "လစ်လပ်"
+    context_words: ["ရာထူး", "နေရာ"]
+    direction: "right"
+    window: 3
+    notes: "Vacant position (လစ်လပ်), not empty (ဗလာ)"
+
+  # --- open vs transparent (governance context) ---
+  - wrong_word: "ဖွင့်သော"
+    correct_word: "ပွင့်လင်းမြင်သာသော"
+    context_words: ["အုပ်ချုပ်", "ရေးဆွဲ"]
+    direction: "right"
+    window: 3
+    notes: "Transparent governance (ပွင့်လင်းမြင်သာ), not open (ဖွင့်)"
+
+  # --- dirty vs polluted (environment context) ---
+  - wrong_word: "ညစ်သော"
+    correct_word: "ညစ်ညမ်းသော"
+    context_words: ["ပတ်ဝန်းကျင်", "လေထု"]
+    direction: "right"
+    window: 3
+    notes: "Polluted environment (ညစ်ညမ်း), not dirty (ညစ်)"
+
+  # --- fall vs decline (standard context) ---
+  - wrong_word: "ကျ"
+    correct_word: "ကျဆင်း"
+    context_words: ["အဆင့်အတန်း", "စံနှုန်း"]
+    direction: "left"
+    window: 3
+    notes: "Standards decline (ကျဆင်း), not fall (ကျ)"
+
+  # --- alive vs vibrant (culture context) ---
+  - wrong_word: "ရှင်သော"
+    correct_word: "စည်ကားသော"
+    context_words: ["ယဉ်ကျေးမှု", "ဓလေ့"]
+    direction: "right"
+    window: 3
+    notes: "Vibrant culture (စည်ကား), not alive (ရှင်)"
+
+  # --- paint vs portray (character in story context) ---
+  - wrong_word: "ဆေးခြယ်"
+    correct_word: "ပုံဖော်"
+    context_words: ["ဇာတ်ကောင်", "ပုံပြင်"]
+    direction: "right"
+    window: 3
+    notes: "Portray character (ပုံဖော်), not paint (ဆေးခြယ်)"
+
+  # --- stretch vs extend (deadline context) ---
+  - wrong_word: "ဆန့်"
+    correct_word: "တိုးမြှင့်"
+    context_words: ["အချိန်", "ရက်သတ်မှတ်"]
+    direction: "right"
+    window: 3
+    notes: "Extend deadline (တိုးမြှင့်), not stretch (ဆန့်)"
+
+  # --- ride vs navigate (crisis context) ---
+  - wrong_word: "စီး"
+    correct_word: "ကျော်လွှား"
+    context_words: ["အကျပ်အတည်း", "ဒုက္ခ"]
+    direction: "right"
+    window: 3
+    notes: "Navigate crisis (ကျော်လွှား), not ride (စီး)"
+
+  # --- fresh vs innovative (idea context) ---
+  - wrong_word: "လတ်ဆတ်သော"
+    correct_word: "ဆန်းသစ်သော"
+    context_words: ["အကြံဉာဏ်", "စဉ်းစား"]
+    direction: "right"
+    window: 3
+    notes: "Innovative idea (ဆန်းသစ်), not fresh (လတ်ဆတ်)"
+
+  # --- strike vs occur (idea/thought context) ---
+  - wrong_word: "ရိုက်"
+    correct_word: "ပေါ်လာ"
+    context_words: ["အကြံ", "စိတ်ကူး"]
+    direction: "left"
+    window: 3
+    notes: "Idea occurs (ပေါ်လာ), not strikes (ရိုက်)"
+
+  # --- cross vs overcome (obstacle context) ---
+  - wrong_word: "ကူး"
+    correct_word: "ကျော်လွှား"
+    context_words: ["အတားအဆီး", "အခက်အခဲ"]
+    direction: "right"
+    window: 3
+    notes: "Overcome obstacle (ကျော်လွှား), not cross (ကူး)"
+
+  # --- smell vs sense (danger context) ---
+  - wrong_word: "နံ"
+    correct_word: "ရိပ်မိ"
+    context_words: ["အန္တရာယ်", "ဘေး"]
+    direction: "right"
+    window: 3
+    notes: "Sense danger (ရိပ်မိ), not smell (နံ)"
+
+  # --- stamp vs ratify (agreement context) ---
+  - wrong_word: "တံဆိပ်ရိုက်"
+    correct_word: "အတည်ပြု"
+    context_words: ["သဘောတူညီ", "စာချုပ်"]
+    direction: "right"
+    window: 3
+    notes: "Ratify agreement (အတည်ပြု), not stamp (တံဆိပ်ရိုက်)"
+
+  # --- push vs urge (person context) ---
+  - wrong_word: "တွန်း"
+    correct_word: "တိုက်တွန်း"
+    context_words: ["ပြည်သူ", "အဖွဲ့"]
+    direction: "right"
+    window: 3
+    notes: "Urge people (တိုက်တွန်း), not push (တွန်း)"
+
+  # --- nail vs finalize (deal context) ---
+  - wrong_word: "ရိုက်"
+    correct_word: "အတည်ဖြစ်"
+    context_words: ["သဘောတူ", "စာချုပ်"]
+    direction: "right"
+    window: 3
+    notes: "Finalize deal (အတည်ဖြစ်), not nail (ရိုက်)"
+
+  # --- drain vs deplete (energy context) ---
+  - wrong_word: "ဖယ်"
+    correct_word: "ကုန်ခမ်း"
+    context_words: ["အင်အား", "စွမ်းအင်"]
+    direction: "right"
+    window: 3
+    notes: "Deplete energy (ကုန်ခမ်း), not drain (ဖယ်)"
+
+  # --- catch fire vs become popular (trend context) ---
+  - wrong_word: "မီးလောင်"
+    correct_word: "လူကြိုက်များလာ"
+    context_words: ["ခေတ်ရေ", "လူကြိုက်"]
+    direction: "both"
+    window: 3
+    notes: "Trend becomes popular (လူကြိုက်များလာ), not catches fire (မီးလောင်)"
+
+  # --- root vs establish firmly (democracy context) ---
+  - wrong_word: "အမြစ်တွယ်"
+    correct_word: "အခိုင်အမာ တည်ရှိ"
+    context_words: ["ဒီမိုကရေစီ", "စနစ်"]
+    direction: "left"
+    window: 3
+    notes: "Democracy established firmly (အခိုင်အမာ တည်ရှိ), not rooted (အမြစ်တွယ်)"
+
+  # --- climb vs advance (career context) ---
+  - wrong_word: "တက်"
+    correct_word: "တိုးတက်"
+    context_words: ["အသက်မွေး", "ရာထူး"]
+    direction: "left"
+    window: 3
+    notes: "Career advances (တိုးတက်), not climbs (တက်)"
+
+  # --- shine vs excel (academics context) ---
+  - wrong_word: "တောက်ပ"
+    correct_word: "ထူးချွန်"
+    context_words: ["ပညာ", "ကျောင်း"]
+    direction: "left"
+    window: 3
+    notes: "Excel in academics (ထူးချွန်), not shine (တောက်ပ)"
+
+  # --- boil vs escalate (conflict context) ---
+  - wrong_word: "ဆူ"
+    correct_word: "ပိုမိုဆိုးရွားလာ"
+    context_words: ["ပဋိပက္ခ", "တင်းမာ"]
+    direction: "left"
+    window: 3
+    notes: "Conflict escalates (ပိုမိုဆိုးရွားလာ), not boils (ဆူ)"
+
+  # --- loud vs outrageous (claim context) ---
+  - wrong_word: "ကျယ်လောင်သော"
+    correct_word: "မယုံနိုင်သော"
+    context_words: ["ဝါဒ", "အဆိုပြု"]
+    direction: "right"
+    window: 3
+    notes: "Outrageous claim (မယုံနိုင်), not loud (ကျယ်လောင်)"
+
+  # --- blind vs unconditional (support context) ---
+  - wrong_word: "ကန်းသော"
+    correct_word: "အကန့်အသတ်မရှိသော"
+    context_words: ["ထောက်ခံ", "ယုံကြည်"]
+    direction: "right"
+    window: 3
+    notes: "Unconditional support (အကန့်အသတ်မရှိ), not blind (ကန်း)"
+
+  # --- sail vs progress smoothly (project context) ---
+  - wrong_word: "လှေစီး"
+    correct_word: "ချောမွေ့စွာ ဆောင်ရွက်"
+    context_words: ["စီမံကိန်း", "ဆောင်ရွက်"]
+    direction: "both"
+    window: 3
+    notes: "Project progresses smoothly (ချောမွေ့စွာ ဆောင်ရွက်), not sails (လှေစီး)"
+
+  # --- fold vs collapse (business context) ---
+  - wrong_word: "ခေါက်"
+    correct_word: "ပျက်စီး"
+    context_words: ["စီးပွားရေး", "ကုမ္ပဏီ"]
+    direction: "left"
+    window: 3
+    notes: "Business collapses (ပျက်စီး), not folds (ခေါက်)"
+
+  # --- deep vs profound (impact context) ---
+  - wrong_word: "နက်သော"
+    correct_word: "ကြီးမားသော"
+    context_words: ["သက်ရောက်", "အကျိုးသက်ရောက်"]
+    direction: "right"
+    window: 3
+    notes: "Profound impact (ကြီးမား), not deep (နက်)"
+
+  # --- sew vs mend (relationship repair context) ---
+  - wrong_word: "ချုပ်"
+    correct_word: "ပြန်လည်တည်ဆောက်"
+    context_words: ["ဆက်ဆံရေး", "ပြန်လည်"]
+    direction: "right"
+    window: 3
+    notes: "Mend relationship (ပြန်လည်တည်ဆောက်), not sew (ချုပ်)"
+
+  # --- lift vs repeal (ban context) ---
+  - wrong_word: "မြှင့်"
+    correct_word: "ရုပ်သိမ်း"
+    context_words: ["တားမြစ်", "ပိတ်ဆို့"]
+    direction: "right"
+    window: 3
+    notes: "Repeal ban (ရုပ်သိမ်း), not lift (မြှင့်)"
+
+  # --- weak vs vulnerable (security context) ---
+  - wrong_word: "အားနည်းသော"
+    correct_word: "ထိခိုက်လွယ်သော"
+    context_words: ["လုံခြုံရေး", "ကာကွယ်"]
+    direction: "right"
+    window: 3
+    notes: "Vulnerable security (ထိခိုက်လွယ်), not weak (အားနည်း)"
+
+  # --- cut vs slash (budget context) ---
+  - wrong_word: "ဖြတ်"
+    correct_word: "ဖြတ်တောက်"
+    context_words: ["ဘတ်ဂျက်", "ငွေကြေး"]
+    direction: "right"
+    window: 3
+    notes: "Slash budget (ဖြတ်တောက်), not just cut (ဖြတ်)"
+

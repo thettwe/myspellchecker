@@ -110,7 +110,9 @@ from myspellchecker.core.config.grammar_configs import (
     GrammarEngineConfig,
     MergedWordCheckerConfig,
     NegationCheckerConfig,
+    ParticleCheckerConfig,
     RegisterCheckerConfig,
+    TenseAgreementCheckerConfig,
 )
 
 # Configuration loader
@@ -182,7 +184,9 @@ __all__ = [
     "CompoundCheckerConfig",
     "MergedWordCheckerConfig",
     "NegationCheckerConfig",
+    "ParticleCheckerConfig",
     "RegisterCheckerConfig",
+    "TenseAgreementCheckerConfig",
     # Tagger configurations
     "POSTaggerConfig",
     "JointConfig",

@@ -170,6 +170,7 @@
             "morphotactics",
             "negation",
             "orthographic_corrections",
+            "particle_contexts",
             "particles",
             "pos_inference",
             "pronouns",

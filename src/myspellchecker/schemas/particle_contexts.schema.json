@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/particle-contexts/v1.0",
+  "title": "Myanmar Particle Context Rules Schema",
+  "description": "JSON Schema for validating particle_contexts.yaml - Verb-particle and noun-particle context validation rules",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "particle_confusions"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "particle_contexts",
+      "description": "Category type (must be 'particle_contexts')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "particle_confusions": {
+      "description": "Particle confusion pairs with context rules",
+      "type": "array",
+      "items": { "$ref": "#/definitions/particle_confusion_entry" }
+    },
+
+    "verb_particle_frames": {
+      "description": "Verb-particle frame compatibility rules",
+      "type": "array",
+      "items": { "$ref": "#/definitions/verb_particle_frame_entry" }
+    }
+  },
+
+  "definitions": {
+    "particle_confusion_entry": {
+      "description": "A particle confusion pair with context rules",
+      "type": "object",
+      "required": ["particle", "confused_with", "context", "description", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "particle": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The correct particle for this context"
+        },
+        "confused_with": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The particle it is commonly confused with"
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The syntactic context where this confusion occurs",
+          "examples": [
+            "after_object_noun",
+            "after_subject_noun",
+            "static_location",
+            "directional_motion",
+            "source_origin",
+            "sequential_action",
+            "sentence_final_completion",
+            "reason_clause",
+            "formal_reason_clause",
+            "colloquial_instrumental",
+            "colloquial_possessive",
+            "contrastive_topic",
+            "purpose_clause",
+            "formal_purpose",
+            "colloquial_conditional",
+            "formal_conditional",
+            "formal_quotative",
+            "comparison",
+            "formal_location",
+            "negative_sentence_ending"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the confusion pattern"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        },
+        "examples": {
+          "type": "object",
+          "properties": {
+            "correct": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Correct usage examples"
+            },
+            "incorrect": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Incorrect usage examples"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+
+    "verb_particle_frame_entry": {
+      "description": "A verb-particle frame compatibility rule",
+      "type": "object",
+      "required": ["verbs", "required_particles", "incompatible_particles"],
+      "additionalProperties": false,
+      "properties": {
+        "verbs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "List of verbs in this semantic frame"
+        },
+        "required_particles": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Particles compatible with this verb class"
+        },
+        "incompatible_particles": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Particles incompatible with this verb class"
+        },
+        "note": {
+          "type": "string",
+          "description": "Human-readable note about this frame"
+        }
+      }
+    }
+  }
+}

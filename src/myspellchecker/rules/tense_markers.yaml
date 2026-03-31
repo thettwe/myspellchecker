@@ -102,6 +102,11 @@ sfp_corrections:
     "ပါတယ်": "ပါမယ်"
     "သည်": "မည်"
     "ပါသည်": "ပါမည်"
+    "ခဲ့": "မယ်"
+    "ခဲ့တယ်": "မယ်"
+    "ခဲ့ပါတယ်": "ပါမယ်"
+    "ခဲ့သည်": "မည်"
+    "ခဲ့ပါသည်": "ပါမည်"
 
   # When past adverb is present but SFP is future
   future_to_past_present:
@@ -111,3 +116,89 @@ sfp_corrections:
     "ပါမည်": "ပါသည်"
     "လိမ့်မည်": "သည်"
     "လိမ့်မယ်": "တယ်"
+
+# ============================================================
+# TENSE AGREEMENT RULES
+# Validates that aspectual particles match temporal adverbials.
+# When a temporal adverb signals a specific tense, the sentence-
+# final aspectual particle must agree with that tense.
+# ============================================================
+tense_agreement_rules:
+  # Past time markers — temporal adverbs indicating past tense
+  past_time_adverbs:
+    - "မနေ့က"           # yesterday
+    - "မနေ့"            # yesterday (short)
+    - "တစ်နေ့က"         # one day (past)
+    - "အရင်က"           # before/previously
+    - "အရင်"            # before (short)
+    - "အရင်တုန်းက"      # back then
+    - "တုန်းက"          # back then (short)
+    - "လွန်ခဲ့သော"      # past (formal)
+    - "လွန်ခဲ့သည့်"     # past (formal variant)
+    - "လွန်ခဲ့တဲ့"      # past (colloquial)
+    - "ယခင်က"           # previously (formal)
+    - "ယခင်"            # previously (formal, short)
+    - "ကလေးဘဝက"        # childhood (past context)
+    - "ပြီးခဲ့သော"      # past (formal modifier)
+    - "ပြီးခဲ့သည့်"     # past (formal modifier variant)
+    - "ပြီးခဲ့တဲ့"      # past (colloquial modifier)
+    - "တမြန်နေ့က"       # day before yesterday
+    - "ယနေ့နံနက်က"      # this morning (past context)
+    - "ယနေ့က"           # today (past context)
+
+  # Past aspect markers — sentence-final particles for past tense
+  past_aspect_markers:
+    - "ခဲ့"              # past tense marker
+    - "ခဲ့သည်"          # past formal
+    - "ခဲ့တယ်"          # past colloquial
+    - "ခဲ့ပါတယ်"        # past polite
+    - "ခဲ့ပါသည်"        # past polite formal
+    - "တယ်"             # statement (past/present)
+    - "ပါတယ်"           # polite statement (past/present)
+    - "သည်"             # formal statement (past/present)
+    - "ပါသည်"           # formal polite statement (past/present)
+
+  # Future time markers — temporal adverbs indicating future tense
+  future_time_adverbs:
+    - "မနက်ဖြန်"        # tomorrow
+    - "မနက်ဖန်"         # tomorrow (common misspelling)
+    - "နောက်နေ့"         # next day
+    - "နောက်ရက်"         # next day (variant)
+    - "လာမယ့်"           # coming (future modifier)
+    - "နောက်လ"           # next month
+    - "နောက်နှစ်"        # next year
+    - "နောက်အပတ်"       # next week
+    - "အနာဂတ်မှာ"        # in the future
+    - "မကြာခင်"          # soon
+    - "မကြာမီ"           # soon (formal)
+    - "နောင်"            # later / in future
+    - "သန်ဖြန်"          # day after tomorrow
+    - "လာမယ့်နှစ်"       # coming year
+    - "လာမယ့်လ"          # coming month
+    - "လာမယ့်အပတ်"      # coming week
+    - "လာမည့်နှစ်"       # coming year (formal)
+    - "လာမည့်လ"          # coming month (formal)
+    - "လာမည့်အပတ်"      # coming week (formal)
+
+  # Future aspect markers — sentence-final particles for future tense
+  future_aspect_markers:
+    - "မယ်"              # future colloquial
+    - "မည်"              # future formal
+    - "ပါမယ်"            # future polite
+    - "ပါမည်"            # future formal polite
+    - "လိမ့်မယ်"         # probability future (colloquial)
+    - "လိမ့်မည်"         # probability future (formal)
+
+  # Incompatible combinations (error patterns)
+  # When a temporal adverb from one tense class co-occurs with an
+  # aspect marker from an incompatible tense class, flag as error.
+  incompatible_pairs:
+    - time_class: "past"
+      incompatible_aspects: ["မယ်", "မည်", "ပါမယ်", "ပါမည်", "လိမ့်မယ်", "လိမ့်မည်"]
+      confidence: 0.75
+      description: "Past time adverb with future aspect marker"
+
+    - time_class: "future"
+      incompatible_aspects: ["ခဲ့", "ခဲ့သည်", "ခဲ့တယ်", "ခဲ့ပါတယ်", "ခဲ့ပါသည်"]
+      confidence: 0.75
+      description: "Future time adverb with past aspect marker"

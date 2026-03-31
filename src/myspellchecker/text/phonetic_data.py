@@ -292,6 +292,72 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     # Social media / texting abbreviations
     "555": {"ဟာဟာဟာ"},  # Laughing (Thai style)
     # "ရယ်" removed: distinct particle (listing/exclamation) from "လေ" (emphasis/evidential)
+    # --- Additional pronoun shortenings ---
+    "ကျနော့်": {"ကျွန်တော့်"},  # Male first person possessive (colloquial)
+    "ကျနော်တို့": {"ကျွန်တော်တို့"},  # Male first person plural (colloquial)
+    "ကျမတို့": {"ကျွန်မတို့"},  # Female first person plural (colloquial)
+    "ငါတို့": {"ကျွန်တော်တို့", "ကျွန်မတို့"},  # First person plural (very informal)
+    "နင်": {"သင်", "ခင်ဗျား"},  # Second person (rude informal -> formal)
+    "သူ့": {"သူ၏"},  # His/her possessive (colloquial -> formal)
+    "ခင်ဗျ": {"ခင်ဗျား"},  # Sir (shortened honorific)
+    "ရှင်": {"ခင်ဗျား"},  # You-female polite (colloquial female -> formal)
+    "ရှင့်": {"ခင်ဗျား၏"},  # Your-female polite possessive (colloquial)
+    "ငါ့": {"ကျွန်တော့်", "ကျွန်မ၏"},  # My (very informal possessive)
+    "မင်းတို့": {"သင်တို့"},  # Second person plural (informal -> formal)
+    # --- Common verb/phrase contractions ---
+    "လုပ်တယ်": {"လုပ်ပါတယ်"},  # Do (dropping polite particle)
+    "သွားတယ်": {"သွားပါတယ်"},  # Go (dropping polite particle)
+    "လာတယ်": {"လာပါတယ်"},  # Come (dropping polite particle)
+    "စားတယ်": {"စားပါတယ်"},  # Eat (dropping polite particle)
+    "ဖတ်တယ်": {"ဖတ်ပါတယ်"},  # Read (dropping polite particle)
+    "ရေးတယ်": {"ရေးပါတယ်"},  # Write (dropping polite particle)
+    "ပြောတယ်": {"ပြောပါတယ်"},  # Say (dropping polite particle)
+    "သိတယ်": {"သိပါတယ်"},  # Know (dropping polite particle)
+    "ဖြစ်တယ်": {"ဖြစ်ပါတယ်"},  # Be/happen (dropping polite particle)
+    "ရတယ်": {"ရပါတယ်"},  # Get/can (dropping polite particle)
+    # --- Negation contractions ---
+    "မလုပ်ဘူး": {"မလုပ်ပါဘူး"},  # Don't do (dropping polite particle)
+    "မသွားဘူး": {"မသွားပါဘူး"},  # Don't go (dropping polite particle)
+    "မလာဘူး": {"မလာပါဘူး"},  # Don't come (dropping polite particle)
+    "မသိဘူး": {"မသိပါဘူး"},  # Don't know (dropping polite particle)
+    "မရဘူး": {"မရပါဘူး"},  # Can't/don't get (dropping polite particle)
+    # --- Particle and ending variants ---
+    "ပေါ့": {"ပါ"},  # Casual affirmative -> polite particle
+    "နော်": {"နော"},  # Tag question particle (colloquial with asat -> standard without)
+    "ဟင်": {"ဟုတ်လား"},  # Huh? (colloquial question -> formal)
+    "ဟာ": {"ဟယ်"},  # Exclamation (colloquial)
+    "လေ": {"ပါ"},  # Emphasis particle (casual -> polite register)
+    "ကွ": {"ကွာ"},  # Sentence-final particle (shortened)
+    # --- Demonstrative and question word variants ---
+    "အဲဒီ": {"ထို"},  # That (demonstrative, colloquial -> formal)
+    "ဒီ": {"ဤ"},  # This (colloquial -> formal)
+    "ဒီမှာ": {"ဤနေရာတွင်"},  # Here (colloquial -> formal)
+    "အဲဒီမှာ": {"ထိုနေရာတွင်"},  # There (colloquial -> formal)
+    "ဘယ်": {"မည်သည့်"},  # Which/where (colloquial -> formal)
+    "ဘယ်မှာ": {"မည်သည့်နေရာတွင်"},  # Where (colloquial -> formal)
+    "ဘာ": {"အဘယ်အရာ"},  # What (colloquial -> formal)
+    "ဘယ်တော့": {"မည်သည့်အချိန်"},  # When (colloquial -> formal)
+    "ဘယ်သူ": {"မည်သူ"},  # Who (colloquial -> formal)
+    "ဘယ်နှစ်": {"မည်မျှ"},  # How many (colloquial -> formal)
+    # --- Adverb and intensifier colloquialisms ---
+    "အရမ်း": {"အလွန်"},  # Very (colloquial -> formal)
+    "ဒီလောက်": {"ဤမျှ"},  # This much (colloquial -> formal)
+    "အဲလောက်": {"ထိုမျှ"},  # That much (colloquial -> formal)
+    "အပြင်": {"အပြင်ဘက်"},  # Outside (shortened)
+    "အထဲ": {"အတွင်း"},  # Inside (colloquial -> formal)
+    # --- Greeting and polite phrase variants ---
+    "ဗျ": {"ခင်ဗျား"},  # Casual address (very shortened honorific)
+    "ဗျာ": {"ခင်ဗျား"},  # Casual address (shortened honorific variant)
+    "ကြာ": {"ခဏ"},  # A while/moment (colloquial)
+    "ကိုယ်": {"မိမိ"},  # Self (colloquial -> formal reflexive)
+    "ကိုယ့်": {"မိမိ၏"},  # Self's (colloquial possessive -> formal)
+    # --- Common noun colloquialisms ---
+    "ကိစ္စ": {"ကိစ္စရပ်"},  # Matter (shortened -> formal)
+    "မနက်ဖြန်": {"နက်ဖြန်"},  # Tomorrow (colloquial with prefix -> standard)
+    "တုန်းက": {"အချိန်က"},  # Back when (colloquial -> formal)
+    "ဟိုတုန်းက": {"ထိုအခါက"},  # Back then (colloquial -> formal)
+    "ဟိုတစ်ခေါက်": {"ထိုအကြိမ်"},  # That other time (colloquial -> formal)
+    "ဟိုနေ့က": {"ထိုနေ့က"},  # That day (colloquial -> formal)
 }
 
 # Reverse mapping: standard form -> set of colloquial variants

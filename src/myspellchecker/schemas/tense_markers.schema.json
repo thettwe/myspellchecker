@@ -85,6 +85,73 @@
           }
         }
       }
+    },
+
+    "tense_agreement_rules": {
+      "description": "Rules for validating that aspectual particles match temporal adverbials",
+      "type": "object",
+      "required": ["past_time_adverbs", "past_aspect_markers", "future_time_adverbs", "future_aspect_markers", "incompatible_pairs"],
+      "additionalProperties": false,
+      "properties": {
+        "past_time_adverbs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Temporal adverbs indicating past tense"
+        },
+        "past_aspect_markers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Sentence-final aspectual particles for past tense"
+        },
+        "future_time_adverbs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Temporal adverbs indicating future tense"
+        },
+        "future_aspect_markers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Sentence-final aspectual particles for future tense"
+        },
+        "incompatible_pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["time_class", "incompatible_aspects", "confidence", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "time_class": {
+                "type": "string",
+                "enum": ["past", "future"],
+                "description": "The tense class of the detected temporal adverb"
+              },
+              "incompatible_aspects": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "minItems": 1,
+                "description": "Aspect markers incompatible with this time class"
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0,
+                "description": "Confidence score for this incompatibility"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Human-readable description of the incompatibility"
+              }
+            }
+          },
+          "minItems": 1,
+          "description": "Incompatible time-adverb and aspect-marker combinations"
+        }
+      }
     }
   }
 }

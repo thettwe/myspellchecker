@@ -294,10 +294,11 @@ class RegisterCheckerConfig(BaseModel):
     """
     Configuration for register consistency checker.
 
-    Controls confidence levels for register (formal/informal) validation.
+    Controls confidence levels for register (formal/colloquial/polite) validation.
 
     Attributes:
-        register_mismatch_confidence: Confidence for register mismatch errors (default: 0.85).
+        register_mismatch_confidence: Confidence for formal+casual mixing errors (default: 0.85).
+        register_formality_gap_confidence: Confidence for formal+polite mixing (default: 0.65).
     """
 
     model_config = ConfigDict(
@@ -310,7 +311,13 @@ class RegisterCheckerConfig(BaseModel):
         default=0.85,
         ge=0.0,
         le=1.0,
-        description="Confidence for register mismatch errors",
+        description="Confidence for formal+casual register mismatch errors",
+    )
+    register_formality_gap_confidence: float = Field(
+        default=0.65,
+        ge=0.0,
+        le=1.0,
+        description="Confidence for formal+polite register gap warnings",
     )
 
 
@@ -342,6 +349,69 @@ class NegationCheckerConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence for missing visarga corrections",
+    )
+
+
+class TenseAgreementCheckerConfig(BaseModel):
+    """
+    Configuration for tense agreement checker.
+
+    Controls confidence levels for tense-time agreement validation
+    between temporal adverbials and aspectual particles.
+
+    Attributes:
+        default_confidence: Default confidence for tense mismatch errors (default: 0.75).
+        high_confidence: Confidence when both adverb and marker are unambiguous (default: 0.85).
+    """
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        frozen=False,
+        extra="forbid",
+    )
+
+    default_confidence: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description="Default confidence for tense mismatch errors",
+    )
+    high_confidence: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description="Confidence when both adverb and marker are unambiguous",
+    )
+
+
+class ParticleCheckerConfig(BaseModel):
+    """
+    Configuration for particle context checker.
+
+    Controls confidence levels for particle context validation.
+
+    Attributes:
+        confusion_confidence: Confidence for particle confusion pair detections (default: 0.70).
+        frame_violation_confidence: Confidence for verb-particle frame violations (default: 0.70).
+    """
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        frozen=False,
+        extra="forbid",
+    )
+
+    confusion_confidence: float = Field(
+        default=0.70,
+        ge=0.0,
+        le=1.0,
+        description="Confidence for particle confusion pair detections",
+    )
+    frame_violation_confidence: float = Field(
+        default=0.70,
+        ge=0.0,
+        le=1.0,
+        description="Confidence for verb-particle frame violations",
     )
 
 
