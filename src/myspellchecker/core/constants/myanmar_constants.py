@@ -1331,6 +1331,7 @@ COMMON_NEGATED_VERBS: dict[str, str] = {
 
 # Register constants for Negation Map
 REGISTER_FORMAL = "formal"
+REGISTER_POLITE = "polite"
 REGISTER_COLLOQUIAL = "colloquial"
 REGISTER_NEUTRAL = "neutral"
 
