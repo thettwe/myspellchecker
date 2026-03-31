@@ -51,20 +51,29 @@ class TestRegisterDetection:
         assert checker.is_formal("များ")
 
     def test_colloquial_word_detection(self):
-        """Colloquial words are correctly identified."""
+        """Colloquial (casual) words are correctly identified."""
         checker = RegisterChecker()
 
-        # Colloquial statement endings
+        # Casual statement endings (without ပါ politeness prefix)
         assert checker.is_colloquial("တယ်")
-        assert checker.is_colloquial("ပါတယ်")
         assert checker.is_colloquial("မယ်")
-        assert checker.is_colloquial("ပါမယ်")
 
         # Colloquial particles
         assert checker.is_colloquial("ရဲ့")
         assert checker.is_colloquial("နဲ့")
         assert checker.is_colloquial("တွေ")
         # Note: ကို is neutral (used in both registers)
+        # Note: ပါတယ် and ပါမယ် are now "polite" register, not colloquial
+
+    def test_polite_word_detection(self):
+        """Polite words are correctly identified."""
+        checker = RegisterChecker()
+
+        # Polite statement endings (with ပါ politeness prefix)
+        info = checker.get_register("ပါတယ်")
+        assert info.register == "polite"
+        info = checker.get_register("ပါမယ်")
+        assert info.register == "polite"
 
     def test_neutral_word_detection(self):
         """Neutral words are correctly identified."""
