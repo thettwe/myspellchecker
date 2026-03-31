@@ -18,7 +18,9 @@ if TYPE_CHECKING:
     from myspellchecker.grammar.checkers.compound import CompoundChecker
     from myspellchecker.grammar.checkers.merged_word import MergedWordChecker
     from myspellchecker.grammar.checkers.negation import NegationChecker
+    from myspellchecker.grammar.checkers.particle import ParticleChecker
     from myspellchecker.grammar.checkers.register import RegisterChecker
+    from myspellchecker.grammar.checkers.tense_agreement import TenseAgreementChecker
     from myspellchecker.grammar.config import GrammarRuleConfig
 
 
@@ -46,7 +48,9 @@ class CheckerDelegationMixin:
     compound_checker: "CompoundChecker"
     merged_word_checker: "MergedWordChecker"
     negation_checker: "NegationChecker"
+    particle_checker: "ParticleChecker"
     register_checker: "RegisterChecker"
+    tense_agreement_checker: "TenseAgreementChecker"
 
     def _check_classifiers(
         self, words: list[str], pos_tags: list[str | None] | None = None
@@ -236,6 +240,54 @@ class CheckerDelegationMixin:
         merged_errors = self.merged_word_checker.validate_sequence(words, pos_tags)
 
         for error in merged_errors:
+            errors.append((error.position, error.word, error.suggestion, error.confidence))
+
+        return errors
+
+    def _check_particles(
+        self, words: list[str], pos_tags: list[str | None] | None = None
+    ) -> list[tuple[int, str, str, float]]:
+        """
+        Check for particle context errors in the word sequence.
+
+        Validates:
+        1. Particle confusion (e.g., subject marker က used where object marker ကို expected)
+        2. Verb-particle frame violations (e.g., motion verb with static locative)
+
+        Args:
+            words: List of words in the sentence.
+            pos_tags: Optional POS tags for context-aware detection.
+
+        Returns:
+            List of (index, error_word, suggestion, confidence) tuples.
+        """
+        errors: list[tuple[int, str, str, float]] = []
+
+        particle_errors = self.particle_checker.validate_sequence(words, pos_tags)
+
+        for error in particle_errors:
+            errors.append((error.position, error.word, error.suggestion, error.confidence))
+
+        return errors
+
+    def _check_tense(self, words: list[str]) -> list[tuple[int, str, str, float]]:
+        """
+        Check for tense-time agreement errors in the word sequence.
+
+        Validates that aspectual particles (past ခဲ့, future မယ်) agree with
+        temporal adverbials (yesterday မနေ့က, tomorrow မနက်ဖြန်).
+
+        Args:
+            words: List of words in the sentence.
+
+        Returns:
+            List of (index, error_word, suggestion, confidence) tuples.
+        """
+        errors: list[tuple[int, str, str, float]] = []
+
+        tense_errors = self.tense_agreement_checker.validate_sequence(words)
+
+        for error in tense_errors:
             errors.append((error.position, error.word, error.suggestion, error.confidence))
 
         return errors
