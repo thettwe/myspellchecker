@@ -619,14 +619,31 @@ class ComponentFactory:
             self.logger.info("Initialized SemanticChecker")
             return checker
         except (
-            ImportError, OSError, RuntimeError, ValueError, FileNotFoundError,
-            ModelLoadError, InferenceError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            ValueError,
+            FileNotFoundError,
+            ModelLoadError,
+            InferenceError,
         ) as e:
-            # Graceful degradation: log warning and continue without semantic checking
-            self.logger.warning(
-                f"SemanticChecker initialization failed, continuing without semantic checking. "
-                f"Check model_path and tokenizer_path in semantic config. Error: {e}"
-            )
+            # If model paths were explicitly configured, surface the error prominently.
+            # Silent failures when the user explicitly requested semantic checking
+            # are confusing and hide missing dependencies.
+            if has_paths:
+                self.logger.error(
+                    f"SemanticChecker initialization FAILED with explicitly configured "
+                    f"model paths. This likely means required packages are missing. "
+                    f"Install via: pip install transformers onnxruntime\n"
+                    f"  model_path: {self.config.semantic.model_path}\n"
+                    f"  tokenizer_path: {self.config.semantic.tokenizer_path}\n"
+                    f"  Error: {e}"
+                )
+            else:
+                self.logger.warning(
+                    f"SemanticChecker initialization failed, continuing without "
+                    f"semantic checking. Error: {e}"
+                )
             return None
 
     def create_suggestion_strategy(
