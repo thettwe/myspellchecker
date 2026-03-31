@@ -11,15 +11,15 @@
 #
 # Schema: https://myspellchecker.dev/schemas/homophones/v1.0
 
-version: "1.5.0"
+version: "1.4.2"
 category: "homophones"
 description: "Myanmar homophones for real-word error correction"
 
 metadata:
   created_date: "2025-12-30"
-  last_updated: "2026-03-31"
-  total_entries: 355
-  source: "v1.5.0 — added 64 new pairs across ya-pin/ya-yit, aspiration, nasal, tone, visarga, ha-htoe, and vowel categories"
+  last_updated: "2026-03-21"
+  total_entries: 217
+  source: "v1.4.2 — added ဆား/စား aspiration confusable pair (BM-515-E4)"
 
 # ============================================================
 # HOMOPHONE MAP
@@ -55,7 +55,7 @@ homophones:
   "ကျီး": ["ကြီး"]
   "ကြောက်": ["ကျောက်"]      # fear vs stone/rock
   "ကျောက်": ["ကြောက်"]
-  "ကြော": ["ကျော", "ကြော်"]  # tendon/sinew vs back (body) vs fry
+  "ကြော": ["ကျော"]          # tendon/sinew vs back (body)
   "ကျော": ["ကြော"]
   "ကြက်": ["ကျက်"]          # chicken vs memorize
   "ကျက်": ["ကြက်"]
@@ -80,7 +80,7 @@ homophones:
   "ကျန်": ["ကျံ"]          # remain vs (rare)
   "ကျံ": ["ကျန်"]
   "မှန်": ["မှံ"]           # mirror/true vs (rare)
-  "ခံ": ["ခန်", "ခင်"]      # endure vs (rare) vs be fond of
+  "ခံ": ["ခန်"]             # endure vs (rare)
   "ခန်": ["ခံ"]
   "ရန်": ["ရံ"]             # enemy vs occasional
   "ရံ": ["ရန်"]
@@ -123,7 +123,7 @@ homophones:
   # Wa-hswe (ွ) vs Lower vowels (ု) - True near-homophones only
   # ============================================================
   "ခွန်": ["ခုန်"]          # strength vs jump
-  "ခုန်": ["ခွန်", "ကုန်", "ခံု"]
+  "ခုန်": ["ခွန်"]
 
   # ============================================================
   # Aspirated/Unaspirated Confusions (တ/ထ, က/ခ, ပ/ဖ, ဆ/စ, ဘ/ဗ)
@@ -144,9 +144,9 @@ homophones:
   "ကွဲ": ["ခွဲ"]              # break/split vs divide/separate
   "ခွဲ": ["ကွဲ"]
   # ပ/ဖ (pa/pha)
-  "ပုံ": ["ဖုံ", "ပူံ"]       # shape/image vs powder/dust vs (variant)
+  "ပုံ": ["ဖုံ"]              # shape/image vs powder/dust
   "ဖုံ": ["ပုံ"]
-  "ပေါ်": ["ဖော်", "ပေါ"]    # appear/surface vs reveal vs (bound form)
+  "ပေါ်": ["ဖော်"]           # appear/surface vs reveal
   "ဖော်": ["ပေါ်"]
   # ဆ/စ, ဘ/ဗ
   "စင်": ["ဆင်"]           # stage/shelf vs elephant
@@ -159,7 +159,7 @@ homophones:
   "ဘူး": ["ဗူး", "ဖူး"]    # gourd/negative vs tin/can vs flower/experience
   "ဆု": ["စု"]             # prize vs gather
   "စု": ["ဆု"]
-  "ဆိုး": ["စိုး", "ဆို့"]    # bad/dye vs rule/worry vs choke/block
+  "ဆိုး": ["စိုး"]           # bad/dye vs rule/worry
   "စိုး": ["ဆိုး"]
   "ဆား": ["စား"]            # salt vs eat (aspiration confusable)
   # Aspirated/labial pairs
@@ -259,7 +259,7 @@ homophones:
   "နုတ်": ["နှုတ်"]
   "ရှပ်": ["ရပ်"]            # shirt vs stop/ward
   "နှိုး": ["နိုး"]           # wake (transitive) vs wake (intransitive)
-  "နိုး": ["နှိုး", "နို့"]   # awake vs wake(transitive) vs milk/breast
+  "နိုး": ["နှိုး"]
   "မှား": ["မား"]             # wrong/mistaken vs harden
   "မား": ["မှား"]
   "မှာ": ["မာ"]              # at/in (locative) vs hard/tough
@@ -303,7 +303,7 @@ homophones:
   "စာ": ["စား"]            # letter vs eat
   "စား": ["စာ", "ဆား"]     # eat vs letter vs salt
   "ကာ": ["ကား"]            # protect vs car
-  "ကား": ["ကာ", "ခါး"]     # car vs protect vs bitter/waist
+  "ကား": ["ကာ"]
   "လက်": ["လတ်"]           # hand vs fresh
   "လတ်": ["လက်"]
   "ဖက်": ["ဖတ်"]           # side vs read
@@ -322,141 +322,6 @@ homophones:
   # ============================================================
   "မဲ": ["မယ်"]             # vote/dark vs future particle
   "မယ်": ["မဲ"]             # future particle vs vote/dark
-
-  # ============================================================
-  # v1.5 additions — 64 new pairs across 7 categories
-  # ============================================================
-
-  # --- Ya-pin (ျ) vs Ya-yit (ြ) — additional high-frequency pairs ---
-  "ကျွန်": ["ကြွန်"]          # slave/servant vs (archaic form)
-  "ကြွန်": ["ကျွန်"]
-  "ချိန်": ["ခြိန်"]           # weigh/time vs (variant)
-  "ခြိန်": ["ချိန်"]
-  "ပျက်": ["ပြက်"]            # spoil/break vs joke/satirize
-  "ပြက်": ["ပျက်"]
-  "ချို": ["ခြို"]             # sweet vs thin/emaciated
-  "ခြို": ["ချို"]
-  "ပျံ": ["ပြံ"]              # fly vs (variant)
-  "ပြံ": ["ပျံ"]
-  "ကျင်": ["ကြင်"]            # jade/accustom vs love/cherish
-  "ကြင်": ["ကျင်"]
-  "ကျင့်": ["ကြင့်", "ကျင်း"]  # practice vs squeeze/pinch vs pit/hole
-  "ကြင့်": ["ကျင့်"]
-  "ကျူး": ["ကြူး"]            # trespass/commit vs (variant)
-  "ကြူး": ["ကျူး"]
-  "ချက်": ["ခြက်"]            # cook/point vs (rare)
-  "ခြက်": ["ချက်"]
-  "ချုပ်": ["ခြုပ်"]           # sew/contract vs (rare form)
-  "ခြုပ်": ["ချုပ်"]
-  "မြစ်": ["မျစ်"]            # river vs (variant)
-  "မျစ်": ["မြစ်"]
-  "မြက်": ["မျက်"]            # grass vs eye (in compound)
-  "မျက်": ["မြက်"]
-  "ပြင်": ["ပျင်"]            # fix/outside vs (variant)
-  "ပျင်": ["ပြင်"]
-  "ပြန်": ["ပျန်"]            # return vs (variant)
-  "ပျန်": ["ပြန်"]
-  "မြန်": ["မျန်"]            # fast/Myanmar vs (variant)
-  "မျန်": ["မြန်"]
-
-  # --- Aspirated/Unaspirated — additional pairs ---
-  "ခါး": ["ကား"]              # bitter/waist vs car
-  "ကိုက်": ["ခိုက်"]           # bite vs while/during
-  "ခိုက်": ["ကိုက်"]
-  "ကုန်": ["ခုန်"]             # goods/finish vs jump
-  "တုန်": ["ထုန်"]             # tremble vs (variant)
-  "ထုန်": ["တုန်"]
-  "ပိုင်": ["ဖိုင်"]           # own vs file
-  "ဖိုင်": ["ပိုင်"]
-  "ပိန်": ["ဖိန်"]             # thin/skinny vs (variant)
-  "ဖိန်": ["ပိန်"]
-  "ပြောင်": ["ဖြောင်"]         # shiny/move vs straight
-  "ဖြောင်": ["ပြောင်"]
-  "စိတ်": ["ဆိတ်"]            # mind vs goat/quiet
-  "ဆိတ်": ["စိတ်"]
-  "ဆိုင်": ["စိုင်"]           # shop/relate vs (rare/stale)
-  "စိုင်": ["ဆိုင်"]
-  "ဆိုင်း": ["စိုင်း"]          # gong/suspend vs hasten/try
-  "စိုင်း": ["ဆိုင်း"]
-
-  # --- Nasal final confusions — additional pairs ---
-  "ပန်း": ["ပံ့"]              # flower vs support/prop
-  "ပံ့": ["ပန်း"]
-  "ကိန်း": ["ကိမ်း"]          # number/reside vs (variant)
-  "ကိမ်း": ["ကိန်း"]
-  "ခံု": ["ခုန်"]              # bench/seat vs jump (ံ vs န်)
-  "ခင်": ["ခံ"]               # be fond of vs endure
-  "ပင်": ["ပံ"]               # tree/very vs mold/shape
-  "ပံ": ["ပင်"]
-  "ယုံ": ["ယုန်"]              # believe vs rabbit
-  "ယုန်": ["ယုံ"]
-  "ဒုံး": ["ဒုန်း"]            # rocket/bomb vs (variant)
-  "ဒုန်း": ["ဒုံး"]
-  "ကျင်း": ["ကျင့်"]          # pit/hole vs practice (finals)
-  "စံု": ["စုန်"]              # complete/pair vs downstream
-  "စုန်": ["စံု"]
-
-  # --- Tone mark confusions (့/း) — pairs differing in tone ---
-  "မြို့": ["မြိုး"]            # city/town vs (variant)
-  "မြိုး": ["မြို့"]
-  "ခိုး": ["ခို့"]              # steal vs (rare)
-  "ခို့": ["ခိုး"]
-  "ပို့": ["ပို"]               # send vs more (with tone)
-  "ပို": ["ပို့"]
-  "ကြို့": ["ကြိုး"]           # (variant) vs rope/string
-  "ကြိုး": ["ကြို့"]
-  "မို့": ["မိုး"]              # because vs rain/sky
-  "မိုး": ["မို့"]
-  "သို့": ["သိုး"]              # to/thus vs sheep
-  "သိုး": ["သို့"]
-  "ဆို့": ["ဆိုး"]             # choke/block vs bad/dye
-  "နို့": ["နိုး", "နှို့"]     # milk/breast vs awake vs (variant wake)
-
-  # --- Visarga presence/absence (း) ---
-  "ကောင်": ["ကောင်း"]         # creature vs good
-  "ကောင်း": ["ကောင်"]
-  "သာ": ["သား"]               # only/pleasant vs son/also
-  "သား": ["သာ"]
-  "ရွာ": ["ရွား"]              # village vs (variant/rare)
-  "ရွား": ["ရွာ"]
-  "နွေ": ["နွေး"]              # summer vs warm
-  "နွေး": ["နွေ"]
-  "သွေ": ["သွေး"]              # stray vs blood
-  "သွေး": ["သွေ"]
-  "ပေါ": ["ပေါ်"]              # (bound form) vs appear/on top
-  "မော": ["မော်"]              # tired vs (variant/engine)
-  "မော်": ["မော"]
-  "ကြော်": ["ကြော"]           # fry vs tendon/sinew
-  "လှော်": ["လှော"]            # row (boat) vs (bound form)
-  "လှော": ["လှော်"]
-
-  # --- Ha-htoe (ှ) presence/absence — additional pairs ---
-  "လှည်း": ["လည်း"]           # cart/ox-cart vs also/too
-  "လည်း": ["လှည်း"]
-  "မှတ်တမ်း": ["မတ်တမ်း"]      # record/memoir vs (variant)
-  "မတ်တမ်း": ["မှတ်တမ်း"]
-  "နှင့်": ["နင့်"]            # and/with vs (variant)
-  "နင့်": ["နှင့်"]
-  "နှို့": ["နို့"]             # (variant wake) vs milk/breast
-  "နှယ်": ["နယ်"]             # like/as vs territory
-  "နယ်": ["နှယ်"]
-  "ရှေ့": ["ရေ့"]              # front vs (variant)
-  "ရေ့": ["ရှေ့"]
-  "လှည့်": ["လည့်"]           # turn/trick vs turn(variant)
-  "လည့်": ["လှည့်"]
-  "နှစ်ခြိုက်": ["နစ်ခြိုက်"]   # enjoy deeply vs (variant)
-  "နစ်ခြိုက်": ["နှစ်ခြိုက်"]
-
-  # --- Vowel length confusions — additional pairs ---
-  "ခု": ["ခူ"]                # now/classifier vs (variant)
-  "ခူ": ["ခု"]
-  "ထူ": ["ထု"]                # thick vs (rare form)
-  "ထု": ["ထူ"]
-  "ရှု": ["ရှူ"]               # look at vs breathe/inhale
-  "ရှူ": ["ရှု"]
-  "ကု": ["ကူ"]                # cure vs help/copy
-  "ကူ": ["ကု"]
-  "ပူံ": ["ပုံ"]               # (variant) vs shape/image
 
 # ============================================================
 # CONTEXT-DEPENDENT HOMOPHONE DISAMBIGUATION
