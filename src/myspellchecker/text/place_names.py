@@ -2,7 +2,8 @@
 Myanmar place-name dictionary for heuristic NER.
 
 Source: chuuhtetnaing/myanmar-nrc-format-dataset (HuggingFace)
-Contains 420 townships and 14 states/regions.
+Contains 420+ townships, 14 states/regions, historical capitals,
+international cities/countries, and major geographic features.
 """
 
 from __future__ import annotations
@@ -502,4 +503,109 @@ MYANMAR_ETHNIC_GROUPS: frozenset[str] = frozenset(
         "ခမီ",
         "ထနု",
     }
+)
+
+# Historical capitals and ancient cities of Myanmar.
+MYANMAR_HISTORICAL_PLACES: frozenset[str] = frozenset(
+    {
+        "ပုဂံ",  # Bagan
+        "အင်းဝ",  # Inwa (Ava)
+        "ဟံသာဝတီ",  # Hanthawaddy
+        "အမရပူရ",  # Amarapura
+        "ဗိဿနိုး",  # Beikthano
+        "စစ်ကျို",  # Tagaung
+        "သီရိက္ခေတ္တရာ",  # Sri Ksetra
+        "ပင်းယ",  # Pinya
+        "ဇာကလိ",  # Sagalay
+        "သဂဟ",  # Thagara
+    }
+)
+
+# International cities commonly referenced in Myanmar text.
+INTERNATIONAL_CITIES: frozenset[str] = frozenset(
+    {
+        "ဘန်ကောက်",  # Bangkok
+        "စင်ကာပူ",  # Singapore
+        "တိုကျို",  # Tokyo
+        "ပေကျင်း",  # Beijing
+        "ဝါရှင်တန်",  # Washington
+        "လန်ဒန်",  # London
+        "မော်စကို",  # Moscow
+        "ပါရီ",  # Paris
+        "ဘာလင်",  # Berlin
+        "ကွာလာလမ်ပူ",  # Kuala Lumpur
+        "ဟနွိုင်",  # Hanoi
+        "ဂျကာတာ",  # Jakarta
+        "မနီလာ",  # Manila
+        "ဆိုးလ်",  # Seoul
+        "ဒေလီ",  # Delhi
+        "ကိုလံဘို",  # Colombo
+        "ဓာကာ",  # Dhaka
+        "ကိုင်ရို",  # Cairo
+        "ဆစ်နီ",  # Sydney
+        "နယူးယောက်",  # New York
+        "ဆန်ဖရန်စစ္စကို",  # San Francisco
+        "ဂျနီဗာ",  # Geneva
+        "ဗီယင်နာ",  # Vienna
+    }
+)
+
+# Country names in Myanmar script.
+INTERNATIONAL_COUNTRIES: frozenset[str] = frozenset(
+    {
+        "ထိုင်း",  # Thailand
+        "တရုတ်",  # China
+        "အိန္ဒိယ",  # India
+        "ဂျပန်",  # Japan
+        "ကိုရီးယား",  # Korea
+        "အမေရိကန်",  # America
+        "အင်္ဂလန်",  # England
+        "ပြင်သစ်",  # France
+        "ဂျာမနီ",  # Germany
+        "ရုရှား",  # Russia
+        "ဩစတြေးလျ",  # Australia
+        "မလေးရှား",  # Malaysia
+        "ဗီယက်နမ်",  # Vietnam
+        "ကမ္ဘောဒီးယား",  # Cambodia
+        "လာအို",  # Laos
+        "ဘင်္ဂလားဒေ့ရှ်",  # Bangladesh
+        "သီရိလင်္ကာ",  # Sri Lanka
+        "ပါကစ္စတန်",  # Pakistan
+        "ဖိလစ်ပိုင်",  # Philippines
+        "အင်ဒိုနီးရှား",  # Indonesia
+        "ဘရာဇီး",  # Brazil
+        "ကနေဒါ",  # Canada
+        "အီတလီ",  # Italy
+        "စပိန်",  # Spain
+        "တူရကီ",  # Turkey
+        "အီဂျစ်",  # Egypt
+        "ဆွစ်ဇာလန်",  # Switzerland
+        "နီပေါ",  # Nepal
+        "အာဖဂန်နစ္စတန်",  # Afghanistan
+        "ဆော်ဒီအာရေးဗီးယား",  # Saudi Arabia
+    }
+)
+
+# Major geographic features (rivers, lakes, landmarks).
+MYANMAR_GEOGRAPHIC_FEATURES: frozenset[str] = frozenset(
+    {
+        "ဧရာဝတီမြစ်",  # Ayeyarwady River
+        "ချင်းတွင်းမြစ်",  # Chindwin River
+        "သံလွင်မြစ်",  # Thanlwin (Salween) River
+        "စစ်တောင်းမြစ်",  # Sittaung River
+        "အင်းလေးကန်",  # Inle Lake
+        "ရွှေတိဂုံ",  # Shwedagon
+        "မြင့်မိုရ်",  # Myinmoletkat
+    }
+)
+
+# Combined set of all place names for convenient lookup.
+ALL_PLACES: frozenset[str] = (
+    MYANMAR_PLACES
+    | MYANMAR_STATE_SHORT
+    | MYANMAR_ETHNIC_GROUPS
+    | MYANMAR_HISTORICAL_PLACES
+    | INTERNATIONAL_CITIES
+    | INTERNATIONAL_COUNTRIES
+    | MYANMAR_GEOGRAPHIC_FEATURES
 )

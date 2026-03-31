@@ -1,0 +1,1087 @@
+# Loan Word Transliteration Variants - Version 1.0
+#
+# Myanmar text contains many loan words from English, Pali, Sanskrit,
+# and other languages. These words often have multiple valid transliteration
+# variants, and the spell checker needs dedicated rules to handle them.
+#
+# This file provides:
+#   1. Standard form and known variant spellings for common loan words
+#   2. Source language and original word for each entry
+#   3. Domain classification for context-aware checking
+#   4. Transliteration pattern rules for systematic variant generation
+#
+# Usage:
+#   - Variants listed here should NOT be flagged as misspellings
+#   - The "standard" form is the preferred/recommended spelling
+#   - When a variant is detected, suggest the standard form as preferred
+#   - Domain tags enable context-sensitive strictness
+#
+# Schema: https://myspellchecker.dev/schemas/loan-words/v1.0
+
+version: "1.0.0"
+category: "loan_words"
+description: "Loan word transliteration variants for Myanmar spell checking"
+
+metadata:
+  created_date: "2026-03-31"
+  total_entries: 186
+  source: "Curated from common Myanmar loan word usage patterns"
+  notes: "Covers English (125), Pali/Sanskrit (35), other sources (26), plus 17 transliteration patterns"
+
+# ============================================================
+# ENGLISH LOAN WORDS
+# ============================================================
+english:
+  # ── Technology ──
+  - standard: "ကွန်ပျူတာ"
+    source: "computer"
+    variants: ["ကွန်ပ်ယူတာ", "ကမ္ပ်ယူတာ", "ကွန်ပြူတာ"]
+    domain: "technology"
+
+  - standard: "အင်တာနက်"
+    source: "internet"
+    variants: ["အင်တာနက့်", "အင်တာနတ်", "အင်တာနတ့်"]
+    domain: "technology"
+
+  - standard: "ဖုန်း"
+    source: "phone"
+    variants: ["ဖုံး", "ဖေါန်း"]
+    domain: "technology"
+
+  - standard: "ဗီဒီယို"
+    source: "video"
+    variants: ["ဗွီဒီယို", "ဗီဒီအို", "ဗီဒိယို"]
+    domain: "technology"
+
+  - standard: "ဝက်ဘ်ဆိုက်"
+    source: "website"
+    variants: ["ဝတ်ဘ်ဆိုက်", "ဝဘ်ဆိုက်", "ဝက်ဆိုက်"]
+    domain: "technology"
+
+  - standard: "ဆော့ဖ်ဝဲ"
+    source: "software"
+    variants: ["ဆော့ဝဲ", "ဆော့ဖ်ဝဲလ်"]
+    domain: "technology"
+
+  - standard: "ဟာ့ဒ်ဝဲ"
+    source: "hardware"
+    variants: ["ဟတ်ဝဲ", "ဟာဒ်ဝဲ"]
+    domain: "technology"
+
+  - standard: "အီးမေးလ်"
+    source: "email"
+    variants: ["အီးမေးလ်း", "အီမေးလ်", "အီးမေး"]
+    domain: "technology"
+
+  - standard: "ဒေတာ"
+    source: "data"
+    variants: ["ဒါတာ", "ဒတ်တာ"]
+    domain: "technology"
+
+  - standard: "ဆာဗာ"
+    source: "server"
+    variants: ["ဆာဗား", "ဆာဘာ"]
+    domain: "technology"
+
+  - standard: "နက်ဝပ်"
+    source: "network"
+    variants: ["နက်ဝက်", "နက်ဝတ်"]
+    domain: "technology"
+
+  - standard: "ပရိုဂရမ်"
+    source: "program"
+    variants: ["ပရိုဂရမ့်", "ပရိုဂရမ်မ"]
+    domain: "technology"
+
+  - standard: "အက်ပ်"
+    source: "app"
+    variants: ["အပ်", "အက်ပလီကေးရှင်း"]
+    domain: "technology"
+
+  - standard: "ဝိုင်ဖိုင်"
+    source: "wifi"
+    variants: ["ဝိုင်ဖိုင့်", "ဝိုင်ဖို"]
+    domain: "technology"
+
+  - standard: "ဘလူးတုသ်"
+    source: "bluetooth"
+    variants: ["ဘလူးတုတ်", "ဘလူးထုသ်"]
+    domain: "technology"
+
+  - standard: "ပရင်တာ"
+    source: "printer"
+    variants: ["ပရင်တား", "ပရင့်တာ"]
+    domain: "technology"
+
+  - standard: "မောနီတာ"
+    source: "monitor"
+    variants: ["မော်နီတာ", "မွန်နီတာ"]
+    domain: "technology"
+
+  - standard: "ကီးဘုတ်"
+    source: "keyboard"
+    variants: ["ကီးဘုဒ်", "ကီဘုတ်"]
+    domain: "technology"
+
+  - standard: "မောက်စ်"
+    source: "mouse"
+    variants: ["မောက်", "မောက်စ"]
+    domain: "technology"
+
+  - standard: "ဒစ်ဂျစ်တယ်"
+    source: "digital"
+    variants: ["ဒီဂျစ်တယ်", "ဒစ်ဂျီတယ်"]
+    domain: "technology"
+
+  - standard: "အွန်လိုင်း"
+    source: "online"
+    variants: ["အွန်လိုင်", "အော်လိုင်း"]
+    domain: "technology"
+
+  - standard: "ဒေါင်းလုဒ်"
+    source: "download"
+    variants: ["ဒေါင်းလုတ်", "ဒေါင်လုဒ်"]
+    domain: "technology"
+
+  - standard: "အပ်လုဒ်"
+    source: "upload"
+    variants: ["အပ်လုတ်", "အတ်လုဒ်"]
+    domain: "technology"
+
+  # ── Education ──
+  - standard: "တက္ကသိုလ်"
+    source: "university (Pali via English)"
+    variants: ["တက္ကသိုလ", "တက္ကဆိုလ်"]
+    domain: "education"
+
+  - standard: "ပါမောက္ခ"
+    source: "professor"
+    variants: ["ပါမောက္ခာ", "ပရောဖက်ဆာ"]
+    domain: "education"
+
+  - standard: "ဘွဲ့"
+    source: "degree"
+    variants: ["ဘွဲ"]
+    domain: "education"
+
+  - standard: "ကောလိပ်"
+    source: "college"
+    variants: ["ကေါလိပ်", "ကော်လိပ်"]
+    domain: "education"
+
+  - standard: "စကော်လာရှစ်"
+    source: "scholarship"
+    variants: ["စကော်လာရှပ်", "စကေါလာရှစ်"]
+    domain: "education"
+
+  - standard: "ဒီပလိုမာ"
+    source: "diploma"
+    variants: ["ဒီပလိုမ", "ဒစ်ပလိုမာ"]
+    domain: "education"
+
+  - standard: "ဆာတီဖီကိတ်"
+    source: "certificate"
+    variants: ["ဆာတီဖီကိတ့်", "ဆာဒီဖီကိတ်"]
+    domain: "education"
+
+  - standard: "စတူဒင့်"
+    source: "student"
+    variants: ["စတူးဒင့်", "စတူဒန့်"]
+    domain: "education"
+
+  # ── Food & Drink ──
+  - standard: "ကော်ဖီ"
+    source: "coffee"
+    variants: ["ကေါ်ဖီ", "ကော့ဖီ", "ကောဖီ"]
+    domain: "food"
+
+  - standard: "ဘီယာ"
+    source: "beer"
+    variants: ["ဘီအာ", "ဗီယာ", "ဘီယား"]
+    domain: "food"
+
+  - standard: "ခေါ်ကလက်"
+    source: "chocolate"
+    variants: ["ချောကလက်", "ချော့ကလက်", "ချောကလတ်"]
+    domain: "food"
+
+  - standard: "ကိတ်မုန့်"
+    source: "cake"
+    variants: ["ကိတ်မှုန့်", "ကိက်မုန့်"]
+    domain: "food"
+
+  - standard: "ဘီစကွတ်"
+    source: "biscuit"
+    variants: ["ဘီစကစ်", "ဘစ်ကွတ်"]
+    domain: "food"
+
+  - standard: "ဆလတ်"
+    source: "salad"
+    variants: ["ဆယ်လတ်", "ဆလက်"]
+    domain: "food"
+
+  - standard: "ဆော့စ်"
+    source: "sauce"
+    variants: ["ဆော့", "ဆော်စ်"]
+    domain: "food"
+
+  - standard: "ဟင်းခါး"
+    source: "curry (via Hindi)"
+    variants: []
+    domain: "food"
+
+  - standard: "ဟမ်ဘာဂါ"
+    source: "hamburger"
+    variants: ["ဟမ်ဘာဂါး", "ဟန်ဘာဂါ"]
+    domain: "food"
+
+  - standard: "ဆန်းဒွစ်ချ်"
+    source: "sandwich"
+    variants: ["ဆန်းဝစ်ချ်", "ဆန်ဒွစ်"]
+    domain: "food"
+
+  - standard: "ပါစတာ"
+    source: "pasta"
+    variants: ["ပတ်စတာ", "ပါ့စတာ"]
+    domain: "food"
+
+  - standard: "ပီဇာ"
+    source: "pizza"
+    variants: ["ပီဇား", "ပိဇာ"]
+    domain: "food"
+
+  - standard: "အိုင်စကရင်"
+    source: "ice cream"
+    variants: ["အိုက်ခရင်", "အိုင်ခရင်", "အိုင်စကရိမ်"]
+    domain: "food"
+
+  # ── Sports ──
+  - standard: "ဘောလုံး"
+    source: "ball"
+    variants: ["ဘော့လုံး"]
+    domain: "sports"
+
+  - standard: "ဂိုး"
+    source: "goal"
+    variants: ["ဂိုးလ်", "ဂိုလ်"]
+    domain: "sports"
+
+  - standard: "ဖိုင်နယ်"
+    source: "final"
+    variants: ["ဖိုင်နယ့်", "ဖိုင်နဲလ်"]
+    domain: "sports"
+
+  - standard: "ချန်ပီယံ"
+    source: "champion"
+    variants: ["ချန်ပီအံ", "ချန်ပီယန်"]
+    domain: "sports"
+
+  - standard: "ဖက်ဒရေးရှင်း"
+    source: "federation"
+    variants: ["ဖယ်ဒရေးရှင်း", "ဖက်ဒရေရှင်း"]
+    domain: "sports"
+
+  - standard: "ဂေါက်သီး"
+    source: "golf"
+    variants: ["ဂေါ့သီး", "ဂေါက်သီ"]
+    domain: "sports"
+
+  - standard: "တင်းနစ်"
+    source: "tennis"
+    variants: ["တင်နစ်", "တင်းနဲစ်"]
+    domain: "sports"
+
+  - standard: "ဗော်လီဘော"
+    source: "volleyball"
+    variants: ["ဗော်လီဘော်", "ဘော်လီဘော"]
+    domain: "sports"
+
+  - standard: "ဘတ်စကက်ဘော"
+    source: "basketball"
+    variants: ["ဘတ်စကက်ဘော်", "ဘတ်စကတ်ဘော"]
+    domain: "sports"
+
+  - standard: "ပေါင်"
+    source: "boxing ring (ring/pound)"
+    variants: []
+    domain: "sports"
+
+  # ── Politics & Government ──
+  - standard: "ဒီမိုကရေစီ"
+    source: "democracy"
+    variants: ["ဒီမိုကရက်စီ", "ဒီမိုခရေစီ", "ဒီမိုကရေစီး"]
+    domain: "politics"
+
+  - standard: "ပါတီ"
+    source: "party"
+    variants: ["ပါတီး"]
+    domain: "politics"
+
+  - standard: "ပါလီမန်"
+    source: "parliament"
+    variants: ["ပါလီမန့်", "ပါလီမင့်"]
+    domain: "politics"
+
+  - standard: "ကော်မရှင်"
+    source: "commission"
+    variants: ["ကော်မစ်ရှင်", "ကော်မီရှင်"]
+    domain: "politics"
+
+  - standard: "ကွန်ဂရက်"
+    source: "congress"
+    variants: ["ကွန်ဂရက်စ်", "ကွန်ဂရစ်"]
+    domain: "politics"
+
+  - standard: "ဝန်ကြီး"
+    source: "minister"
+    variants: []
+    domain: "politics"
+
+  - standard: "ဖက်ဒရယ်"
+    source: "federal"
+    variants: ["ဖယ်ဒရယ်", "ဖက်ဒရဲယ်"]
+    domain: "politics"
+
+  - standard: "သံရုံး"
+    source: "embassy"
+    variants: []
+    domain: "politics"
+
+  - standard: "ကောင်စစ်"
+    source: "consul"
+    variants: ["ကောင်ဆယ်", "ကောင်ဆူလ်"]
+    domain: "politics"
+
+  # ── Medical & Health ──
+  - standard: "ဗိုင်းရပ်စ်"
+    source: "virus"
+    variants: ["ဗိုင်းရပ်", "ဗိုင်ရပ်စ်", "ဘိုင်းရပ်စ်"]
+    domain: "medical"
+
+  - standard: "ဗက်တီးရီးယား"
+    source: "bacteria"
+    variants: ["ဘက်တီးရီးယား", "ဗတ္တီးရီးယား"]
+    domain: "medical"
+
+  - standard: "ဆေးခန်း"
+    source: "clinic"
+    variants: []
+    domain: "medical"
+
+  - standard: "အိတ်ခ်ျအိုင်ဗွီ"
+    source: "HIV"
+    variants: ["အိတ်ချ်အိုင်ဗွီ", "HIV"]
+    domain: "medical"
+
+  - standard: "ကိုဗစ်"
+    source: "COVID"
+    variants: ["ကိုဗစ့်", "ကိုးဗစ်"]
+    domain: "medical"
+
+  - standard: "ဆေးရုံ"
+    source: "hospital"
+    variants: []
+    domain: "medical"
+
+  - standard: "ကလီနစ်"
+    source: "clinic"
+    variants: ["ကလင်းနစ်", "ကလီးနစ်"]
+    domain: "medical"
+
+  - standard: "ဓာတ်ခွဲခန်း"
+    source: "laboratory"
+    variants: []
+    domain: "medical"
+
+  - standard: "ဗီတာမင်"
+    source: "vitamin"
+    variants: ["ဗိုက်တာမင်", "ဗစ်တမင်", "ဗီတမင်"]
+    domain: "medical"
+
+  - standard: "အင်ဆူလင်"
+    source: "insulin"
+    variants: ["အင်စူလင်", "အင်ဆုလင်"]
+    domain: "medical"
+
+  - standard: "ကင်ဆာ"
+    source: "cancer"
+    variants: ["ကန်ဆာ", "ကင်ဆား"]
+    domain: "medical"
+
+  - standard: "ဆာဂျရီ"
+    source: "surgery"
+    variants: ["ဆာဂျာရီ", "ဆာဂျီရီ"]
+    domain: "medical"
+
+  - standard: "ဓာတ်မတည့်ခြင်း"
+    source: "allergy"
+    variants: []
+    domain: "medical"
+
+  - standard: "အလာဂျီ"
+    source: "allergy (transliterated)"
+    variants: ["အယ်လာဂျီ", "အဲလာဂျီ"]
+    domain: "medical"
+
+  # ── Transportation ──
+  - standard: "ဘတ်စ်ကား"
+    source: "bus"
+    variants: ["ဘက်စ်ကား", "ဘတ်ကား"]
+    domain: "transportation"
+
+  - standard: "တက္ကစီ"
+    source: "taxi"
+    variants: ["တက်ကစီ", "တက္ကဆီ"]
+    domain: "transportation"
+
+  - standard: "ရထား"
+    source: "train"
+    variants: []
+    domain: "transportation"
+
+  - standard: "ကားဂိတ်"
+    source: "car gate (station)"
+    variants: ["ကားဂိတ"]
+    domain: "transportation"
+
+  - standard: "ဆိုင်ကယ်"
+    source: "cycle (motorcycle)"
+    variants: ["ဆိုင်ကဲ", "ဆိုင်ကယ"]
+    domain: "transportation"
+
+  - standard: "လိုင်စင်"
+    source: "license"
+    variants: ["လိုင်စင့်", "လိုင်ဆင်"]
+    domain: "transportation"
+
+  - standard: "ဂါလံ"
+    source: "gallon"
+    variants: ["ဂယ်လံ", "ဂါလန်"]
+    domain: "transportation"
+
+  - standard: "ဒီဇယ်"
+    source: "diesel"
+    variants: ["ဒီဇဲ", "ဒီဆယ်"]
+    domain: "transportation"
+
+  - standard: "ဓာတ်ဆီ"
+    source: "petrol/gasoline"
+    variants: []
+    domain: "transportation"
+
+  # ── Business & Finance ──
+  - standard: "ဘဏ်"
+    source: "bank"
+    variants: ["ဘဏ့်"]
+    domain: "finance"
+
+  - standard: "ဒေါ်လာ"
+    source: "dollar"
+    variants: ["ဒေါ်လား", "ဒေါလာ"]
+    domain: "finance"
+
+  - standard: "ရာခိုင်နှုန်း"
+    source: "percent"
+    variants: []
+    domain: "finance"
+
+  - standard: "ပါဆယ်"
+    source: "parcel"
+    variants: ["ပါစယ်", "ပါဆဲ"]
+    domain: "finance"
+
+  - standard: "အင်ဗွိုက်"
+    source: "invoice"
+    variants: ["အင်ဗွိုက့်", "အင်ဗိုက်"]
+    domain: "finance"
+
+  - standard: "ကုမ္ပဏီ"
+    source: "company"
+    variants: ["ကုမ္ပဏီး", "ကုမ်ပဏီ", "ကုန်ပဏီ"]
+    domain: "finance"
+
+  - standard: "ဖက်ထရီ"
+    source: "factory"
+    variants: ["ဖတ်ထရီ", "ဖက်တရီ"]
+    domain: "finance"
+
+  - standard: "မန်နေဂျာ"
+    source: "manager"
+    variants: ["မန္နေဂျာ", "မနေဂျာ"]
+    domain: "finance"
+
+  - standard: "အော်ဒါ"
+    source: "order"
+    variants: ["အော်ဒါး", "အော်ဒါ့"]
+    domain: "finance"
+
+  # ── Entertainment & Media ──
+  - standard: "ရုပ်ရှင်"
+    source: "movie/cinema"
+    variants: []
+    domain: "entertainment"
+
+  - standard: "ဇာတ်ကား"
+    source: "drama/film"
+    variants: []
+    domain: "entertainment"
+
+  - standard: "ကင်မရာ"
+    source: "camera"
+    variants: ["ကမ်မရာ", "ကင်မရား"]
+    domain: "entertainment"
+
+  - standard: "ဂစ်တာ"
+    source: "guitar"
+    variants: ["ဂီတာ", "ဂစ်တား"]
+    domain: "entertainment"
+
+  - standard: "ပိုစတာ"
+    source: "poster"
+    variants: ["ပိုစတား", "ပို့စတာ"]
+    domain: "entertainment"
+
+  - standard: "ရေဒီယို"
+    source: "radio"
+    variants: ["ရေဒီအို", "ရေးဒီယို"]
+    domain: "entertainment"
+
+  - standard: "တီဗွီ"
+    source: "TV"
+    variants: ["တီဘီ", "တီဗီ"]
+    domain: "entertainment"
+
+  # ── Everyday Objects & General ──
+  - standard: "ပလတ်စတစ်"
+    source: "plastic"
+    variants: ["ပလက်စတစ်", "ပလတ်စတိတ်"]
+    domain: "general"
+
+  - standard: "ဘက်ထရီ"
+    source: "battery"
+    variants: ["ဘတ်ထရီ", "ဘက်ထရီး"]
+    domain: "general"
+
+  - standard: "ဆိုဖာ"
+    source: "sofa"
+    variants: ["ဆိုဖား", "ဆိုးဖာ"]
+    domain: "general"
+
+  - standard: "မီတာ"
+    source: "meter"
+    variants: ["မီတား", "မိတာ"]
+    domain: "general"
+
+  - standard: "စင်တီမီတာ"
+    source: "centimeter"
+    variants: ["စင်တီမီတား", "ဆင်တီမီတာ"]
+    domain: "general"
+
+  - standard: "ကီလို"
+    source: "kilo"
+    variants: ["ကီလိုး", "ကိလို"]
+    domain: "general"
+
+  - standard: "ဟိုတယ်"
+    source: "hotel"
+    variants: ["ဟိုတဲ", "ဟိုတယ"]
+    domain: "general"
+
+  - standard: "အိမ်သာ"
+    source: "toilet (Myanmar word)"
+    variants: []
+    domain: "general"
+
+  - standard: "ဘောပင်"
+    source: "ballpoint"
+    variants: ["ဘော့ပင်"]
+    domain: "general"
+
+  - standard: "အင်ဂျင်"
+    source: "engine"
+    variants: ["အင်ဂျင့်", "အင်ဂျိန်"]
+    domain: "general"
+
+  - standard: "ရာဘာ"
+    source: "rubber"
+    variants: ["ရပ်ဘာ", "ရာဘား"]
+    domain: "general"
+
+  - standard: "ဆီမင့်"
+    source: "cement"
+    variants: ["ဆီမင်", "ဆီမင့်"]
+    domain: "general"
+
+  - standard: "စက်ရုံ"
+    source: "factory (Myanmar)"
+    variants: []
+    domain: "general"
+
+  # ── Fashion & Clothing ──
+  - standard: "ဖက်ရှင်"
+    source: "fashion"
+    variants: ["ဖက်ရှင့်", "ဖတ်ရှင်"]
+    domain: "fashion"
+
+  - standard: "ဒီဇိုင်း"
+    source: "design"
+    variants: ["ဒီဇိုင်", "ဒီဆိုင်း"]
+    domain: "fashion"
+
+  - standard: "တီရှပ်"
+    source: "t-shirt"
+    variants: ["တီးရှပ်", "တီရှပ"]
+    domain: "fashion"
+
+  - standard: "ဂျင်းဘောင်းဘီ"
+    source: "jeans"
+    variants: ["ဂျင်ဘောင်းဘီ", "ဂျင်းဘောင်ဘီ"]
+    domain: "fashion"
+
+  - standard: "အင်္ကျီ"
+    source: "shirt/blouse (Pali)"
+    variants: ["အင်ကြီ"]
+    domain: "fashion"
+
+  # ── Measurement & Science ──
+  - standard: "ဗို့"
+    source: "volt"
+    variants: ["ဗိုလ့်", "ဗို"]
+    domain: "science"
+
+  - standard: "ဝပ်"
+    source: "watt"
+    variants: ["ဝတ်"]
+    domain: "science"
+
+  - standard: "ကယ်လိုရီ"
+    source: "calorie"
+    variants: ["ကယ်လရီ", "ကလိုရီ"]
+    domain: "science"
+
+  - standard: "အောက်ဆီဂျင်"
+    source: "oxygen"
+    variants: ["အောက်ဆီဂျင့်", "အောက်စီဂျင်"]
+    domain: "science"
+
+  - standard: "ဟိုက်ဒရိုဂျင်"
+    source: "hydrogen"
+    variants: ["ဟိုက်ဒရိုဂျင့်", "ဟိုဒရိုဂျင်"]
+    domain: "science"
+
+# ============================================================
+# PALI/SANSKRIT LOAN WORDS
+# ============================================================
+pali_sanskrit:
+  # ── Religious & Philosophical ──
+  - standard: "ဗုဒ္ဓ"
+    source: "Buddha"
+    variants: ["ဘုဒ္ဓ", "ဗုဒ်ဓ"]
+    domain: "religious"
+
+  - standard: "ဓမ္မ"
+    source: "Dhamma"
+    variants: ["ဓမ်မ", "ဓမ္မာ", "ဓမ်"]
+    domain: "religious"
+
+  - standard: "သံဃာ"
+    source: "Sangha"
+    variants: ["သံဃ", "ဆံဃာ"]
+    domain: "religious"
+
+  - standard: "သာသနာ"
+    source: "Sasana"
+    variants: ["ဿာသနာ", "သာသနာ့"]
+    domain: "religious"
+
+  - standard: "ပရိနိဗ္ဗာန်"
+    source: "Parinibbana"
+    variants: ["ပရိနိဗ်ဗာန်", "ပရိနိဗ္ဗာန"]
+    domain: "religious"
+
+  - standard: "ကမ္မ"
+    source: "Kamma/Karma"
+    variants: ["ကမ်မ", "ကမ္ဗ", "ကံမ"]
+    domain: "religious"
+
+  - standard: "နိဗ္ဗာန်"
+    source: "Nibbana/Nirvana"
+    variants: ["နိဗ်ဗာန်", "နိဗ္ဗာန"]
+    domain: "religious"
+
+  - standard: "ဝိပဿနာ"
+    source: "Vipassana"
+    variants: ["ဝိပါဿနာ", "ဝိပဿနာ့"]
+    domain: "religious"
+
+  - standard: "သမာဓိ"
+    source: "Samadhi"
+    variants: ["သမ္မာဓိ", "ဆမာဓိ"]
+    domain: "religious"
+
+  - standard: "ပါရမီ"
+    source: "Parami/Paramita"
+    variants: ["ပါရမီး", "ပရမီ"]
+    domain: "religious"
+
+  - standard: "သီလ"
+    source: "Sila"
+    variants: ["သီလာ", "ဆီလ"]
+    domain: "religious"
+
+  - standard: "ဒါန"
+    source: "Dana"
+    variants: ["ဒါနာ", "ဓာန"]
+    domain: "religious"
+
+  - standard: "ကုသိုလ်"
+    source: "Kusala"
+    variants: ["ကုဆိုလ်", "ကုသိုလ"]
+    domain: "religious"
+
+  - standard: "အကုသိုလ်"
+    source: "Akusala"
+    variants: ["အကုဆိုလ်", "အကုသိုလ"]
+    domain: "religious"
+
+  - standard: "ပိဋကတ်"
+    source: "Pitaka"
+    variants: ["ပိဋကတ", "ပိဋိကတ်"]
+    domain: "religious"
+
+  - standard: "သုတ္တန်"
+    source: "Suttanta"
+    variants: ["သုတ်တန်", "သုတ္တာန်"]
+    domain: "religious"
+
+  - standard: "ဝိနည်း"
+    source: "Vinaya"
+    variants: ["ဝိနယ်", "ဝိနည်"]
+    domain: "religious"
+
+  - standard: "အဘိဓမ္မာ"
+    source: "Abhidhamma"
+    variants: ["အဘိဓမ်မာ", "အဘိဓမ္မ"]
+    domain: "religious"
+
+  # ── Formal/Literary ──
+  - standard: "ဝိဇ္ဇာ"
+    source: "Vijja (knowledge/arts)"
+    variants: ["ဝိဇ်ဇာ", "ဝိဇ္ဇ"]
+    domain: "education"
+
+  - standard: "သိပ္ပံ"
+    source: "Sippa (science/craft)"
+    variants: ["သိပံ", "သိပ်ပံ"]
+    domain: "education"
+
+  - standard: "ပညာ"
+    source: "Panna (wisdom)"
+    variants: ["ပညာ့"]
+    domain: "education"
+
+  - standard: "ဂုဏ်"
+    source: "Guna (virtue/quality)"
+    variants: ["ဂုန်", "ဂုန့်"]
+    domain: "general"
+
+  - standard: "ဗုဒ္ဓဘာသာ"
+    source: "Buddhism"
+    variants: ["ဗုဒ္ဓဘာသာ့", "ဘုဒ္ဓဘာသာ"]
+    domain: "religious"
+
+  - standard: "သတ္တဝါ"
+    source: "Sattava (being/creature)"
+    variants: ["သတ်တဝါ", "သတ္တဝ"]
+    domain: "religious"
+
+  - standard: "ပဌမ"
+    source: "Pathama (first)"
+    variants: ["ပထမ"]
+    domain: "general"
+
+  - standard: "ဒုတိယ"
+    source: "Dutiya (second)"
+    variants: ["ဒုတိယာ"]
+    domain: "general"
+
+  - standard: "တတိယ"
+    source: "Tatiya (third)"
+    variants: ["တတိယာ"]
+    domain: "general"
+
+  - standard: "စတုတ္ထ"
+    source: "Catuttha (fourth)"
+    variants: ["စတုထ", "စတုတ်ထ"]
+    domain: "general"
+
+  - standard: "သမ္မတ"
+    source: "Sammata (president/agreed upon)"
+    variants: ["သမတ", "သမ္မာတ"]
+    domain: "politics"
+
+  - standard: "ပြဿနာ"
+    source: "Panhā (problem/question)"
+    variants: ["ပြသနာ", "ပြဿနာ့"]
+    domain: "general"
+
+  - standard: "ရာဇဝင်"
+    source: "Rajavamsa (royal chronicle)"
+    variants: ["ရာဇဝင့်", "ရာဇာဝင်"]
+    domain: "general"
+
+  - standard: "ဆရာ"
+    source: "Acariya (teacher)"
+    variants: []
+    domain: "education"
+
+  - standard: "အစိုးရ"
+    source: "government (Myanmar/Pali blend)"
+    variants: []
+    domain: "politics"
+
+  - standard: "ဥပဒေ"
+    source: "Upadesa (law/instruction)"
+    variants: ["ဥပဒေ့", "ဥပဒေး"]
+    domain: "politics"
+
+  - standard: "မဂ္ဂဇင်း"
+    source: "magazine (via English)"
+    variants: ["မဂ်ဂဇင်း", "မဂ္ဂဇင်"]
+    domain: "general"
+
+# ============================================================
+# OTHER LOAN WORDS (Thai, Hindi, Chinese, Japanese)
+# ============================================================
+other:
+  # ── Thai ──
+  - standard: "သပိတ်"
+    source: "alms bowl (Thai: บาตร)"
+    variants: []
+    domain: "religious"
+
+  - standard: "ဂေါ်ဖီ"
+    source: "cabinet/cupboard (Thai influence)"
+    variants: ["ဂေါဖီ"]
+    domain: "general"
+
+  - standard: "ကြိယာ"
+    source: "verb (Pali: kiriya, Thai influence)"
+    variants: ["ကြိယာ့"]
+    domain: "grammar"
+
+  - standard: "နာမ်"
+    source: "noun (Pali: nama, Thai influence)"
+    variants: ["နာမ"]
+    domain: "grammar"
+
+  - standard: "ဝိသေသန"
+    source: "adjective (Pali, Thai influence)"
+    variants: ["ဝိသေသနာ", "ဝိသေသန့"]
+    domain: "grammar"
+
+  - standard: "သြဝါဒ"
+    source: "advice/teaching (Pali: ovada)"
+    variants: ["ဩဝါဒ", "သြဝါဓ"]
+    domain: "religious"
+
+  # ── Hindi/Urdu ──
+  - standard: "ဘာဇာ"
+    source: "bazaar (Hindi/Urdu: बाज़ार)"
+    variants: ["ဘဇာ", "ဘာဇား"]
+    domain: "general"
+
+  - standard: "ဂျူတီ"
+    source: "duty (via Hindi)"
+    variants: ["ဂျူတီး", "ဒျူတီ"]
+    domain: "general"
+
+  - standard: "ချပါတီ"
+    source: "chapati (Hindi)"
+    variants: ["ခ်ပါတီ"]
+    domain: "food"
+
+  - standard: "နံပြား"
+    source: "naan (Hindi/Urdu influence)"
+    variants: []
+    domain: "food"
+
+  - standard: "ဘီရိုး"
+    source: "bureau (via Hindi)"
+    variants: ["ဘီရို", "ဘီရိုင်း"]
+    domain: "general"
+
+  # ── Chinese ──
+  - standard: "ကြာဇံ"
+    source: "fried dough stick (Chinese: 油炸鬼)"
+    variants: ["ကြာဇန်"]
+    domain: "food"
+
+  - standard: "လက်ဖက်"
+    source: "tea leaf (Chinese influence)"
+    variants: []
+    domain: "food"
+
+  - standard: "ခေါက်ဆွဲ"
+    source: "noodles (Chinese influence)"
+    variants: ["ခေါက်ဆွဲ့"]
+    domain: "food"
+
+  - standard: "ပဲ"
+    source: "bean (possible Chinese influence)"
+    variants: []
+    domain: "food"
+
+  - standard: "ဆီ"
+    source: "oil (Chinese: 油)"
+    variants: []
+    domain: "food"
+
+  - standard: "ကုန်တိုက်"
+    source: "department store (Chinese influence)"
+    variants: ["ကုန်တိုက"]
+    domain: "general"
+
+  # ── Japanese ──
+  - standard: "ဆူရှီ"
+    source: "sushi"
+    variants: ["ဆူဆီ", "ဆုရှီ"]
+    domain: "food"
+
+  - standard: "ကာရာအိုကေ"
+    source: "karaoke"
+    variants: ["ကာရာအိုကဲ", "ကရာအိုကေ"]
+    domain: "entertainment"
+
+  - standard: "ဆာကီ"
+    source: "sake"
+    variants: ["ဆာကေး", "ဆကီ"]
+    domain: "food"
+
+  - standard: "ဆူနာမီ"
+    source: "tsunami"
+    variants: ["ဆူနာမီး", "ဆုနာမီ"]
+    domain: "science"
+
+  # ── French ──
+  - standard: "ရက်စတိုရင့်"
+    source: "restaurant"
+    variants: ["ရက်စတော်ရင့်", "ရက်စတိုရန့်", "ရက်စတိုရင်"]
+    domain: "food"
+
+  - standard: "ဘူဖေး"
+    source: "buffet"
+    variants: ["ဘူဖဲ", "ဘူးဖေး"]
+    domain: "food"
+
+  - standard: "ဒီပို"
+    source: "depot"
+    variants: ["ဒီပိုး", "ဒီပို့"]
+    domain: "general"
+
+  # ── Portuguese (via colonial contact) ──
+  - standard: "ဘုရင်"
+    source: "king (Portuguese influence debated)"
+    variants: []
+    domain: "general"
+
+  - standard: "ခရစ်ယာန်"
+    source: "Christian (via Portuguese)"
+    variants: ["ခရစ်ယန်", "ခရစ္စယာန်"]
+    domain: "religious"
+
+# ============================================================
+# TRANSLITERATION PATTERN RULES
+# ============================================================
+# Common phoneme-mapping confusion patterns that apply systematically
+# across loan words. These describe WHY certain transliteration errors
+# occur and can be used for systematic variant generation.
+transliteration_patterns:
+  english_to_myanmar:
+    # ── Consonant mappings ──
+    - source_phoneme: "/s/"
+      correct: ["စ", "ဆ"]
+      common_error: ["သ"]
+      note: "English 's' maps to စ (voiceless) or ဆ (aspirated), NOT သ (dental fricative)"
+
+    - source_phoneme: "/r/"
+      correct: ["ရ"]
+      common_error: ["လ"]
+      note: "English 'r' maps to ရ (liquid r), sometimes confused with လ (lateral l)"
+
+    - source_phoneme: "/f/"
+      correct: ["ဖ"]
+      common_error: ["ပ"]
+      note: "English 'f' maps to ဖ (aspirated labial), no native /f/ so confused with ပ"
+
+    - source_phoneme: "/v/"
+      correct: ["ဗ"]
+      common_error: ["ဘ"]
+      note: "English 'v' maps to ဗ (voiced labial), confused with ဘ (aspirated)"
+
+    - source_phoneme: "/z/"
+      correct: ["ဇ"]
+      common_error: ["စ", "ဆ"]
+      note: "English 'z' maps to ဇ (voiced palatal), confused with voiceless counterparts"
+
+    - source_phoneme: "/dʒ/"
+      correct: ["ဂျ"]
+      common_error: ["ချ", "ဂ"]
+      note: "English 'j/g(e)' maps to ဂျ (consonant+medial), common composition error"
+
+    - source_phoneme: "/ʃ/"
+      correct: ["ရှ"]
+      common_error: ["ရ", "ဆ"]
+      note: "English 'sh' maps to ရှ (r+ha-htoe), sometimes simplified to ရ or ဆ"
+
+    - source_phoneme: "/tʃ/"
+      correct: ["ချ"]
+      common_error: ["ခ", "ဂျ"]
+      note: "English 'ch' maps to ချ (kha+medial ya), confused with plain ခ or ဂျ"
+
+    - source_phoneme: "/θ/"
+      correct: ["သ"]
+      common_error: ["စ", "ဆ"]
+      note: "English 'th' (voiceless) maps to သ (dental), confused with palatal sibilants"
+
+    - source_phoneme: "/k/"
+      correct: ["က"]
+      common_error: ["ခ"]
+      note: "English 'k/c' maps to က (voiceless velar), confused with ခ (aspirated)"
+
+    # ── Vowel mappings ──
+    - source_phoneme: "/eɪ/"
+      correct: ["ေး"]
+      common_error: ["ေ", "ဲ"]
+      note: "English long 'a' (as in 'cake') → ေး, shortened to ေ or confused with ဲ"
+
+    - source_phoneme: "/iː/"
+      correct: ["ီ"]
+      common_error: ["ိ"]
+      note: "English long 'ee' → ီ (long i), confused with ိ (short i)"
+
+    - source_phoneme: "/ɔː/"
+      correct: ["ော"]
+      common_error: ["ေါ", "ော်"]
+      note: "English 'aw/or' → ော, common reordering or asat confusion"
+
+    # ── Final consonant mappings ──
+    - source_phoneme: "final /t/"
+      correct: ["တ်"]
+      common_error: ["က်", "ဒ်"]
+      note: "English final 't' maps to တ် (ta+asat), confused with other finals"
+
+    - source_phoneme: "final /d/"
+      correct: ["ဒ်"]
+      common_error: ["တ်"]
+      note: "English final 'd' maps to ဒ်, often devoiced to တ်"
+
+    - source_phoneme: "final /n/"
+      correct: ["န်"]
+      common_error: ["င်"]
+      note: "English final 'n' → န်, confused with င် (velar nasal)"
+
+    - source_phoneme: "final /ŋ/"
+      correct: ["င်"]
+      common_error: ["န်"]
+      note: "English final 'ng' → င် (velar nasal), confused with န် (alveolar)"

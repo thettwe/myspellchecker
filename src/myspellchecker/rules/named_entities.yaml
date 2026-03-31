@@ -1,0 +1,450 @@
+# Myanmar Named Entity Gazetteer
+#
+# Curated list of named entities for false-positive suppression.
+# Words in this gazetteer should NEVER be flagged as spelling errors.
+#
+# Categories:
+#   person_names  - Common name prefixes and components
+#   organizations - Government, media, international bodies
+#   places        - States/regions, cities, international locations
+#   religious     - Buddhist and religious terminology
+#   historical    - Historical figures and cultural references
+#
+# Source: Manual curation from Myanmar NER corpora and common usage.
+
+version: "1.0.0"
+category: "named_entities"
+description: "Myanmar named entity gazetteer for FP suppression"
+
+metadata:
+  created_date: "2026-03-31"
+  description: "Named entities that should not be flagged as spelling errors"
+
+# Person name components (common first/last name elements)
+person_names:
+  prefixes:
+    - "ဦး"          # U (Mr./Uncle)
+    - "ဒေါ်"        # Daw (Mrs./Aunt)
+    - "မောင်"       # Maung (young man)
+    - "မ"           # Ma (Miss)
+    - "ကို"         # Ko (Brother)
+    - "ဗိုလ်"       # Bo (Colonel/military officer)
+    - "ဆရာ"         # Saya (Teacher, male)
+    - "ဆရာမ"        # Sayama (Teacher, female)
+    - "ပါမောက္ခ"     # Professor
+    - "ဒုတိယ"       # Deputy
+    - "ဒေါက်တာ"     # Doctor
+    - "ဆရာဝန်"      # Medical doctor
+    - "သခင်"        # Thakin (historical title)
+    - "ဗိုလ်ချုပ်"   # General
+    - "ဗိုလ်မှူး"    # Major
+    - "ရဲအုပ်"       # Police officer
+    - "ဝန်ကြီး"      # Minister
+    - "သမ္မတ"        # President
+    - "ဆရာတော်"     # Sayadaw (abbot)
+
+  common_names:
+    - "အောင်"       # Aung
+    - "မြင့်"        # Myint
+    - "ဝင်း"        # Win
+    - "ထွန်း"       # Htun
+    - "ခိုင်"       # Khaing
+    - "သန်း"        # Than
+    - "မျိုး"       # Myo
+    - "နိုင်"       # Naing
+    - "ဟန်"         # Han
+    - "ဇော်"        # Zaw
+    - "မင်း"        # Min
+    - "သူ"          # Thu
+    - "ချို"        # Cho
+    - "စိုး"        # Soe
+    - "လှ"          # Hla
+    - "ကျော်"       # Kyaw
+    - "ညွန့်"       # Nyunt
+    - "တင့်"        # Tint
+    - "ဆွေ"         # Swe
+    - "မော်"        # Maw
+    - "ခင်"         # Khin
+    - "တင်"         # Tin
+    - "မြ"          # Mya
+    - "အေး"         # Aye
+    - "နွယ်"        # Nway
+    - "သီ"          # Thi
+    - "ဖြိုး"       # Phyo
+    - "ထက်"         # Htet
+    - "ရဲ"          # Ye
+    - "ဖိုး"        # Phoe
+    - "သိန်း"       # Thein
+    - "မြတ်"        # Myat
+    - "ထူး"         # Htoo
+    - "ပိုင်"       # Paing
+    - "သာ"          # Tha
+    - "ပြည့်"       # Pyae
+    - "စန္ဒာ"       # Sandar
+    - "ရတနာ"        # Yadana
+    - "ဝေ"          # Way
+    - "ဇင်"         # Zin
+    - "လင်း"        # Lin
+    - "ညို"         # Nyo
+    - "မိုး"        # Moe
+    - "ဟိန်း"       # Hein
+    - "ဝမ်း"        # One
+    - "စိန်"        # Sein
+    - "ထိုက်"       # Htaik
+    - "ခန့်"        # Khan
+    - "ရီ"          # Yi
+    - "သက်"         # Thet
+    - "ဆိုင်း"      # Saing
+    - "လွင်"        # Lwin
+    - "ပြည့်စုံ"     # Pyae Sone
+    - "ဝတ်"         # Wut
+    - "ရွှေ"        # Shwe
+    - "သင်း"        # Thin
+    - "နန္ဒာ"       # Nandar
+
+# Organization names
+organizations:
+  government:
+    - "လွှတ်တော်"              # Parliament
+    - "ပြည်ထောင်စုလွှတ်တော်"   # Union Parliament
+    - "ပြည်သူ့လွှတ်တော်"       # People's Parliament (Lower House)
+    - "အမျိုးသားလွှတ်တော်"     # National Parliament (Upper House)
+    - "အစိုးရ"                # Government
+    - "ဝန်ကြီးဌာန"            # Ministry
+    - "တပ်မတော်"              # Armed Forces (Tatmadaw)
+    - "ရဲတပ်ဖွဲ့"              # Police Force
+    - "ပြည်ထောင်စု"           # Union (of Myanmar)
+    - "နိုင်ငံတော်"            # The State
+    - "ကာကွယ်ရေးဝန်ကြီးဌာန"   # Ministry of Defence
+    - "ပညာရေးဝန်ကြီးဌာန"      # Ministry of Education
+    - "ကျန်းမာရေးဝန်ကြီးဌာန"  # Ministry of Health
+    - "နိုင်ငံခြားရေးဝန်ကြီးဌာန" # Ministry of Foreign Affairs
+    - "ပြည်ထောင်စုတရားလွှတ်တော်ချုပ်" # Supreme Court of the Union
+    - "ပြည်ထောင်စုရွေးကောက်ပွဲကော်မရှင်" # Union Election Commission
+    - "ဗဟိုဘဏ်"              # Central Bank
+    - "ရွေးကောက်ပွဲကော်မရှင်" # Election Commission
+
+  education:
+    - "ရန်ကုန်တက္ကသိုလ်"       # University of Yangon
+    - "မန္တလေးတက္ကသိုလ်"       # University of Mandalay
+    - "ရန်ကုန်နည်းပညာတက္ကသိုလ်" # Yangon Technological University
+    - "ဆေးတက္ကသိုလ်"           # Medical University
+    - "ကွန်ပျူတာတက္ကသိုလ်"     # Computer University
+    - "စစ်တက္ကသိုလ်"           # Defence Services Academy
+    - "အဝေးသင်တက္ကသိုလ်"      # Distance Education University
+
+  media:
+    - "မြဝတီ"                 # Myawaddy (state media)
+    - "ဧရာဝတီ"               # Irrawaddy (news)
+    - "အလင်းသစ်"              # New Light (state newspaper)
+    - "မြန်မာ့အလင်း"           # Myanmar Alin
+    - "ကြေးမုံ"                # Kyemon (Mirror)
+    - "မြန်မာတိုင်း(မ်)"       # Myanmar Times
+    - "ဒီမိုကရေစီ"             # Democracy (journal title)
+    - "ချင်းတွင်း"             # Chindwin (regional media)
+
+  international:
+    - "ကုလသမဂ္ဂ"              # United Nations
+    - "အာဆီယံ"               # ASEAN
+    - "ကမ္ဘာ့ဘဏ်"             # World Bank
+    - "ကမ္ဘာ့ကျန်းမာရေးအဖွဲ့"  # WHO
+    - "ကမ္ဘာ့ကုန်သွယ်ရေးအဖွဲ့"  # WTO
+    - "နိုင်ငံတကာ"             # International
+    - "ဥရောပသမဂ္ဂ"            # European Union
+    - "အိုင်အမ်အက်ဖ်"         # IMF
+    - "အာရှဖွံ့ဖြိုးရေးဘဏ်"    # Asian Development Bank
+    - "ယူနီဆက်ဖ်"             # UNICEF
+    - "အပြည်ပြည်ဆိုင်ရာကြက်ခြေနီ" # International Red Cross
+    - "အိုအိုင်စီ"             # OIC
+
+  business:
+    - "မြန်မာ့စီးပွားရေးဘဏ်"    # Myanmar Economic Bank
+    - "ကမ္ဘောဇဘဏ်"            # KBZ Bank
+    - "မြန်မာ့ရွှေရေးရွှေရာ"     # Myanmar Gold
+    - "အေးရာဝတီဘဏ်"           # Ayeyarwady Bank
+    - "သီရိစပါးဘဏ်"           # Sibin Bank
+    - "မြန်မာ့လေကြောင်း"       # Myanmar Airways
+    - "မြန်မာ့ဆက်သွယ်ရေး"     # Myanmar Posts and Telecom
+
+# Place names (extending place_names.py)
+places:
+  states_regions:
+    - "ရန်ကုန်"        # Yangon
+    - "မန္တလေး"        # Mandalay
+    - "နေပြည်တော်"     # Naypyidaw
+    - "စစ်ကိုင်း"      # Sagaing
+    - "မကွေး"          # Magway
+    - "ပဲခူး"          # Bago
+    - "ဧရာဝတီ"         # Ayeyarwady
+    - "တနင်္သာရီ"      # Tanintharyi
+    - "ရှမ်း"          # Shan
+    - "ကချင်"          # Kachin
+    - "ကယား"           # Kayah
+    - "ကရင်"           # Kayin
+    - "ချင်း"          # Chin
+    - "မွန်"           # Mon
+    - "ရခိုင်"         # Rakhine
+
+  major_cities:
+    - "ပြည်"           # Pyay
+    - "မော်လမြိုင်"    # Mawlamyine
+    - "ပုသိမ်"         # Pathein
+    - "မိတ္ထီလာ"       # Meiktila
+    - "တောင်ကြီး"      # Taunggyi
+    - "လားရှိုး"       # Lashio
+    - "မြစ်ကြီးနား"    # Myitkyina
+    - "ဘားအံ"          # Hpa-an
+    - "ထားဝယ်"         # Dawei
+    - "လွိုင်ကော်"     # Loikaw
+    - "ဟားခါး"         # Hakha
+    - "စစ်တွေ"         # Sittwe
+    - "မုံရွာ"         # Monywa
+    - "မြိတ်"          # Myeik
+    - "ပျဉ်းမနား"     # Pyinmana
+    - "ကလေး"           # Kalay
+    - "ပခုက္ကူ"       # Pakokku
+    - "ကျောက်ဆည်"     # Kyaukse
+    - "ပြင်ဦးလွင်"     # Pyin Oo Lwin
+    - "မင်းဘူး"        # Minbu
+    - "ပုဗ္ဗသီရိ"     # Pobbathiri
+    - "ဇမ္ဗူသီရိ"     # Zabuthiri
+    - "ဒဂုံ"           # Dagon
+    - "အင်းစိန်"       # Insein
+    - "မရမ်းကုန်း"     # Mayangone
+    - "ကမာရွတ်"        # Kamayut
+    - "ဗဟန်း"          # Bahan
+    - "လှိုင်"         # Hlaing
+    - "သာကေတ"          # Thaketa
+    - "တောင်ဥက္ကလာပ"   # South Okkalapa
+    - "မြောက်ဥက္ကလာပ"  # North Okkalapa
+    - "ရွှေဘို"        # Shwebo
+    - "ကန့်ဘလူ"       # Kanbalu
+    - "ပင်လောင်း"      # Pinlaung
+    - "နမ့်ဆန်"        # Namhsan
+    - "ကျိုင်းတုံ"     # Kengtung
+    - "မူဆယ်"          # Muse
+    - "ပူတာအို"        # Putao
+    - "ဟိုပင်"         # Hopong
+    - "သထုံ"           # Thaton
+    - "ဘိုကလေး"       # Bogale
+    - "ဖျာပုံ"         # Pyapon
+
+  historical_places:
+    - "ပုဂံ"           # Bagan
+    - "အင်းဝ"          # Inwa (Ava)
+    - "မြင်းခြံ"       # Myingun
+    - "အမရပူရ"        # Amarapura
+    - "ဟံသာဝတီ"        # Hanthawaddy
+    - "သဂဟ"            # Thagara
+    - "ဗိဿနိုး"       # Beikthano
+    - "စစ်ကျို"       # Tagaung
+    - "သီရိက္ခေတ္တရာ"   # Sri Ksetra
+    - "ပင်းယ"          # Pinya
+    - "ဇာကလိ"          # Sagalay
+
+  international:
+    - "ဘန်ကောက်"       # Bangkok
+    - "စင်ကာပူ"        # Singapore
+    - "တိုကျို"        # Tokyo
+    - "ပေကျင်း"        # Beijing
+    - "ဝါရှင်တန်"      # Washington
+    - "လန်ဒန်"         # London
+    - "မော်စကို"       # Moscow
+    - "ပါရီ"           # Paris
+    - "ဘာလင်"          # Berlin
+    - "ကွာလာလမ်ပူ"     # Kuala Lumpur
+    - "ဟနွိုင်"        # Hanoi
+    - "ဂျကာတာ"        # Jakarta
+    - "မနီလာ"          # Manila
+    - "ဆိုးလ်"         # Seoul
+    - "ဒေလီ"           # Delhi
+    - "ကိုလံဘို"       # Colombo
+    - "ဓာကာ"           # Dhaka
+    - "ကိုင်ရို"       # Cairo
+    - "ဆစ်နီ"          # Sydney
+    - "နယူးယောက်"      # New York
+    - "ဆန်ဖရန်စစ္စကို"  # San Francisco
+    - "ဂျနီဗာ"         # Geneva
+    - "ဗီယင်နာ"        # Vienna
+
+  countries:
+    - "ထိုင်း"         # Thailand
+    - "တရုတ်"          # China
+    - "အိန္ဒိယ"        # India
+    - "ဂျပန်"          # Japan
+    - "ကိုရီးယား"       # Korea
+    - "အမေရိကန်"       # America
+    - "အင်္ဂလန်"       # England
+    - "ပြင်သစ်"        # France
+    - "ဂျာမနီ"         # Germany
+    - "ရုရှား"         # Russia
+    - "ဩစတြေးလျ"       # Australia
+    - "မလေးရှား"       # Malaysia
+    - "ဗီယက်နမ်"       # Vietnam
+    - "ကမ္ဘောဒီးယား"    # Cambodia
+    - "လာအို"          # Laos
+    - "ဘင်္ဂလားဒေ့ရှ်"  # Bangladesh
+    - "သီရိလင်္ကာ"     # Sri Lanka
+    - "ပါကစ္စတန်"      # Pakistan
+    - "ဖိလစ်ပိုင်"     # Philippines
+    - "အင်ဒိုနီးရှား"   # Indonesia
+    - "ဘရာဇီး"         # Brazil
+    - "ကနေဒါ"          # Canada
+    - "အီတလီ"          # Italy
+    - "စပိန်"          # Spain
+    - "တူရကီ"          # Turkey
+    - "အီဂျစ်"         # Egypt
+    - "ဆွစ်ဇာလန်"      # Switzerland
+    - "နီပေါ"           # Nepal
+    - "အာဖဂန်နစ္စတန်"   # Afghanistan
+    - "ဆော်ဒီအာရေးဗီးယား" # Saudi Arabia
+
+  geographic_features:
+    - "ဧရာဝတီမြစ်"       # Ayeyarwady River
+    - "ချင်းတွင်းမြစ်"    # Chindwin River
+    - "သံလွင်မြစ်"        # Thanlwin (Salween) River
+    - "စစ်တောင်းမြစ်"     # Sittaung River
+    - "အင်းလေးကန်"       # Inle Lake
+    - "ရွှေတိဂုံ"         # Shwedagon
+    - "မြင့်မိုရ်"        # Myinmoletkat
+
+# Religious/cultural terms
+religious:
+  buddhist:
+    - "ဗုဒ္ဓ"           # Buddha
+    - "ဓမ္မ"            # Dhamma
+    - "သံဃာ"            # Sangha
+    - "ဘုရား"           # Pagoda / Lord Buddha
+    - "ဘုန်းကြီး"       # Monk (informal)
+    - "ရဟန်း"           # Monk (formal)
+    - "ကျောင်းတိုက်"    # Monastery
+    - "သာသနာ"           # Sasana (Buddhist era/religion)
+    - "ပိဋကတ်"          # Pitaka (scripture)
+    - "ဝိနည်း"          # Vinaya (monastic rules)
+    - "သုတ္တန်"         # Sutta
+    - "အဘိဓမ္မာ"        # Abhidhamma
+    - "ဘုရားရှိခိုး"     # Prayer/worship
+    - "ကံ"              # Karma
+    - "နိဗ္ဗာန်"        # Nirvana
+    - "ဝိပဿနာ"          # Vipassana (meditation)
+    - "သမထ"             # Samatha (meditation)
+    - "သီလ"             # Sila (morality/precepts)
+    - "ဝါဆို"           # Waso (Buddhist Lent start)
+    - "ဝါကျွတ်"        # Thadingyut (Buddhist Lent end)
+    - "ဓာတ်တော်"        # Sacred relic
+    - "စေတီ"            # Pagoda / Stupa
+    - "ဗိမာန်"          # Vimana (celestial palace)
+    - "ဘုရားလောင်း"     # Bodhisattva
+    - "ဒါန"             # Dana (generosity/offering)
+    - "သတိပဋ္ဌာန်"      # Satipatthana (foundations of mindfulness)
+    - "ပရိတ်"           # Paritta (protective chanting)
+    - "ကထိန်"           # Kathina (robe offering ceremony)
+    - "ဓမ္မစကြာ"        # Dhammacakka (first sermon)
+    - "မဟာမုနိ"         # Mahamuni (Great Sage / famous pagoda)
+
+  other_religions:
+    - "ခရစ်ယာန်"        # Christian
+    - "အစ္စလာမ်"        # Islam
+    - "ဟိန္ဒူ"          # Hindu
+    - "ဘုရားကျောင်း"    # Church (Myanmar term)
+    - "ဗလီ"             # Mosque
+    - "ကျောင်းတော်"     # Temple/church
+
+# Historical figures and cultural references
+historical:
+  historical_figures:
+    - "အနော်ရထာ"        # Anawrahta
+    - "ဘုရင့်နောင်"     # Bayinnaung
+    - "အလောင်းဘုရား"    # Alaungpaya
+    - "မင်းတုန်"        # Mindon
+    - "သီပေါမင်း"       # Thibaw (last king)
+    - "အောင်ဆန်း"       # Aung San
+    - "နု"              # Nu (U Nu)
+    - "နေဝင်း"          # Ne Win
+    - "သန့်ရှင်း"       # Thant (U Thant)
+
+  cultural_terms:
+    - "သင်္ကြန်"       # Thingyan (Water Festival)
+    - "တန်ဆောင်မုန်း"   # Tazaungdaing (Festival of Lights)
+    - "တပေါင်း"         # Tabaung (month/festival)
+    - "ထီးနန်း"         # Throne
+    - "နတ်"             # Nat (spirit)
+    - "လောကနာထ"         # Lokanatha
+    - "မဟာသက္ကရာဇ်"    # Myanmar Era
+    - "လုံချည်"         # Longyi (sarong)
+    - "လက်ဖက်"         # Laphet (pickled tea)
+
+# Ethnic group names (not already in place_names.py)
+ethnic_groups:
+  - "ဗမာ"              # Bamar
+  - "ကချင်"            # Kachin
+  - "ကယား"             # Kayah
+  - "ကရင်"             # Kayin
+  - "ချင်း"            # Chin
+  - "မွန်"             # Mon
+  - "ရခိုင်"           # Rakhine
+  - "ရှမ်း"            # Shan
+  - "ကယန်"             # Kayan
+  - "ပအိုဝ့်"          # Pa-O
+  - "ပလောင်"           # Palaung
+  - "တအောင်း"          # Ta'ang
+  - "ဓနု"              # Danu
+  - "အင်းသား"          # Intha
+  - "လားဟူ"            # Lahu
+  - "အခါ"              # Akha
+  - "ဝ"                # Wa
+  - "ကိုးကန့်"         # Kokang
+  - "နာဂ"              # Naga
+  - "ဒိုင်းနက်"        # Deinnet
+  - "လီဆူ"             # Lisu
+  - "ရဝမ်"             # Rawang
+  - "ဂေါ်ရခါး"         # Gorkha
+  - "ဇိုမီး"           # Zomi
+  - "မရု"              # Maru
+  - "ခမီ"              # Khami
+  - "ထနု"              # Thanu
+
+# Day names and temporal terms often appearing in proper-noun contexts
+temporal:
+  days:
+    - "တနင်္ဂနွေ"       # Sunday
+    - "တနင်္လာ"         # Monday
+    - "အင်္ဂါ"          # Tuesday
+    - "ဗုဒ္ဓဟူး"        # Wednesday
+    - "ကြာသပတေး"       # Thursday
+    - "သောကြာ"          # Friday
+    - "စနေ"             # Saturday
+
+  myanmar_months:
+    - "တန်ခူး"          # Tagu
+    - "ကဆုန်"           # Kason
+    - "နယုန်"           # Nayon
+    - "ဝါဆို"           # Waso
+    - "ဝါခေါင်"         # Wagaung
+    - "တော်သလင်း"       # Tawthalin
+    - "သီတင်းကျွတ်"     # Thadingyut
+    - "တန်ဆောင်မုန်း"   # Tazaungmon
+    - "နတ်တော်"         # Nadaw
+    - "ပြာသို"          # Pyatho
+    - "တပို့တွဲ"        # Tabodwe
+    - "တပေါင်း"         # Tabaung
+
+# Common Myanmar loanwords from Pali/Sanskrit that may not be in dictionary
+pali_sanskrit:
+  - "သဒ္ဒါ"            # Sadda (grammar / faith)
+  - "ဝိဘတ်"            # Vibhatti (declension)
+  - "ဓာတ်"             # Dhatu (element)
+  - "အနိစ္စ"            # Anicca (impermanence)
+  - "ဒုက္ခ"            # Dukkha (suffering)
+  - "အနတ္တ"            # Anatta (non-self)
+  - "သမာဓိ"            # Samadhi (concentration)
+  - "ပညာ"              # Panna (wisdom)
+  - "မေတ္တာ"           # Metta (loving-kindness)
+  - "ကရုဏာ"            # Karuna (compassion)
+  - "မုဒိတာ"           # Mudita (sympathetic joy)
+  - "ဥပေက္ခာ"          # Upekkha (equanimity)
+  - "ဘာဝနာ"            # Bhavana (meditation/development)
+  - "သံသရာ"            # Samsara (cycle of rebirth)
+  - "ပါရမီ"            # Parami (perfection)
+  - "မင်္ဂလာ"          # Mingala (auspiciousness)
+  - "ဗောဓိ"            # Bodhi (enlightenment)

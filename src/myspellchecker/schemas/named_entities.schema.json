@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/named-entities/v1.0",
+  "title": "Myanmar Named Entity Gazetteer Schema",
+  "description": "JSON Schema for validating named_entities.yaml - Named entity gazetteer for FP suppression",
+
+  "type": "object",
+  "required": ["version", "category", "metadata"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "named_entities",
+      "description": "Category type (must be 'named_entities')"
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the gazetteer"
+    },
+
+    "metadata": {
+      "type": "object",
+      "required": ["created_date"],
+      "additionalProperties": false,
+      "properties": {
+        "created_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date the file was created (YYYY-MM-DD)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the metadata"
+        }
+      }
+    },
+
+    "person_names": {
+      "$ref": "#/definitions/person_names_section"
+    },
+
+    "organizations": {
+      "$ref": "#/definitions/named_group_section"
+    },
+
+    "places": {
+      "$ref": "#/definitions/named_group_section"
+    },
+
+    "religious": {
+      "$ref": "#/definitions/named_group_section"
+    },
+
+    "historical": {
+      "$ref": "#/definitions/named_group_section"
+    },
+
+    "ethnic_groups": {
+      "$ref": "#/definitions/myanmar_string_list"
+    },
+
+    "temporal": {
+      "$ref": "#/definitions/named_group_section"
+    },
+
+    "pali_sanskrit": {
+      "$ref": "#/definitions/myanmar_string_list"
+    }
+  },
+
+  "definitions": {
+    "myanmar_string_list": {
+      "description": "A flat list of Myanmar text strings",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+
+    "person_names_section": {
+      "description": "Person name components with prefixes and common names",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefixes": {
+          "$ref": "#/definitions/myanmar_string_list",
+          "description": "Honorific prefixes that precede personal names"
+        },
+        "common_names": {
+          "$ref": "#/definitions/myanmar_string_list",
+          "description": "Common Myanmar name components (syllables)"
+        }
+      }
+    },
+
+    "named_group_section": {
+      "description": "Named entities organized by sub-category",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/myanmar_string_list"
+      }
+    }
+  }
+}

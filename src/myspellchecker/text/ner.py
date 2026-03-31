@@ -9,17 +9,102 @@ Strategies:
    (e.g., U, Daw, Ko, Maung, Dr.).
 2. **Whitelist**: Checks against a list of common names or whitelisted entities.
 3. **Pattern Matching**: Uses Regex to identify numbers, dates, and English text.
+4. **Gazetteer Lookup**: Checks against curated named_entities.yaml for known entities.
 """
 
 from __future__ import annotations
 
+import logging
 import re
+from functools import lru_cache
+from pathlib import Path
 
 from myspellchecker.core.constants import HONORIFICS
 
 __all__ = [
     "NameHeuristic",
+    "is_known_entity",
+    "load_gazetteer",
 ]
+
+logger = logging.getLogger(__name__)
+
+_RULES_DIR = Path(__file__).resolve().parent.parent / "rules"
+
+
+def _collect_strings(obj: object) -> set[str]:
+    """Recursively collect all string values from a nested dict/list structure."""
+    result: set[str] = set()
+    if isinstance(obj, str):
+        result.add(obj)
+    elif isinstance(obj, list):
+        for item in obj:
+            result.update(_collect_strings(item))
+    elif isinstance(obj, dict):
+        for value in obj.values():
+            result.update(_collect_strings(value))
+    return result
+
+
+@lru_cache(maxsize=1)
+def load_gazetteer() -> frozenset[str]:
+    """Load the named entity gazetteer from ``rules/named_entities.yaml``.
+
+    Returns a frozen set of all entity strings across every category.
+    The result is cached after the first call.
+
+    Returns
+    -------
+    frozenset[str]
+        All known named entity strings.
+    """
+    yaml_path = _RULES_DIR / "named_entities.yaml"
+    if not yaml_path.exists():
+        logger.warning("Named entity gazetteer not found: %s", yaml_path)
+        return frozenset()
+
+    try:
+        import yaml  # noqa: PLC0415
+
+        with open(yaml_path, encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+    except ImportError:
+        logger.debug("PyYAML not installed; gazetteer lookup unavailable")
+        return frozenset()
+    except Exception:
+        logger.warning("Failed to load named entity gazetteer", exc_info=True)
+        return frozenset()
+
+    if not isinstance(data, dict):
+        return frozenset()
+
+    # Skip non-entity keys
+    skip_keys = {"version", "category", "description", "metadata"}
+    entities: set[str] = set()
+    for key, value in data.items():
+        if key in skip_keys:
+            continue
+        entities.update(_collect_strings(value))
+
+    return frozenset(entities)
+
+
+def is_known_entity(word: str) -> bool:
+    """Check if a word is a known named entity that should not be flagged.
+
+    Looks up the word in the curated ``named_entities.yaml`` gazetteer.
+
+    Parameters
+    ----------
+    word:
+        The word to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the word is a recognized named entity.
+    """
+    return word in load_gazetteer()
 
 
 class NameHeuristic:

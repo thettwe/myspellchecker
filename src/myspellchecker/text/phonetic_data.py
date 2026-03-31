@@ -11,11 +11,13 @@ from myspellchecker.core.constants import TONE_MARKS
 
 __all__ = [
     "COLLOQUIAL_SUBSTITUTIONS",
+    "G2P_HOMOPHONE_GROUPS",
     "MYANMAR_SUBSTITUTION_COSTS",
     "PHONETIC_GROUPS",
     "STANDARD_TO_COLLOQUIAL",
     "TONAL_GROUPS",
     "VISUAL_SIMILAR",
+    "get_phonetic_equivalents",
     "get_standard_forms",
     "is_colloquial_variant",
 ]
@@ -394,3 +396,101 @@ def get_standard_forms(colloquial: str) -> set[str]:
         Set of standard forms, empty set if not a known colloquial variant.
     """
     return COLLOQUIAL_SUBSTITUTIONS.get(colloquial, set())
+
+
+# ============================================================
+# G2P (Grapheme-to-Phoneme) Integration
+# Loads homophone groups from rules/g2p_mappings.yaml to build
+# phonetic equivalence classes for improved homophone detection.
+# ============================================================
+
+
+def _load_g2p_homophone_groups() -> list[dict[str, object]]:
+    """Load homophone groups from g2p_mappings.yaml.
+
+    Returns a list of group dicts, each with keys: phoneme, graphemes,
+    confusion_type, frequency, and optional notes.  Returns an empty
+    list if the YAML file cannot be loaded (missing file, missing
+    PyYAML, etc.) so the library degrades gracefully.
+    """
+    import logging
+    from pathlib import Path
+
+    logger = logging.getLogger(__name__)
+
+    yaml_path = Path(__file__).resolve().parent.parent / "rules" / "g2p_mappings.yaml"
+    if not yaml_path.exists():
+        logger.debug("G2P mappings file not found: %s", yaml_path)
+        return []
+
+    try:
+        import yaml
+    except ImportError:
+        logger.debug("PyYAML not installed; G2P mappings unavailable")
+        return []
+
+    try:
+        with open(yaml_path, "r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+    except Exception:  # noqa: BLE001
+        logger.warning("Failed to load G2P mappings from %s", yaml_path, exc_info=True)
+        return []
+
+    if not isinstance(data, dict):
+        return []
+
+    groups = data.get("homophone_groups")
+    if not isinstance(groups, list):
+        return []
+
+    return groups
+
+
+# Loaded once at import time; empty list on failure (graceful degradation).
+G2P_HOMOPHONE_GROUPS: list[dict[str, object]] = _load_g2p_homophone_groups()
+
+# Reverse index: character -> set of phonetically equivalent characters.
+# Built from G2P homophone_groups so that lookups are O(1).
+_G2P_EQUIVALENCE_MAP: dict[str, set[str]] = {}
+for _group in G2P_HOMOPHONE_GROUPS:
+    _graphemes = _group.get("graphemes")
+    if not isinstance(_graphemes, list) or len(_graphemes) < 2:
+        continue
+    for _g in _graphemes:
+        if _g not in _G2P_EQUIVALENCE_MAP:
+            _G2P_EQUIVALENCE_MAP[_g] = set()
+        for _other in _graphemes:
+            if _other != _g:
+                _G2P_EQUIVALENCE_MAP[_g].add(_other)
+
+
+def get_phonetic_equivalents(char: str) -> set[str]:
+    """Get characters that are phonetically equivalent to *char*.
+
+    Uses the homophone_groups from ``g2p_mappings.yaml`` to return
+    all characters that share the same phoneme and are therefore
+    commonly confused.
+
+    This is a superset of the information in :data:`PHONETIC_GROUPS`
+    because G2P groups also capture cross-series mergers (e.g.
+    retroflex/alveolar, ရ/ယ liquid merger) that phonetic-group
+    membership alone does not express.
+
+    Args:
+        char: A single Myanmar character (consonant, vowel sign,
+              medial, or final marker).
+
+    Returns:
+        Set of phonetically equivalent characters.  Empty set if the
+        character has no known equivalents in the G2P data.
+
+    Example::
+
+        >>> get_phonetic_equivalents("က")
+        {'ခ', 'ဂ', 'ဃ', 'ဋ'}
+        >>> get_phonetic_equivalents("ရ")
+        {'ယ'}
+        >>> get_phonetic_equivalents("ξ")  # non-Myanmar
+        set()
+    """
+    return set(_G2P_EQUIVALENCE_MAP.get(char, set()))

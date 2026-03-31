@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/loan-words/v1.0",
+  "title": "Myanmar Loan Word Transliteration Schema",
+  "description": "JSON Schema for validating loan_words.yaml - Loan word transliteration variants for Myanmar spell checking",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "loan_words",
+      "description": "Category type (must be 'loan_words')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "english": {
+      "description": "English loan words with transliteration variants",
+      "type": "array",
+      "items": { "$ref": "#/definitions/loan_word_entry" }
+    },
+
+    "pali_sanskrit": {
+      "description": "Pali and Sanskrit loan words with transliteration variants",
+      "type": "array",
+      "items": { "$ref": "#/definitions/loan_word_entry" }
+    },
+
+    "other": {
+      "description": "Loan words from other languages (Thai, Hindi, Chinese, Japanese, French, Portuguese, etc.)",
+      "type": "array",
+      "items": { "$ref": "#/definitions/loan_word_entry" }
+    },
+
+    "transliteration_patterns": {
+      "description": "Systematic phoneme-mapping confusion patterns for variant generation",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/transliteration_pattern_entry" }
+      }
+    }
+  },
+
+  "definitions": {
+    "loan_word_entry": {
+      "description": "A loan word with its standard form, source, variants, and domain",
+      "type": "object",
+      "required": ["standard", "source", "variants", "domain"],
+      "additionalProperties": false,
+      "properties": {
+        "standard": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The standard/preferred Myanmar spelling of the loan word"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The source language word or description of origin"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Known variant spellings (may be empty if no common variants exist)"
+        },
+        "domain": {
+          "type": "string",
+          "enum": [
+            "technology",
+            "education",
+            "food",
+            "sports",
+            "politics",
+            "medical",
+            "transportation",
+            "finance",
+            "entertainment",
+            "general",
+            "fashion",
+            "science",
+            "religious",
+            "grammar"
+          ],
+          "description": "Domain classification for context-aware checking"
+        }
+      }
+    },
+
+    "transliteration_pattern_entry": {
+      "description": "A systematic phoneme-mapping confusion pattern",
+      "type": "object",
+      "required": ["source_phoneme", "correct", "common_error", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "source_phoneme": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The source language phoneme (IPA notation)"
+        },
+        "correct": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "Correct Myanmar character(s) for this phoneme"
+        },
+        "common_error": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "Commonly confused Myanmar character(s)"
+        },
+        "note": {
+          "type": "string",
+          "description": "Explanation of the confusion pattern"
+        }
+      }
+    }
+  }
+}
