@@ -244,6 +244,19 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if is_near_synonym:
                 raw_variants.update(self._near_synonym_pairs[word])
 
+            # Loan word transliteration variants
+            from myspellchecker.core.loan_word_variants import (
+                get_loan_word_standard,
+                get_loan_word_variants,
+            )
+
+            loan_variants = get_loan_word_variants(word)
+            if loan_variants:
+                raw_variants.update(loan_variants)
+            loan_standards = get_loan_word_standard(word)
+            if loan_standards:
+                raw_variants.update(loan_standards)
+
             has_valid_variant = any(
                 v != word
                 and v not in VARIANT_BLOCKLIST
@@ -337,6 +350,19 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 if is_near_synonym:
                     near_synonym_variants_for_word = self._near_synonym_pairs[word]
                     raw_variants.update(near_synonym_variants_for_word)
+
+                # Loan word transliteration variants
+                from myspellchecker.core.loan_word_variants import (
+                    get_loan_word_standard,
+                    get_loan_word_variants,
+                )
+
+                loan_variants = get_loan_word_variants(word)
+                if loan_variants:
+                    raw_variants.update(loan_variants)
+                loan_standards = get_loan_word_standard(word)
+                if loan_standards:
+                    raw_variants.update(loan_standards)
 
                 valid_variants = {
                     v

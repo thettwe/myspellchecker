@@ -33,6 +33,7 @@ from myspellchecker.text.phonetic_data import (
     PHONETIC_GROUPS,
     TONAL_GROUPS,
     VISUAL_SIMILAR,
+    get_phonetic_equivalents,
 )
 
 if TYPE_CHECKING:
@@ -373,6 +374,15 @@ class PhoneticHasher:
             if char in VISUAL_SIMILAR:
                 for confusable in VISUAL_SIMILAR[char]:
                     variant = normalized[:i] + confusable + normalized[i + 1 :]
+                    variants.add(variant)
+
+            # G2P-based phonetic equivalents (covers aspiration, voicing,
+            # retroflex mergers, and other systematic confusions from
+            # g2p_mappings.yaml homophone groups)
+            g2p_equivalents = get_phonetic_equivalents(char)
+            for equiv_char in g2p_equivalents:
+                if equiv_char != char:
+                    variant = normalized[:i] + equiv_char + normalized[i + 1 :]
                     variants.add(variant)
 
         return variants

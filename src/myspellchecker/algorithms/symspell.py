@@ -1029,6 +1029,10 @@ class SymSpell:
         if use_phonetic:
             self._add_phonetic_candidates(term, level, candidate_scores)
 
+        # 6. Add loan word transliteration variants (word level only)
+        if level == ValidationLevel.WORD.value:
+            self._add_loan_word_candidates(term, level, candidate_scores)
+
         return candidate_scores
 
     def _add_delete_candidates(
@@ -1191,6 +1195,48 @@ class SymSpell:
                 # Use graded phonetic similarity instead of flat 1.0 score
                 similarity = self.phonetic_hasher.compute_phonetic_similarity(term, variant)
                 candidate_scores[variant] = max(candidate_scores.get(variant, 0.0), similarity)
+
+    def _add_loan_word_candidates(
+        self, term: str, level: str, candidate_scores: dict[str, float]
+    ) -> None:
+        """Add loan word transliteration variants as candidates.
+
+        If the term is a known non-standard loan word variant, adds the
+        standard form(s).  If the term is a standard loan word, adds its
+        known variants.  This covers transliteration differences that are
+        too large for SymSpell's delete-based approach.
+
+        Args:
+            term: Input term
+            level: Dictionary level (only called for 'word')
+            candidate_scores: Dict to add candidates to (modified in place)
+        """
+        from myspellchecker.core.loan_word_variants import (
+            get_loan_word_standard,
+            get_loan_word_variants,
+        )
+
+        # variant -> standard (most common case: user typed non-standard form)
+        standards = get_loan_word_standard(term)
+        for std in standards:
+            is_valid = (
+                self.provider.is_valid_syllable(std)
+                if level == ValidationLevel.SYLLABLE.value
+                else self.provider.is_valid_word(std)
+            )
+            if is_valid:
+                candidate_scores.setdefault(std, 0.0)
+
+        # standard -> variants (less common: standard form typed, variants exist)
+        variants = get_loan_word_variants(term)
+        for variant in variants:
+            is_valid = (
+                self.provider.is_valid_syllable(variant)
+                if level == ValidationLevel.SYLLABLE.value
+                else self.provider.is_valid_word(variant)
+            )
+            if is_valid:
+                candidate_scores.setdefault(variant, 0.0)
 
     def lookup_compound(
         self, text: str, max_suggestions: int = 5, max_edit_distance: int = 2

@@ -1084,6 +1084,7 @@ class SpellChecker(
         self._suppress_low_value_context_probability(errors, text=normalized_text)
         self._suppress_low_value_confusable_errors(errors, text=normalized_text)
         self._suppress_low_value_semantic_errors(errors, text=normalized_text)
+        self._suppress_known_entity_errors(errors, text=normalized_text)
         self._filter_ner_entities(errors, normalized_text)
 
         return errors, layers_applied

@@ -1055,6 +1055,41 @@ class ErrorSuppressionMixin:
                 if not (e.error_type == ET_SYNTAX_ERROR and e.position in tense_ends)
             ]
 
+    @staticmethod
+    def _suppress_known_entity_errors(errors: list[Error], text: str) -> None:
+        """Suppress errors on tokens that match the named entity gazetteer.
+
+        Lightweight supplement to :meth:`_filter_ner_entities` -- works without
+        the transformer NER model by checking against a curated whitelist
+        of known Myanmar names, places, organizations, and religious terms
+        loaded from ``rules/named_entities.yaml``.
+        """
+        if not errors:
+            return
+
+        from myspellchecker.text.ner import is_known_entity
+
+        filtered: list[Error] = []
+        for e in errors:
+            # Text-level detector errors are immune (same policy as NER filtering)
+            err_type = getattr(e, "error_type", "")
+            if err_type in _NER_IMMUNE:
+                filtered.append(e)
+                continue
+
+            token = e.text or ""
+            # Check if the error token is a known entity
+            if token and is_known_entity(token):
+                # Still keep high-confidence errors with suggestions
+                if e.confidence >= _NER_HIGH_CONFIDENCE_OVERRIDE and e.suggestions:
+                    filtered.append(e)
+                # Otherwise suppress -- it's a known name/place/entity
+                continue
+
+            filtered.append(e)
+
+        errors[:] = filtered
+
     def _filter_ner_entities(self, errors: list[Error], text: str) -> None:
         """Remove errors that overlap with recognized named entities.
 
