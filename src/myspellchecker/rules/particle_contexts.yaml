@@ -12,7 +12,7 @@ description: "Verb-particle and noun-particle context validation rules"
 
 metadata:
   created_date: "2026-03-31"
-  total_entries: 28
+  total_entries: 53
 
 # ============================================================
 # PARTICLE CONFUSION PAIRS
@@ -297,3 +297,179 @@ verb_particle_frames:
     required_particles: ["နဲ့", "နှင့်", "ဖြင့်"]
     incompatible_particles: []
     note: "Tool-using verbs take instrumental particle နဲ့/နှင့်/ဖြင့်"
+
+  # ---------- Stative / existential verbs ----------
+
+  # Existential verbs take locative, not directional
+  - verbs: ["ရှိ", "ဖြစ်", "ဟုတ်", "ကျန်"]
+    required_particles: ["မှာ", "တွင်", "၌", "ပါ"]
+    incompatible_particles: ["ကို", "သို့"]
+    note: "Stative/existential verbs require locative, not directional"
+
+  # Existence with emphasis on remaining/lasting
+  - verbs: ["ကျန်ရစ်", "ကျန်ရှိ", "တည်ရှိ", "တည်မြဲ"]
+    required_particles: ["မှာ", "တွင်", "၌"]
+    incompatible_particles: ["ကို", "သို့", "မှ"]
+    note: "Residual/enduring existential verbs take locative only"
+
+  # ---------- Giving / transfer verbs ----------
+
+  # Giving verbs take benefactive recipient, not source
+  - verbs: ["ပေး", "ပေးအပ်", "လှူ", "ချီး", "ဆုပေး"]
+    required_particles: ["ကို", "အတွက်"]
+    incompatible_particles: ["မှ"]
+    note: "Giving/transfer verbs take benefactive ကို/အတွက်, not source မှ"
+
+  # Sending/delivering verbs take recipient and destination
+  - verbs: ["ပို့", "ပို့ဆောင်", "ပေးပို့", "လွှဲ", "လွှဲပြောင်း"]
+    required_particles: ["ကို", "သို့", "အတွက်"]
+    incompatible_particles: []
+    note: "Sending/delivery verbs take recipient ကို or destination သို့"
+
+  # ---------- Speaking / communication verbs ----------
+
+  # Speaking verbs take quotative particle, not locative
+  - verbs: ["ပြော", "ဆို", "ပြောဆို", "မေး", "ဖြေ", "ရှင်းပြ"]
+    required_particles: ["ဟု", "လို့", "ကို", "နဲ့"]
+    incompatible_particles: ["မှာ", "တွင်", "၌"]
+    note: "Communication verbs take quotative ဟု/လို့ or addressee ကို, not locative"
+
+  # Reporting/narrating verbs take quotative
+  - verbs: ["ပြောပြ", "ပြောကြား", "ထုတ်ဖော်", "ကြေညာ", "အသိပေး"]
+    required_particles: ["ဟု", "လို့", "ကို"]
+    incompatible_particles: ["မှာ", "တွင်"]
+    note: "Reporting verbs take quotative ဟု/လို့ or recipient ကို"
+
+  # ---------- Perception verbs ----------
+
+  # Perception verbs take object, not directional
+  - verbs: ["မြင်", "ကြား", "သိ", "ခံစား", "တွေ့"]
+    required_particles: ["ကို"]
+    incompatible_particles: ["သို့"]
+    note: "Perception verbs take object marker ကို, not directional သို့"
+
+  # Perception with source — what is perceived from
+  - verbs: ["ကြားသိ", "သတိပြု", "သတိထား", "အာရုံစိုက်"]
+    required_particles: ["ကို", "မှာ"]
+    incompatible_particles: ["သို့"]
+    note: "Attentive perception verbs take object ကို or locative မှာ"
+
+  # ---------- Causative verbs ----------
+
+  # Causative verbs take object (the person caused to act)
+  - verbs: ["ခိုင်း", "စေ", "ပြုလုပ်စေ", "အမိန့်ပေး"]
+    required_particles: ["ကို", "အား"]
+    incompatible_particles: ["မှာ", "တွင်"]
+    note: "Causative verbs take object ကို/အား (person being caused to act)"
+
+  # Permissive causatives (let/allow)
+  - verbs: ["ခွင့်ပြု", "ခွင့်ပေး", "လွတ်ပေး", "သဘောတူ"]
+    required_particles: ["ကို", "အား"]
+    incompatible_particles: ["မှာ", "တွင်"]
+    note: "Permissive verbs take object ကို/အား of the person permitted"
+
+  # ---------- Cognitive verbs ----------
+
+  # Cognitive verbs take complementizer, not locative
+  - verbs: ["ထင်", "ယူဆ", "ယုံ", "နားလည်", "သဘောပေါက်"]
+    required_particles: ["ဟု", "လို့"]
+    incompatible_particles: ["မှာ", "တွင်", "၌"]
+    note: "Cognitive verbs take complementizer ဟု/လို့, not locative"
+
+  # Belief/opinion verbs
+  - verbs: ["ယုံကြည်", "သံသယရှိ", "မှတ်ယူ", "မှတ်ထင်"]
+    required_particles: ["ဟု", "လို့", "ကို"]
+    incompatible_particles: ["မှာ", "တွင်"]
+    note: "Belief verbs take complementizer ဟု/လို့ or object ကို"
+
+  # ---------- Desire / want verbs ----------
+
+  # Desire verbs take infinitive complement, not object particle
+  - verbs: ["လို", "ချင်", "အလိုရှိ", "လိုလား", "တောင့်တ"]
+    required_particles: ["ဖို့", "ရန်"]
+    incompatible_particles: ["ကို", "မှာ"]
+    note: "Desire/want verbs take infinitive ဖို့/ရန်, not object ကို"
+
+  # Intention/plan verbs
+  - verbs: ["ကြံ", "စိတ်ကူး", "စီစဉ်", "ရည်ရွယ်", "ရည်မှန်း"]
+    required_particles: ["ဖို့", "ရန်", "ဟု"]
+    incompatible_particles: ["ကို"]
+    note: "Intention verbs take purpose ဖို့/ရန် or complementizer ဟု"
+
+  # ---------- Comparative constructions ----------
+
+  # Comparative adjectives take ထက် for comparison standard
+  - verbs: ["ပို", "သာ", "လွန်", "ကျော်"]
+    required_particles: ["ထက်"]
+    incompatible_particles: ["ကို", "မှာ"]
+    note: "Degree/comparative modifiers take ထက် for comparison standard"
+
+  # Similative/approximative constructions
+  - verbs: ["တူ", "ဆင်တူ", "တူညီ", "ကွာ"]
+    required_particles: ["နဲ့", "နှင့်", "လို", "လောက်"]
+    incompatible_particles: ["ကို"]
+    note: "Similative verbs take comitative နဲ့ or approximative လို/လောက်"
+
+  # ---------- Progressive aspect verbs ----------
+
+  # Progressive/continuative auxiliary verbs
+  - verbs: ["နေ", "လျက်ရှိ", "ဆဲ", "လျက်"]
+    required_particles: ["မှာ", "တွင်"]
+    incompatible_particles: ["ကို", "သို့"]
+    note: "Progressive/continuative auxiliaries are compatible with locative, not directional"
+
+  # Habitual/repeated action markers
+  - verbs: ["တတ်", "လေ့ရှိ", "မြဲ", "ကြိမ်ဖန်များစွာ"]
+    required_particles: ["ကို", "မှာ"]
+    incompatible_particles: []
+    note: "Habitual aspect markers take object ကို or locative မှာ for context"
+
+  # ---------- Resultative / completion verbs ----------
+
+  # Resultative verbs take aspect completion markers
+  - verbs: ["ရ", "ပြီ", "ပြီး", "ပြီးစီး"]
+    required_particles: ["ပြီ", "ပြီး"]
+    incompatible_particles: ["သို့"]
+    note: "Resultative verbs are compatible with completion markers, not directional"
+
+  # Inchoative (beginning) verbs
+  - verbs: ["စတင်", "စ", "အစပြု", "ကြိုးစား"]
+    required_particles: ["ဖို့", "ရန်", "ကို"]
+    incompatible_particles: []
+    note: "Inchoative verbs take purpose ဖို့/ရန် or object ကို"
+
+  # ---------- Emotional / psychological verbs ----------
+
+  # Emotion verbs take object (stimulus) or cause
+  - verbs: ["ကြောက်", "ရွံ့", "မုန်း", "ချစ်", "နှစ်သက်", "ဝမ်းနည်း"]
+    required_particles: ["ကို", "လို့", "ကြောင့်"]
+    incompatible_particles: ["သို့", "မှ"]
+    note: "Emotion verbs take object ကို (stimulus) or causal လို့/ကြောင့်"
+
+  # Volitional emotion verbs (wanting, hoping)
+  - verbs: ["မျှော်လင့်", "ဆုတောင်း", "ဆန္ဒရှိ", "မျှော်မှန်း"]
+    required_particles: ["ဖို့", "ရန်", "ဟု"]
+    incompatible_particles: ["ကို", "မှာ"]
+    note: "Volitional emotion verbs take purpose ဖို့/ရန် or complementizer ဟု"
+
+  # ---------- Acquisition / possession verbs ----------
+
+  # Acquisition verbs take source or object
+  - verbs: ["ဝယ်", "ရယူ", "ရ", "လက်ခံ", "လက်ခံရရှိ"]
+    required_particles: ["ကို", "မှ"]
+    incompatible_particles: ["သို့"]
+    note: "Acquisition verbs take object ကို or source မှ, not directional သို့"
+
+  # Possession/ownership verbs take locative context
+  - verbs: ["ပိုင်", "ဆိုင်", "ပိုင်ဆိုင်", "ကိုင်"]
+    required_particles: ["ကို"]
+    incompatible_particles: ["မှ", "သို့"]
+    note: "Possession verbs take object ကို, not source/directional"
+
+  # ---------- Separation / removal verbs ----------
+
+  # Separation verbs take source marker
+  - verbs: ["ခွဲ", "ဖယ်", "ထုတ်", "ဖယ်ရှား", "ဖြုတ်"]
+    required_particles: ["မှ", "ကနေ"]
+    incompatible_particles: ["မှာ", "တွင်"]
+    note: "Separation/removal verbs take source မှ/ကနေ, not static locative"
