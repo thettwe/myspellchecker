@@ -73,7 +73,9 @@ class CompoundDetectionThresholds:
     dominant_compound_threshold: int = 50000
 
     # Minimum compound frequency for full-token joins (left+right→compound).
-    broken_compound_full_min_freq: int = 5000
+    # Raised from 5000 to 15000 to suppress FPs on common word pairs that
+    # coincidentally form valid but infrequent compounds.
+    broken_compound_full_min_freq: int = 8000
 
     # Minimum compound frequency for prefix-join cases.
     # Lower than full-join — prefix patterns are higher precision.

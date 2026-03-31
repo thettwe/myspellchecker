@@ -13,6 +13,7 @@ preserving the exact same method signatures and behaviour.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -235,12 +236,21 @@ _WORD_ORDER_BOUNDARIES: frozenset[str] = _norm_set(
     }
 )
 
+# Terminal SFP+punctuation patterns: sentence-final particle immediately
+# followed by Myanmar full stop (။).  These are legitimate sentence endings
+# and should NOT be flagged as missing conjunctions.
+# Covers formal (သည်။, ပါသည်။), colloquial (တယ်။, ပါတယ်။), and
+# future (မည်။, မယ်။, ပါမည်။, ပါမယ်။) forms.
+_TERMINAL_SFP_RE = re.compile(r"(?:ပါသည်|ပါတယ်|ပါမည်|ပါမယ်|သည်|တယ်|မည်|မယ်)\u104B$")
+
 
 class StructureDetectionMixin:
     """Mixin providing sentence structure detection.
 
     Detects G02 (dangling word) and G03 (missing conjunction) patterns
-    across the full text.
+    across the full text.  G04 (word-order inversion) is also implemented
+    but disabled by default (``_enable_g04_word_order = False``) because
+    it produces excessive false positives on real Myanmar text.
     """
 
     # --- Type stubs for attributes provided by SpellChecker or sibling mixins ---
@@ -251,6 +261,12 @@ class StructureDetectionMixin:
     _INFORMAL_PARTICLES: frozenset[str]
 
     # --- Class-level constants (extracted from inline magic numbers) ---
+
+    # G04 word-order detection is disabled by default because it produces
+    # 600+ false positives on real Myanmar text.  Myanmar freely allows
+    # post-verbal complements, so flagging them as displaced arguments is
+    # incorrect for most sentences.  Set to True to re-enable.
+    _enable_g04_word_order: bool = False
 
     # Word order detection (G04): maximum tail tokens to scan for displaced arguments
     _WORD_ORDER_MAX_TAIL_TOKENS: int = 4
@@ -376,6 +392,12 @@ class StructureDetectionMixin:
                 # verb-final particles — don't flag as missing conjunction.
                 if tokens[idx2] in self._DISCOURSE_ENDINGS:
                     continue
+                # Terminal SFP+။: tokens like "သည်။" and "တယ်။" are
+                # legitimate sentence endings.  When either SFP token already
+                # includes a Myanmar period, the two SFPs belong to separate
+                # sentences — not a missing conjunction within one sentence.
+                if _TERMINAL_SFP_RE.search(tokens[idx1]) or _TERMINAL_SFP_RE.search(tokens[idx2]):
+                    continue
                 # Colloquial parataxis: in spoken Myanmar, clauses are commonly
                 # juxtaposed without explicit conjunction (e.g., "ခေါင်းကိုက်တယ်
                 # ဆေးရုံမှာ သွားခဲ့တယ်"). When both SFPs end with colloquial
@@ -452,6 +474,13 @@ class StructureDetectionMixin:
                     break  # only report first occurrence
 
         # G04: Verb-fronted object/complement phrase (word-order inversion).
+        # Disabled by default -- produces 600+ false positives because Myanmar
+        # freely allows post-verbal complement ordering.  Gate on the
+        # _enable_g04_word_order class attribute so the logic is preserved
+        # but inactive unless explicitly opted in.
+        if not self._enable_g04_word_order:
+            return
+
         # Canonical Myanmar order keeps the finite verb after its object phrase.
         max_tail_tokens = self._WORD_ORDER_MAX_TAIL_TOKENS
         for i in range(1, len(tokens) - 2):
