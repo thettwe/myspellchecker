@@ -356,12 +356,14 @@ class ValidationConfig(BaseModel):
     )
     # Output confidence filter thresholds
     output_confidence_thresholds: dict[str, float] = Field(
-        default={"confusable_error": 0.75},
+        default={"confusable_error": 0.75, "colloquial_info": 0.35},
         description=(
             "Per-error-type minimum confidence for the output filter. "
             "Errors whose confidence is below the threshold for their type "
             "are suppressed. Empirically calibrated: confusable_error FPs "
-            "cluster at 0.72, TPs at 0.88+."
+            "cluster at 0.72, TPs at 0.88+. colloquial_info notes use "
+            "confidence 0.3 (informational, not errors) and are suppressed "
+            "by default; lower this threshold to surface them."
         ),
     )
     secondary_confidence_thresholds: dict[str, float] = Field(

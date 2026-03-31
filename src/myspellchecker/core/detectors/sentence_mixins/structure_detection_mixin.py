@@ -261,6 +261,11 @@ class StructureDetectionMixin:
     # Colloquial parataxis suppression (G03): minimum existing errors to suppress
     _COLLOQUIAL_SFP_MIN_EXISTING_ERRORS: int = 2
 
+    # G02 dangling word: suppress for high-frequency function words.
+    # Words above this corpus frequency are common particles/markers that
+    # naturally appear at clause boundaries and should not be flagged.
+    _DANGLING_HIGH_FREQ_THRESHOLD: int = 5_000
+
     def _detect_sentence_structure_issues(self, text: str, errors: list[Error]) -> None:
         """Detect sentence structure issues across the full text.
 
@@ -285,13 +290,16 @@ class StructureDetectionMixin:
         is_sent_final: list[bool] = []
         for token in tokens:
             matched = False
+            # Strip trailing boundary punctuation (။, ၊, etc.) so that
+            # tokens like "သည်။" and "တယ်။" still match the SFP sets.
+            token_stripped = token.rstrip(_BOUNDARY_PUNCT_CHARS)
             # Exact match against all endings
-            if token in self._ALL_ENDINGS_WITH_STRIPPED:
+            if token_stripped in self._ALL_ENDINGS_WITH_STRIPPED:
                 matched = True
             else:
                 # Suffix match for unambiguous sentence-final endings
                 for ending in _SUFFIX_SAFE:
-                    if len(ending) < len(token) and token.endswith(ending):
+                    if len(ending) < len(token_stripped) and token_stripped.endswith(ending):
                         matched = True
                         break
             is_sent_final.append(matched)
@@ -318,12 +326,30 @@ class StructureDetectionMixin:
                         break  # temporal/transitional adverb, valid clause start
                     if is_sent_final[j]:
                         break  # another sentence-final, handled by G03
+                    # Pure punctuation tokens (e.g., "၊", "။") are boundary
+                    # markers, not dangling content words.
+                    if not next_stripped:
+                        continue
                     # Multi-clause parataxis: if there's a subsequent SFP,
                     # this word starts a new clause, not dangling.
                     # e.g., "ခေါင်းကိုက်တယ် ဆေးရုံမှာ သွားခဲ့တယ်"
                     has_later_sfp = any(is_sent_final[k] for k in range(j + 1, len(tokens)))
                     if has_later_sfp:
                         continue
+                    # High-frequency words are common particles/markers (e.g.,
+                    # ခဲ့, ဖြစ်, များ, က, ပါ) that naturally appear at clause
+                    # boundaries.  Suppress dangling-word FPs for these.
+                    provider = getattr(self, "provider", None)
+                    if provider is not None:
+                        try:
+                            freq = provider.get_word_frequency(next_stripped)
+                            if (
+                                isinstance(freq, (int, float))
+                                and freq >= self._DANGLING_HIGH_FREQ_THRESHOLD
+                            ):
+                                continue
+                        except Exception:
+                            pass
                     # This is a dangling content word
                     if next_pos not in existing_positions:
                         dangling_suggestions: list[str] = [""]

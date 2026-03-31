@@ -466,3 +466,327 @@ false_compounds:
 
   - parts: ["မ", "လုပ်"]
     reason: "negation prefix + verb"
+
+  - parts: ["မ", "ရှိ"]
+    reason: "negation prefix + verb (not exist)"
+
+  - parts: ["မ", "ဟုတ်"]
+    reason: "negation prefix + verb (not correct)"
+
+  - parts: ["မ", "ပါ"]
+    reason: "negation prefix + verb (not included)"
+
+  - parts: ["မ", "လို"]
+    reason: "negation prefix + verb (not want)"
+
+  - parts: ["မ", "သိ"]
+    reason: "negation prefix + verb (not know)"
+
+  - parts: ["မ", "ကြ"]
+    reason: "negation prefix + plural verb marker"
+
+  - parts: ["မ", "နိုင်"]
+    reason: "negation prefix + potential verb (cannot)"
+
+  - parts: ["မ", "ဖြစ်"]
+    reason: "negation prefix + verb (not happen)"
+
+  - parts: ["မ", "ရ"]
+    reason: "negation prefix + verb (not get/must not)"
+
+  - parts: ["မ", "ကောင်း"]
+    reason: "negation prefix + adjective (not good)"
+
+  # ── Numeral + classifier (always separate) ──
+  - parts: ["တစ်", "ခု"]
+    reason: "numeral (one) + classifier (item)"
+
+  - parts: ["တစ်", "ဦး"]
+    reason: "numeral (one) + classifier (person/honorific)"
+
+  - parts: ["တစ်", "ယောက်"]
+    reason: "numeral (one) + classifier (person/informal)"
+
+  - parts: ["တစ်", "ကောင်"]
+    reason: "numeral (one) + classifier (animal)"
+
+  - parts: ["တစ်", "ခြောင်း"]
+    reason: "numeral (one) + classifier (long object)"
+
+  - parts: ["တစ်", "စုံ"]
+    reason: "numeral (one) + classifier (pair/set)"
+
+  - parts: ["တစ်", "လုံး"]
+    reason: "numeral (one) + classifier (round object/whole)"
+
+  - parts: ["တစ်", "ပင်"]
+    reason: "numeral (one) + classifier (plant/tree)"
+
+  - parts: ["တစ်", "စင်း"]
+    reason: "numeral (one) + classifier (vehicle/boat)"
+
+  - parts: ["တစ်", "ခွက်"]
+    reason: "numeral (one) + classifier (cup)"
+
+  - parts: ["တစ်", "ပွဲ"]
+    reason: "numeral (one) + classifier (event/plate)"
+
+  - parts: ["နှစ်", "ခု"]
+    reason: "numeral (two) + classifier (item)"
+
+  - parts: ["နှစ်", "ဦး"]
+    reason: "numeral (two) + classifier (person)"
+
+  - parts: ["နှစ်", "ယောက်"]
+    reason: "numeral (two) + classifier (person/informal)"
+
+  - parts: ["သုံး", "ခု"]
+    reason: "numeral (three) + classifier (item)"
+
+  - parts: ["သုံး", "ယောက်"]
+    reason: "numeral (three) + classifier (person)"
+
+  - parts: ["ခု", "နှစ်"]
+    reason: "classifier + numeral (year in dates)"
+
+  - parts: ["လေး", "ခု"]
+    reason: "numeral (four) + classifier (item)"
+
+  - parts: ["ငါး", "ခု"]
+    reason: "numeral (five) + classifier (item)"
+
+  # ── Verb + sequential/aspect particles (expanded) ──
+  - parts: ["ဖြစ်", "ပြီး"]
+    reason: "verb (be/happen) + sequential particle"
+
+  - parts: ["ပြော", "ပြီး"]
+    reason: "verb (say) + sequential particle"
+
+  - parts: ["လာ", "ပြီး"]
+    reason: "verb (come) + sequential particle"
+
+  - parts: ["ကြည့်", "ပြီး"]
+    reason: "verb (look) + sequential particle"
+
+  - parts: ["ပေး", "ပြီး"]
+    reason: "verb (give) + sequential particle"
+
+  - parts: ["ယူ", "ပြီး"]
+    reason: "verb (take) + sequential particle"
+
+  - parts: ["ဖတ်", "ပြီး"]
+    reason: "verb (read) + sequential particle"
+
+  - parts: ["သိ", "ပြီး"]
+    reason: "verb (know) + sequential particle"
+
+  - parts: ["ဖြစ်", "ပြီ"]
+    reason: "verb (be) + completed particle"
+
+  - parts: ["ပြီး", "ပြီ"]
+    reason: "sequential particle + completed particle"
+
+  - parts: ["သွား", "ပြီ"]
+    reason: "verb (go) + completed particle"
+
+  - parts: ["လာ", "ပြီ"]
+    reason: "verb (come) + completed particle"
+
+  - parts: ["ရ", "ပြီ"]
+    reason: "verb (get) + completed particle"
+
+  # ── Verb + auxiliary/potential verbs ──
+  - parts: ["သွား", "နိုင်"]
+    reason: "verb + potential auxiliary (can go)"
+
+  - parts: ["လုပ်", "နိုင်"]
+    reason: "verb + potential auxiliary (can do)"
+
+  - parts: ["ပြော", "နိုင်"]
+    reason: "verb + potential auxiliary (can say)"
+
+  - parts: ["လာ", "နိုင်"]
+    reason: "verb + potential auxiliary (can come)"
+
+  - parts: ["ဖြစ်", "နိုင်"]
+    reason: "verb + potential auxiliary (can be)"
+
+  - parts: ["သွား", "ရ"]
+    reason: "verb + obligation/permission auxiliary"
+
+  - parts: ["လုပ်", "ရ"]
+    reason: "verb + obligation/permission auxiliary"
+
+  - parts: ["ပြော", "ရ"]
+    reason: "verb + obligation/permission auxiliary"
+
+  # ── Verb + progressive/continuous (နေ) ──
+  - parts: ["လုပ်", "နေ"]
+    reason: "verb + progressive auxiliary (doing)"
+
+  - parts: ["ပြော", "နေ"]
+    reason: "verb + progressive auxiliary (saying)"
+
+  - parts: ["ကြည့်", "နေ"]
+    reason: "verb + progressive auxiliary (looking)"
+
+  - parts: ["စား", "နေ"]
+    reason: "verb + progressive auxiliary (eating)"
+
+  - parts: ["သွား", "နေ"]
+    reason: "verb + progressive auxiliary (going)"
+
+  - parts: ["နေ", "ရာ"]
+    reason: "progressive/place marker + noun (place/position)"
+
+  # ── Verb + SFP (formal/expanded) ──
+  - parts: ["သွား", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["လာ", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ဖြစ်", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ရှိ", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["လုပ်", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ပြော", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ဖြစ်", "တယ်"]
+    reason: "verb (be) + SFP"
+
+  - parts: ["ရှိ", "တယ်"]
+    reason: "verb (exist) + SFP"
+
+  - parts: ["နိုင်", "တယ်"]
+    reason: "potential auxiliary + SFP"
+
+  - parts: ["သွား", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["လာ", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["ဖြစ်", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["ရှိ", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["လုပ်", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["ဖြစ်", "ပါသည်"]
+    reason: "verb + formal polite SFP"
+
+  - parts: ["ရှိ", "ပါသည်"]
+    reason: "verb + formal polite SFP"
+
+  - parts: ["လုပ်", "ပါသည်"]
+    reason: "verb + formal polite SFP"
+
+  # ── Verb + completed aspect (expanded) ──
+  - parts: ["ဖြစ်", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ပြော", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ရေး", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ပေး", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ရှိ", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  # ── Verb + future (expanded) ──
+  - parts: ["ဖြစ်", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ရှိ", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ပြော", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ရေး", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ပေး", "မယ်"]
+    reason: "verb + future particle"
+
+  # ── Compound nouns (properly spaced in formal writing) ──
+  - parts: ["မြန်မာ", "နိုင်ငံ"]
+    reason: "proper noun + noun (Myanmar country)"
+
+  - parts: ["ပြည်", "ထောင်စု"]
+    reason: "compound noun (Union/Federal) — written separately"
+
+  - parts: ["နိုင်ငံ", "ရေး"]
+    reason: "noun + suffix (politics/affairs)"
+
+  - parts: ["နိုင်ငံ", "တကာ"]
+    reason: "noun + suffix (international)"
+
+  - parts: ["အစိုးရ", "အဖွဲ့"]
+    reason: "noun + noun (government + organization)"
+
+  - parts: ["လွှတ်တော်", "ကိုယ်စားလှယ်"]
+    reason: "noun + noun (parliament + representative)"
+
+  - parts: ["သတင်း", "စာ"]
+    reason: "noun + noun (newspaper — often written separately)"
+
+  - parts: ["ရေး", "သား"]
+    reason: "verb + noun forming agent noun (writer — can be split)"
+
+  - parts: ["ဖွံ့", "ဖြိုး"]
+    reason: "verb + verb complement (develop — written separately)"
+
+  - parts: ["ပြည်", "သူ"]
+    reason: "noun + noun (citizen — can be split)"
+
+  - parts: ["ပြည်", "နယ်"]
+    reason: "noun + noun (province/region)"
+
+  - parts: ["ကျန်း", "မာ"]
+    reason: "adj + adj complement (healthy — can be split)"
+
+  - parts: ["စီး", "ပွား"]
+    reason: "verb + complement (economy/business — written separately)"
+
+  - parts: ["ပညာ", "ရေး"]
+    reason: "noun + suffix (education)"
+
+  - parts: ["လုံ", "ခြုံ"]
+    reason: "adj + complement (security/safety)"
+
+  - parts: ["အစိုးရ", "အရာရှိ"]
+    reason: "noun + noun (government + official)"
+
+  - parts: ["မြန်မာ", "ပြည်"]
+    reason: "proper noun + noun (Myanmar country)"
+
+  - parts: ["မြန်မာ", "စာ"]
+    reason: "proper noun + noun (Myanmar language/writing)"
+
+  # ── Additional postpositions ──
+  - parts: ["အိမ်", "က"]
+    reason: "noun + ablative postposition"
+
+  - parts: ["ကျောင်း", "က"]
+    reason: "noun + ablative postposition"
+
+  - parts: ["အိမ်", "တွင်"]
+    reason: "noun + formal locative postposition"
+
+  - parts: ["ကျောင်း", "တွင်"]
+    reason: "noun + formal locative postposition"
