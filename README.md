@@ -72,16 +72,17 @@ Full documentation is available at **[docs.myspellchecker.com](https://docs.mysp
 *   **[Context Checking](https://docs.myspellchecker.com/features/context-checking)**: N-gram probability analysis.
 *   **[Homophone Detection](https://docs.myspellchecker.com/features/homophones)**: Sound-alike error detection.
 
-### Grammar
+### Grammar & NER
 *   **[Grammar Checking](https://docs.myspellchecker.com/features/grammar-checking)**: Syntactic validation.
-*   **[Grammar Checkers](https://docs.myspellchecker.com/features/grammar-checkers)**: 6 specialized checkers (Aspect, Classifier, Compound, MergedWord, Negation, Register).
+*   **[Grammar Checkers](https://docs.myspellchecker.com/features/grammar-checkers)**: 8 specialized checkers (Aspect, Classifier, Compound, MergedWord, Negation, Particle, TenseAgreement, Register).
 *   **[Grammar Engine](https://docs.myspellchecker.com/features/grammar-engine)**: Rule engine internals.
+*   **[Named Entity Recognition](https://docs.myspellchecker.com/features/ner)**: NER with 3 implementations + gazetteer.
+*   **[Loan Word Variants](https://docs.myspellchecker.com/features/loan-words)**: Transliteration variant handling for English, Pali/Sanskrit loan words.
 
 ### Language Processing
 *   **[POS Tagging](https://docs.myspellchecker.com/features/pos-tagging)**: Pluggable tagging (Rule-Based, Viterbi, Transformer).
 *   **[Morphology Analysis](https://docs.myspellchecker.com/features/morphology)**: Word structure analysis.
 *   **[Segmenters](https://docs.myspellchecker.com/features/segmenters)**: Word segmentation engines.
-*   **[Named Entity Recognition](https://docs.myspellchecker.com/features/ner)**: NER with 3 implementations.
 
 ### AI-Powered Checking
 *   **[Semantic Checking](https://docs.myspellchecker.com/features/semantic-checking)**: AI-powered MLM validation.
@@ -477,9 +478,12 @@ mySpellChecker integrates tools and research from the Myanmar NLP community:
 | Resource | Author | Description | Link |
 |----------|--------|-------------|------|
 | **Myanmar POS Model** | Chuu Htet Naing | XLM-RoBERTa-based POS tagger (93.37% accuracy) | [HuggingFace](https://huggingface.co/chuuhtetnaing/myanmar-pos-model) |
+| **Myanmar NER Model** | Chuu Htet Naing | Transformer-based named entity recognition | [HuggingFace](https://huggingface.co/chuuhtetnaing/myanmar-ner-model) |
 | **Myanmar Text Segmentation Model** | Chuu Htet Naing | Transformer-based word segmenter | [HuggingFace](https://huggingface.co/chuuhtetnaing/myanmar-text-segmentation-model) |
 | **myWord Segmentation** | Ye Kyaw Thu | Viterbi-based Myanmar word segmentation | [GitHub](https://github.com/ye-kyaw-thu/myWord) |
 | **myPOS** | Ye Kyaw Thu | POS corpus used for CRF training | [GitHub](https://github.com/ye-kyaw-thu/myPOS) |
+| **myNER** | Ye Kyaw Thu et al. | NER corpus with 7-tag annotation scheme, joint POS training | [arXiv](https://arxiv.org/abs/2504.04038) |
+| **myG2P** | Ye Kyaw Thu | Myanmar grapheme-to-phoneme conversion dictionary | [GitHub](https://github.com/ye-kyaw-thu/myG2P) |
 | **CRF Word Segmenter** | Ye Kyaw Thu | CRF-based syllable-to-word segmentation model | [GitHub](https://github.com/ye-kyaw-thu) |
 | **myanmartools** | Google | Zawgyi detection and conversion | [GitHub](https://github.com/google/myanmar-tools) |
 
@@ -546,6 +550,29 @@ If you use mySpellChecker in your research, please cite the relevant works:
   title = {Myanmar Text Segmentation Model},
   publisher = {Hugging Face},
   url = {https://huggingface.co/chuuhtetnaing/myanmar-text-segmentation-model}
+}
+
+@misc{chuuhtetnaing-myanmar-ner,
+  author = {Chuu Htet Naing},
+  title = {Myanmar NER Model},
+  publisher = {Hugging Face},
+  url = {https://huggingface.co/chuuhtetnaing/myanmar-ner-model}
+}
+
+@inproceedings{myner-2025,
+  title = {myNER: Contextualized Burmese Named Entity Recognition with Bidirectional LSTM and fastText Embeddings via Joint Training with POS Tagging},
+  author = {Kaung Lwin Thant and Kwankamol Nongpong and Ye Kyaw Thu and Thura Aung and Khaing Hsu Wai and Thazin Myint Oo},
+  year = {2025},
+  booktitle = {4th International Conference on Cybernetics and Innovations (ICCI 2025)},
+  note = {Best Presentation Award},
+  url = {https://arxiv.org/abs/2504.04038}
+}
+
+@misc{yekyawthu-myg2p,
+  author = {Ye Kyaw Thu},
+  title = {myG2P: Myanmar Grapheme to Phoneme Conversion Dictionary},
+  publisher = {GitHub},
+  url = {https://github.com/ye-kyaw-thu/myG2P}
 }
 ```
 
