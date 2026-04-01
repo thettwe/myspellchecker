@@ -27,6 +27,7 @@ __all__ = [
 # Shared runtime flags (replaces per-module globals)
 # ---------------------------------------------------------------------------
 
+
 def set_allow_extended_myanmar(allow: bool) -> None:
     """Set whether to allow extended Myanmar characters in validation.
 

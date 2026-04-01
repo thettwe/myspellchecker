@@ -72,16 +72,16 @@ class TestComputeBidirectionalProb:
 
     def test_left_bigram_only(self, checker, mock_provider):
         """With only left bigram context."""
-        mock_provider.get_bigram_probability.side_effect = (
-            lambda w1, w2: 0.05 if (w1, w2) == ("prev", "word") else 0.0
+        mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+            0.05 if (w1, w2) == ("prev", "word") else 0.0
         )
         prob = checker._compute_bidirectional_prob("word", ["prev"], [])
         assert prob == pytest.approx(0.05)
 
     def test_right_bigram_only(self, checker, mock_provider):
         """With only right bigram context."""
-        mock_provider.get_bigram_probability.side_effect = (
-            lambda w1, w2: 0.03 if (w1, w2) == ("word", "next") else 0.0
+        mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+            0.03 if (w1, w2) == ("word", "next") else 0.0
         )
         prob = checker._compute_bidirectional_prob("word", [], ["next"])
         assert prob == pytest.approx(0.03)
@@ -107,8 +107,8 @@ class TestComputeBidirectionalProb:
     def test_trigram_fallback_to_bigram_left(self, checker, mock_provider):
         """Falls back to bigram when trigram is zero."""
         mock_provider.get_trigram_probability.return_value = 0.0
-        mock_provider.get_bigram_probability.side_effect = (
-            lambda w1, w2: 0.03 if (w1, w2) == ("prev", "word") else 0.0
+        mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+            0.03 if (w1, w2) == ("prev", "word") else 0.0
         )
         prob = checker._compute_bidirectional_prob("word", ["pp", "prev"], [])
         assert prob == pytest.approx(0.03)

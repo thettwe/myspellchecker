@@ -70,8 +70,8 @@ def test_get_smoothed_trigram_probability(checker, mock_provider):
     # Case 2: Unseen trigram, backoff to bigram
     mock_provider.get_trigram_probability.return_value = 0.0
     # Bigram ("b", "c")
-    mock_provider.get_bigram_probability.side_effect = (
-        lambda w1, w2: 0.1 if (w1, w2) == ("b", "c") else 0.0
+    mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+        0.1 if (w1, w2) == ("b", "c") else 0.0
     )
     # 0.4 * 0.1 = 0.04
     assert checker.get_smoothed_trigram_probability("a", "b", "c") == pytest.approx(0.04)
@@ -105,8 +105,8 @@ def test_is_contextual_error_bidirectional(checker, mock_provider):
     # Left: P(curr|prev)
     # right_context_threshold = threshold * 10 = 0.01 * 10 = 0.1
     # So right_prob must be > 0.1 to rescue
-    mock_provider.get_bigram_probability.side_effect = (
-        lambda w1, w2: 0.005
+    mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+        0.005
         if (w1, w2) == ("prev", "curr")
         else 0.15  # Must be > right_context_threshold (0.1)
         if (w1, w2) == ("curr", "next")
@@ -158,12 +158,8 @@ def test_suggest_scoring_logic(checker, mock_provider):
     # Use "cura" as candidate (distance 1 from "curr")
     candidate = "cura"
 
-    mock_provider.get_bigram_probability.side_effect = (
-        lambda w1, w2: 0.001
-        if (w1, w2) == ("prev", "curr")
-        else 0.5
-        if (w1, w2) == ("prev", candidate)
-        else 0.0
+    mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+        0.001 if (w1, w2) == ("prev", "curr") else 0.5 if (w1, w2) == ("prev", candidate) else 0.0
     )
 
     checker.provider.get_top_continuations.return_value = [(candidate, 0.5)]
@@ -204,13 +200,13 @@ def test_suggest_pos_context_scoring(checker, mock_provider):
     candidate = "candidate"
 
     # Words and POS
-    mock_provider.get_word_pos.side_effect = (
-        lambda w: "N" if w == "prev" else "V" if w == candidate else None
+    mock_provider.get_word_pos.side_effect = lambda w: (
+        "N" if w == "prev" else "V" if w == candidate else None
     )
 
     # Bigram probs
-    mock_provider.get_bigram_probability.side_effect = (
-        lambda w1, w2: 0.5 if (w1, w2) == ("prev", candidate) else 0.001
+    mock_provider.get_bigram_probability.side_effect = lambda w1, w2: (
+        0.5 if (w1, w2) == ("prev", candidate) else 0.001
     )
 
     checker.provider.get_top_continuations.return_value = [(candidate, 0.5)]

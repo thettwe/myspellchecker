@@ -67,7 +67,12 @@ class EnrichmentMixin:
                     )
                     for row in cursor:
                         w1, w2, ctype, overlap, freq_ratio, suppress = (
-                            row[0], row[1], row[2], row[3], row[4], row[5],
+                            row[0],
+                            row[1],
+                            row[2],
+                            row[3],
+                            row[4],
+                            row[5],
                         )
                         new_map.setdefault(w1, []).append(
                             (w2, ctype, overlap, freq_ratio or 0.0, suppress)

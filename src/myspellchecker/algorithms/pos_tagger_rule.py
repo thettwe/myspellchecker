@@ -286,9 +286,7 @@ class RuleBasedPOSTagger(POSTaggerBase):
             return self._tag_word_cached.cache_info()
         import functools
 
-        return functools._CacheInfo(
-            hits=0, misses=0, maxsize=self._cache_size, currsize=0
-        )
+        return functools._CacheInfo(hits=0, misses=0, maxsize=self._cache_size, currsize=0)
 
     @property
     def tagger_type(self) -> TaggerType:

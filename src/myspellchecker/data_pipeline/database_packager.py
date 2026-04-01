@@ -52,6 +52,7 @@ except ImportError:
 # Shared runtime flags (replaces per-module globals)
 # ---------------------------------------------------------------------------
 
+
 def set_allow_extended_myanmar(allow: bool) -> None:
     """Configure Extended Myanmar character handling for database packager.
 
