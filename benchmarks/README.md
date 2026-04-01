@@ -1,4 +1,4 @@
-# Myanmar Spell Checker Benchmark
+# mySpellChecker Benchmark
 
 Benchmark suite for evaluating the myspellchecker error detection and suggestion pipeline.
 489 hand-annotated Myanmar sentences covering syllable errors, word errors, grammar errors,
@@ -39,6 +39,8 @@ Where `latency_normalized = min(p95 / 500ms, 1.0)`.
 - **Database**: `mySpellChecker_production.db` (565 MB, 601K words, full POS + enrichment tables)
 - **Validation level**: word
 - **Platform**: macOS (Apple Silicon)
+
+> **Note:** The dictionary database and semantic model (v2.3) used in these benchmarks are **not included** in the library. They were built from our own proprietary corpus using the [data pipeline](https://docs.myspellchecker.com/data-pipeline/index) and [training pipeline](https://docs.myspellchecker.com/guides/training) respectively. Your results will vary depending on the dictionary database you build and the semantic model you train.
 
 ### Overall Metrics (no semantic)
 
