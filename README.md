@@ -447,7 +447,7 @@ pip install -e ".[dev]"
 
 ### Testing
 
-The test suite has 4,664 tests across 211 files with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
+The test suite has 4,549 tests across 211 files with 70% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
 
 ```bash
 # Run default test suite (~5 min, skips slow tests)
@@ -459,7 +459,7 @@ pytest tests/ -m e2e            # 10 end-to-end CLI tests
 pytest tests/ -m slow           # 39 slow tests (property-based, stress, DB builds)
 
 # Run with coverage
-pytest tests/ --cov=src/myspellchecker --cov-fail-under=75
+pytest tests/ --cov=src/myspellchecker --cov-fail-under=70
 
 # Formatting and linting
 ruff format .
