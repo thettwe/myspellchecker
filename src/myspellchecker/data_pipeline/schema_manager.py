@@ -191,6 +191,17 @@ class SchemaManager:
                 informal_count INTEGER DEFAULT 0
             )
         """,
+        "ner_entities": """
+            CREATE TABLE IF NOT EXISTS ner_entities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                entity TEXT NOT NULL,
+                entity_type TEXT NOT NULL,
+                source TEXT DEFAULT 'corpus',
+                confidence REAL DEFAULT 1.0,
+                frequency INTEGER DEFAULT 0,
+                UNIQUE(entity, entity_type)
+            )
+        """,
     }
 
     # Index definitions
@@ -231,6 +242,12 @@ class SchemaManager:
         ),
         "idx_colloc_word1": ("CREATE INDEX IF NOT EXISTS idx_colloc_word1 ON collocations (word1)"),
         "idx_colloc_word2": ("CREATE INDEX IF NOT EXISTS idx_colloc_word2 ON collocations (word2)"),
+        "idx_ner_entity": (
+            "CREATE INDEX IF NOT EXISTS idx_ner_entity ON ner_entities (entity)"
+        ),
+        "idx_ner_entity_type": (
+            "CREATE INDEX IF NOT EXISTS idx_ner_entity_type ON ner_entities (entity_type)"
+        ),
     }
 
     # POS inference columns for migration

@@ -1,611 +1,75 @@
 """
 Myanmar place-name dictionary for heuristic NER.
 
-Source: chuuhtetnaing/myanmar-nrc-format-dataset (HuggingFace)
-Contains 420+ townships, 14 states/regions, historical capitals,
-international cities/countries, and major geographic features.
+All data now lives in ``rules/named_entities.yaml`` and is loaded via
+:func:`myspellchecker.text.ner.get_gazetteer_data`.  This module provides
+backwards-compatible frozenset attributes that delegate to the YAML-backed
+gazetteer singleton.
 """
 
 from __future__ import annotations
 
-MYANMAR_PLACES: frozenset[str] = frozenset(
-    {
-        "ကချင်ပြည်နယ်",
-        "ကနီ",
-        "ကန့်ဘလူ",
-        "ကန်ကြီးထောင့်",
-        "ကန်ပက်လက်",
-        "ကန်ပိုက်တီ",
-        "ကမမောင်း",
-        "ကမာရွတ်",
-        "ကယားပြည်နယ်",
-        "ကရင်ပြည်နယ်",
-        "ကရသူရိ",
-        "ကလိန်အောင်",
-        "ကလော",
-        "ကလေး",
-        "ကလေးဝ",
-        "ကဝ",
-        "ကသာ",
-        "ကာမိုင်း",
-        "ကာလိ",
-        "ကိုကိုးကျွန်း",
-        "ကုန်းကြမ်း",
-        "ကူမဲ",
-        "ကေတုမတီ",
-        "ကောလင်း",
-        "ကော့ကရိတ်",
-        "ကော့မှူး",
-        "ကော့သောင်း",
-        "ကံမ",
-        "ကျိန္တလီ",
-        "ကျိုက္ခမီ",
-        "ကျိုက်ထို",
-        "ကျိုက်မရော",
-        "ကျိုက်လတ်",
-        "ကျိုင်းတုံ",
-        "ကျိုင်းတောင်း",
-        "ကျိုင်းလပ်",
-        "ကျီခါး",
-        "ကျုံဒိုး",
-        "ကျုံပျော်",
-        "ကျောက်ကြီး",
-        "ကျောက်ဆည်",
-        "ကျောက်တန်း",
-        "ကျောက်တလုံးကြီး",
-        "ကျောက်တော်",
-        "ကျောက်တံခါး",
-        "ကျောက်တံတား",
-        "ကျောက်ထု",
-        "ကျောက်ပန်းတောင်း",
-        "ကျောက်ဖြူ",
-        "ကျောက်မဲ",
-        "ကျောက်မြောင်း",
-        "ကျောင်းကုန်း",
-        "ကျေးသီး",
-        "ကျွန်းစု",
-        "ကျွန်းလှ",
-        "ကြည့်မြင်တိုင်",
-        "ကြာအင်းဆိပ်ကြီး",
-        "ကြို့ပင်ကောက်",
-        "ကြံခင်း",
-        "ကွတ်ခိုင်",
-        "ကွန်ဟိန်း",
-        "ကွမ်းခြံကုန်း",
-        "ကွမ်းလုံ",
-        "ခင်ဦး",
-        "ခန္တီး",
-        "ခမောက်ကြီး",
-        "ခရမ်း",
-        "ခါမ်းပါတ်",
-        "ခိုလမ်",
-        "ခေါင်လန်ဖူး",
-        "ခေါဇာ",
-        "ခေါ်ဘူဒဲ",
-        "ချင်းပြည်နယ်",
-        "ချင်းရွှေဟော်",
-        "ချမ်းမြသာစည်",
-        "ချမ်းအေးသာဇံ",
-        "ချီဖွေ",
-        "ချောက်",
-        "ချောင်းဆုံ",
-        "ချောင်းဦး",
-        "ဂန့်ဂေါ",
-        "ဂွ",
-        "ငပုတော",
-        "ငဖဲ",
-        "ငရုတ်ကောင်း",
-        "ငသိုင်းချောင်း",
-        "ငါန်းဇွန်",
-        "ငါ့သရောက်",
-        "ငွေဆောင်",
-        "စကု",
-        "စစ်ကိုင်း",
-        "စစ်ကိုင်းတိုင်းဒေသကြီး",
-        "စစ်တွေ",
-        "စဉ့်ကိုင်",
-        "စဉ့်ကူး",
-        "စမ်းချောင်း",
-        "စလင်း",
-        "စုကလိ",
-        "စေတုတ္တရာ",
-        "ဆင်ပေါင်ဝဲ",
-        "ဆင်ဘို",
-        "ဆဒုံး",
-        "ဆမီး",
-        "ဆားလင်းကြီး",
-        "ဆိပ်ကမ်း",
-        "ဆိပ်ဖြူ",
-        "ဆီဆိုင်",
-        "ဆော",
-        "ဆော့လော်",
-        "ဆွမ္မရာ",
-        "ဆွမ်ပရာဘွမ်",
-        "ဇမ္ဗူသီရိ",
-        "ဇလွန်",
-        "ဇီးကုန်း",
-        "ဇေယျာသီရိ",
-        "ညောင်တုန်း",
-        "ညောင်ရွှေ",
-        "ညောင်လေးပင်",
-        "ညောင်ဦး",
-        "တကောင်း",
-        "တနင်္သာရီ",
-        "တနင်္သာရီတိုင်းဒေသကြီး",
-        "တနိုင်း",
-        "တန့်ဆည်",
-        "တန့်ယန်း",
-        "တပ်ကုန်း",
-        "တမူး",
-        "တာချီလိတ်",
-        "တာမိုးညဲ",
-        "တာမွေ",
-        "တာလေ",
-        "တိုက်ကြီး",
-        "တီးတိန်",
-        "တုံတာ",
-        "တောင်ကုတ်",
-        "တောင်ကြီး",
-        "တောင်ငူ",
-        "တောင်တွင်းကြီး",
-        "တောင်ပြိုလက်ဝဲ",
-        "တောင်သာ",
-        "တောင်ဥက္ကလာပ",
-        "တံတား",
-        "တံတားဦး",
-        "တွန်းဇန်",
-        "တွံတေး",
-        "ထန်တလန်",
-        "ထန်ပါခွေ",
-        "ထန်းတပင်",
-        "ထားဝယ်",
-        "ထီးချိုင့်",
-        "ထီးလင်း",
-        "ဒက္ခိဏသီရိ",
-        "ဒဂုံ",
-        "ဒဂုံမြို့သစ် (ဆိပ်ကမ်း)",
-        "ဒဂုံမြို့သစ် (အရှေ့ပိုင်း)",
-        "ဒဂုံမြို့သစ်(တောင်ပိုင်း)",
-        "ဒဂုံမြို့သစ်(မြောက်ပိုင်း)",
-        "ဒလ",
-        "ဒိုက်ဦး",
-        "ဒီပဲယင်း",
-        "ဒီးမော့ဆို",
-        "ဒုံဟီး",
-        "ဒေါပုံ",
-        "ဒေါ့ဖုန်းယန်",
-        "ဒေးဒရဲ",
-        "ဓနုဖြူ",
-        "နတ်တလင်း",
-        "နတ်မောက်",
-        "နန်းယွန်း",
-        "နမ့်ခမ်း",
-        "နမ့်ဆန်",
-        "နမ္မတူ",
-        "နားဖန်",
-        "နောင်ချို",
-        "နောင်တရား",
-        "နောင်မွန်း",
-        "နွားထိုးကြီး",
-        "ပခုက္ကူ",
-        "ပင်လည်ဘူး",
-        "ပင်လုံ",
-        "ပင်လောင်း",
-        "ပင်းတယ",
-        "ပန်ဆန်း (ပန်ခမ်း)",
-        "ပန်ဆိုင်း (ကြူကုတ်)",
-        "ပန်ဆောင်",
-        "ပန်နန်းဒင်",
-        "ပန်ယန်း",
-        "ပန်လုံ",
-        "ပန်ဝါ",
-        "ပန်ဝိုင်",
-        "ပန်းတနော်",
-        "ပန်းတောင်း",
-        "ပန်းဘဲတန်း",
-        "ပလက်ဝ",
-        "ပလောက်",
-        "ပိုင်ကျုံ",
-        "ပုဇွန်တောင်",
-        "ပုဏ္ဏားကျွန်း",
-        "ပုဗ္ဗသီရိ",
-        "ပုလော",
-        "ပုလဲ",
-        "ပုသိမ်ကြီး",
-        "ပူတာအို",
-        "ပေါက်",
-        "ပေါက်ခေါင်း",
-        "ပေါက်တော",
-        "ပေါင်",
-        "ပေါင်းတည်",
-        "ပေါင်းတလည်",
-        "ပဲခူး",
-        "ပဲခူးတိုင်းဒေသကြီး",
-        "ပဲနွယ်ကုန်း",
-        "ပျဉ်းမနား",
-        "ပျော်ဘွယ်",
-        "ပြင်စလူ",
-        "ပြည်",
-        "ပြည်ကြီးတံခွန်",
-        "ပြည်ကြီးမဏ္ဍိုင်",
-        "ပြွန်တန်ဆာ",
-        "ပွင့်ဖြူ",
-        "ဖယ်ခုံ",
-        "ဖရူဆို",
-        "ဖလမ်း",
-        "ဖာပွန်",
-        "ဖားကန့်",
-        "ဖားဆောင်း",
-        "ဖောင်းပြင်",
-        "ဖျာပုံ",
-        "ဖြူး",
-        "ဗန်းမောက်",
-        "ဗန်းမော်",
-        "ဗဟန်း",
-        "ဗိုလ်တထောင်",
-        "ဘားအံ",
-        "ဘိုကလေး",
-        "ဘီးလင်း",
-        "ဘုတလင်",
-        "ဘုတ်ပြင်း",
-        "ဘုရားသုံးဆူ",
-        "ဘူးသီးတောင်",
-        "ဘောဂလိ",
-        "ဘောလခဲ",
-        "မက်မန်း",
-        "မကွေး",
-        "မကွေးတိုင်းဒေသကြီး",
-        "မချမ်းဘော",
-        "မင်းကင်း",
-        "မင်းတပ်",
-        "မင်းတုန်း",
-        "မင်းပြား",
-        "မင်းဘူး",
-        "မင်းလှ",
-        "မင်္ဂလာတောင်ညွန့်",
-        "မင်္ဂလာဒုံ",
-        "မတူပီ",
-        "မတ္တရာ",
-        "မဒေါက်",
-        "မန္တလေးတိုင်းဒေသကြီး",
-        "မန်ကန်",
-        "မန်တုံ",
-        "မန်ဖန့်",
-        "မန်ဟျိုး (မန်ဟီးရိုး)",
-        "မဘိမ်း",
-        "မယ်စဲ",
-        "မရမ်းကုန်း",
-        "မလှိုင်",
-        "မဟာအောင်မြေ",
-        "မအီ",
-        "မအူပင်",
-        "မာန်အောင်",
-        "မိတ္ထီလာ",
-        "မိုင်းကာ",
-        "မိုင်းခတ်",
-        "မိုင်းခုတ်",
-        "မိုင်းငေါ့",
-        "မိုင်းစံ (မုန်းဆန်း)",
-        "မိုင်းဆတ်",
-        "မိုင်းတုံ",
-        "မိုင်းနောင်",
-        "မိုင်းပန်",
-        "မိုင်းပေါက်",
-        "မိုင်းပျဉ်း",
-        "မိုင်းဖြတ်",
-        "မိုင်းမော",
-        "မိုင်းယန်း",
-        "မိုင်းယောင်း",
-        "မိုင်းရယ်",
-        "မိုင်းရှူး",
-        "မိုင်းလား",
-        "မိုင်းလုံ",
-        "မိုပိုင်းလွတ်",
-        "မိုးကုတ်",
-        "မိုးကောင်း",
-        "မိုးညို",
-        "မိုးညှင်း",
-        "မိုးနဲ",
-        "မိုးမိတ်",
-        "မိုးမောက်",
-        "မုဒုံ",
-        "မုန်းကိုး",
-        "မုံရွာ",
-        "မုံးထ",
-        "မူဆယ်",
-        "မေတ္တာ",
-        "မောက်မယ်",
-        "မော်ထိုက်",
-        "မော်လမြိုင်",
-        "မော်လမြိုင်ကျွန်း",
-        "မော်လိုက်",
-        "မံစီ",
-        "မြင်းခြံ",
-        "မြင်းမူ",
-        "မြစ်ကြီးနား",
-        "မြစ်သား",
-        "မြန်အောင်",
-        "မြဝတီ",
-        "မြိတ်",
-        "မြိုင်",
-        "မြို့လှ",
-        "မြို့သစ်",
-        "မြေပုံ",
-        "မြောက်ဥက္ကလာပ",
-        "မြောက်ဦး",
-        "မြောင်",
-        "မြောင်းမြ",
-        "မွန်ပြည်နယ်",
-        "မှော်ဘီ",
-        "ယင်းမာပင်",
-        "ရခိုင်ပြည်နယ်",
-        "ရန်ကင်း",
-        "ရန်ကုန်တိုင်းဒေသကြီး",
-        "ရပ်စောက်",
-        "ရမည်းသင်း",
-        "ရမ်းဗြဲ",
-        "ရသေ့တောင်",
-        "ရိခေါ်ဒါရ်",
-        "ရေကြည်",
-        "ရေစကြို",
-        "ရေဇွာ",
-        "ရေတာရှည်",
-        "ရေနံချောင်း",
-        "ရေဖြူ",
-        "ရေဦး",
-        "ရေး",
-        "ရွာငံ",
-        "ရွာသစ်",
-        "ရွှေကူ",
-        "ရွှေကျင်",
-        "ရွှေညောင်",
-        "ရွှေတောင်",
-        "ရွှေပြည်သာ",
-        "ရွှေဘို",
-        "ရွှေသောင်ယံ",
-        "ရှင်ဗွေယန်",
-        "ရှမ်းပြည်နယ်",
-        "ရှမ်းရွာသစ်",
-        "ရှားတော",
-        "လက်ပံတန်း",
-        "လင်းခေး",
-        "လပွတ္တာ",
-        "လမိုင်း",
-        "လမ်းမတော်",
-        "လယ်ဝေး",
-        "လသာ",
-        "လဟယ်",
-        "လားရှိုး",
-        "လိပ်သို",
-        "လေရှီး",
-        "လောက်ကိုင်",
-        "လောင်းလုံး",
-        "လေးမျက်နှာ",
-        "လဲချား",
-        "လွယ်ဂျယ်",
-        "လွိုင်ကော်",
-        "လွိုင်လင်",
-        "လှည်းကူး",
-        "လှိုင်",
-        "လှိုင်သာယာ",
-        "လှိုင်းဘွဲ့",
-        "ဝက်လက်",
-        "ဝန်းသို",
-        "ဝမ်းတွင်း",
-        "ဝါးခယ်မ",
-        "ဝိုင်းမော်",
-        "ဝေါ",
-        "ဝေါလေမြိုင် (ဝေါလေ)",
-        "သင်္ဃန်းကျွန်း",
-        "သထုံ",
-        "သနပ်ပင်",
-        "သန်လျင်",
-        "သပိတ်ကျင်း",
-        "သရက်",
-        "သရက်ချောင်း",
-        "သာကေတ",
-        "သာစည်",
-        "သာပေါင်း",
-        "သာယာဝတီ",
-        "သိန္နီ",
-        "သီပေါ",
-        "သုံးခွ",
-        "သုံးဆယ်",
-        "သဲကုန်း",
-        "သံတောင်",
-        "သံတောင်ကြီး",
-        "သံတွဲ",
-        "သံဖြူဇရပ်",
-        "ဟင်္သာတ",
-        "ဟားခါး",
-        "ဟိုင်းကြီးကျွန်း",
-        "ဟိုပင်",
-        "ဟိုပန်",
-        "ဟိုပုံး",
-        "ဟိုမိန်း",
-        "ဟုမ္မလင်း",
-        "ဟဲဟိုး",
-        "အင်ဂျန်းယန်",
-        "အင်တော",
-        "အင်းစိန်",
-        "အင်းတော်",
-        "အင်္ဂပူ",
-        "အမရပူရ",
-        "အမာ",
-        "အမ်း",
-        "အရာတော်",
-        "အလုံ",
-        "အိမ်မဲ",
-        "အုတ်တွင်း",
-        "အုတ်ဖို",
-        "အောင်ပန်း",
-        "အောင်မြေသာဇံ",
-        "အောင်လံ",
-        "အေးသာယာ",
-        "ဥတ္တရသီရိ",
-        "ဧရာဝတီတိုင်းဒေသကြီး",
-    }
-)
+from functools import lru_cache
 
-# Short state names (without ပြည်နယ်/တိုင်းဒေသကြီး suffix)
-MYANMAR_STATE_SHORT: frozenset[str] = frozenset(
-    {
-        "ကချင်",
-        "ကယား",
-        "ကရင်",
-        "ချင်း",
-        "စစ်ကိုင်း",
-        "တနင်္သာရီ",
-        "ပဲခူး",
-        "မကွေး",
-        "မန္တလေး",
-        "မွန်",
-        "ရခိုင်",
-        "ရန်ကုန်",
-        "ရှမ်း",
-        "ဧရာဝတီ",
-    }
-)
 
-# Major ethnic group names used as modifiers in Myanmar text.
-# These double as region/state names and frequently appear in proper-noun
-# contexts (e.g., "ကချင်ပွဲတော်" Kachin festival, "ရှမ်းထမင်း" Shan rice).
-# Included in NER LOC matching to suppress false positives.
-MYANMAR_ETHNIC_GROUPS: frozenset[str] = frozenset(
-    {
-        # 8 major national ethnic groups
-        "ကချင်",
-        "ကယား",
-        "ကရင်",
-        "ချင်း",
-        "ဗမာ",
-        "မွန်",
-        "ရခိုင်",
-        "ရှမ်း",
-        # Major sub-groups commonly found in text
-        "ကယန်",
-        "ပအိုဝ့်",
-        "ပလောင်",
-        "တအောင်း",
-        "ဓနု",
-        "အင်းသား",
-        "လားဟူ",
-        "အခါ",
-        "ဝ",
-        "ကိုးကန့်",
-        "နာဂ",
-        "ဒိုင်းနက်",
-        "လီဆူ",
-        "ရဝမ်",
-        "ဂေါ်ရခါး",
-        "ဇိုမီး",
-        "မရု",
-        "ခမီ",
-        "ထနု",
-    }
-)
+def _build_compat_sets() -> dict[str, frozenset[str]]:
+    """Build backwards-compatible frozenset mapping from the YAML gazetteer."""
+    from myspellchecker.text.ner import get_gazetteer_data
 
-# Historical capitals and ancient cities of Myanmar.
-MYANMAR_HISTORICAL_PLACES: frozenset[str] = frozenset(
-    {
-        "ပုဂံ",  # Bagan
-        "အင်းဝ",  # Inwa (Ava)
-        "ဟံသာဝတီ",  # Hanthawaddy
-        "အမရပူရ",  # Amarapura
-        "ဗိဿနိုး",  # Beikthano
-        "စစ်ကျို",  # Tagaung
-        "သီရိက္ခေတ္တရာ",  # Sri Ksetra
-        "ပင်းယ",  # Pinya
-        "ဇာကလိ",  # Sagalay
-        "သဂဟ",  # Thagara
-    }
-)
+    gaz = get_gazetteer_data()
 
-# International cities commonly referenced in Myanmar text.
-INTERNATIONAL_CITIES: frozenset[str] = frozenset(
-    {
-        "ဘန်ကောက်",  # Bangkok
-        "စင်ကာပူ",  # Singapore
-        "တိုကျို",  # Tokyo
-        "ပေကျင်း",  # Beijing
-        "ဝါရှင်တန်",  # Washington
-        "လန်ဒန်",  # London
-        "မော်စကို",  # Moscow
-        "ပါရီ",  # Paris
-        "ဘာလင်",  # Berlin
-        "ကွာလာလမ်ပူ",  # Kuala Lumpur
-        "ဟနွိုင်",  # Hanoi
-        "ဂျကာတာ",  # Jakarta
-        "မနီလာ",  # Manila
-        "ဆိုးလ်",  # Seoul
-        "ဒေလီ",  # Delhi
-        "ကိုလံဘို",  # Colombo
-        "ဓာကာ",  # Dhaka
-        "ကိုင်ရို",  # Cairo
-        "ဆစ်နီ",  # Sydney
-        "နယူးယောက်",  # New York
-        "ဆန်ဖရန်စစ္စကို",  # San Francisco
-        "ဂျနီဗာ",  # Geneva
-        "ဗီယင်နာ",  # Vienna
-    }
-)
+    myanmar_places = gaz.townships | gaz.states_regions | gaz.major_cities
+    # MYANMAR_STATE_SHORT = the 14 official state/region short names.
+    # The YAML states_regions also includes "နေပြည်တော်" (Naypyidaw, a union
+    # territory) which was never in the original 14-item set.
+    _UNION_TERRITORIES = frozenset({"နေပြည်တော်"})
+    myanmar_state_short = gaz.states_regions - _UNION_TERRITORIES
+    myanmar_ethnic_groups = gaz.ethnic_groups
+    myanmar_historical_places = gaz.historical_places
+    international_cities = gaz.international_places
+    international_countries = gaz.countries
+    myanmar_geographic_features = gaz.geographic_features
 
-# Country names in Myanmar script.
-INTERNATIONAL_COUNTRIES: frozenset[str] = frozenset(
-    {
-        "ထိုင်း",  # Thailand
-        "တရုတ်",  # China
-        "အိန္ဒိယ",  # India
-        "ဂျပန်",  # Japan
-        "ကိုရီးယား",  # Korea
-        "အမေရိကန်",  # America
-        "အင်္ဂလန်",  # England
-        "ပြင်သစ်",  # France
-        "ဂျာမနီ",  # Germany
-        "ရုရှား",  # Russia
-        "ဩစတြေးလျ",  # Australia
-        "မလေးရှား",  # Malaysia
-        "ဗီယက်နမ်",  # Vietnam
-        "ကမ္ဘောဒီးယား",  # Cambodia
-        "လာအို",  # Laos
-        "ဘင်္ဂလားဒေ့ရှ်",  # Bangladesh
-        "သီရိလင်္ကာ",  # Sri Lanka
-        "ပါကစ္စတန်",  # Pakistan
-        "ဖိလစ်ပိုင်",  # Philippines
-        "အင်ဒိုနီးရှား",  # Indonesia
-        "ဘရာဇီး",  # Brazil
-        "ကနေဒါ",  # Canada
-        "အီတလီ",  # Italy
-        "စပိန်",  # Spain
-        "တူရကီ",  # Turkey
-        "အီဂျစ်",  # Egypt
-        "ဆွစ်ဇာလန်",  # Switzerland
-        "နီပေါ",  # Nepal
-        "အာဖဂန်နစ္စတန်",  # Afghanistan
-        "ဆော်ဒီအာရေးဗီးယား",  # Saudi Arabia
-    }
-)
+    all_places = (
+        myanmar_places
+        | myanmar_state_short
+        | myanmar_ethnic_groups
+        | myanmar_historical_places
+        | international_cities
+        | international_countries
+        | myanmar_geographic_features
+    )
 
-# Major geographic features (rivers, lakes, landmarks).
-MYANMAR_GEOGRAPHIC_FEATURES: frozenset[str] = frozenset(
-    {
-        "ဧရာဝတီမြစ်",  # Ayeyarwady River
-        "ချင်းတွင်းမြစ်",  # Chindwin River
-        "သံလွင်မြစ်",  # Thanlwin (Salween) River
-        "စစ်တောင်းမြစ်",  # Sittaung River
-        "အင်းလေးကန်",  # Inle Lake
-        "ရွှေတိဂုံ",  # Shwedagon
-        "မြင့်မိုရ်",  # Myinmoletkat
+    return {
+        "MYANMAR_PLACES": myanmar_places,
+        "MYANMAR_STATE_SHORT": myanmar_state_short,
+        "MYANMAR_ETHNIC_GROUPS": myanmar_ethnic_groups,
+        "MYANMAR_HISTORICAL_PLACES": myanmar_historical_places,
+        "INTERNATIONAL_CITIES": international_cities,
+        "INTERNATIONAL_COUNTRIES": international_countries,
+        "MYANMAR_GEOGRAPHIC_FEATURES": myanmar_geographic_features,
+        "ALL_PLACES": all_places,
     }
-)
 
-# Combined set of all place names for convenient lookup.
-ALL_PLACES: frozenset[str] = (
-    MYANMAR_PLACES
-    | MYANMAR_STATE_SHORT
-    | MYANMAR_ETHNIC_GROUPS
-    | MYANMAR_HISTORICAL_PLACES
-    | INTERNATIONAL_CITIES
-    | INTERNATIONAL_COUNTRIES
-    | MYANMAR_GEOGRAPHIC_FEATURES
-)
+
+@lru_cache(maxsize=1)
+def _cached_sets() -> dict[str, frozenset[str]]:
+    return _build_compat_sets()
+
+
+_COMPAT_NAMES = {
+    "MYANMAR_PLACES",
+    "MYANMAR_STATE_SHORT",
+    "MYANMAR_ETHNIC_GROUPS",
+    "MYANMAR_HISTORICAL_PLACES",
+    "INTERNATIONAL_CITIES",
+    "INTERNATIONAL_COUNTRIES",
+    "MYANMAR_GEOGRAPHIC_FEATURES",
+    "ALL_PLACES",
+}
+
+
+def __getattr__(name: str) -> frozenset[str]:
+    if name in _COMPAT_NAMES:
+        return _cached_sets()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

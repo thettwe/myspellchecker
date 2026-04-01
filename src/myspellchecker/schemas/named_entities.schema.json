@@ -11,8 +11,8 @@
   "properties": {
     "version": {
       "type": "string",
-      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
-      "description": "Schema version (must be '1.x.x')"
+      "pattern": "^[1-9]\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (semver format)"
     },
 
     "category": {
@@ -73,6 +73,11 @@
 
     "pali_sanskrit": {
       "$ref": "#/definitions/myanmar_string_list"
+    },
+
+    "ner_heuristics": {
+      "$ref": "#/definitions/named_group_section",
+      "description": "NER heuristic configuration (ambiguous honorifics, name syllables, suffixes, patterns)"
     }
   },
 

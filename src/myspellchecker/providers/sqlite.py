@@ -33,6 +33,7 @@ from myspellchecker.core.constants import (
 from myspellchecker.core.exceptions import MissingDatabaseError
 from myspellchecker.providers._sqlite_cache import CacheMixin, create_caches
 from myspellchecker.providers._sqlite_enrichment import EnrichmentMixin
+from myspellchecker.providers._sqlite_ner import NEREntityMixin
 
 # ---------------------------------------------------------------------------
 # Re-export everything from helper modules for backward compatibility.
@@ -72,7 +73,7 @@ __all__ = [
 _DEFAULT_PROVIDER_CONFIG = ProviderConfig()
 
 
-class SQLiteProvider(EnrichmentMixin, CacheMixin, DictionaryProvider):
+class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProvider):
     """
     SQLite-based dictionary provider with caching and thread-safety.
 
@@ -307,6 +308,10 @@ class SQLiteProvider(EnrichmentMixin, CacheMixin, DictionaryProvider):
         self._collocation_map: dict[tuple[str, str], float] | None = None
         self._register_map: dict[str, str] | None = None
         self._enrichment_lock = threading.Lock()
+
+        # NER entity cache (loaded lazily on first access)
+        self._ner_entity_map: dict[str, set[str]] | None = None
+        self._ner_lock = threading.Lock()
 
         # Initialize Stemmer for OOV root lookup
         self.stemmer = Stemmer()

@@ -14,20 +14,24 @@ Strategies:
 
 from __future__ import annotations
 
-import logging
 import re
+import threading
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
 from myspellchecker.core.constants import HONORIFICS
+from myspellchecker.utils.logging_utils import get_logger
 
 __all__ = [
+    "GazetteerData",
     "NameHeuristic",
+    "get_gazetteer_data",
     "is_known_entity",
     "load_gazetteer",
 ]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 _RULES_DIR = Path(__file__).resolve().parent.parent / "rules"
 
@@ -46,6 +50,222 @@ def _collect_strings(obj: object) -> set[str]:
     return result
 
 
+@dataclass(frozen=True)
+class GazetteerData:
+    """Structured NER gazetteer loaded from ``rules/named_entities.yaml``.
+
+    Provides typed access to individual entity categories rather than
+    flattening everything into a single set.
+    """
+
+    # Person name data
+    person_prefixes: frozenset[str] = field(default_factory=frozenset)
+    common_name_syllables: frozenset[str] = field(default_factory=frozenset)
+
+    # NER heuristic config
+    ambiguous_honorifics: frozenset[str] = field(default_factory=frozenset)
+    location_suffixes: frozenset[str] = field(default_factory=frozenset)
+    org_patterns: frozenset[str] = field(default_factory=frozenset)
+
+    # Place data (categorical)
+    states_regions: frozenset[str] = field(default_factory=frozenset)
+    major_cities: frozenset[str] = field(default_factory=frozenset)
+    townships: frozenset[str] = field(default_factory=frozenset)
+    historical_places: frozenset[str] = field(default_factory=frozenset)
+    international_places: frozenset[str] = field(default_factory=frozenset)
+    countries: frozenset[str] = field(default_factory=frozenset)
+    geographic_features: frozenset[str] = field(default_factory=frozenset)
+
+    # Other categories
+    organizations: frozenset[str] = field(default_factory=frozenset)
+    religious: frozenset[str] = field(default_factory=frozenset)
+    historical_figures: frozenset[str] = field(default_factory=frozenset)
+    ethnic_groups: frozenset[str] = field(default_factory=frozenset)
+    temporal: frozenset[str] = field(default_factory=frozenset)
+    pali_sanskrit: frozenset[str] = field(default_factory=frozenset)
+
+    # Combined sets
+    all_places: frozenset[str] = field(default_factory=frozenset)
+    all_entities: frozenset[str] = field(default_factory=frozenset)
+
+
+# ---------------------------------------------------------------------------
+# Thread-safe lazy singleton (double-checked locking, matching rerank_rules.py)
+# ---------------------------------------------------------------------------
+
+_GAZETTEER_DATA: GazetteerData | None = None
+_gazetteer_lock = threading.Lock()
+
+
+def _parse_gazetteer_yaml(path: Path | None = None) -> GazetteerData:
+    """Parse ``named_entities.yaml`` into a structured :class:`GazetteerData`."""
+    yaml_path = path or (_RULES_DIR / "named_entities.yaml")
+    if not yaml_path.exists():
+        logger.warning("Named entity gazetteer not found: %s", yaml_path)
+        return _hardcoded_fallback()
+
+    try:
+        import yaml  # noqa: PLC0415
+
+        with open(yaml_path, encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+    except ImportError:
+        logger.debug("PyYAML not installed; using hardcoded NER data")
+        return _hardcoded_fallback()
+    except Exception:
+        logger.warning("Failed to load named entity gazetteer", exc_info=True)
+        return _hardcoded_fallback()
+
+    if not isinstance(data, dict):
+        return _hardcoded_fallback()
+
+    # --- Extract categories ---
+    person = data.get("person_names", {})
+    person_prefixes = frozenset(person.get("prefixes", []))
+
+    ner_cfg = data.get("ner_heuristics", {})
+    ambiguous = frozenset(ner_cfg.get("ambiguous_honorifics", ["ကို", "မ"]))
+    # common_name_syllables comes from ner_heuristics (17 high-frequency
+    # components), NOT from person_names.common_names (broader gazetteer list).
+    common_names = frozenset(
+        ner_cfg.get(
+            "common_name_syllables",
+            [
+                "အောင်",
+                "ကျော်",
+                "မောင်",
+                "ထွန်း",
+                "မြင့်",
+                "ခင်",
+                "သန်း",
+                "လှ",
+                "အေး",
+                "ဝင်း",
+                "တင်",
+                "ဆွေ",
+                "မြ",
+                "စိုး",
+                "နွယ်",
+                "သီ",
+                "တာ",
+            ],
+        )
+    )
+    loc_suffixes = frozenset(
+        ner_cfg.get(
+            "location_suffixes",
+            ["မြို့", "ရွာ", "ပြည်နယ်", "တိုင်း", "ခရိုင်", "မြို့နယ်"],
+        )
+    )
+    org_pats = frozenset(
+        ner_cfg.get(
+            "org_patterns",
+            ["ကုမ္ပဏီ", "ဘဏ်", "တက္ကသိုလ်", "ကျောင်း", "ဆေးရုံ", "ရုံး"],
+        )
+    )
+
+    places = data.get("places", {})
+    states_regions = frozenset(places.get("states_regions", []))
+    major_cities = frozenset(places.get("major_cities", []))
+    townships_data = frozenset(places.get("townships", []))
+    historical_pl = frozenset(places.get("historical_places", []))
+    international = frozenset(places.get("international", []))
+    countries_data = frozenset(places.get("countries", []))
+    geo = frozenset(places.get("geographic_features", []))
+
+    all_places = (
+        states_regions
+        | major_cities
+        | townships_data
+        | historical_pl
+        | international
+        | countries_data
+        | geo
+    )
+
+    orgs = frozenset(_collect_strings(data.get("organizations", {})))
+    religious = frozenset(_collect_strings(data.get("religious", {})))
+    historical_fig = frozenset(_collect_strings(data.get("historical", {})))
+    ethnics = frozenset(data.get("ethnic_groups", []))
+    temporal = frozenset(_collect_strings(data.get("temporal", {})))
+    pali = frozenset(data.get("pali_sanskrit", []))
+
+    # Build flat entity set (all strings from all entity sections)
+    skip_keys = {"version", "category", "description", "metadata", "ner_heuristics"}
+    all_entities: set[str] = set()
+    for key, value in data.items():
+        if key in skip_keys:
+            continue
+        all_entities.update(_collect_strings(value))
+
+    return GazetteerData(
+        person_prefixes=person_prefixes,
+        common_name_syllables=common_names,
+        ambiguous_honorifics=ambiguous,
+        location_suffixes=loc_suffixes,
+        org_patterns=org_pats,
+        states_regions=states_regions,
+        major_cities=major_cities,
+        townships=townships_data,
+        historical_places=historical_pl,
+        international_places=international,
+        countries=countries_data,
+        geographic_features=geo,
+        organizations=orgs,
+        religious=religious,
+        historical_figures=historical_fig,
+        ethnic_groups=ethnics,
+        temporal=temporal,
+        pali_sanskrit=pali,
+        all_places=all_places,
+        all_entities=frozenset(all_entities),
+    )
+
+
+def _hardcoded_fallback() -> GazetteerData:
+    """Return hardcoded defaults when YAML/PyYAML is unavailable."""
+    return GazetteerData(
+        person_prefixes=frozenset(HONORIFICS),
+        common_name_syllables=frozenset(
+            {
+                "အောင်",
+                "ကျော်",
+                "မောင်",
+                "ထွန်း",
+                "မြင့်",
+                "ခင်",
+                "သန်း",
+                "လှ",
+                "အေး",
+                "ဝင်း",
+                "တင်",
+                "ဆွေ",
+                "မြ",
+                "စိုး",
+                "နွယ်",
+                "သီ",
+                "တာ",
+            }
+        ),
+        ambiguous_honorifics=frozenset({"ကို", "မ"}),
+        location_suffixes=frozenset({"မြို့", "ရွာ", "ပြည်နယ်", "တိုင်း", "ခရိုင်", "မြို့နယ်"}),
+        org_patterns=frozenset({"ကုမ္ပဏီ", "ဘဏ်", "တက္ကသိုလ်", "ကျောင်း", "ဆေးရုံ", "ရုံး"}),
+    )
+
+
+def get_gazetteer_data(path: Path | None = None) -> GazetteerData:
+    """Return the structured :class:`GazetteerData` singleton.
+
+    Thread-safe lazy initialization.  Pass *path* only in tests.
+    """
+    global _GAZETTEER_DATA  # noqa: PLW0603
+    if _GAZETTEER_DATA is None:
+        with _gazetteer_lock:
+            if _GAZETTEER_DATA is None:
+                _GAZETTEER_DATA = _parse_gazetteer_yaml(path)
+    return _GAZETTEER_DATA
+
+
 @lru_cache(maxsize=1)
 def load_gazetteer() -> frozenset[str]:
     """Load the named entity gazetteer from ``rules/named_entities.yaml``.
@@ -58,35 +278,7 @@ def load_gazetteer() -> frozenset[str]:
     frozenset[str]
         All known named entity strings.
     """
-    yaml_path = _RULES_DIR / "named_entities.yaml"
-    if not yaml_path.exists():
-        logger.warning("Named entity gazetteer not found: %s", yaml_path)
-        return frozenset()
-
-    try:
-        import yaml  # noqa: PLC0415
-
-        with open(yaml_path, encoding="utf-8") as fh:
-            data = yaml.safe_load(fh)
-    except ImportError:
-        logger.debug("PyYAML not installed; gazetteer lookup unavailable")
-        return frozenset()
-    except Exception:
-        logger.warning("Failed to load named entity gazetteer", exc_info=True)
-        return frozenset()
-
-    if not isinstance(data, dict):
-        return frozenset()
-
-    # Skip non-entity keys
-    skip_keys = {"version", "category", "description", "metadata"}
-    entities: set[str] = set()
-    for key, value in data.items():
-        if key in skip_keys:
-            continue
-        entities.update(_collect_strings(value))
-
-    return frozenset(entities)
+    return get_gazetteer_data().all_entities
 
 
 def is_known_entity(word: str) -> bool:
@@ -116,13 +308,6 @@ class NameHeuristic:
     in spell checking by 'whitelisting' words that appear to be names.
     """
 
-    # Honorifics that also function as common particles/prefixes.
-    # ကို = "Ko" (honorific) vs object marker particle
-    # မ = "Ma" (honorific) vs negation prefix
-    # These only act as honorifics in name-like context (sentence-initial
-    # or preceded by another honorific), not after content words.
-    _AMBIGUOUS_HONORIFICS: set[str] = {"ကို", "မ"}
-
     def __init__(self, whitelist: set[str] | None = None):
         """
         Initialize the NameHeuristic detector.
@@ -131,6 +316,15 @@ class NameHeuristic:
             whitelist: Optional set of known names to always treat as valid.
         """
         self.whitelist = whitelist if whitelist is not None else set()
+
+        gaz = get_gazetteer_data()
+
+        # Honorifics that also function as common particles/prefixes.
+        # ကို = "Ko" (honorific) vs object marker particle
+        # မ = "Ma" (honorific) vs negation prefix
+        # These only act as honorifics in name-like context (sentence-initial
+        # or preceded by another honorific), not after content words.
+        self._AMBIGUOUS_HONORIFICS: set[str] = set(gaz.ambiguous_honorifics)
 
         self.patterns = {
             # English words (A-Z, a-z)
@@ -145,25 +339,7 @@ class NameHeuristic:
 
         # Common Myanmar Name Syllables (High frequency name components)
         # Used as a soft signal when combined with other indicators
-        self._common_name_syllables: set[str] = {
-            "အောင်",
-            "ကျော်",
-            "မောင်",
-            "ထွန်း",
-            "မြင့်",
-            "ခင်",
-            "သန်း",
-            "လှ",
-            "အေး",
-            "ဝင်း",
-            "တင်",
-            "ဆွေ",
-            "မြ",
-            "စိုး",
-            "နွယ်",
-            "သီ",
-            "တာ",
-        }
+        self._common_name_syllables: set[str] = set(gaz.common_name_syllables)
 
     def is_potential_name(
         self,
