@@ -7,7 +7,7 @@ from myspellchecker.core.validation_strategies import ValidationContext, Validat
 
 
 class MockStrategy(ValidationStrategy):
-    def __init__(self, priority=50, fail=False):
+    def __init__(self, priority=10, fail=False):
         self._priority = priority
         self.fail = fail
         self.called_with = None

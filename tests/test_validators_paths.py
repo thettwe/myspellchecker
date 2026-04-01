@@ -261,7 +261,7 @@ class TestContextValidatorCoverage(MockIsMyanmarMixin):
 
         # Create mock strategies
         mock_strategy = MagicMock()
-        mock_strategy.priority.return_value = 50
+        mock_strategy.priority.return_value = 25
         mock_strategy.validate.return_value = []
 
         validator = ContextValidator(

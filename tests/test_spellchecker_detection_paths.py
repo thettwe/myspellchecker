@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from myspellchecker import SpellChecker
 from myspellchecker.core.response import Error, SyllableError
 
@@ -591,6 +593,7 @@ class TestDetectionPaths:
         assert errors[0].suggestions
         assert errors[0].suggestions[0] == "ပါ"
 
+    @pytest.mark.skip(reason="G04 word-order detector disabled — produces 600+ FPs")
     def test_detect_sentence_structure_issues_flags_verb_fronted_object_phrase(self):
         checker = SpellChecker.__new__(SpellChecker)
         errors: list[Error] = []
@@ -862,7 +865,7 @@ class TestDetectionPaths:
         assert errors
         assert errors[0].text == "ဟ"
         assert errors[0].suggestions
-        assert errors[0].suggestions[0] == "ခင်ဗျာ"
+        assert errors[0].suggestions[0] == "ခင်ဗျား"
 
     def test_detect_punctuation_errors_detects_boundary_before_nauk_hma(self):
         checker = SpellChecker.__new__(SpellChecker)
