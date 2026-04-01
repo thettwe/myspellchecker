@@ -1,4 +1,3 @@
-
 """
 Integration test for Database Builder and SpellChecker usage.
 

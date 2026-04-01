@@ -1,4 +1,3 @@
-
 """
 Tests for POS tagger system functionality.
 
