@@ -309,6 +309,7 @@ def test_calibrate_confidence():
 
 def test_pytorch_inference_session():
     """Test PyTorch inference wrapper."""
+    pytest.importorskip("torch", reason="PyTorch required for inference session test")
     with patch("myspellchecker.algorithms.semantic_checker.torch"):
         mock_model = MagicMock()
         mock_output = MagicMock()

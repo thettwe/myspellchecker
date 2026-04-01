@@ -1,3 +1,4 @@
+
 """
 Integration test for Database Builder and SpellChecker usage.
 
@@ -13,11 +14,13 @@ from pathlib import Path
 
 import pytest
 
-from myspellchecker import SpellChecker
-from myspellchecker.core.config import SpellCheckerConfig
-from myspellchecker.core.config.algorithm_configs import SymSpellConfig
-from myspellchecker.data_pipeline import Pipeline, PipelineConfig
-from myspellchecker.providers import SQLiteProvider
+duckdb = pytest.importorskip("duckdb", reason="DuckDB required for database build tests")
+
+from myspellchecker import SpellChecker  # noqa: E402
+from myspellchecker.core.config import SpellCheckerConfig  # noqa: E402
+from myspellchecker.core.config.algorithm_configs import SymSpellConfig  # noqa: E402
+from myspellchecker.data_pipeline import Pipeline, PipelineConfig  # noqa: E402
+from myspellchecker.providers import SQLiteProvider  # noqa: E402
 
 # Sample corpus containing "Myanmar" (correct) and "Country" (correct)
 # We will test if we can detect "Myanmarr" (typo)
