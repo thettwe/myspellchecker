@@ -193,6 +193,7 @@ from myspellchecker.core.constants.myanmar_constants import (
     REGISTER_COLLOQUIAL,
     REGISTER_FORMAL,
     REGISTER_NEUTRAL,
+    REGISTER_POLITE,
     REGISTER_VARIANT_PAIRS,
     # Section marks
     SECTION_MARKS,
@@ -444,6 +445,7 @@ __all__ = [
     "NEGATIVE_AUXILIARIES",
     "COMMON_NEGATED_VERBS",
     "REGISTER_FORMAL",
+    "REGISTER_POLITE",
     "REGISTER_COLLOQUIAL",
     "REGISTER_NEUTRAL",
     "REGISTER_VARIANT_PAIRS",

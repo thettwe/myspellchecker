@@ -64,12 +64,17 @@ _DEFAULT_FORMAL_ENDINGS: frozenset[str] = _norm_set(
     }
 )
 
+_DEFAULT_POLITE_ENDINGS: frozenset[str] = _norm_set(
+    {
+        "ပါတယ်",
+        "ပါမယ်",
+    }
+)
+
 _DEFAULT_COLLOQUIAL_ENDINGS: frozenset[str] = _norm_set(
     {
         "တယ်",
-        "ပါတယ်",
         "မယ်",
-        "ပါမယ်",
     }
 )
 
@@ -99,6 +104,7 @@ _REGISTER_YAML_PATH = Path(__file__).resolve().parent.parent.parent / "rules" / 
 
 def _load_register_endings() -> tuple[
     frozenset[str],  # formal_endings
+    frozenset[str],  # polite_endings
     frozenset[str],  # colloquial_endings
     frozenset[str],  # discourse_endings
     frozenset[str],  # informal_particles
@@ -106,11 +112,12 @@ def _load_register_endings() -> tuple[
     """Load sentence-final particle sets from register.yaml with fallback.
 
     Returns:
-        Tuple of (formal_endings, colloquial_endings, discourse_endings,
-        informal_particles), all normalized via _norm_set.
+        Tuple of (formal_endings, polite_endings, colloquial_endings,
+        discourse_endings, informal_particles), all normalized via _norm_set.
     """
     defaults = (
         _DEFAULT_FORMAL_ENDINGS,
+        _DEFAULT_POLITE_ENDINGS,
         _DEFAULT_COLLOQUIAL_ENDINGS,
         _DEFAULT_DISCOURSE_ENDINGS,
         _DEFAULT_INFORMAL_PARTICLES,
@@ -141,6 +148,11 @@ def _load_register_endings() -> tuple[
                 if isinstance(sfp.get("formal"), list) and sfp["formal"]
                 else _DEFAULT_FORMAL_ENDINGS
             )
+            polite_endings = (
+                _norm_set(sfp["polite"])
+                if isinstance(sfp.get("polite"), list) and sfp["polite"]
+                else _DEFAULT_POLITE_ENDINGS
+            )
             colloquial_endings = (
                 _norm_set(sfp["colloquial"])
                 if isinstance(sfp.get("colloquial"), list) and sfp["colloquial"]
@@ -153,6 +165,7 @@ def _load_register_endings() -> tuple[
             )
         else:
             formal_endings = _DEFAULT_FORMAL_ENDINGS
+            polite_endings = _DEFAULT_POLITE_ENDINGS
             colloquial_endings = _DEFAULT_COLLOQUIAL_ENDINGS
             discourse_endings = _DEFAULT_DISCOURSE_ENDINGS
 
@@ -166,13 +179,20 @@ def _load_register_endings() -> tuple[
 
         logger.debug(
             "Loaded register endings from YAML: "
-            "%d formal, %d colloquial, %d discourse, %d informal",
+            "%d formal, %d polite, %d colloquial, %d discourse, %d informal",
             len(formal_endings),
+            len(polite_endings),
             len(colloquial_endings),
             len(discourse_endings),
             len(informal_particles),
         )
-        return formal_endings, colloquial_endings, discourse_endings, informal_particles
+        return (
+            formal_endings,
+            polite_endings,
+            colloquial_endings,
+            discourse_endings,
+            informal_particles,
+        )
 
     except Exception:
         logger.warning(
@@ -185,6 +205,7 @@ def _load_register_endings() -> tuple[
 # Load at module level (once, at import time)
 (
     _FORMAL_ENDINGS_LOADED,
+    _POLITE_ENDINGS_LOADED,
     _COLLOQUIAL_ENDINGS_LOADED,
     _DISCOURSE_ENDINGS_LOADED,
     _INFORMAL_PARTICLES_LOADED,
@@ -363,6 +384,7 @@ class SentenceDetectorsMixin(
     # Checked across the entire text (not per-sentence) because the sentence
     # segmenter splits at sentence-final particles.
     _FORMAL_ENDINGS: frozenset[str] = _FORMAL_ENDINGS_LOADED
+    _POLITE_ENDINGS: frozenset[str] = _POLITE_ENDINGS_LOADED
     _COLLOQUIAL_ENDINGS: frozenset[str] = _COLLOQUIAL_ENDINGS_LOADED
 
     # Discourse/question particles that validly end sentences
@@ -373,6 +395,7 @@ class SentenceDetectorsMixin(
     # Note: comprehensions can't access class vars in Python 3, so use literals
     _ALL_ENDINGS_WITH_STRIPPED: frozenset[str] = (
         _FORMAL_ENDINGS_LOADED
+        | _POLITE_ENDINGS_LOADED
         | _COLLOQUIAL_ENDINGS_LOADED
         | _DISCOURSE_ENDINGS_LOADED
         | _norm_set(
@@ -381,10 +404,10 @@ class SentenceDetectorsMixin(
                 "ပါသည",
                 "မည",
                 "ပါမည",  # formal without asat
-                "တယ",
                 "ပါတယ",
-                "မယ",
-                "ပါမယ",  # colloquial without asat
+                "ပါမယ",  # polite without asat
+                "တယ",
+                "မယ",  # colloquial without asat
             }
         )
     )
@@ -396,12 +419,16 @@ class SentenceDetectorsMixin(
             "ပါမည",
         }
     )
+    _POLITE_ENDINGS_WITH_STRIPPED: frozenset[str] = _POLITE_ENDINGS_LOADED | _norm_set(
+        {
+            "ပါတယ",
+            "ပါမယ",
+        }
+    )
     _COLLOQUIAL_ENDINGS_WITH_STRIPPED: frozenset[str] = _COLLOQUIAL_ENDINGS_LOADED | _norm_set(
         {
             "တယ",
-            "ပါတယ",
             "မယ",
-            "ပါမယ",
         }
     )
 
@@ -776,9 +803,9 @@ class SentenceDetectorsMixin(
         if matched_particle in {normalize("ကွာ"), normalize("ကွ")}:
             prefix = text[:particle_pos].rstrip()
             if prefix.endswith(normalize("ပြီးပြီ")):
-                polite_suggestions = ["ရှင့်", "ရှင်", "ခင်ဗျာ"]
+                polite_suggestions = ["ရှင့်", "ရှင်", "ခင်ဗျား"]
             else:
-                polite_suggestions = ["ရှင်", "ရှင့်", "ခင်ဗျာ"]
+                polite_suggestions = ["ရှင်", "ရှင့်", "ခင်ဗျား"]
         elif matched_particle == normalize("ဟ"):
             question_endings = (
                 normalize("လား"),
@@ -790,11 +817,11 @@ class SentenceDetectorsMixin(
             )
             question_prefix = text[:particle_pos].rstrip()
             if any(question_prefix.endswith(ending) for ending in question_endings):
-                polite_suggestions = ["ခင်ဗျာ", "ရှင်", "ပါ"]
+                polite_suggestions = ["ခင်ဗျား", "ရှင်", "ပါ"]
             else:
-                polite_suggestions = ["ပါ", "ရှင်", "ခင်ဗျာ"]
+                polite_suggestions = ["ပါ", "ရှင်", "ခင်ဗျား"]
         else:
-            polite_suggestions = ["ခင်ဗျာ", "ရှင့်"]
+            polite_suggestions = ["ခင်ဗျား", "ရှင့်"]
 
         errors.append(
             SyllableError(

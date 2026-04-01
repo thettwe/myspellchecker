@@ -33,7 +33,7 @@ ITERATOR_FETCH_SIZE: int = _DEFAULT_PROVIDER_CONFIG.iterator_fetch_size
 # Valid table names for SQL queries (defense-in-depth against SQL injection)
 # These are the only tables that can be queried via _cached_frequency_query
 VALID_TABLES: frozenset[str] = frozenset(
-    {"syllables", "words", "bigrams", "trigrams", "fourgrams", "fivegrams"}
+    {"syllables", "words", "bigrams", "trigrams", "fourgrams", "fivegrams", "ner_entities"}
 )
 
 # Valid column names for SQL queries
@@ -64,7 +64,7 @@ _MISSING_TABLE_PATTERNS = (
 # Schema version tracking
 # Increment this when making breaking schema changes
 # Format: MAJOR.MINOR where MAJOR = breaking changes, MINOR = backwards-compatible
-CURRENT_SCHEMA_VERSION = "1.0"
+CURRENT_SCHEMA_VERSION = "1.1"
 
 # Minimum compatible schema version for reading
 # Older databases may lack some features but can still be read

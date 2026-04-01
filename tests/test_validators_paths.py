@@ -166,8 +166,8 @@ class TestWordValidatorCoverage(MockIsMyanmarMixin):
             return token in {"ကြိး", "ကြပ်", "ကြီးကြပ်"}
 
         provider.is_valid_word.side_effect = _is_valid
-        provider.get_word_frequency.side_effect = (
-            lambda token: 9000 if token == "ကြီးကြပ်" else (281 if token == "ကြိး" else 0)
+        provider.get_word_frequency.side_effect = lambda token: (
+            9000 if token == "ကြီးကြပ်" else (281 if token == "ကြိး" else 0)
         )
 
         symspell.lookup_compound.return_value = []
@@ -261,7 +261,7 @@ class TestContextValidatorCoverage(MockIsMyanmarMixin):
 
         # Create mock strategies
         mock_strategy = MagicMock()
-        mock_strategy.priority.return_value = 50
+        mock_strategy.priority.return_value = 25
         mock_strategy.validate.return_value = []
 
         validator = ContextValidator(

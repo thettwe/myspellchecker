@@ -5,50 +5,54 @@ description: Myanmar spell checker benchmark with minimal gold spans and revised
 metadata:
   created_date: '2026-03-17'
   annotation_revision_date: '2026-03-17'
-  total_sentences: 489
-  clean_count: 60
-  error_count: 429
-  observable_error_span_count: 470
+  total_sentences: 719
+  clean_count: 210
+  error_count: 509
+  observable_error_span_count: 564
   annotation_anomaly_count: 0
   difficulty_distribution:
-    tier_1: 151
-    tier_2: 148
-    tier_3: 125
+    tier_1: 188
+    tier_2: 183
+    tier_3: 133
   domain_distribution:
-    conversational: 114
-    academic: 114
-    technical: 103
-    news: 93
+    conversational: 201
+    academic: 124
+    technical: 143
+    news: 140
+    religious: 26
+    literary: 20
   observed_error_subtype_distribution:
     stacking_error: 43
     tone_mark_error: 41
     non_word_typo: 41
     consonant_substitution: 39
     vowel_medial_substitution: 39
-    word_boundary: 38
+    word_boundary: 48
     real_word_confusion: 38
-    loan_word_misspelling: 37
-    particle_misuse: 28
-    verb_tense_agreement: 23
+    loan_word_misspelling: 52
+    particle_misuse: 38
+    verb_tense_agreement: 33
     classifier_error: 23
     collocation_error: 23
-    register_mismatch: 23
+    register_mismatch: 33
     word_order: 16
+    colloquial_in_formal: 10
+    homophone_confusion: 15
   word_vs_syllable_policy_date: '2026-03-17'
   unflaggable_source_rows_promoted_to_clean: 8
   reclassified_word_level_from_previous_invalid_syllable: 145
   observed_error_type_distribution:
-    wrong_word: 274
-    grammar_error: 90
+    wrong_word: 314
+    grammar_error: 110
     invalid_syllable: 42
     semantic_error: 23
-    register_error: 23
+    register_error: 43
   reclassified_invalid_syllable_entries: 40
   annotation_policy_note: invalid_syllable is reserved for malformed syllable strings; wrong_word is reserved for orthographically
     well-formed but non-lexical or wrong lexical forms.
   context_required_distribution:
-    'False': 301
-    'True': 151
+    'False': 316
+    'True': 216
   cleanup:
     source_file: /Users/thettwe/Works/my-spellchecker/benchmarks/myanmar_spellchecker_bench_final.yaml
     duplicate_sentences_removed: 36
@@ -151,8 +155,8 @@ metadata:
   reclassification_note: 'v1.1.0: near_synonym_confusion (23) and logical_contradiction (23) removed as non-spelling errors.
     39 promoted-to-clean slots replaced with new pure spelling error sentences (8 consonant_sub, 8 vowel_medial_sub, 6 tone_mark,
     6 non_word_typo, 6 loan_word, 5 stacking).'
-  clean_sentences: 60
-  error_sentences: 424
+  clean_sentences: 210
+  error_sentences: 504
 sentences:
 - id: BM-001
   input: ဒီမနက် ကျွန်တော်က ခစားကွင်းအကြောင်း သူငယ်ချင်းနဲ့ စကားပြောခဲ့တယ်။
@@ -9946,3 +9950,2804 @@ sentences:
     context_required: true
     notes: Medial confusion ျ→ြ in ကြာ (long time). Real-word confusion — ကျာ is non-standard.
   notes: User-submitted sentence. Vowel confusion and medial swap in conversational speech.
+
+- id: BM-EXT-C001
+  input: ဒီနေ့ ရာသီဥတုက အရမ်းကောင်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C002
+  input: အစားအသောက်က အရမ်းကောင်းတယ် နောက်တစ်ခါ လာဖို့စဉ်းစားနေတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C003
+  input: ဒါက တကယ်ကို လှတဲ့နေ့ဝင်ချိန် ဓာတ်ပုံပဲ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C004
+  input: သူငယ်ချင်းတွေနဲ့ ကော်ဖီသောက်ရတာ ပျော်စရာကောင်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C005
+  input: ဒီနေ့ ညစာ ဘာစားမလဲ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C006
+  input: မနေ့က ရုပ်ရှင်ကြည့်ခဲ့တယ် အရမ်းကောင်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C007
+  input: အိမ်မှာ အပန်းဖြေနေတယ် ဘာမှ မလုပ်ချင်ဘူး။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C008
+  input: နှစ်သစ်ကူးပွဲတော် ပျော်ရွှင်ပါစေ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C009
+  input: ဒီသီချင်းက အရမ်းကောင်းတယ် နားထောင်ကြည့်ပါ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C010
+  input: ကိုယ်ကျန်းမာရေးဂရုစိုက်ပါ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C011
+  input: ဈေးဝယ်ထွက်လာတယ် ဈေးကတော့ အတော်ကြီးသွားပြီ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C012
+  input: မနက်ဖြန် အားလပ်ရင် လာကြမယ်နော်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C013
+  input: ကလေးတွေ ကျောင်းကို ပျော်ပျော်ပါးပါး သွားကြတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C014
+  input: ငါ အခုမှ အိပ်ရာထတာ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C015
+  input: ကိုယ့်အကြိုက်ပဲ ရွေးပါ ဘာပဲဖြစ်ဖြစ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C016
+  input: ဒီနေ့ တနင်္လာနေ့ဆိုတော့ အလုပ်များတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C017
+  input: အင်တာနက်က နှေးလွန်းတယ် ဒီနေ့။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C018
+  input: ဒီနေ့ ဘက်စ်ကားပေါ်မှာ လူများလွန်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C019
+  input: ကျွန်တော် ဖုန်းအသစ်ဝယ်ခဲ့တယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C020
+  input: သူက အမြဲတမ်း ရယ်စရာတွေပြောတာ ပျော်စရာကောင်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C021
+  input: ဒီနေ့ အလုပ်ပြီးရင် ခဏနားမယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C022
+  input: မနေ့က ဘောလုံးပွဲကြည့်ရတာ စိတ်လှုပ်ရှားစရာကောင်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C023
+  input: ဟိုဆိုင်က လက်ဖက်ရည်က အရမ်းကောင်းတယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C024
+  input: အလုပ်ခွင်ကနေ ပြန်လာပြီ ပင်ပန်းလိုက်တာ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C025
+  input: ကျွန်မ ဒီနေ့ ချက်ပြုတ်ဖို့ စျေးဝယ်လာခဲ့တယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C026
+  input: ဒီပန်းချီကားက လှလိုက်တာ ဘယ်သူဆွဲတာလဲ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C027
+  input: ရေချိုးပြီးရင် ထွက်မယ် စောင့်ပါ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C028
+  input: အင်းလေ ဒါက ဘဝပဲ ကြိုးစားရမှာပေါ့။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C029
+  input: ဒီနေ့ မိုးရွာမယ်ထင်တယ် ထီးယူသွားပါ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C030
+  input: ကလေးက စကားပြောတတ်ပြီ ချစ်စရာကောင်းလိုက်တာ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C031
+  input: ဗုဒ္ဓဘာသာဝင်များသည် ကံ ဉာဏ် ဝီရိယ သုံးပါးကို ယုံကြည်ကိုးကွယ်ကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C032
+  input: ရှင်မဟာမုနိဘုရားသည် မန္တလေးမြို့၏ အထင်ကရ ဘုရားတစ်ဆူဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C033
+  input: ဝါတွင်းကာလတွင် ဘုရားကျောင်းသို့ ပုံမှန်သွားရောက်ဖူးမျှော်ကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C034
+  input: သီလကို လုံခြုံစွာ စောင့်ထိန်းခြင်းသည် သုခချမ်းသာ၏ အခြေခံဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C035
+  input: ပါဠိစာပေကို လေ့လာခြင်းသည် ဗုဒ္ဓဓမ္မကို နက်နဲစွာ နားလည်ရန် အထောက်အကူပြုသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C036
+  input: သာသနာပြုလုပ်ငန်းများကို ဆရာတော်ကြီးများက ဦးဆောင်ကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C037
+  input: ဓမ္မစကြာတရားတော်သည် ဗုဒ္ဓဘုရားရှင်၏ ပထမဆုံးဟောကြားတော်မူခဲ့သော တရားတော်ဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C038
+  input: ကထိန်သင်္ကန်းကပ်လှူပွဲကို ဝါကျွတ်ပြီးတစ်လအတွင်း ကျင်းပကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C039
+  input: မေတ္တာဘာဝနာသည် သတ္တဝါအားလုံးအပေါ် အကျိုးလိုလားစိတ်ကို ပွားများခြင်းဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C040
+  input: မဟာဗောဓိပင်အောက်တွင် ဗုဒ္ဓဘုရားရှင်သည် သဗ္ဗညုတဉာဏ်ကို ရရှိတော်မူခဲ့သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C041
+  input: ရဟန်းတော်များသည် နေ့စဉ် ဆွမ်းခံကြွလှည့်ကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C042
+  input: ဒါနကုသိုလ်သည် ဗုဒ္ဓဘာသာ၏ အခြေခံအကျဆုံးအကျင့်ဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C043
+  input: ဘုရားရှိခိုးဝတ်ကို နံနက်ညနေ ပုံမှန်ပြုလုပ်သင့်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C044
+  input: အလှူဒါနပြုခြင်းဖြင့် စိတ်ကောင်းစေတနာ ပွားများနိုင်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C045
+  input: ဝိပဿနာတရားထိုင်ခြင်းသည် ပညာဉာဏ်ကို ဖွံ့ဖြိုးစေသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C046
+  input: ကျောင်းတိုက်ကြီးတွင် သာမဏေလေးများကို ပညာသင်ကြားပေးလျက်ရှိသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C047
+  input: သုံးလောကကို သိမြင်တော်မူသော ဘုရားရှင်ကို ဦးညွှတ်ကိုးကွယ်ပါ၏။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C048
+  input: သာသနာတော်ကို ကာကွယ်စောင့်ရှောက်ရန်သည် ဗုဒ္ဓဘာသာဝင်တိုင်း၏ တာဝန်ဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C049
+  input: ဝါဆိုလပြည့်နေ့ကို ဓမ္မစကြာနေ့ဟုလည်း ခေါ်ကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C050
+  input: အနိစ္စ ဒုက္ခ အနတ္တ ဟူသော လက္ခဏာသုံးပါးကို ဆင်ခြင်ရှုမှတ်ရမည်ဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C051
+  input: ပရိတ်ကြီးတရားတော်ကို အိမ်တွင် နေ့စဉ် ရွတ်ဆိုပွားများသင့်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C052
+  input: ငါးပါးသီလကို ဗုဒ္ဓဘာသာဝင်တိုင်း စောင့်ထိန်းရမည်ဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C053
+  input: ဘုန်းကြီးကျောင်းတွင် ဒါယကာ ဒါယိကာမများက ဆွမ်းကပ်ကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C054
+  input: ပဋိစ္စသမုပ္ပါဒ်သည် အကြောင်းအကျိုးဆက်နွယ်မှုကို ရှင်းပြသော ဗုဒ္ဓအယူအဆဖြစ်သည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C055
+  input: စေတီတော်ကို ဘုရားဖူးလာသူများက ရေဖွင့်ပေးလျက်ရှိကြသည်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C056
+  input: နေဝင်ချိန်တွင် မိုးကောင်းကင်သည် ရွှေရောင်ခြည်ဖြင့် တောက်ပလျက်ရှိသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C057
+  input: လေညင်းက ပန်းခိုင်များကို ဖြည်းညင်းစွာ ယိမ်းနွဲ့ပေးသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C058
+  input: ညဉ့်၏ တိတ်ဆိတ်ခြင်းထဲမှ ဖိုးခေါင်သံ ပေါ်လာသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C059
+  input: မြစ်ရေသည် ကျောက်ဆောင်ကြားမှ ဖြတ်စီး၍ တောင်ကြားချိုင့်ဝှမ်းသို့ ဆင်းသက်သွားသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C060
+  input: သူမ၏ အပြုံးသည် နွေဦးသီချင်းတစ်ပုဒ်ကဲ့သို့ နူးညံ့သိမ်မွေ့လှသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C061
+  input: ကျေးရွာအစွန်ရှိ သရက်ပင်ကြီးအောက်တွင် အဘိုးကြီးက ပုံပြင်ပြောနေသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C062
+  input: မိုးသည်းထန်စွာ ရွာသွန်းပြီးနောက် မြေပြင်ပေါ်တွင် ရေအိုင်များဖြစ်နေသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C063
+  input: စာရေးဆရာသည် စကားလုံးတစ်လုံးချင်းကို စိတ်ရှည်လက်ရှည် ရွေးချယ်ရေးသားသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C064
+  input: ဒေသခံတို့၏ ရိုးရာပွဲတော်သည် နှစ်စဉ်နှစ်တိုင်း အင်အားတက်လာသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C065
+  input: လပြည့်ညတွင် ရေကန်ထဲ၌ လပုံရိပ်သည် ငြိမ်သက်စွာ ကျရောက်နေသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C066
+  input: သစ်ရွက်ဟောင်းများ ကြွေကျပြီး သစ်ရွက်သစ်များ ပေါက်လာမည့် ရာသီဖြစ်သည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C067
+  input: တောင်ထိပ်ပေါ်မှ ကြည့်လျှင် ချိုင့်ဝှမ်းတစ်ခုလုံး မြင်ကွင်းကျယ်စွာ ပေါ်နေသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C068
+  input: မြို့ပြဘဝ၏ အလျင်အမြန်ကို ခံစားနေရသူတို့ ရွာကိုလွမ်းမိကြသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C069
+  input: ပန်းချီဆရာသည် မိမိ၏ စိတ်ခံစားမှုကို အရောင်များဖြင့် ဖော်ထုတ်သည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C070
+  input: ညနေချမ်းတွင် ငှက်များ အုံပြန်ပြန်ကြ၍ ကောင်းကင်သည် ငှက်အုံးများဖြင့် ပြည့်နှက်နေသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C071
+  input: သူ့မျက်နှာပေါ်တွင် ကြာရှည်စွာ ဆိတ်ငြိမ်နေခဲ့သော အပြုံးတစ်ခု ပေါ်လာသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C072
+  input: မြို့ဟောင်းရှိ အုတ်တံတိုင်းသည် ရာစုနှစ်များ ကုန်လွန်ခြင်း၏ သက်သေဖြစ်သည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C073
+  input: ကဗျာဆရာသည် ခံစားမှုတစ်ခုကို စာကြောင်းတစ်ကြောင်းဖြင့် ဖမ်းယူဖော်ထုတ်တတ်သည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C074
+  input: နံနက်ခင်း ဝေဝါးနေသေးသော အလင်းရောင်ထဲမှ ကြက်ဖခေါ်သံ ကြားရသည်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C075
+  input: ဒီမြစ်ကမ်းပါးတွင် ကျွန်ုပ်တို့ ငယ်စဉ်က ရေကူးခဲ့ကြသည်ကို မမေ့နိုင်ပါ။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C076
+  input: နိုင်ငံတော်သမ္မတသည် နိုင်ငံခြားခရီးစဉ်မှ ယမန်နေ့က ပြန်လည်ရောက်ရှိခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C077
+  input: ဆန်စပါးထုတ်လုပ်မှုသည် ယခုနှစ်တွင် ယမန်နှစ်ထက် ၁၅ ရာခိုင်နှုန်း တိုးတက်ခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C078
+  input: ရန်ကုန်မြို့တွင် လာမည့်လတွင် နိုင်ငံတကာ ကုန်စည်ပြပွဲ ကျင်းပမည်ဖြစ်သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C079
+  input: ပညာရေးဝန်ကြီးဌာနက သင်ရိုးညွှန်းတမ်းအသစ်ကို ထုတ်ပြန်ကြေညာခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C080
+  input: မြန်မာ့လေကြောင်းလိုင်းသည် ဂျပန်နိုင်ငံသို့ ခရီးစဉ်သစ် ပျံသန်းမည်ဖြစ်ကြောင်း ကြေညာခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C081
+  input: ရေကြီးရေလျှံမှုကြောင့် ဒေသခံပြည်သူများကို ဘေးလွတ်ရာသို့ ရွှေ့ပြောင်းပေးခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C082
+  input: ဆေးရုံသစ်ကို လာမည့်နှစ်တွင် ဖွင့်လှစ်နိုင်မည်ဟု ကျန်းမာရေးဝန်ကြီးက ပြောကြားခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C083
+  input: အာဆီယံထိပ်သီးအစည်းအဝေးကို မြန်မာနိုင်ငံက အိမ်ရှင်အဖြစ် လက်ခံကျင်းပခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C084
+  input: ကမ္ဘာ့ကျန်းမာရေးအဖွဲ့က ကာကွယ်ဆေးအစီအစဉ်ကို ချီးကျူးဂုဏ်ပြုခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C085
+  input: နိုင်ငံခြားရင်းနှီးမြှုပ်နှံမှုပမာဏသည် ဒေါ်လာ သန်း ၅၀၀ ကျော် ရှိလာကြောင်း ထုတ်ပြန်ခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C086
+  input: ခရီးသွားလုပ်ငန်းကဏ္ဍသည် စီးပွားရေးဖွံ့ဖြိုးမှုကို အထောက်အကူပြုနေသည်ဟု ဝန်ကြီးက ပြောသည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C087
+  input: သဘာဝဓာတ်ငွေ့ပိုက်လိုင်းစီမံကိန်းကို လာမည့်လတွင် စတင်ဆောင်ရွက်မည်ဖြစ်သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C088
+  input: မြန်မာအမျိုးသမီးဘောလုံးအသင်းသည် ဆီမီးဖိုင်နယ်သို့ တက်ရောက်ခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C089
+  input: လွှတ်တော်ကိုယ်စားလှယ်များက ဥပဒေမူကြမ်းကို အတည်ပြုခဲ့ကြသည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C090
+  input: မြို့တော်စည်ပင်သာယာရေးကော်မတီက လမ်းသစ်ဖောက်လုပ်ရေးစီမံကိန်းကို အတည်ပြုခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C091
+  input: ငလျင်ဒဏ်ခံ ဒေသများတွင် ပြန်လည်ထူထောင်ရေးလုပ်ငန်းများ ဆောင်ရွက်လျက်ရှိသည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C092
+  input: ကုန်သွယ်ရေးဝန်ကြီးဌာနက ပြည်ပပို့ကုန်ကို တိုးချဲ့ရန် အစီအစဉ်ရေးဆွဲထားသည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C093
+  input: ရန်ကုန်တက္ကသိုလ်က ပါရဂူဘွဲ့အသစ်ကို စတင်ဖွင့်လှစ်ခဲ့ကြောင်း ကြေညာခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C094
+  input: စစ်ကိုင်းတိုင်းဒေသကြီးတွင် ဆန်စပါးထုတ်လုပ်မှု ယခုနှစ်ပိုမိုများပြားခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C095
+  input: အိုလံပစ်ရွှေတံဆိပ်ရှင်ကို ပြည်သူ့ဂုဏ်ထူးဆောင်ဆုချီးမြှင့်ခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C096
+  input: မြို့ပြဒေသများတွင် လျှပ်စစ်ဓာတ်အား ပိုမိုထုတ်လုပ်ဖြန့်ဖြူးနိုင်ရေး ဆောင်ရွက်လျက်ရှိသည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C097
+  input: သယ်ယူပို့ဆောင်ရေးဝန်ကြီးဌာနက တံတားသစ်ဖွင့်ပွဲကို ကျင်းပခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C098
+  input: ကမ္ဘာ့ဘဏ်က မြန်မာနိုင်ငံ၏ စီးပွားရေးတိုးတက်မှုအား အပြုသဘောဆောင်ဟု သုံးသပ်ခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C099
+  input: သတင်းထောက်များအဖွဲ့က စစ်တမ်းကောက်ယူမှုရလဒ်ကို ထုတ်ပြန်ခဲ့သည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C100
+  input: အလုပ်အကိုင်ဖန်တီးရေးအစီအစဉ်ဖြင့် လူငယ်ထောင်ချီ အလုပ်အကိုင်ရရှိခဲ့ကြသည်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C101
+  input: ကျွန်တော် ကျန်းမာပါတယ် ခင်ဗျား ကျန်းမာပါသလား။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C102
+  input: ဒီကိစ္စအတွက် ကူညီပေးပါခင်ဗျား။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C103
+  input: ခင်ဗျားတို့ အဆင်ပြေပါသလား ကျွန်တော် ကူညီစရာရှိရင် ပြောပါ။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C104
+  input: ကျေးဇူးတင်ပါတယ် ရှင့်ကျေးဇူးကြောင့် အဆင်ပြေခဲ့ပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C105
+  input: ရှင့်ကို မေးခွန်းတစ်ခု မေးလို့ရမလား ခင်ဗျာ။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C106
+  input: ကျွန်မ ဒီအစီရင်ခံစာကို တင်ပြလိုပါတယ် ရှင့်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C107
+  input: ခင်ဗျား ခဏ စောင့်ပေးပါ ကျွန်တော် ခဏနဲ့ ပြန်လာပါမယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C108
+  input: ဒီလမ်းညွှန်ချက်ကို လိုက်နာပေးပါခင်ဗျား။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C109
+  input: ကျွန်တော်တို့ အစည်းအဝေး ဘယ်အချိန်လဲ ခင်ဗျာ။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C110
+  input: ရှင့်အကြံဉာဏ်ကို ကျေးဇူးတင်ပါတယ် အင်မတန်အသုံးဝင်ပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C111
+  input: ခင်ဗျား ဖိတ်ကြားချက်ကို ဝမ်းမြောက်စွာ လက်ခံပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C112
+  input: ကျွန်မ ဒီအကြောင်းကို ရှင့်ကို အသေးစိတ်ရှင်းပြလိုပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C113
+  input: ခင်ဗျား လိုအပ်တာရှိရင် ဘယ်အချိန်မဆို ဆက်သွယ်ပါ။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C114
+  input: ကျွန်တော့်အနေနဲ့ ဒီအဆိုကို ထောက်ခံပါတယ် ခင်ဗျာ။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C115
+  input: ရှင့်ကို ဒီအခွင့်အရေးအတွက် ကျေးဇူးအထူးတင်ပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C116
+  input: ကျွန်မတို့ နောက်အပတ် ထပ်တွေ့ရအောင်ပါ ရှင့်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C117
+  input: ခင်ဗျား အချိန်ပေးပြီး ကြွရောက်လာတဲ့အတွက် ကျေးဇူးတင်ပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C118
+  input: ကျွန်တော် ဒီကိစ္စကို တတ်နိုင်သမျှ မြန်မြန်ဆောင်ရွက်ပါမယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C119
+  input: ရှင့်မှာ အခက်အခဲရှိရင် ပြောပါ ကျွန်မ ကူညီပါ့မယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C120
+  input: ခင်ဗျား ပြောတဲ့အတိုင်း ကျွန်တော် လိုက်နာပါ့မယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C121
+  input: ကျွန်မ ဒီနေရာကို ရောက်ဖူးခဲ့ပါတယ် အလွန်လှပါတယ် ရှင့်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C122
+  input: ခင်ဗျား ကျန်းမာပါစေလို့ ဆုတောင်းပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C123
+  input: ကျွန်တော့်မှာ အကြံပြုချက်တစ်ခုရှိပါတယ် ခင်ဗျာ။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C124
+  input: ရှင့်အလုပ်တွေ အဆင်ပြေပါစေလို့ ဆုတောင်းပါတယ်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C125
+  input: ကျွန်မ ဒီကိစ္စကို နားလည်ပါတယ် ကျေးဇူးတင်ပါတယ် ရှင့်။
+  is_clean: true
+  domain: conversational
+  register: polite
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C126
+  input: ဒေတာဘေ့စ်ဆာဗာကို ပုံမှန်မွမ်းမံထိန်းသိမ်းခြင်းသည် စနစ်တည်ငြိမ်မှုကို သေချာစေသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C127
+  input: ဆော့ဖ်ဝဲလ်အင်ဂျင်နီယာများသည် ကုဒ်ကို ပုံမှန်စစ်ဆေးပြုပြင်ကြသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C128
+  input: ကလောက်ကွန်ပျူတင်စနစ်သည် လုပ်ငန်းများအတွက် ကုန်ကျစရိတ် သက်သာစေသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C129
+  input: မိုဘိုင်းအက်ပလီကေးရှင်းကို အိုင်အိုအက်စ်နှင့် အန်းဒရွိုက် နှစ်မျိုးစလုံး ထုတ်လုပ်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C130
+  input: ဆိုက်ဘာလုံခြုံရေးသည် ယနေ့ခေတ်တွင် အရေးကြီးဆုံးကိစ္စတစ်ခုဖြစ်လာသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C131
+  input: ဒစ်ဂျစ်တယ်နည်းပညာ ဖွံ့ဖြိုးလာခြင်းကြောင့် ဘဝရပ်တည်မှုပုံစံ ပြောင်းလဲလာသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C132
+  input: အေပီအိုင်ပေါင်းစပ်ချိတ်ဆက်ခြင်းသည် စနစ်များအကြား ဒေတာစီးဆင်းမှုကို ချောမွေ့စေသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C133
+  input: မရှင်းလာနင်းနည်းပညာသည် ပုံရိပ်မှတ်သားခြင်းတွင် ထိရောက်မှုရှိသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C134
+  input: ဝက်ဘ်ဆိုက်ဒီဇိုင်းတွင် အသုံးပြုသူအတွေ့အကြုံကို ဦးစားပေးစဉ်းစားသင့်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C135
+  input: ဗားရှင်းထိန်းချုပ်စနစ်ကို အသုံးပြုခြင်းဖြင့် ကုဒ်ပြောင်းလဲမှုများကို ခြေရာခံနိုင်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C136
+  input: နက်ဝပ်ခ်လုံခြုံရေးကို ဖိုင်းယားဝေါလ်ဖြင့် ကာကွယ်ထားသင့်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C137
+  input: ပရိုဂရမ်ရေးသားသူများသည် အယ်ဂိုရီသမ်ကို ပိုမိုထိရောက်အောင် ပြင်ဆင်ကြသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C138
+  input: အော့ပရေးတင်းစနစ်သည် ဟာ့ဒ်ဝဲနှင့် ဆော့ဖ်ဝဲလ်ကြား ဆက်သွယ်ပေးသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C139
+  input: ဒေတာသိပ္ပံပညာရပ်သည် ဆုံးဖြတ်ချက်ချခြင်းကို အထောက်အကူပြုသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C140
+  input: ဘလော့ချိန်းနည်းပညာသည် ငွေကြေးလွှဲပြောင်းမှုကို ပွင့်လင်းမြင်သာစေသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C141
+  input: အလိုအလျောက်စမ်းသပ်ခြင်းသည် ဆော့ဖ်ဝဲလ်အရည်အသွေးကို မြှင့်တင်ပေးသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C142
+  input: ကွန်တိန်နာနည်းပညာကို အသုံးပြု၍ အက်ပလီကေးရှင်းကို ဖြန့်ကျက်တပ်ဆင်နိုင်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C143
+  input: ကြိုးမဲ့ကွန်ရက်စနစ်သည် ယနေ့ခေတ်ရုံးခန်းများတွင် မရှိမဖြစ်လိုအပ်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C144
+  input: ယူနစ်စမ်းသပ်ခြင်းသည် ကုဒ်တစ်ခုချင်းစီ၏ မှန်ကန်မှုကို အတည်ပြုပေးသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C145
+  input: ပရိုဂရမ်ဘာသာစကားအသစ်ကို သင်ယူခြင်းသည် ကျွမ်းကျင်မှုကို တိုးပွားစေသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C146
+  input: ကလောက်သိုလှောင်ခန်းဝန်ဆောင်မှုကို အသုံးပြု၍ ဒေတာကို လုံခြုံစွာ သိမ်းဆည်းနိုင်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C147
+  input: အိုင်တီအခြေခံအဆောက်အအုံကို ခေတ်မီအောင် ပြုပြင်မွမ်းမံသင့်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C148
+  input: ဆော့ဖ်ဝဲလ်ဖွံ့ဖြိုးရေးစက်ဝန်းတွင် စီစဉ်ခြင်းမှ ထုတ်လုပ်ခြင်းအထိ ပါဝင်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C149
+  input: အီးမေးလ်လုံခြုံရေးကို ကာကွယ်ရန် စကားဝှက်ကို ပုံမှန်ပြောင်းလဲသင့်သည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-C150
+  input: စက်ရုပ်နည်းပညာသည် ထုတ်လုပ်ရေးကဏ္ဍတွင် အထူးအသုံးဝင်လာသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  expected_errors: []
+  notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
+- id: BM-EXT-E001
+  input: ဒီစားသောက်ဆိုင်က အသားကြော်က အရမ်းကောင်တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E001-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 33
+      end: 38
+    erroneous_text: ကောင်
+    gold_correction: ကောင်း
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ကောင် (creature) vs ကောင်း (good). Missing visarga changes meaning entirely."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E002
+  input: သူ့ကို ရုံးမာ တွေ့ခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E002-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 11
+      end: 13
+    erroneous_text: မာ
+    gold_correction: မှာ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မာ (hard) vs မှာ (at/in). Missing ha-htoe changes postposition to adjective."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E003
+  input: ကလေးတွေ ကျောင်းက ပြန်လာပီ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E003-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 23
+      end: 25
+    erroneous_text: ပီ
+    gold_correction: ပြီ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ပီ vs ပြီ (already). Missing ya-yit medial on aspect particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E004
+  input: သူက စားပွဲကို သာပေးခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E004-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 14
+      end: 16
+    erroneous_text: သာ
+    gold_correction: သား
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: သာ (only/just) vs သား (also/son). Missing visarga changes particle meaning."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E005
+  input: ဒီကားက အရမ်းမန်တယ် လမ်းပေါ်မှာ ဖြတ်သွားတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E005-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 12
+      end: 15
+    erroneous_text: မန်
+    gold_correction: မြန်
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မန် (non-standard) vs မြန် (fast). Missing ya-yit medial."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E006
+  input: မနက်ဖြန် ရုံးကို သွားရမာ ပြင်ဆင်ထားပါ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E006-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 22
+      end: 24
+    erroneous_text: မာ
+    gold_correction: မှာ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မာ (hard) vs မှာ (will). Missing ha-htoe changes future marker to adjective."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E007
+  input: ဒီလမ်းက ကာကြီးတွေ အများကြီးသွားတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E007-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 8
+      end: 10
+    erroneous_text: ကာ
+    gold_correction: ကား
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ကာ (conjunction/fence) vs ကား (car). Missing visarga changes noun meaning."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E008
+  input: ငါတို့ ပန်းခြံထဲမှာ ပန်းပွင့်တွေ ပွင့်နေပီ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E008-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 40
+      end: 42
+    erroneous_text: ပီ
+    gold_correction: ပြီ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ပီ vs ပြီ (already). Missing ya-yit medial on sentence-final particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E009
+  input: စာမေးပွဲ အောင်ချက် ထွက်ပီ ကျွန်တော် အောင်ခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E009-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 23
+      end: 25
+    erroneous_text: ပီ
+    gold_correction: ပြီ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ပီ vs ပြီ (already). Common colloquial spelling error."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E010
+  input: သူငယ်ချင်းက ရန်ကုန်မာ နေတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E010-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 19
+      end: 21
+    erroneous_text: မာ
+    gold_correction: မှာ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မာ (hard) vs မှာ (in/at). Missing ha-htoe on locative particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E011
+  input: အဖေက လယ်ထဲမာ အလုပ်လုပ်နေတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E011-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 10
+      end: 12
+    erroneous_text: မာ
+    gold_correction: မှာ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မာ (hard) vs မှာ (in). Missing ha-htoe on locative particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E012
+  input: မိုးရွာနေလို့ ထီးယူသွားပါ မပါရင် စိုမာပဲ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E012-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 36
+      end: 38
+    erroneous_text: မာ
+    gold_correction: မှာ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မာ (hard) vs မှာ (will). Missing ha-htoe on future particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E013
+  input: ဒီနေ့ ညစာ ကြက်သားဟင်း ချက်မာ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E013-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 26
+      end: 28
+    erroneous_text: မာ
+    gold_correction: မှာ
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: မာ (hard) vs မှာ (will). Missing ha-htoe on future/intent particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E014
+  input: ဒီပုံပြင်ကို ဖတ်ပီးရင် ပြန်ပြောပြပါ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E014-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 16
+      end: 19
+    erroneous_text: ပီး
+    gold_correction: ပြီး
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ပီး vs ပြီး (after/finished). Missing ya-yit medial on connective particle."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E015
+  input: ကွန်ပျူတာ ပရိုဂမ်ကို အပ်ဒိတ်လုပ်ထားပါ။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E015-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 10
+      end: 17
+    erroneous_text: ပရိုဂမ်
+    gold_correction: ပရိုဂရမ်
+    edit_distance: 1
+    context_required: false
+    notes: "Loan word error: Missing ရ in ပရိုဂရမ် (program). Common truncation."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E016
+  input: ဆာဗာ ကွန်ဖစ်ကူရေးရှင်းကို စစ်ဆေးပါ။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E016-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 5
+      end: 22
+    erroneous_text: ကွန်ဖစ်ကူရေးရှင်း
+    gold_correction: ကွန်ဖီဂူရေးရှင်း
+    edit_distance: 3
+    context_required: false
+    notes: "Loan word error: ကွန်ဖစ်ကူရေးရှင်း should be ကွန်ဖီဂူရေးရှင်း (configuration). Vowel confusion in transliteration."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E017
+  input: ကွန်ပျူတာ ဟတ်ဝဲ ပြဿနာကို စစ်ဆေးပါ။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E017-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 10
+      end: 15
+    erroneous_text: ဟတ်ဝဲ
+    gold_correction: ဟာ့ဒ်ဝဲ
+    edit_distance: 3
+    context_required: false
+    notes: "Loan word error: ဟတ်ဝဲ should be ဟာ့ဒ်ဝဲ (hardware). Missing vowel length and consonant."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E018
+  input: အင်တနက် ချိတ်ဆက်မှု ပြတ်တောက်နေသည်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E018-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 7
+    erroneous_text: အင်တနက်
+    gold_correction: အင်တာနက်
+    edit_distance: 1
+    context_required: false
+    notes: "Loan word error: Missing တာ syllable in အင်တာနက် (internet)."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E019
+  input: ပရိုဂျက်ကို မနေဂျာက ကြီးကြပ်ကွပ်ကဲသည်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E019-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 12
+      end: 18
+    erroneous_text: မနေဂျာ
+    gold_correction: မန်နေဂျာ
+    edit_distance: 2
+    context_required: false
+    notes: "Loan word error: မနေဂျာ should be မန်နေဂျာ (manager). Missing asat on first syllable."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E020
+  input: ဆော့ဝဲလ် ဒီဘယ်လော့ပါ အလုပ်ခေါ်ယူနေသည်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E020-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: ဆော့ဝဲလ်
+    gold_correction: ဆော့ဖ်ဝဲလ်
+    edit_distance: 2
+    context_required: false
+    notes: "Loan word error: Missing ဖ in ဆော့ဖ်ဝဲလ် (software)."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E021
+  input: ဆာဗာ စတိုရေ့ ပြည့်နေသည်ဟု ဖော်ပြထားသည်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E021-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 5
+      end: 12
+    erroneous_text: စတိုရေ့
+    gold_correction: စတိုရိတ်ခ်
+    edit_distance: 5
+    context_required: false
+    notes: "Loan word error: စတိုရေ့ should be စတိုရိတ်ခ် (storage). Simplified transliteration."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E022
+  input: ဒီဆိုဒ်ကို ဒိုမိန်း အသစ်နဲ့ ချိတ်ဆက်ထားတယ်။
+  is_clean: false
+  domain: technical
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E022-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 2
+      end: 7
+    erroneous_text: ဆိုဒ်
+    gold_correction: ဆိုက်
+    edit_distance: 1
+    context_required: false
+    notes: "Loan word error: ဆိုဒ် should be ဆိုက် (site). Consonant confusion ဒ/က in transliteration."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E023
+  input: ဒေတာ ဘေ့ အပ်လုပ်ထားဖို့ လိုသည်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E023-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 5
+      end: 8
+    erroneous_text: ဘေ့
+    gold_correction: ဘေ့စ်
+    edit_distance: 2
+    context_required: false
+    notes: "Loan word error: ဘေ့ should be ဘေ့စ် (base, as in database). Missing final syllable."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E024
+  input: အိုင်တီ ဒီပတ်မန့်ကို ပြောင်းရွှေ့ခဲ့သည်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E024-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 8
+      end: 17
+    erroneous_text: ဒီပတ်မန့်
+    gold_correction: ဒီပါ့တ်မန့်
+    edit_distance: 2
+    context_required: false
+    notes: "Loan word error: ဒီပတ်မန့် should be ဒီပါ့တ်မန့် (department). Missing vowel."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E025
+  input: ကွန်ရက် ဗိုင်ယာလက်ရှင်းကို စစ်ဆေးပါ။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E025-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 8
+      end: 23
+    erroneous_text: ဗိုင်ယာလက်ရှင်း
+    gold_correction: ဗိုင်အိုလေးရှင်း
+    edit_distance: 5
+    context_required: false
+    notes: "Loan word error: Incorrect transliteration of 'violation'. Common consonant/vowel confusion."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E026
+  input: ဝက်ဘဆိုက်ရဲ့ ပါဖောမန့်ကို တိုင်းတာပါ။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E026-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 13
+      end: 22
+    erroneous_text: ပါဖောမန့်
+    gold_correction: ပါဖော်မန့်စ်
+    edit_distance: 3
+    context_required: false
+    notes: "Loan word error: ပါဖောမန့် should be ပါဖော်မန့်စ် (performance). Missing asat and final."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E027
+  input: ဒီပရောဂျက်ကို ဖရိန်းဝပ် သုံးပြီး ဆောက်မယ်။
+  is_clean: false
+  domain: technical
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E027-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 14
+      end: 23
+    erroneous_text: ဖရိန်းဝပ်
+    gold_correction: ဖရိမ်းဝပ်ခ်
+    edit_distance: 3
+    context_required: false
+    notes: "Loan word error: ဖရိန်းဝပ် should be ဖရိမ်းဝပ်ခ် (framework). Vowel and final consonant error."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E028
+  input: ဘရောက်စာကို အပ်ဒိတ်လုပ်ပါ။
+  is_clean: false
+  domain: technical
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E028-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: ဘရောက်စာ
+    gold_correction: ဘရောက်ဆာ
+    edit_distance: 1
+    context_required: false
+    notes: "Loan word error: ဘရောက်စာ should be ဘရောက်ဆာ (browser). Consonant confusion စ/ဆ."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E029
+  input: သူသည် ရန်ကုန်ကို နေထိုင်သည်။
+  is_clean: false
+  domain: conversational
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E029-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 13
+      end: 16
+    erroneous_text: ကို
+    gold_correction: တွင်
+    edit_distance: 4
+    context_required: true
+    notes: "Particle misuse: ကို (object marker) used instead of တွင် (locative). 'Living at Yangon' requires locative."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E030
+  input: ဆရာမသည် ကျောင်းသားများကို သင်္ချာ သင်ကြားသည့် ဆရာမကို ဖြစ်သည်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E030-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 41
+      end: 45
+    erroneous_text: သည့်
+    gold_correction: သော
+    edit_distance: 3
+    context_required: true
+    notes: "Particle misuse: သည့် used instead of သော as relative clause marker before noun."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E031
+  input: ညနေ ၃ နာရီမှာ ကျွန်တော် ရုံးသို့ ရောက်ခဲ့သည်။
+  is_clean: false
+  domain: conversational
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E031-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 28
+      end: 32
+    erroneous_text: သို့
+    gold_correction: ကို
+    edit_distance: 2
+    context_required: true
+    notes: "Particle misuse: သို့ (literary directional) used where spoken ကို is expected after ရုံး (office)."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E032
+  input: ဒီစာအုပ်ကို ငါ့အတွက် ဝယ်ကို ပေးတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E032-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 8
+      end: 11
+    erroneous_text: ကို
+    gold_correction: ပြီး
+    edit_distance: 4
+    context_required: true
+    notes: "Particle misuse: Extra ကို (object marker) between verb and auxiliary. Should use ပြီး (having done)."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E033
+  input: မနေ့က ကျွန်တော်နှင့် သူ ကစားခဲ့ကြ၏။
+  is_clean: false
+  domain: conversational
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E033-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 15
+      end: 20
+    erroneous_text: နှင့်
+    gold_correction: နဲ့
+    edit_distance: 3
+    context_required: true
+    notes: "Particle misuse: Formal နှင့် in colloquial context. Register-inappropriate particle selection. Should be နဲ့."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E034
+  input: သူ့ကို အလုပ်ထဲ ဝင်ခွင့်ပြုပါသည်။
+  is_clean: false
+  domain: conversational
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E034-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 12
+      end: 14
+    erroneous_text: ထဲ
+    gold_correction: ထဲသို့
+    edit_distance: 4
+    context_required: true
+    notes: "Particle misuse: Missing directional particle သို့ after ထဲ. Should be ထဲသို့ for 'into'."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E035
+  input: အစားအစာတွေ စားပြီးတော့ အလုပ်ကို ရောက်တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E035-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 28
+      end: 31
+    erroneous_text: ကို
+    gold_correction: သို့
+    edit_distance: 2
+    context_required: true
+    notes: "Particle misuse: ကို (object marker) instead of directional marker with ရောက် (arrive)."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E036
+  input: ကျွန်တော်နဲ့ သူငယ်ချင်းနဲ့ ကစားခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E036-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 9
+      end: 12
+    erroneous_text: နဲ့
+    gold_correction: က
+    edit_distance: 3
+    context_required: true
+    notes: "Particle misuse: Double နဲ့ — first should be ကျွန်တော်က (subject marker) with second နဲ့ as comitative."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E037
+  input: ဆရာက ကျောင်းသားကို ပညာ ပေးသည်ဖြင့် ဘာသာရပ်ကို တတ်မြောက်ကြသည်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E037-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 29
+      end: 34
+    erroneous_text: ဖြင့်
+    gold_correction: သောကြောင့်
+    edit_distance: 6
+    context_required: true
+    notes: "Particle misuse: ဖြင့် (instrumental 'with') used where causal သောကြောင့် (because) is needed."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E038
+  input: ဒီအချိန်ထိ ကျွန်မ စာမေးပွဲအတွက် ပြင်ဆင်ကာ ရှိပါသည်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E038-E1
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: grammar
+    span:
+      start: 39
+      end: 41
+    erroneous_text: ကာ
+    gold_correction: လျက်
+    edit_distance: 3
+    context_required: true
+    notes: "Particle misuse: ကာ (sequential connective) used where လျက် (ongoing state) is needed with ရှိသည်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E039
+  input: ခင်ဗျားတို့ ဒီအစီအစဉ်ကို သဘောကျသလား အရမ်းကောင်းတယ်နော်ဟ ဗျာ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E039-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 50
+      end: 59
+    erroneous_text: နော်ဟ ဗျာ
+    gold_correction: ခင်ဗျာ
+    edit_distance: 5
+    context_required: true
+    notes: "Register mismatch: Mixing polite ခင်ဗျား with extremely casual နော်ဟ ဗျာ. Inconsistent register."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E040
+  input: ပါမောက္ခချုပ်ကြီး ဟောပြောတာ ဘယ်လောက်ကောင်းလဲ မသိဘူး ဗျ။
+  is_clean: false
+  domain: academic
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E040-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 45
+      end: 54
+    erroneous_text: မသိဘူး ဗျ
+    gold_correction: မသိပါ
+    edit_distance: 6
+    context_required: true
+    notes: "Register mismatch: Academic context about ပါမောက္ခချုပ် with very casual မသိဘူး ဗျ. Should be formal."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E041
+  input: ညီလာခံတွင် ဥက္ကဌကြီးက မိန့်ခွန်းပြောကြားတော့ လူတွေ အူသွားတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E041-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 51
+      end: 60
+    erroneous_text: အူသွားတယ်
+    gold_correction: ဝမ်းမြောက်ခဲ့ကြသည်
+    edit_distance: 16
+    context_required: true
+    notes: "Register mismatch: Formal context (ညီလာခံ, ဥက္ကဌ) with slang အူသွားတယ် (went crazy happy). Should use formal."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E042
+  input: သုတေသနစာတမ်းတွင် ရလဒ်တွေက ကောင်းလိုက်တာ ဆရာရယ်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E042-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 26
+      end: 46
+    erroneous_text: ကောင်းလိုက်တာ ဆရာရယ်
+    gold_correction: ကောင်းမွန်ပါသည်
+    edit_distance: 12
+    context_required: true
+    notes: "Register mismatch: Academic research paper context with casual exclamation. Should be formal register."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E043
+  input: မြို့တော်ဝန်ကြီးက ဖွင့်ပွဲကို ကိုယ်တိုင်ကြွရောက်ပြီး ပြောတာက ဟာသတွေချည်းပဲ ဟဲဟဲ။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E043-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 61
+      end: 79
+    erroneous_text: ဟာသတွေချည်းပဲ ဟဲဟဲ
+    gold_correction: ဟာသဝင်မိန့်ခွန်းများ ပြောကြားခဲ့သည်
+    edit_distance: 27
+    context_required: true
+    notes: "Register mismatch: News about mayor with very casual ဟဲဟဲ. Formal news register expected."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E044
+  input: တရားရုံးတော်မှ ချမှတ်သော စီရင်ချက်ကို မကြိုက်ဘူး ဘာဖြစ်လို့လဲ ဆိုတော့ မတရားလို့ပဲ။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E044-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 38
+      end: 81
+    erroneous_text: မကြိုက်ဘူး ဘာဖြစ်လို့လဲ ဆိုတော့ မတရားလို့ပဲ
+    gold_correction: သဘောမတူကြောင်းနှင့် မတရားမှုရှိကြောင်း ထုတ်ဖော်ပြောဆိုကြသည်
+    edit_distance: 47
+    context_required: true
+    notes: "Register mismatch: Legal/court context with very casual speech. Formal legal register expected."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E045
+  input: ပရောဖက်ဆာက သင်ပြတာ ကြိုက်တယ် ညီမလေးရဲ့ ကောင်းတယ်ကွာ။
+  is_clean: false
+  domain: academic
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E045-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 29
+      end: 51
+    erroneous_text: ညီမလေးရဲ့ ကောင်းတယ်ကွာ
+    gold_correction: ကောင်းမွန်ပါသည်
+    edit_distance: 18
+    context_required: true
+    notes: "Register mismatch: Academic setting (professor) with intimate casual ညီမလေးရဲ့ ကောင်းတယ်ကွာ."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E046
+  input: သံအမတ်ကြီးက ပြောတာက ကောင်းပါဘူး ကြာမယ်ဟ အဲဒါ။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E046-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 20
+      end: 44
+    erroneous_text: ကောင်းပါဘူး ကြာမယ်ဟ အဲဒါ
+    gold_correction: ကောင်းမွန်မည်မဟုတ်ကြောင်း ကြာမြင့်မည်ဟု ဆိုခဲ့သည်
+    edit_distance: 33
+    context_required: true
+    notes: "Register mismatch: Diplomatic context (ambassador) with very casual speech particles."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E047
+  input: ဘုန်းကြီးက တရားပြောတော့ ရီစရာကြီးဘဲ ကြားနေကြတယ်။
+  is_clean: false
+  domain: religious
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E047-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 24
+      end: 35
+    erroneous_text: ရီစရာကြီးဘဲ
+    gold_correction: ဟာသနှင့်ကြွယ်ဝသော
+    edit_distance: 15
+    context_required: true
+    notes: "Register mismatch: Religious context (monk's sermon) with very casual ရီစရာကြီးဘဲ. Disrespectful register."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E048
+  input: လွှတ်တော်ကိုယ်စားလှယ်က ပြောတာ ဟုတ်ဘူး ဟယ် ဗျ သူပြောတာ ညာသွားတာ။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E048-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: context
+    span:
+      start: 30
+      end: 62
+    erroneous_text: ဟုတ်ဘူး ဟယ် ဗျ သူပြောတာ ညာသွားတာ
+    gold_correction: မှန်ကန်မှုမရှိကြောင်း ဝေဖန်ခဲ့ကြသည်
+    edit_distance: 33
+    context_required: true
+    notes: "Register mismatch: Parliamentary context with very casual and disrespectful language. Formal expected."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E049
+  input: အစိုးရအဖွဲ့၏ မူဝါဒအရ ဟိုဟာကို ပြောင်းလိုက်ရသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E049-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 21
+      end: 26
+    erroneous_text: ဟိုဟာ
+    gold_correction: ယင်းအချက်
+    edit_distance: 9
+    context_required: true
+    notes: "Colloquial in formal: ဟိုဟာ (that thing) is casual vague reference in formal government context. Should be ယင်းအချက်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E050
+  input: သုတေသနအဖွဲ့က ဟိုတစ်နေ့က ပြုလုပ်ခဲ့သော စမ်းသပ်မှုကို ထုတ်ပြန်ခဲ့သည်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E050-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 13
+      end: 23
+    erroneous_text: ဟိုတစ်နေ့က
+    gold_correction: ယခင်က
+    edit_distance: 8
+    context_required: true
+    notes: "Colloquial in formal: ဟိုတစ်နေ့က (the other day) is casual in research publication context. Should be ယခင်က."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E051
+  input: လွှတ်တော်အစည်းအဝေးတွင် ဒီအကြောင်းကို ဆွေးနွေးခဲ့ကြသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E051-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 23
+      end: 25
+    erroneous_text: ဒီ
+    gold_correction: ယင်း
+    edit_distance: 4
+    context_required: true
+    notes: "Colloquial in formal: ဒီ (this, casual demonstrative) in parliamentary context. Should be ယင်း or ဤ."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E052
+  input: ပါမောက္ခက ဒါကို ရှင်းပြခဲ့ပြီးတော့ ကျောင်းသားတွေ သဘောပေါက်သွားကြတယ်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E052-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 10
+      end: 12
+    erroneous_text: ဒါ
+    gold_correction: ယင်းကိစ္စ
+    edit_distance: 9
+    context_required: true
+    notes: "Colloquial in formal: ဒါ (this/that, casual) in academic lecture context. Should be ယင်းကိစ္စ."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E053
+  input: ဝန်ကြီးဌာနက ထုတ်ပြန်ချက်အရ ဒီနှစ် ဘတ်ဂျက်ကို တိုးပေးလိုက်ပြီ။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E053-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 49
+      end: 60
+    erroneous_text: ပေးလိုက်ပြီ
+    gold_correction: ပေးခဲ့ပြီဖြစ်သည်
+    edit_distance: 12
+    context_required: true
+    notes: "Colloquial in formal: လိုက်ပြီ is casual completion marker in government announcement. Should use formal verb ending."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E054
+  input: တရားရုံးက ဒီလူကို ပြစ်ဒဏ်ချမှတ်လိုက်သည်ဟု ကြေညာခဲ့သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E054-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 10
+      end: 14
+    erroneous_text: ဒီလူ
+    gold_correction: ယင်းတရားခံ
+    edit_distance: 10
+    context_required: true
+    notes: "Colloquial in formal: ဒီလူ (this person, casual) in court context. Should be ယင်းတရားခံ."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E055
+  input: ဆေးရုံအုပ်ချုပ်ရေးအဖွဲ့က ဒီကိစ္စကို အမြန်ဆုံး ကြည့်ရှုပေးပါမယ် လို့ ပြောခဲ့သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E055-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 46
+      end: 62
+    erroneous_text: ကြည့်ရှုပေးပါမယ်
+    gold_correction: ဆောင်ရွက်ပေးမည်ဖြစ်ကြောင်း
+    edit_distance: 20
+    context_required: true
+    notes: "Colloquial in formal: ပါမယ် is casual future marker in hospital administration quote. Should use formal ending."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E056
+  input: နိုင်ငံတော်သမ္မတက ဒီကိစ္စ အရေးကြီးကြောင်း ပြောခဲ့ပါတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E056-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 42
+      end: 54
+    erroneous_text: ပြောခဲ့ပါတယ်
+    gold_correction: မိန့်ကြားခဲ့သည်
+    edit_distance: 12
+    context_required: true
+    notes: "Colloquial in formal: ပြောခဲ့ပါတယ် (polite but casual) for presidential speech. Should use formal မိန့်ကြားခဲ့သည်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E057
+  input: အစိုးရ၏ စီးပွားရေးမူဝါဒကို ခုမှ ပြောင်းလိုက်တာ နောက်ကျသွားပြီ။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E057-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 27
+      end: 31
+    erroneous_text: ခုမှ
+    gold_correction: ယခုမှ
+    edit_distance: 1
+    context_required: true
+    notes: "Colloquial in formal: ခုမှ (now only, casual) in government policy context. Should be ယခုမှ."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E058
+  input: သိပ္ပံပညာရှင်တွေက ဒါကို တွေ့ရှိခဲ့ပြီ ဆိုတော့ အရေးကြီးတယ်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E058-E1
+    error_type: register_error
+    error_subtype: colloquial_in_formal
+    detection_layer: context
+    span:
+      start: 18
+      end: 20
+    erroneous_text: ဒါ
+    gold_correction: ယင်း
+    edit_distance: 4
+    context_required: true
+    notes: "Colloquial in formal: ဒါ (this/that, casual) in scientific discovery context. Should be ယင်း."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E059
+  input: ကျွန်တော် ကျောင်း အုပ် ကြီး ကို တွေ့ခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E059-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 18
+      end: 27
+    erroneous_text: အုပ် ကြီး
+    gold_correction: အုပ်ကြီး
+    edit_distance: 1
+    context_required: true
+    notes: "Broken compound: ကျောင်းအုပ်ကြီး (headmaster) split into separate words. Should be joined."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E060
+  input: ဒီလမ်းမှာ လူ သွား လမ်း မရှိဘူး။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E060-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 10
+      end: 22
+    erroneous_text: လူ သွား လမ်း
+    gold_correction: လူသွားလမ်း
+    edit_distance: 2
+    context_required: true
+    notes: "Broken compound: လူသွားလမ်း (sidewalk) split into separate words. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E061
+  input: ဒီ အိမ်ခြံ မြေ ကို ရောင်းမယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E061-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 3
+      end: 14
+    erroneous_text: အိမ်ခြံ မြေ
+    gold_correction: အိမ်ခြံမြေ
+    edit_distance: 1
+    context_required: true
+    notes: "Broken compound: အိမ်ခြံမြေ (real estate) split. Should be single compound noun."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E062
+  input: စာ ကြည့် တိုက် ကို တက်ရောက်ခဲ့သည်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E062-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 0
+      end: 14
+    erroneous_text: စာ ကြည့် တိုက်
+    gold_correction: စာကြည့်တိုက်
+    edit_distance: 2
+    context_required: true
+    notes: "Broken compound: စာကြည့်တိုက် (library) split into three words. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E063
+  input: သူ့ မျက်နှာ ချင်း ဆိုင် ပြောခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E063-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 4
+      end: 23
+    erroneous_text: မျက်နှာ ချင်း ဆိုင်
+    gold_correction: မျက်နှာချင်းဆိုင်
+    edit_distance: 2
+    context_required: true
+    notes: "Broken compound: မျက်နှာချင်းဆိုင် (face-to-face) split. Should be single compound adverb."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E064
+  input: ဒီ ပညာရေး ဝန်ကြီး ဌာနက ကြေညာခဲ့သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E064-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 3
+      end: 21
+    erroneous_text: ပညာရေး ဝန်ကြီး ဌာန
+    gold_correction: ပညာရေးဝန်ကြီးဌာန
+    edit_distance: 2
+    context_required: true
+    notes: "Broken compound: ပညာရေးဝန်ကြီးဌာန (Ministry of Education) split. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E065
+  input: အလုပ် အကိုင် အခွင့် အရေး ရှားပါးလာသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E065-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 0
+      end: 12
+    erroneous_text: အလုပ် အကိုင်
+    gold_correction: အလုပ်အကိုင်
+    edit_distance: 1
+    context_required: true
+    notes: "Broken compound: အလုပ်အကိုင် (employment/job) split. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E066
+  input: ကျန်းမာ ရေး ဝန်ကြီးက ပြောကြားခဲ့သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E066-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 0
+      end: 11
+    erroneous_text: ကျန်းမာ ရေး
+    gold_correction: ကျန်းမာရေး
+    edit_distance: 1
+    context_required: true
+    notes: "Broken compound: ကျန်းမာရေး (health) split. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E067
+  input: စိုက်ပျိုး ရေး ကဏ္ဍတွင် ဖွံ့ဖြိုးမှုများ ရှိလာသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E067-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 0
+      end: 14
+    erroneous_text: စိုက်ပျိုး ရေး
+    gold_correction: စိုက်ပျိုးရေး
+    edit_distance: 1
+    context_required: true
+    notes: "Broken compound: စိုက်ပျိုးရေး (agriculture) split. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E068
+  input: မနေ့က ကျောင်းသွားမယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E068-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 13
+      end: 20
+    erroneous_text: သွားမယ်
+    gold_correction: သွားခဲ့တယ်
+    edit_distance: 4
+    context_required: true
+    notes: "Tense mismatch: Past time adverb မနေ့က (yesterday) with future marker မယ်. Should use past ခဲ့တယ်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E069
+  input: မနက်ဖြန် ကျွန်တော် စာမေးပွဲ ဖြေခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E069-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 28
+      end: 37
+    erroneous_text: ဖြေခဲ့တယ်
+    gold_correction: ဖြေမယ်
+    edit_distance: 4
+    context_required: true
+    notes: "Tense mismatch: Future time adverb မနက်ဖြန် (tomorrow) with past marker ခဲ့တယ်. Should use future မယ်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E070
+  input: အခု ကျွန်မ ညစာ ချက်ခဲ့ပြီ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E070-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 15
+      end: 25
+    erroneous_text: ချက်ခဲ့ပြီ
+    gold_correction: ချက်နေတယ်
+    edit_distance: 6
+    context_required: true
+    notes: "Tense mismatch: Present time adverb အခု (now) with completed past ချက်ခဲ့ပြီ. Should use progressive ချက်နေတယ်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E071
+  input: လာမည့်နှစ်တွင် ဆေးရုံကို ဖွင့်လှစ်ခဲ့သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E071-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 25
+      end: 40
+    erroneous_text: ဖွင့်လှစ်ခဲ့သည်
+    gold_correction: ဖွင့်လှစ်မည်ဖြစ်သည်
+    edit_distance: 7
+    context_required: true
+    notes: "Tense mismatch: Future time phrase လာမည့်နှစ် (next year) with past ခဲ့သည်. Should use future မည်ဖြစ်သည်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E072
+  input: ယမန်နေ့က လွှတ်တော်တွင် ဥပဒေအသစ် အတည်ပြုမည်ဖြစ်သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E072-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 32
+      end: 49
+    erroneous_text: အတည်ပြုမည်ဖြစ်သည်
+    gold_correction: အတည်ပြုခဲ့သည်
+    edit_distance: 7
+    context_required: true
+    notes: "Tense mismatch: Past time ယမန်နေ့က (yesterday) with future မည်ဖြစ်သည်. Should use past ခဲ့သည်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E073
+  input: မနေ့ညက သူ အိပ်ပျော်ပြီး မနက်ဖြန် ထမယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 3
+  expected_errors:
+  - error_id: BM-EXT-E073-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 24
+      end: 37
+    erroneous_text: မနက်ဖြန် ထမယ်
+    gold_correction: ဒီနေ့ ထခဲ့တယ်
+    edit_distance: 11
+    context_required: true
+    notes: "Tense mismatch: Past narrative context (မနေ့ညက) suddenly switches to future with မနက်ဖြန် ထမယ် where the natural continuation would be past."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E074
+  input: လွန်ခဲ့သောနှစ်တွင် ကုမ္ပဏီသည် ဝန်ထမ်း ၁၀၀ ခန့်ထားမည်ဖြစ်သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E074-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 42
+      end: 59
+    erroneous_text: ခန့်ထားမည်ဖြစ်သည်
+    gold_correction: ခန့်ထားခဲ့သည်
+    edit_distance: 7
+    context_required: true
+    notes: "Tense mismatch: Past time phrase လွန်ခဲ့သောနှစ် (last year) with future မည်ဖြစ်သည်. Should use past ခဲ့သည်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E075
+  input: အခု ကျွန်တော် စာဖတ်ခဲ့နေပြီ ခေါင်းကိုက်ပြီ။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E075-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 16
+      end: 27
+    erroneous_text: ဖတ်ခဲ့နေပြီ
+    gold_correction: ဖတ်နေတယ်
+    edit_distance: 6
+    context_required: true
+    notes: "Tense mismatch: Present အခု (now) with mixed ခဲ့နေပြီ combining past and present markers. Should use progressive."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E076
+  input: လာမည့်လတွင် အစည်းအဝေးကို ကျင်းပခဲ့ကြသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E076-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 25
+      end: 39
+    erroneous_text: ကျင်းပခဲ့ကြသည်
+    gold_correction: ကျင်းပကြမည်ဖြစ်သည်
+    edit_distance: 8
+    context_required: true
+    notes: "Tense mismatch: Future လာမည့်လ (next month) with past ခဲ့ကြသည်. Should use future ကြမည်ဖြစ်သည်."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E077
+  input: ယမန်နှစ်က ဒီစီမံကိန်းကို စတင်မည်ဖြစ်ကြောင်း ထုတ်ပြန်ခဲ့သည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E077-E1
+    error_type: grammar_error
+    error_subtype: verb_tense_agreement
+    detection_layer: grammar
+    span:
+      start: 25
+      end: 43
+    erroneous_text: စတင်မည်ဖြစ်ကြောင်း
+    gold_correction: စတင်ခဲ့ကြောင်း
+    edit_distance: 7
+    context_required: true
+    notes: "Tense mismatch: Past ယမန်နှစ်က (last year) with future မည်ဖြစ်ကြောင်း. Should use past ခဲ့ကြောင်း."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E078
+  input: ဒီအကြောင်းကို ကျေးဇူးပြု၍ ရှင်ပေးပါ။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E078-E1
+    error_type: wrong_word
+    error_subtype: homophone_confusion
+    detection_layer: context
+    span:
+      start: 26
+      end: 30
+    erroneous_text: ရှင်
+    gold_correction: ရှင်း
+    edit_distance: 1
+    context_required: true
+    notes: "Homophone confusion: ရှင် (you, polite female) vs ရှင်း (explain/clear). Missing visarga changes meaning from pronoun to verb."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-EXT-E079
+  input: ဒီပရောဂျက်ကို အဲဂျိုင်နည်းနဲ့ လုပ်ကြမယ်။
+  is_clean: false
+  domain: technical
+  register: colloquial
+  difficulty_tier: 2
+  expected_errors:
+  - error_id: BM-EXT-E079-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 14
+      end: 22
+    erroneous_text: အဲဂျိုင်
+    gold_correction: အဲဂျိုင်းလ်
+    edit_distance: 3
+    context_required: false
+    notes: "Loan word error: အဲဂျိုင် should be အဲဂျိုင်းလ် (agile). Missing final syllable in transliteration."
+  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+- id: BM-EXT-E080
+  input: နိုင်ငံ ခြား ရေးရာ ကိစ္စကို ဆွေးနွေးခဲ့ကြသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  expected_errors:
+  - error_id: BM-EXT-E080-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: context
+    span:
+      start: 0
+      end: 18
+    erroneous_text: နိုင်ငံ ခြား ရေးရာ
+    gold_correction: နိုင်ငံခြားရေးရာ
+    edit_distance: 2
+    context_required: true
+    notes: "Broken compound: နိုင်ငံခြားရေးရာ (foreign affairs) split into separate words. Should be single compound."
+  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.

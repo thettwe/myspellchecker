@@ -11,11 +11,13 @@ from myspellchecker.core.constants import TONE_MARKS
 
 __all__ = [
     "COLLOQUIAL_SUBSTITUTIONS",
+    "G2P_HOMOPHONE_GROUPS",
     "MYANMAR_SUBSTITUTION_COSTS",
     "PHONETIC_GROUPS",
     "STANDARD_TO_COLLOQUIAL",
     "TONAL_GROUPS",
     "VISUAL_SIMILAR",
+    "get_phonetic_equivalents",
     "get_standard_forms",
     "is_colloquial_variant",
 ]
@@ -292,6 +294,72 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     # Social media / texting abbreviations
     "555": {"ဟာဟာဟာ"},  # Laughing (Thai style)
     # "ရယ်" removed: distinct particle (listing/exclamation) from "လေ" (emphasis/evidential)
+    # --- Additional pronoun shortenings ---
+    "ကျနော့်": {"ကျွန်တော့်"},  # Male first person possessive (colloquial)
+    "ကျနော်တို့": {"ကျွန်တော်တို့"},  # Male first person plural (colloquial)
+    "ကျမတို့": {"ကျွန်မတို့"},  # Female first person plural (colloquial)
+    "ငါတို့": {"ကျွန်တော်တို့", "ကျွန်မတို့"},  # First person plural (very informal)
+    "နင်": {"သင်", "ခင်ဗျား"},  # Second person (rude informal -> formal)
+    "သူ့": {"သူ၏"},  # His/her possessive (colloquial -> formal)
+    "ခင်ဗျ": {"ခင်ဗျား"},  # Sir (shortened honorific)
+    "ရှင်": {"ခင်ဗျား"},  # You-female polite (colloquial female -> formal)
+    "ရှင့်": {"ခင်ဗျား၏"},  # Your-female polite possessive (colloquial)
+    "ငါ့": {"ကျွန်တော့်", "ကျွန်မ၏"},  # My (very informal possessive)
+    "မင်းတို့": {"သင်တို့"},  # Second person plural (informal -> formal)
+    # --- Common verb/phrase contractions ---
+    "လုပ်တယ်": {"လုပ်ပါတယ်"},  # Do (dropping polite particle)
+    "သွားတယ်": {"သွားပါတယ်"},  # Go (dropping polite particle)
+    "လာတယ်": {"လာပါတယ်"},  # Come (dropping polite particle)
+    "စားတယ်": {"စားပါတယ်"},  # Eat (dropping polite particle)
+    "ဖတ်တယ်": {"ဖတ်ပါတယ်"},  # Read (dropping polite particle)
+    "ရေးတယ်": {"ရေးပါတယ်"},  # Write (dropping polite particle)
+    "ပြောတယ်": {"ပြောပါတယ်"},  # Say (dropping polite particle)
+    "သိတယ်": {"သိပါတယ်"},  # Know (dropping polite particle)
+    "ဖြစ်တယ်": {"ဖြစ်ပါတယ်"},  # Be/happen (dropping polite particle)
+    "ရတယ်": {"ရပါတယ်"},  # Get/can (dropping polite particle)
+    # --- Negation contractions ---
+    "မလုပ်ဘူး": {"မလုပ်ပါဘူး"},  # Don't do (dropping polite particle)
+    "မသွားဘူး": {"မသွားပါဘူး"},  # Don't go (dropping polite particle)
+    "မလာဘူး": {"မလာပါဘူး"},  # Don't come (dropping polite particle)
+    "မသိဘူး": {"မသိပါဘူး"},  # Don't know (dropping polite particle)
+    "မရဘူး": {"မရပါဘူး"},  # Can't/don't get (dropping polite particle)
+    # --- Particle and ending variants ---
+    "ပေါ့": {"ပါ"},  # Casual affirmative -> polite particle
+    "နော်": {"နော"},  # Tag question particle (colloquial with asat -> standard without)
+    "ဟင်": {"ဟုတ်လား"},  # Huh? (colloquial question -> formal)
+    "ဟာ": {"ဟယ်"},  # Exclamation (colloquial)
+    "လေ": {"ပါ"},  # Emphasis particle (casual -> polite register)
+    "ကွ": {"ကွာ"},  # Sentence-final particle (shortened)
+    # --- Demonstrative and question word variants ---
+    "အဲဒီ": {"ထို"},  # That (demonstrative, colloquial -> formal)
+    "ဒီ": {"ဤ"},  # This (colloquial -> formal)
+    "ဒီမှာ": {"ဤနေရာတွင်"},  # Here (colloquial -> formal)
+    "အဲဒီမှာ": {"ထိုနေရာတွင်"},  # There (colloquial -> formal)
+    "ဘယ်": {"မည်သည့်"},  # Which/where (colloquial -> formal)
+    "ဘယ်မှာ": {"မည်သည့်နေရာတွင်"},  # Where (colloquial -> formal)
+    "ဘာ": {"အဘယ်အရာ"},  # What (colloquial -> formal)
+    "ဘယ်တော့": {"မည်သည့်အချိန်"},  # When (colloquial -> formal)
+    "ဘယ်သူ": {"မည်သူ"},  # Who (colloquial -> formal)
+    "ဘယ်နှစ်": {"မည်မျှ"},  # How many (colloquial -> formal)
+    # --- Adverb and intensifier colloquialisms ---
+    "အရမ်း": {"အလွန်"},  # Very (colloquial -> formal)
+    "ဒီလောက်": {"ဤမျှ"},  # This much (colloquial -> formal)
+    "အဲလောက်": {"ထိုမျှ"},  # That much (colloquial -> formal)
+    "အပြင်": {"အပြင်ဘက်"},  # Outside (shortened)
+    "အထဲ": {"အတွင်း"},  # Inside (colloquial -> formal)
+    # --- Greeting and polite phrase variants ---
+    "ဗျ": {"ခင်ဗျား"},  # Casual address (very shortened honorific)
+    "ဗျာ": {"ခင်ဗျား"},  # Casual address (shortened honorific variant)
+    "ကြာ": {"ခဏ"},  # A while/moment (colloquial)
+    "ကိုယ်": {"မိမိ"},  # Self (colloquial -> formal reflexive)
+    "ကိုယ့်": {"မိမိ၏"},  # Self's (colloquial possessive -> formal)
+    # --- Common noun colloquialisms ---
+    "ကိစ္စ": {"ကိစ္စရပ်"},  # Matter (shortened -> formal)
+    "မနက်ဖြန်": {"နက်ဖြန်"},  # Tomorrow (colloquial with prefix -> standard)
+    "တုန်းက": {"အချိန်က"},  # Back when (colloquial -> formal)
+    "ဟိုတုန်းက": {"ထိုအခါက"},  # Back then (colloquial -> formal)
+    "ဟိုတစ်ခေါက်": {"ထိုအကြိမ်"},  # That other time (colloquial -> formal)
+    "ဟိုနေ့က": {"ထိုနေ့က"},  # That day (colloquial -> formal)
 }
 
 # Reverse mapping: standard form -> set of colloquial variants
@@ -328,3 +396,101 @@ def get_standard_forms(colloquial: str) -> set[str]:
         Set of standard forms, empty set if not a known colloquial variant.
     """
     return COLLOQUIAL_SUBSTITUTIONS.get(colloquial, set())
+
+
+# ============================================================
+# G2P (Grapheme-to-Phoneme) Integration
+# Loads homophone groups from rules/g2p_mappings.yaml to build
+# phonetic equivalence classes for improved homophone detection.
+# ============================================================
+
+
+def _load_g2p_homophone_groups() -> list[dict[str, object]]:
+    """Load homophone groups from g2p_mappings.yaml.
+
+    Returns a list of group dicts, each with keys: phoneme, graphemes,
+    confusion_type, frequency, and optional notes.  Returns an empty
+    list if the YAML file cannot be loaded (missing file, missing
+    PyYAML, etc.) so the library degrades gracefully.
+    """
+    import logging
+    from pathlib import Path
+
+    logger = logging.getLogger(__name__)
+
+    yaml_path = Path(__file__).resolve().parent.parent / "rules" / "g2p_mappings.yaml"
+    if not yaml_path.exists():
+        logger.debug("G2P mappings file not found: %s", yaml_path)
+        return []
+
+    try:
+        import yaml
+    except ImportError:
+        logger.debug("PyYAML not installed; G2P mappings unavailable")
+        return []
+
+    try:
+        with open(yaml_path, "r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+    except Exception:  # noqa: BLE001
+        logger.warning("Failed to load G2P mappings from %s", yaml_path, exc_info=True)
+        return []
+
+    if not isinstance(data, dict):
+        return []
+
+    groups = data.get("homophone_groups")
+    if not isinstance(groups, list):
+        return []
+
+    return groups
+
+
+# Loaded once at import time; empty list on failure (graceful degradation).
+G2P_HOMOPHONE_GROUPS: list[dict[str, object]] = _load_g2p_homophone_groups()
+
+# Reverse index: character -> set of phonetically equivalent characters.
+# Built from G2P homophone_groups so that lookups are O(1).
+_G2P_EQUIVALENCE_MAP: dict[str, set[str]] = {}
+for _group in G2P_HOMOPHONE_GROUPS:
+    _graphemes = _group.get("graphemes")
+    if not isinstance(_graphemes, list) or len(_graphemes) < 2:
+        continue
+    for _g in _graphemes:
+        if _g not in _G2P_EQUIVALENCE_MAP:
+            _G2P_EQUIVALENCE_MAP[_g] = set()
+        for _other in _graphemes:
+            if _other != _g:
+                _G2P_EQUIVALENCE_MAP[_g].add(_other)
+
+
+def get_phonetic_equivalents(char: str) -> set[str]:
+    """Get characters that are phonetically equivalent to *char*.
+
+    Uses the homophone_groups from ``g2p_mappings.yaml`` to return
+    all characters that share the same phoneme and are therefore
+    commonly confused.
+
+    This is a superset of the information in :data:`PHONETIC_GROUPS`
+    because G2P groups also capture cross-series mergers (e.g.
+    retroflex/alveolar, ရ/ယ liquid merger) that phonetic-group
+    membership alone does not express.
+
+    Args:
+        char: A single Myanmar character (consonant, vowel sign,
+              medial, or final marker).
+
+    Returns:
+        Set of phonetically equivalent characters.  Empty set if the
+        character has no known equivalents in the G2P data.
+
+    Example::
+
+        >>> get_phonetic_equivalents("က")
+        {'ခ', 'ဂ', 'ဃ', 'ဋ'}
+        >>> get_phonetic_equivalents("ရ")
+        {'ယ'}
+        >>> get_phonetic_equivalents("ξ")  # non-Myanmar
+        set()
+    """
+    return set(_G2P_EQUIVALENCE_MAP.get(char, set()))

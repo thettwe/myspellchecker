@@ -1,0 +1,560 @@
+# Myanmar Grapheme-to-Phoneme (G2P) Mappings - Version 1.0
+#
+# Systematic G2P mappings for Myanmar consonants, vowels, medials,
+# and homophone groups. Derived from myG2P phonological analysis
+# (https://github.com/ye-kyaw-thu/myG2P).
+#
+# Used by phonetic_data.py to build phonetic equivalence classes
+# that improve homophone detection coverage in Strategy 45.
+#
+# Schema: https://myspellchecker.dev/schemas/g2p-mappings/v1.0
+
+version: "1.0.0"
+category: "g2p_mappings"
+description: "Myanmar grapheme-to-phoneme mappings for homophone detection"
+
+metadata:
+  created_date: "2026-03-31"
+  last_updated: "2026-03-31"
+  source: "myG2P project (ye-kyaw-thu/myG2P) + Myanmar phonology references"
+  notes: >
+    Covers the primary Myanmar Unicode block (U+1000-U+109F).
+    Phoneme notation follows IPA conventions.
+    Position-dependent allophony is noted where relevant.
+
+# ============================================================
+# CONSONANT PHONEME MAPPINGS
+# All 33 Myanmar consonants with IPA phonemes.
+# position: "initial" (onset), "final" (coda), or "both"
+# ============================================================
+consonants:
+  # --- Velar series (ကခဂဃင) ---
+  - grapheme: "က"
+    phonemes: ["k"]
+    position: "both"
+    notes: "Voiceless velar stop; unreleased [k̚] in coda"
+
+  - grapheme: "ခ"
+    phonemes: ["kʰ"]
+    position: "initial"
+    notes: "Aspirated velar stop; merges with /k/ in coda"
+
+  - grapheme: "ဂ"
+    phonemes: ["ɡ"]
+    position: "initial"
+    notes: "Voiced velar stop; devoices to [k] in coda"
+
+  - grapheme: "ဃ"
+    phonemes: ["ɡʰ"]
+    position: "initial"
+    notes: "Aspirated voiced velar; rare, Pali/Sanskrit loans"
+
+  - grapheme: "င"
+    phonemes: ["ŋ"]
+    position: "both"
+    notes: "Velar nasal"
+
+  # --- Palatal series (စဆဇဈည/ဉ) ---
+  - grapheme: "စ"
+    phonemes: ["s", "θ"]
+    position: "initial"
+    notes: "Voiceless alveolar fricative; /θ/ in some loanwords"
+
+  - grapheme: "ဆ"
+    phonemes: ["sʰ", "θ"]
+    position: "initial"
+    notes: "Aspirated sibilant; often neutralized with စ in speech"
+
+  - grapheme: "ဇ"
+    phonemes: ["z"]
+    position: "initial"
+    notes: "Voiced alveolar fricative; Pali/Sanskrit loans"
+
+  - grapheme: "ဈ"
+    phonemes: ["z"]
+    position: "initial"
+    notes: "Voiced palatal; extremely rare, Pali origin"
+
+  - grapheme: "ည"
+    phonemes: ["ɲ", "n"]
+    position: "both"
+    notes: "Palatal nasal; often realized as [n] in colloquial speech"
+
+  - grapheme: "\u1009"
+    phonemes: ["ɲ", "n"]
+    position: "both"
+    notes: "NYA variant (U+1009); phonetically identical to ည"
+
+  # --- Retroflex series (ဋဌဍဎဏ) ---
+  - grapheme: "ဋ"
+    phonemes: ["t"]
+    position: "initial"
+    notes: "Retroflex stop; realized as alveolar in modern Burmese"
+
+  - grapheme: "ဌ"
+    phonemes: ["tʰ"]
+    position: "initial"
+    notes: "Aspirated retroflex; Pali loans only"
+
+  - grapheme: "ဍ"
+    phonemes: ["d"]
+    position: "initial"
+    notes: "Voiced retroflex; Pali loans only"
+
+  - grapheme: "ဎ"
+    phonemes: ["d"]
+    position: "initial"
+    notes: "Aspirated voiced retroflex; extremely rare"
+
+  - grapheme: "ဏ"
+    phonemes: ["n"]
+    position: "both"
+    notes: "Retroflex nasal; merged with /n/ in modern pronunciation"
+
+  # --- Alveolar/Dental series (တထဒဓန) ---
+  - grapheme: "တ"
+    phonemes: ["t"]
+    position: "both"
+    notes: "Voiceless alveolar stop; unreleased [t̚] in coda"
+
+  - grapheme: "ထ"
+    phonemes: ["tʰ"]
+    position: "initial"
+    notes: "Aspirated alveolar stop"
+
+  - grapheme: "ဒ"
+    phonemes: ["d"]
+    position: "initial"
+    notes: "Voiced alveolar stop; devoices in coda"
+
+  - grapheme: "ဓ"
+    phonemes: ["dʰ"]
+    position: "initial"
+    notes: "Aspirated voiced alveolar; rare, Pali loans"
+
+  - grapheme: "န"
+    phonemes: ["n"]
+    position: "both"
+    notes: "Alveolar nasal"
+
+  # --- Labial series (ပဖဗဘမ) ---
+  - grapheme: "ပ"
+    phonemes: ["p"]
+    position: "both"
+    notes: "Voiceless bilabial stop; unreleased [p̚] in coda"
+
+  - grapheme: "ဖ"
+    phonemes: ["pʰ"]
+    position: "initial"
+    notes: "Aspirated bilabial stop"
+
+  - grapheme: "ဗ"
+    phonemes: ["b"]
+    position: "initial"
+    notes: "Voiced bilabial stop; devoices in coda"
+
+  - grapheme: "ဘ"
+    phonemes: ["bʰ"]
+    position: "initial"
+    notes: "Aspirated voiced bilabial; common in Pali loans"
+
+  - grapheme: "မ"
+    phonemes: ["m"]
+    position: "both"
+    notes: "Bilabial nasal"
+
+  # --- Other consonants (ယရလဝသဟဠအ) ---
+  - grapheme: "ယ"
+    phonemes: ["j"]
+    position: "initial"
+    notes: "Palatal approximant"
+
+  - grapheme: "ရ"
+    phonemes: ["j"]
+    position: "initial"
+    notes: "Historically rhotic /r/; merged with ယ /j/ in standard Burmese"
+
+  - grapheme: "လ"
+    phonemes: ["l"]
+    position: "both"
+    notes: "Alveolar lateral"
+
+  - grapheme: "ဝ"
+    phonemes: ["w"]
+    position: "initial"
+    notes: "Labial-velar approximant"
+
+  - grapheme: "သ"
+    phonemes: ["θ", "ð"]
+    position: "initial"
+    notes: "Dental fricative /θ/; voiced [ð] intervocalically in some dialects"
+
+  - grapheme: "ဟ"
+    phonemes: ["h"]
+    position: "initial"
+    notes: "Glottal fricative"
+
+  - grapheme: "ဠ"
+    phonemes: ["l"]
+    position: "both"
+    notes: "Great La; phonetically identical to လ in modern Burmese"
+
+  - grapheme: "အ"
+    phonemes: ["ʔ"]
+    position: "initial"
+    notes: "Glottal stop; vowel carrier in syllable-initial position"
+
+# ============================================================
+# VOWEL PHONEME MAPPINGS
+# Dependent vowel signs and independent vowels.
+# ============================================================
+vowels:
+  # --- Dependent vowel signs ---
+  - grapheme: "ာ"
+    phonemes: ["a"]
+    length: "long"
+    notes: "Open vowel /a/ (long)"
+
+  - grapheme: "\u102b"
+    phonemes: ["a"]
+    length: "long"
+    notes: "Tall AA; allograph of ာ"
+
+  - grapheme: "ိ"
+    phonemes: ["i"]
+    length: "short"
+    notes: "Close front vowel (short)"
+
+  - grapheme: "ီ"
+    phonemes: ["i"]
+    length: "long"
+    notes: "Close front vowel (long)"
+
+  - grapheme: "ု"
+    phonemes: ["u"]
+    length: "short"
+    notes: "Close back rounded vowel (short)"
+
+  - grapheme: "ူ"
+    phonemes: ["u"]
+    length: "long"
+    notes: "Close back rounded vowel (long)"
+
+  - grapheme: "ေ"
+    phonemes: ["e"]
+    length: "long"
+    notes: "Mid front vowel; written before consonant"
+
+  - grapheme: "ဲ"
+    phonemes: ["ɛ"]
+    length: "long"
+    notes: "Open-mid front vowel; distinct from ေ /e/"
+
+  - grapheme: "\u1036"
+    phonemes: ["ã"]
+    length: "short"
+    notes: "Anusvara — nasalized vowel"
+
+  # --- Independent vowels ---
+  - grapheme: "\u1021"
+    phonemes: ["ʔ"]
+    length: "n/a"
+    notes: "A vowel carrier (glottal stop onset)"
+
+  - grapheme: "\u1023"
+    phonemes: ["ʔi"]
+    length: "short"
+    notes: "Independent I"
+
+  - grapheme: "\u1024"
+    phonemes: ["ʔi"]
+    length: "long"
+    notes: "Independent II"
+
+  - grapheme: "\u1025"
+    phonemes: ["ʔu"]
+    length: "short"
+    notes: "Independent U"
+
+  - grapheme: "\u1026"
+    phonemes: ["ʔu"]
+    length: "long"
+    notes: "Independent UU"
+
+  - grapheme: "\u1027"
+    phonemes: ["ʔe"]
+    length: "long"
+    notes: "Independent E"
+
+  - grapheme: "\u1029"
+    phonemes: ["ʔɔ"]
+    length: "long"
+    notes: "Independent O (ဩ)"
+
+  - grapheme: "\u102a"
+    phonemes: ["ʔɔ"]
+    length: "long"
+    notes: "Independent AU (ဪ)"
+
+# ============================================================
+# MEDIAL CONSONANT MAPPINGS
+# Four Myanmar medials modifying the onset consonant.
+# ============================================================
+medials:
+  - grapheme: "ျ"
+    phonemes: ["j"]
+    notes: "Ya-pin medial; palatalizes the onset"
+
+  - grapheme: "ြ"
+    phonemes: ["j"]
+    notes: "Ya-yit medial; historically /r/, now merged with ျ /j/ in standard Burmese"
+
+  - grapheme: "ွ"
+    phonemes: ["w"]
+    notes: "Wa-hswe medial; labializes the onset"
+
+  - grapheme: "ှ"
+    phonemes: ["h"]
+    notes: "Ha-htoe medial; adds aspiration/breathy voice"
+
+# ============================================================
+# FINAL MARKERS
+# Asat, Virama, and tone marks affecting syllable coda.
+# ============================================================
+finals:
+  - grapheme: "\u103a"
+    phonemes: ["ʔ"]
+    notes: "Asat — final consonant marker; glottal stop in open syllables"
+
+  - grapheme: "\u1039"
+    phonemes: []
+    notes: "Virama — stacking marker; no independent phoneme"
+
+  - grapheme: "\u1037"
+    phonemes: ["ʔ"]
+    notes: "Dot below (Auk-myit) — creaky tone / glottal constriction"
+
+  - grapheme: "\u1038"
+    phonemes: ["ː"]
+    notes: "Visarga — high tone / heavy syllable marker"
+
+# ============================================================
+# HOMOPHONE GROUPS
+# Characters/character-combinations that produce identical or
+# near-identical pronunciation, grouped by confusion pattern.
+# These drive the phonetic equivalence classes used by
+# homophone detection (Strategy 45).
+#
+# confusion_type categories:
+#   aspiration   — aspirated vs unaspirated onset
+#   voicing      — voiced vs voiceless onset
+#   retroflex    — retroflex vs dental/alveolar merger
+#   liquid       — ရ/ယ merger (historical /r/ -> /j/)
+#   sibilant     — သ/ဆ/စ dental-sibilant overlap
+#   nasal        — nasal place merger (e.g., န/ဏ)
+#   medial       — ျ/ြ medial merger
+#   vowel_length — short vs long vowel neutralization
+#   lateral      — လ/ဠ lateral merger
+#   nya_variant  — ည/ဉ orthographic variants
+#   final_marker — asat/dot-below/visarga confusion
+#   wa_zero      — ဝ/၀ visual confusion
+#
+# frequency: "high" (very common error), "medium", "low" (rare)
+# ============================================================
+homophone_groups:
+  # ── Aspiration confusion (most common homophone errors) ──
+  - phoneme: "k"
+    graphemes: ["က", "ခ"]
+    confusion_type: "aspiration"
+    frequency: "high"
+    notes: "Voiceless velar: unaspirated က vs aspirated ခ"
+
+  - phoneme: "s"
+    graphemes: ["စ", "ဆ"]
+    confusion_type: "aspiration"
+    frequency: "high"
+    notes: "Sibilant: unaspirated စ vs aspirated ဆ"
+
+  - phoneme: "t"
+    graphemes: ["တ", "ထ"]
+    confusion_type: "aspiration"
+    frequency: "high"
+    notes: "Alveolar: unaspirated တ vs aspirated ထ"
+
+  - phoneme: "p"
+    graphemes: ["ပ", "ဖ"]
+    confusion_type: "aspiration"
+    frequency: "high"
+    notes: "Bilabial: unaspirated ပ vs aspirated ဖ"
+
+  # ── Voicing confusion ──
+  - phoneme: "k_voiced"
+    graphemes: ["က", "ဂ"]
+    confusion_type: "voicing"
+    frequency: "high"
+    notes: "Velar voicing: voiceless က vs voiced ဂ"
+
+  - phoneme: "t_voiced"
+    graphemes: ["တ", "ဒ"]
+    confusion_type: "voicing"
+    frequency: "high"
+    notes: "Alveolar voicing: voiceless တ vs voiced ဒ"
+
+  - phoneme: "p_voiced"
+    graphemes: ["ပ", "ဗ", "ဘ"]
+    confusion_type: "voicing"
+    frequency: "high"
+    notes: "Bilabial voicing: ပ vs ဗ vs ဘ — very common in Pali loans"
+
+  - phoneme: "s_voiced"
+    graphemes: ["စ", "ဇ"]
+    confusion_type: "voicing"
+    frequency: "medium"
+    notes: "Sibilant voicing: voiceless စ vs voiced ဇ"
+
+  # ── Retroflex merger (Pali/Sanskrit origin, merged in modern Burmese) ──
+  - phoneme: "n_retroflex"
+    graphemes: ["န", "ဏ"]
+    confusion_type: "retroflex"
+    frequency: "medium"
+    notes: "Alveolar န vs retroflex ဏ — identical in modern speech"
+
+  - phoneme: "t_retroflex"
+    graphemes: ["တ", "ဋ"]
+    confusion_type: "retroflex"
+    frequency: "low"
+    notes: "Alveolar တ vs retroflex ဋ — merged, rare outside Pali words"
+
+  - phoneme: "th_retroflex"
+    graphemes: ["ထ", "ဌ"]
+    confusion_type: "retroflex"
+    frequency: "low"
+    notes: "Aspirated alveolar ထ vs retroflex ဌ — merged"
+
+  - phoneme: "d_retroflex"
+    graphemes: ["ဒ", "ဍ"]
+    confusion_type: "retroflex"
+    frequency: "low"
+    notes: "Voiced alveolar ဒ vs retroflex ဍ — merged"
+
+  - phoneme: "dh_retroflex"
+    graphemes: ["ဓ", "ဎ"]
+    confusion_type: "retroflex"
+    frequency: "low"
+    notes: "Aspirated voiced alveolar ဓ vs retroflex ဎ — merged"
+
+  # ── Liquid/approximant merger ──
+  - phoneme: "j_liquid"
+    graphemes: ["ရ", "ယ"]
+    confusion_type: "liquid"
+    frequency: "high"
+    notes: "Historical /r/ (ရ) merged with /j/ (ယ) in standard Burmese"
+
+  # ── Sibilant/dental overlap ──
+  - phoneme: "theta_sibilant"
+    graphemes: ["သ", "ဆ", "စ"]
+    confusion_type: "sibilant"
+    frequency: "high"
+    notes: "Dental fricative သ /θ/ often confused with sibilants ဆ/စ /s/"
+
+  # ── Nasal confusion ──
+  - phoneme: "ng_nya"
+    graphemes: ["င", "ည", "\u1009"]
+    confusion_type: "nasal"
+    frequency: "medium"
+    notes: "Velar nasal င /ŋ/ vs palatal nasal ည/ဉ /ɲ/ — confusable in some contexts"
+
+  # ── Medial merger ──
+  - phoneme: "j_medial"
+    graphemes: ["ျ", "ြ"]
+    confusion_type: "medial"
+    frequency: "high"
+    notes: "Ya-pin ျ and Ya-yit ြ — historically /j/ vs /r/, now both /j/"
+
+  # ── Vowel length neutralization ──
+  - phoneme: "i_length"
+    graphemes: ["ိ", "ီ"]
+    confusion_type: "vowel_length"
+    frequency: "high"
+    notes: "Short ိ /i/ vs long ီ /iː/ — often confused in rapid typing"
+
+  - phoneme: "u_length"
+    graphemes: ["ု", "ူ"]
+    confusion_type: "vowel_length"
+    frequency: "high"
+    notes: "Short ု /u/ vs long ူ /uː/ — often confused in rapid typing"
+
+  - phoneme: "a_length"
+    graphemes: ["ာ", "\u102b"]
+    confusion_type: "vowel_length"
+    frequency: "medium"
+    notes: "Regular ာ vs tall AA — allographic variants of /aː/"
+
+  # ── Lateral merger ──
+  - phoneme: "l_lateral"
+    graphemes: ["လ", "ဠ"]
+    confusion_type: "lateral"
+    frequency: "medium"
+    notes: "Regular လ vs Great La ဠ — identical /l/ in modern Burmese"
+
+  # ── NYA orthographic variants ──
+  - phoneme: "nya_variant"
+    graphemes: ["ည", "\u1009"]
+    confusion_type: "nya_variant"
+    frequency: "high"
+    notes: "Two Unicode codepoints for the same NYA sound — very commonly confused"
+
+  # ── Final marker confusion ──
+  - phoneme: "final_stop"
+    graphemes: ["\u1037", "\u1038"]
+    confusion_type: "final_marker"
+    frequency: "high"
+    notes: "Dot below (creaky tone) vs Visarga (high tone) — common tone confusion"
+
+  - phoneme: "final_close"
+    graphemes: ["\u1039", "\u103a"]
+    confusion_type: "final_marker"
+    frequency: "medium"
+    notes: "Virama (stacking) vs Asat (final stop) — structural confusion"
+
+  # ── Wa / Zero visual confusion ──
+  - phoneme: "wa_zero"
+    graphemes: ["ဝ", "၀"]
+    confusion_type: "wa_zero"
+    frequency: "high"
+    notes: "Wa consonant (U+101D) vs Myanmar digit zero (U+1040) — visually identical"
+
+  # ── Lower medial confusion ──
+  - phoneme: "lower_medial"
+    graphemes: ["ွ", "ှ"]
+    confusion_type: "medial"
+    frequency: "medium"
+    notes: "Wa-hswe ွ vs Ha-htoe ှ — both lower medials, sometimes confused"
+
+  # ── Aspirated velar full group ──
+  - phoneme: "k_full"
+    graphemes: ["က", "ခ", "ဂ", "ဃ"]
+    confusion_type: "aspiration"
+    frequency: "medium"
+    notes: "Full velar series — all neutralize to [k̚] in coda position"
+
+  # ── Aspirated alveolar full group ──
+  - phoneme: "t_full"
+    graphemes: ["တ", "ထ", "ဒ", "ဓ"]
+    confusion_type: "aspiration"
+    frequency: "medium"
+    notes: "Full alveolar series — all neutralize to [t̚] in coda position"
+
+  # ── Aspirated bilabial full group ──
+  - phoneme: "p_full"
+    graphemes: ["ပ", "ဖ", "ဗ", "ဘ"]
+    confusion_type: "aspiration"
+    frequency: "medium"
+    notes: "Full labial series — all neutralize to [p̚] in coda position"
+
+  # ── Sa / Great Sa ──
+  - phoneme: "sa_ssa"
+    graphemes: ["သ", "ဿ"]
+    confusion_type: "lateral"
+    frequency: "medium"
+    notes: "Sa သ vs Great Sa ဿ — practically identical pronunciation"

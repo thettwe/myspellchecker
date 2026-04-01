@@ -244,6 +244,19 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if is_near_synonym:
                 raw_variants.update(self._near_synonym_pairs[word])
 
+            # Loan word transliteration variants
+            from myspellchecker.core.loan_word_variants import (
+                get_loan_word_standard,
+                get_loan_word_variants,
+            )
+
+            loan_variants = get_loan_word_variants(word)
+            if loan_variants:
+                raw_variants.update(loan_variants)
+            loan_standards = get_loan_word_standard(word)
+            if loan_standards:
+                raw_variants.update(loan_standards)
+
             has_valid_variant = any(
                 v != word
                 and v not in VARIANT_BLOCKLIST
@@ -337,6 +350,19 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 if is_near_synonym:
                     near_synonym_variants_for_word = self._near_synonym_pairs[word]
                     raw_variants.update(near_synonym_variants_for_word)
+
+                # Loan word transliteration variants
+                from myspellchecker.core.loan_word_variants import (
+                    get_loan_word_standard,
+                    get_loan_word_variants,
+                )
+
+                loan_variants = get_loan_word_variants(word)
+                if loan_variants:
+                    raw_variants.update(loan_variants)
+                loan_standards = get_loan_word_standard(word)
+                if loan_standards:
+                    raw_variants.update(loan_standards)
 
                 valid_variants = {
                     v
@@ -501,13 +527,6 @@ class ConfusableSemanticStrategy(ValidationStrategy):
         explicit_scores = explicit_scores or {}
         curated_variants = curated_variants or set()
         near_synonym_variants = near_synonym_variants or set()
-        min_score = (
-            min(pred_map.values())
-            if pred_map
-            else min(explicit_scores.values())
-            if explicit_scores
-            else 0.0
-        )
 
         for variant in valid_variants:
             variant_score = explicit_scores.get(variant, pred_map.get(variant))
@@ -519,12 +538,15 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if current_score is not None:
                 logit_diff = variant_score - current_score
             else:
-                # Current word not in top-K -- use variant score minus
-                # the lowest score in the prediction set as a proxy.
-                # Raw variant_score (6-18) far exceeds thresholds (3-6)
-                # designed for score *differences*, causing FPs on valid
-                # high-freq words like က and ရာ.
-                logit_diff = variant_score - min_score
+                # Current word has no reliable score (not in top-K and
+                # score_mask_candidates unavailable or failed).  The old
+                # fallback ``variant_score - min_score`` produced inflated
+                # diffs (13-16) vs thresholds designed for real diffs (3-6),
+                # causing widespread false positives on valid high-freq
+                # words like က, ရာ, and မှ.  Without a trustworthy
+                # current-word score we cannot compute a meaningful diff,
+                # so skip this variant entirely.
+                continue
 
             # Near-synonym pairs use a higher threshold than general curated
             # pairs because both words share semantic overlap and are often

@@ -9,12 +9,14 @@ from concurrent.futures import Future
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pyarrow as pa
 import pytest
 
-from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder
-from myspellchecker.data_pipeline.ingester import CorpusIngester
-from myspellchecker.data_pipeline.segmenter import CorpusSegmenter
+duckdb = pytest.importorskip("duckdb", reason="DuckDB required for data pipeline tests")
+pa = pytest.importorskip("pyarrow", reason="PyArrow required for data pipeline tests")
+
+from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder  # noqa: E402
+from myspellchecker.data_pipeline.ingester import CorpusIngester  # noqa: E402
+from myspellchecker.data_pipeline.segmenter import CorpusSegmenter  # noqa: E402
 
 # --- CorpusIngester Tests ---
 

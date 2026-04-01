@@ -3,9 +3,11 @@ from unittest.mock import patch
 
 import pytest
 
-from myspellchecker.core.exceptions import InsufficientStorageError
-from myspellchecker.data_pipeline.config import PipelineConfig
-from myspellchecker.data_pipeline.pipeline import Pipeline
+duckdb = pytest.importorskip("duckdb", reason="DuckDB required for disk space tests")
+
+from myspellchecker.core.exceptions import InsufficientStorageError  # noqa: E402
+from myspellchecker.data_pipeline.config import PipelineConfig  # noqa: E402
+from myspellchecker.data_pipeline.pipeline import Pipeline  # noqa: E402
 
 # Match shutil.disk_usage return type (named tuple with .total/.used/.free)
 _DiskUsage = namedtuple("usage", ["total", "used", "free"])

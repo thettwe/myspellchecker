@@ -445,15 +445,29 @@ class SemanticValidationStrategy(ValidationStrategy):
                     self._config.proactive_confidence_base
                     + best_diff / self._config.proactive_confidence_divisor,
                 )
-                fallback_suggestions = [best_candidate]
-                for pred_word, _pred_score in active_predictions:
-                    if pred_word in fallback_suggestions or pred_word == word:
+                # Sort MLM predictions by edit distance (morphological
+                # similarity) instead of logit order.  This fixes MRR
+                # regression: the MLM often suggests compound words that
+                # fit the context but have high edit distance from the
+                # original error token.
+                from myspellchecker.algorithms.distance.edit_distance import (
+                    damerau_levenshtein_distance,
+                )
+
+                scored_preds = []
+                for pred_word, pred_logit in active_predictions:
+                    if len(pred_word) < 2 or pred_word == word:
                         continue
-                    if len(pred_word) < 2:
-                        continue
-                    fallback_suggestions.append(pred_word)
-                    if len(fallback_suggestions) >= 5:
-                        break
+                    ed = damerau_levenshtein_distance(word, pred_word)
+                    scored_preds.append((pred_word, pred_logit, ed))
+
+                # Prefer low edit distance; use high logit as tiebreaker
+                scored_preds.sort(key=lambda x: (x[2], -x[1]))
+
+                fallback_suggestions = [best_candidate] if best_candidate else []
+                for pred_word, _, _ in scored_preds[:5]:
+                    if pred_word not in fallback_suggestions:
+                        fallback_suggestions.append(pred_word)
 
                 errors.append(
                     ContextError(

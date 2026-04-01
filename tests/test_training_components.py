@@ -265,6 +265,9 @@ class TestONNXExporter:
         """Test exporter raises on invalid model directory deterministically."""
         import myspellchecker.training.exporter as exporter_module
 
+        if not hasattr(exporter_module, "PreTrainedTokenizerFast"):
+            pytest.skip("PreTrainedTokenizerFast not available (torch/transformers import failed)")
+
         class _FailingTokenizerLoader:
             @staticmethod
             def from_pretrained(model_dir):

@@ -370,6 +370,35 @@ class CompoundDetectionMixin:
     semantic_checker: Any
     symspell: Any
 
+    # ----- False compound suppression keys (loaded from compound_morphology.yaml) -----
+    _FALSE_COMPOUND_UNLOADED: object = object()  # sentinel: distinct from None and empty set
+    _false_compound_keys_cache: set[tuple[str, str]] | object = _FALSE_COMPOUND_UNLOADED
+
+    @classmethod
+    def _get_false_compound_keys(cls) -> set[tuple[str, str]] | None:
+        """Load curated false_compound pairs from compound_morphology.yaml.
+
+        Caches at class level (loaded once). Returns None if YAML unavailable.
+        """
+        if cls._false_compound_keys_cache is not cls._FALSE_COMPOUND_UNLOADED:
+            cache = cls._false_compound_keys_cache
+            return cache if isinstance(cache, set) else None  # type: ignore[return-value]
+
+        try:
+            from myspellchecker.core.validation_strategies.broken_compound_strategy import (
+                _load_morphology_data,
+            )
+
+            data = _load_morphology_data()
+            if data is not None:
+                cls._false_compound_keys_cache = data.false_compound_keys
+                return cls._false_compound_keys_cache  # type: ignore[return-value]
+        except Exception:
+            logger.debug("Failed to load false compound keys from morphology data", exc_info=True)
+
+        cls._false_compound_keys_cache = set()
+        return cls._false_compound_keys_cache  # type: ignore[return-value]
+
     # ----- Compound confusion data (loaded from YAML with hardcoded fallback) -----
     _HA_HTOE_COMPOUNDS: dict[str, tuple[str, str]] = _LOADED_HA_HTOE_COMPOUNDS
     _ASPIRATED_COMPOUNDS: dict[str, tuple[str, str]] = _LOADED_ASPIRATED_COMPOUNDS
@@ -1015,6 +1044,11 @@ class CompoundDetectionMixin:
 
         segmenter = getattr(self, "segmenter", None)
 
+        # Load curated false_compound suppression set from compound_morphology.yaml.
+        # These are word pairs (e.g., verb+SFP, negation+verb, numeral+classifier)
+        # that should never be flagged as broken compounds.
+        false_compound_keys = self._get_false_compound_keys()
+
         # Walk through adjacent pairs
         for i in range(len(tokens) - 1):
             left = tokens[i]
@@ -1024,6 +1058,10 @@ class CompoundDetectionMixin:
             if not any("\u1000" <= ch <= "\u109f" for ch in left):
                 continue
             if not any("\u1000" <= ch <= "\u109f" for ch in right):
+                continue
+
+            # Skip curated false_compound pairs from compound_morphology.yaml
+            if false_compound_keys and (left, right) in false_compound_keys:
                 continue
 
             # Skip when both tokens are particles/function words — their

@@ -13,6 +13,7 @@ preserving the exact same method signatures and behaviour.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -235,12 +236,21 @@ _WORD_ORDER_BOUNDARIES: frozenset[str] = _norm_set(
     }
 )
 
+# Terminal SFP+punctuation patterns: sentence-final particle immediately
+# followed by Myanmar full stop (။).  These are legitimate sentence endings
+# and should NOT be flagged as missing conjunctions.
+# Covers formal (သည်။, ပါသည်။), colloquial (တယ်။, ပါတယ်။), and
+# future (မည်။, မယ်။, ပါမည်။, ပါမယ်။) forms.
+_TERMINAL_SFP_RE = re.compile(r"(?:ပါသည်|ပါတယ်|ပါမည်|ပါမယ်|သည်|တယ်|မည်|မယ်)\u104B$")
+
 
 class StructureDetectionMixin:
     """Mixin providing sentence structure detection.
 
     Detects G02 (dangling word) and G03 (missing conjunction) patterns
-    across the full text.
+    across the full text.  G04 (word-order inversion) is also implemented
+    but disabled by default (``_enable_g04_word_order = False``) because
+    it produces excessive false positives on real Myanmar text.
     """
 
     # --- Type stubs for attributes provided by SpellChecker or sibling mixins ---
@@ -252,6 +262,12 @@ class StructureDetectionMixin:
 
     # --- Class-level constants (extracted from inline magic numbers) ---
 
+    # G04 word-order detection is disabled by default because it produces
+    # 600+ false positives on real Myanmar text.  Myanmar freely allows
+    # post-verbal complements, so flagging them as displaced arguments is
+    # incorrect for most sentences.  Set to True to re-enable.
+    _enable_g04_word_order: bool = False
+
     # Word order detection (G04): maximum tail tokens to scan for displaced arguments
     _WORD_ORDER_MAX_TAIL_TOKENS: int = 4
 
@@ -260,6 +276,11 @@ class StructureDetectionMixin:
 
     # Colloquial parataxis suppression (G03): minimum existing errors to suppress
     _COLLOQUIAL_SFP_MIN_EXISTING_ERRORS: int = 2
+
+    # G02 dangling word: suppress for high-frequency function words.
+    # Words above this corpus frequency are common particles/markers that
+    # naturally appear at clause boundaries and should not be flagged.
+    _DANGLING_HIGH_FREQ_THRESHOLD: int = 5_000
 
     def _detect_sentence_structure_issues(self, text: str, errors: list[Error]) -> None:
         """Detect sentence structure issues across the full text.
@@ -285,13 +306,16 @@ class StructureDetectionMixin:
         is_sent_final: list[bool] = []
         for token in tokens:
             matched = False
+            # Strip trailing boundary punctuation (။, ၊, etc.) so that
+            # tokens like "သည်။" and "တယ်။" still match the SFP sets.
+            token_stripped = token.rstrip(_BOUNDARY_PUNCT_CHARS)
             # Exact match against all endings
-            if token in self._ALL_ENDINGS_WITH_STRIPPED:
+            if token_stripped in self._ALL_ENDINGS_WITH_STRIPPED:
                 matched = True
             else:
                 # Suffix match for unambiguous sentence-final endings
                 for ending in _SUFFIX_SAFE:
-                    if len(ending) < len(token) and token.endswith(ending):
+                    if len(ending) < len(token_stripped) and token_stripped.endswith(ending):
                         matched = True
                         break
             is_sent_final.append(matched)
@@ -318,12 +342,30 @@ class StructureDetectionMixin:
                         break  # temporal/transitional adverb, valid clause start
                     if is_sent_final[j]:
                         break  # another sentence-final, handled by G03
+                    # Pure punctuation tokens (e.g., "၊", "။") are boundary
+                    # markers, not dangling content words.
+                    if not next_stripped:
+                        continue
                     # Multi-clause parataxis: if there's a subsequent SFP,
                     # this word starts a new clause, not dangling.
                     # e.g., "ခေါင်းကိုက်တယ် ဆေးရုံမှာ သွားခဲ့တယ်"
                     has_later_sfp = any(is_sent_final[k] for k in range(j + 1, len(tokens)))
                     if has_later_sfp:
                         continue
+                    # High-frequency words are common particles/markers (e.g.,
+                    # ခဲ့, ဖြစ်, များ, က, ပါ) that naturally appear at clause
+                    # boundaries.  Suppress dangling-word FPs for these.
+                    provider = getattr(self, "provider", None)
+                    if provider is not None:
+                        try:
+                            freq = provider.get_word_frequency(next_stripped)
+                            if (
+                                isinstance(freq, (int, float))
+                                and freq >= self._DANGLING_HIGH_FREQ_THRESHOLD
+                            ):
+                                continue
+                        except Exception:
+                            pass
                     # This is a dangling content word
                     if next_pos not in existing_positions:
                         dangling_suggestions: list[str] = [""]
@@ -349,6 +391,12 @@ class StructureDetectionMixin:
                 # Discourse particles (နော်, ပေါ့, ပဲ, etc.) naturally follow
                 # verb-final particles — don't flag as missing conjunction.
                 if tokens[idx2] in self._DISCOURSE_ENDINGS:
+                    continue
+                # Terminal SFP+။: tokens like "သည်။" and "တယ်။" are
+                # legitimate sentence endings.  When either SFP token already
+                # includes a Myanmar period, the two SFPs belong to separate
+                # sentences — not a missing conjunction within one sentence.
+                if _TERMINAL_SFP_RE.search(tokens[idx1]) or _TERMINAL_SFP_RE.search(tokens[idx2]):
                     continue
                 # Colloquial parataxis: in spoken Myanmar, clauses are commonly
                 # juxtaposed without explicit conjunction (e.g., "ခေါင်းကိုက်တယ်
@@ -426,6 +474,13 @@ class StructureDetectionMixin:
                     break  # only report first occurrence
 
         # G04: Verb-fronted object/complement phrase (word-order inversion).
+        # Disabled by default -- produces 600+ false positives because Myanmar
+        # freely allows post-verbal complement ordering.  Gate on the
+        # _enable_g04_word_order class attribute so the logic is preserved
+        # but inactive unless explicitly opted in.
+        if not self._enable_g04_word_order:
+            return
+
         # Canonical Myanmar order keeps the finite verb after its object phrase.
         max_tail_tokens = self._WORD_ORDER_MAX_TAIL_TOKENS
         for i in range(1, len(tokens) - 2):

@@ -252,19 +252,16 @@ class HeuristicNER(NERModel):
 
         self._heuristic = NameHeuristic()
 
-        # Known entity patterns
-        self._location_suffixes = {"မြို့", "ရွာ", "ပြည်နယ်", "တိုင်း", "ခရိုင်", "မြို့နယ်"}
-        self._org_patterns = {"ကုမ္ပဏီ", "ဘဏ်", "တက္ကသိုလ်", "ကျောင်း", "ဆေးရုံ", "ရုံး"}
+        # Known entity patterns (from named_entities.yaml gazetteer)
+        from myspellchecker.text.ner import get_gazetteer_data
 
-        # Place-name dictionary (420 townships + 14 states + short state names + ethnic groups)
-        from myspellchecker.text.place_names import (
-            MYANMAR_ETHNIC_GROUPS,
-            MYANMAR_PLACES,
-            MYANMAR_STATE_SHORT,
-        )
+        gaz = get_gazetteer_data()
+        self._location_suffixes = set(gaz.location_suffixes)
+        self._org_patterns = set(gaz.org_patterns)
 
-        self._known_places = MYANMAR_PLACES
-        self._state_short = MYANMAR_STATE_SHORT | MYANMAR_ETHNIC_GROUPS
+        # Place-name dictionary (townships + states + short state names + ethnic groups)
+        self._known_places = gaz.all_places
+        self._state_short = gaz.states_regions | gaz.ethnic_groups
 
     def extract_entities(self, text: str) -> list[Entity]:
         """Extract entities using heuristics."""

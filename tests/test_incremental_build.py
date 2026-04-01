@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from myspellchecker.cli import main as cli_main
+duckdb = pytest.importorskip("duckdb", reason="DuckDB required for incremental build tests")
+
+from myspellchecker.cli import main as cli_main  # noqa: E402
 
 
 @pytest.fixture

@@ -214,18 +214,30 @@ class ErrorSuppressionMixin:
         """Suppress errors on fragments from valid Pali/Sanskrit virama stacking.
 
         Words containing valid consonant stacking via virama (U+1039), e.g.
-        မဂ္ဂဇင်း (magazine), ပစ္စည်း (things), break the syllable segmenter.
-        The resulting fragments (e.g. ``မ``) are flagged as invalid syllables.
-        This method finds valid stacking patterns, expands to word boundaries,
-        and suppresses all ``invalid_syllable`` errors within those words.
-        """
-        from myspellchecker.core.constants.myanmar_constants import STACKING_EXCEPTIONS
+        ဗုဒ္ဓ (Buddha), မဂ္ဂဇင်း (magazine), ပစ္စည်း (things), break the
+        syllable segmenter.  The resulting fragments (e.g. ``ဗု``, ``ဒ္ဓ``)
+        are flagged as invalid syllables or unknown words.
 
+        This method:
+        1. Validates stacking pairs against the YAML-loaded whitelist
+           (``rules/stacking_pairs.yaml``) via ``load_stacking_pairs()``.
+        2. Expands each valid stacking site to word boundaries.
+        3. Merges overlapping/adjacent ranges so that a word with multiple
+           stacking sites (e.g. ပစ္စည်း) produces one continuous range.
+        4. Suppresses both ``invalid_syllable`` and ``invalid_word`` errors
+           whose span falls entirely within a stacking word range.
+        """
         _VIRAMA = "\u1039"
         if _VIRAMA not in text:
             return
 
-        stacking_word_ranges: list[tuple[int, int]] = []
+        # Load comprehensive stacking pairs from YAML (with hardcoded fallback)
+        from myspellchecker.core.detection_rules import load_stacking_pairs
+
+        valid_pairs = load_stacking_pairs()
+
+        # --- Phase 1: find word ranges containing valid stacking sites ---
+        raw_ranges: list[tuple[int, int]] = []
         for i, ch in enumerate(text):
             if ch != _VIRAMA:
                 continue
@@ -233,26 +245,40 @@ class ErrorSuppressionMixin:
                 continue
             upper = text[i - 1]
             lower = text[i + 1]
-            if (upper, lower) not in STACKING_EXCEPTIONS:
+            if (upper, lower) not in valid_pairs:
                 continue
+            # Expand to word boundaries (space-delimited)
             start = i
             while start > 0 and text[start - 1] != " ":
                 start -= 1
             end = i + 1
             while end < len(text) and text[end] != " ":
                 end += 1
-            stacking_word_ranges.append((start, end))
+            raw_ranges.append((start, end))
 
-        if not stacking_word_ranges:
+        if not raw_ranges:
             return
 
+        # --- Phase 2: merge overlapping / adjacent ranges ---
+        raw_ranges.sort()
+        merged: list[tuple[int, int]] = [raw_ranges[0]]
+        for rs, re in raw_ranges[1:]:
+            prev_s, prev_e = merged[-1]
+            if rs <= prev_e:
+                # Overlapping or contiguous — extend
+                merged[-1] = (prev_s, max(prev_e, re))
+            else:
+                merged.append((rs, re))
+
+        # --- Phase 3: suppress syllable AND word errors within ranges ---
+        _SUPPRESSIBLE = frozenset({ET_SYLLABLE, ET_WORD})
         to_remove: set[int] = set()
         for idx, e in enumerate(errors):
-            if getattr(e, "error_type", "") != ET_SYLLABLE:
+            if getattr(e, "error_type", "") not in _SUPPRESSIBLE:
                 continue
             e_start = e.position
             e_end = e_start + (len(e.text) if e.text else 0)
-            for ws, we in stacking_word_ranges:
+            for ws, we in merged:
                 if e_start >= ws and e_end <= we:
                     to_remove.add(idx)
                     break
@@ -1028,6 +1054,41 @@ class ErrorSuppressionMixin:
                 for e in errors
                 if not (e.error_type == ET_SYNTAX_ERROR and e.position in tense_ends)
             ]
+
+    @staticmethod
+    def _suppress_known_entity_errors(errors: list[Error], text: str) -> None:
+        """Suppress errors on tokens that match the named entity gazetteer.
+
+        Lightweight supplement to :meth:`_filter_ner_entities` -- works without
+        the transformer NER model by checking against a curated whitelist
+        of known Myanmar names, places, organizations, and religious terms
+        loaded from ``rules/named_entities.yaml``.
+        """
+        if not errors:
+            return
+
+        from myspellchecker.text.ner import is_known_entity
+
+        filtered: list[Error] = []
+        for e in errors:
+            # Text-level detector errors are immune (same policy as NER filtering)
+            err_type = getattr(e, "error_type", "")
+            if err_type in _NER_IMMUNE:
+                filtered.append(e)
+                continue
+
+            token = e.text or ""
+            # Check if the error token is a known entity
+            if token and is_known_entity(token):
+                # Still keep high-confidence errors with suggestions
+                if e.confidence >= _NER_HIGH_CONFIDENCE_OVERRIDE and e.suggestions:
+                    filtered.append(e)
+                # Otherwise suppress -- it's a known name/place/entity
+                continue
+
+            filtered.append(e)
+
+        errors[:] = filtered
 
     def _filter_ner_entities(self, errors: list[Error], text: str) -> None:
         """Remove errors that overlap with recognized named entities.

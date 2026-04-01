@@ -1,0 +1,299 @@
+# Myanmar Particle Context Validation Rules - Version 1.0
+# Validates particle choice given verb/noun context.
+#
+# Common misuse patterns where particles are confused because
+# they sound similar, overlap in meaning, or differ by register.
+#
+# Schema: https://myspellchecker.dev/schemas/particle_contexts/v1.0
+
+version: "1.0.0"
+category: "particle_contexts"
+description: "Verb-particle and noun-particle context validation rules"
+
+metadata:
+  created_date: "2026-03-31"
+  total_entries: 28
+
+# ============================================================
+# PARTICLE CONFUSION PAIRS
+# Each entry describes two particles that are commonly swapped,
+# the syntactic context where the error occurs, and examples.
+# ============================================================
+particle_confusions:
+  # ---------- Case marker confusions ----------
+
+  # Subject marker က vs object marker ကို
+  - particle: "ကို"
+    confused_with: "က"
+    context: "after_object_noun"
+    description: "Object nouns take ကို, not subject marker က"
+    confidence: 0.75
+    examples:
+      correct: ["စာအုပ်ကို ဖတ်တယ်", "ထမင်းကို စားတယ်"]
+      incorrect: ["စာအုပ်က ဖတ်တယ်", "ထမင်းက စားတယ်"]
+
+  # Object marker ကို vs subject marker က (reverse)
+  - particle: "က"
+    confused_with: "ကို"
+    context: "after_subject_noun"
+    description: "Subject/agent nouns take က, not object marker ကို"
+    confidence: 0.70
+    examples:
+      correct: ["ကျောင်းသားက လာတယ်", "သူက ပြောတယ်"]
+      incorrect: ["ကျောင်းသားကို လာတယ်"]
+
+  # ---------- Location / direction confusions ----------
+
+  # Static location မှာ vs directional ကို
+  - particle: "မှာ"
+    confused_with: "ကို"
+    context: "static_location"
+    description: "Static location takes မှာ, not directional ကို"
+    confidence: 0.70
+    examples:
+      correct: ["ကျောင်းမှာ ရှိတယ်", "အိမ်မှာ နေတယ်"]
+      incorrect: ["ကျောင်းကို ရှိတယ်"]
+
+  # Directional ကို vs static location မှာ
+  - particle: "ကို"
+    confused_with: "မှာ"
+    context: "directional_motion"
+    description: "Motion verbs take directional ကို, not static မှာ"
+    confidence: 0.70
+    examples:
+      correct: ["ကျောင်းကို သွားတယ်", "ဈေးကို သွားမယ်"]
+      incorrect: ["ကျောင်းမှာ သွားတယ်"]
+
+  # Source marker မှ vs static location မှာ
+  - particle: "မှ"
+    confused_with: "မှာ"
+    context: "source_origin"
+    description: "Source/origin takes မှ, not locative မှာ"
+    confidence: 0.70
+    examples:
+      correct: ["ကျောင်းမှ ပြန်လာတယ်", "ရန်ကုန်မှ ထွက်တယ်"]
+      incorrect: ["ကျောင်းမှာ ပြန်လာတယ်"]
+
+  # Formal locative တွင် vs colloquial မှာ
+  - particle: "တွင်"
+    confused_with: "မှာ"
+    context: "formal_location"
+    description: "Formal locative uses တွင်; colloquial uses မှာ"
+    confidence: 0.60
+    examples:
+      correct: ["ကျောင်းတွင် ရှိသည်"]
+      incorrect: ["ကျောင်းမှာ ရှိသည်"]
+
+  # ---------- Completion / sequence confusions ----------
+
+  # Sequential ပြီး vs completed ပြီ
+  - particle: "ပြီး"
+    confused_with: "ပြီ"
+    context: "sequential_action"
+    description: "Sequential actions (after doing X, do Y) use ပြီး not ပြီ"
+    confidence: 0.70
+    examples:
+      correct: ["စားပြီး သွားတယ်", "ရေချိုးပြီး အိပ်တယ်"]
+      incorrect: ["စားပြီ သွားတယ်"]
+
+  # Completed ပြီ vs sequential ပြီး
+  - particle: "ပြီ"
+    confused_with: "ပြီး"
+    context: "sentence_final_completion"
+    description: "Sentence-final completion uses ပြီ not ပြီး"
+    confidence: 0.70
+    examples:
+      correct: ["စားပြီ", "ရောက်ပြီ"]
+      incorrect: ["စားပြီး။"]
+
+  # ---------- Reason / cause confusions ----------
+
+  # Colloquial reason လို့ vs formal ကြောင့်
+  - particle: "လို့"
+    confused_with: "ကြောင့်"
+    context: "reason_clause"
+    description: "Colloquial reason clause uses လို့, formal uses ကြောင့်"
+    confidence: 0.65
+    examples:
+      correct: ["မိုးရွာလို့ မသွားဘူး"]
+      incorrect: ["မိုးရွာကြောင့် မသွားဘူး"]
+
+  # Formal reason ကြောင့် vs colloquial လို့
+  - particle: "ကြောင့်"
+    confused_with: "လို့"
+    context: "formal_reason_clause"
+    description: "Formal reason clause uses ကြောင့်, colloquial uses လို့"
+    confidence: 0.65
+    examples:
+      correct: ["မိုးရွာသောကြောင့် မသွားပါ"]
+      incorrect: ["မိုးရွာလို့ မသွားပါ"]
+
+  # ---------- Instrumentive / comitative confusions ----------
+
+  # Instrumental နဲ့ (with) vs comitative နှင့် (formal with)
+  - particle: "နဲ့"
+    confused_with: "နှင့်"
+    context: "colloquial_instrumental"
+    description: "Colloquial instrumental uses နဲ့, formal uses နှင့်"
+    confidence: 0.60
+    examples:
+      correct: ["ခဲတံနဲ့ ရေးတယ်", "သူနဲ့ သွားတယ်"]
+      incorrect: []
+
+  # ---------- Possessive confusions ----------
+
+  # Colloquial possessive ရဲ့ vs formal possessive ၏
+  - particle: "ရဲ့"
+    confused_with: "၏"
+    context: "colloquial_possessive"
+    description: "Colloquial possessive uses ရဲ့, formal uses ၏"
+    confidence: 0.60
+    examples:
+      correct: ["သူရဲ့ စာအုပ်"]
+      incorrect: []
+
+  # ---------- Topic / emphasis confusions ----------
+
+  # Topic marker ကတော့ vs simple subject က
+  - particle: "ကတော့"
+    confused_with: "က"
+    context: "contrastive_topic"
+    description: "Contrastive topic uses ကတော့, not simple subject က"
+    confidence: 0.65
+    examples:
+      correct: ["သူကတော့ လာမယ်"]
+      incorrect: []
+
+  # ---------- Purpose confusions ----------
+
+  # Purpose particle ဖို့ vs formal အတွက်
+  - particle: "ဖို့"
+    confused_with: "အတွက်"
+    context: "purpose_clause"
+    description: "Colloquial purpose uses ဖို့, formal uses အတွက်"
+    confidence: 0.65
+    examples:
+      correct: ["စားဖို့ ဝယ်တယ်"]
+      incorrect: []
+
+  # Benefactive/purpose အတွက် vs ဖို့
+  - particle: "အတွက်"
+    confused_with: "ဖို့"
+    context: "formal_purpose"
+    description: "Formal purpose/benefactive uses အတွက်"
+    confidence: 0.65
+    examples:
+      correct: ["မိသားစု အတွက် လုပ်သည်"]
+      incorrect: []
+
+  # ---------- Conditional confusions ----------
+
+  # Colloquial conditional ရင် vs formal လျှင်
+  - particle: "ရင်"
+    confused_with: "လျှင်"
+    context: "colloquial_conditional"
+    description: "Colloquial conditional uses ရင်, formal uses လျှင်/ပါက"
+    confidence: 0.60
+    examples:
+      correct: ["မိုးရွာရင် မသွားဘူး"]
+      incorrect: []
+
+  # Formal conditional လျှင် vs colloquial ရင်
+  - particle: "လျှင်"
+    confused_with: "ရင်"
+    context: "formal_conditional"
+    description: "Formal conditional uses လျှင် or ပါက"
+    confidence: 0.60
+    examples:
+      correct: ["မိုးရွာလျှင် မသွားပါ"]
+      incorrect: []
+
+  # ---------- Quotative confusions ----------
+
+  # Quotative လို့ (saying) vs reason လို့ (because)
+  - particle: "ဟု"
+    confused_with: "လို့"
+    context: "formal_quotative"
+    description: "Formal quotative uses ဟု, colloquial uses လို့"
+    confidence: 0.65
+    examples:
+      correct: ["ကောင်းသည်ဟု ပြောသည်"]
+      incorrect: []
+
+  # ---------- Comparative confusions ----------
+
+  # Comparative ထက် vs ablative ကနေ
+  - particle: "ထက်"
+    confused_with: "ကနေ"
+    context: "comparison"
+    description: "Comparison uses ထက်, not source marker ကနေ"
+    confidence: 0.65
+    examples:
+      correct: ["ဒီဟာက အဲဒီဟာထက် ကောင်းတယ်"]
+      incorrect: []
+
+  # ---------- Sentence-final particle confusions ----------
+
+  # Affirmative ending တယ် with negation (should be ဘူး)
+  - particle: "ဘူး"
+    confused_with: "တယ်"
+    context: "negative_sentence_ending"
+    description: "Negated verbs end with ဘူး not တယ်"
+    confidence: 0.80
+    examples:
+      correct: ["မသွားဘူး", "မစားဘူး"]
+      incorrect: ["မသွားတယ်", "မစားတယ်"]
+
+# ============================================================
+# VERB-PARTICLE FRAME RULES
+# Semantic verb classes with their compatible/incompatible
+# particle patterns.
+# ============================================================
+verb_particle_frames:
+  # Motion verbs require directional particles
+  - verbs: ["သွား", "လာ", "ပြန်", "ထွက်", "ဝင်", "တက်", "ဆင်း"]
+    required_particles: ["ကို", "မှ", "သို့"]
+    incompatible_particles: ["မှာ", "တွင်", "၌"]
+    note: "Motion verbs take directional particles, not static location"
+
+  # Stative verbs require locative particles
+  - verbs: ["ရှိ", "နေ", "ထိုင်", "အိပ်", "ရပ်", "တည်"]
+    required_particles: ["မှာ", "တွင်", "၌"]
+    incompatible_particles: []
+    note: "Stative verbs take locative particles"
+
+  # Transfer/giving verbs take recipient ကို
+  - verbs: ["ပေး", "ပို့", "ပြ", "ပြော", "ပြန်ပေး"]
+    required_particles: ["ကို"]
+    incompatible_particles: []
+    note: "Transfer/giving verbs take recipient marker ကို"
+
+  # Achievement/result verbs often take ပြီ (completed)
+  - verbs: ["ရောက်", "ပြီး", "ပြည့်", "ဆုံး", "ပျက်"]
+    required_particles: ["ပြီ"]
+    incompatible_particles: []
+    note: "Achievement verbs often mark completion with ပြီ"
+
+  # Verbs of searching/looking take target ကို or location မှာ
+  - verbs: ["ရှာ", "ကြည့်", "စစ်"]
+    required_particles: ["ကို", "မှာ"]
+    incompatible_particles: []
+    note: "Search verbs take object ကို or location မှာ"
+
+  # Speaking/communication verbs
+  - verbs: ["ပြော", "ပြန်ပြော", "ဆို", "မေး", "ဖြေ"]
+    required_particles: ["ကို", "နဲ့", "နှင့်"]
+    incompatible_particles: []
+    note: "Communication verbs take addressee ကို or comitative နဲ့"
+
+  # Comparison verbs/adjectives
+  - verbs: ["ကောင်း", "ဆိုး", "မြင့်", "နိမ့်", "ကြီး", "ငယ်"]
+    required_particles: ["ထက်"]
+    incompatible_particles: []
+    note: "Comparative adjectives take ထက် for comparison"
+
+  # Verbs requiring instrumental/tool particle
+  - verbs: ["ရေး", "ရိုက်", "ဖြတ်", "ထု", "ခုတ်"]
+    required_particles: ["နဲ့", "နှင့်", "ဖြင့်"]
+    incompatible_particles: []
+    note: "Tool-using verbs take instrumental particle နဲ့/နှင့်/ဖြင့်"

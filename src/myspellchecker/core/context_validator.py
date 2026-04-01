@@ -381,6 +381,13 @@ class ContextValidator(Validator):
 
         return context
 
+    # Strategies at or below this priority are "structural" (Layer 1-2) and
+    # always run.  Higher-priority strategies (context, grammar, semantic) are
+    # skipped on sentences where Layer 1-2 found zero issues — the "fast path".
+    # This dramatically reduces FPR on clean text because most sentences have
+    # no structural errors, and the contextual strategies are the main FP source.
+    _FAST_PATH_PRIORITY_CUTOFF: int = 25  # Tone(10), Ortho(15), Syntactic(20), Compound(25)
+
     def _execute_strategies(
         self,
         *,
@@ -388,12 +395,41 @@ class ContextValidator(Validator):
         strategy_debug_telemetry: dict[str, Any] | None,
         exclude_strategy_types: frozenset[type] | None = None,
     ) -> list[Error]:
-        """Execute all strategies for one context."""
+        """Execute all strategies for one context.
+
+        Fast-path optimization: if structural strategies (priority <= 25) find
+        no errors, higher-priority contextual strategies are skipped. This
+        reduces FPR on clean sentences without affecting recall on sentences
+        that have structural issues.
+        """
         errors: list[Error] = []
         timing_enabled = self.config.validation.enable_strategy_timing
+        structural_phase_done = False
+        structural_phase_ran = False
+
         for strategy in self.strategies:
             if exclude_strategy_types and type(strategy) in exclude_strategy_types:
                 continue
+
+            # Fast-path exit: if structural strategies found nothing, skip
+            # contextual strategies (POS, Homophone, Confusable, Ngram, Semantic).
+            # Only fires when fast-path is enabled and at least one structural
+            # strategy actually ran (not just skipped via exclude_strategy_types).
+            if not structural_phase_done and strategy.priority() > self._FAST_PATH_PRIORITY_CUTOFF:
+                structural_phase_done = True
+                if (
+                    self.config.validation.enable_fast_path
+                    and structural_phase_ran
+                    and not errors
+                    and not context.existing_errors
+                ):
+                    logger.debug(
+                        "Fast-path: structural strategies found no issues, "
+                        "skipping contextual strategies"
+                    )
+                    break
+            if not structural_phase_done:
+                structural_phase_ran = True
             strategy_name = strategy.__class__.__name__
             pre_positions: set[int] = set()
             pre_error_types: dict[int, str] = {}

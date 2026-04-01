@@ -10,7 +10,7 @@
 #
 # Schema: https://myspellchecker.dev/schemas/register/v1.0
 
-version: "1.2.0"
+version: "1.3.0"
 category: "register"
 description: "Myanmar register pairs, vocabulary, slang detection, and register marker data"
 
@@ -30,12 +30,14 @@ register_pairs:
   - formal: "ပါသည်"
     colloquial: "ပါတယ်"
     type: "polite_statement"
+    register: "polite"
   - formal: "မည်"
     colloquial: "မယ်"
     type: "future"
   - formal: "ပါမည်"
     colloquial: "ပါမယ်"
     type: "polite_future"
+    register: "polite"
 
   # Plurals
   - formal: "များ"
@@ -96,13 +98,17 @@ formal_words:
   - "အားဖြင့်" # by means of
   - "သို့"    # allative (direction/to) — formal, no direct colloquial equivalent
 
+polite_words:
+  - "ဗျ"      # male polite particle
+  - "ဗျာ"     # male polite extended
+  - "ရှင်"    # female polite
+  - "ရှင့်"   # female polite (with dot-below)
+  - "ခင်ဗျား"  # male polite address (formal spelling)
+
 colloquial_words:
   - "ပဲ"      # emphasis "only/just"
   - "ပေါ့"    # softener
   - "နော်"    # tag question
-  - "ဗျ"      # male polite
-  - "ဗျာ"     # male polite extended
-  - "ရှင်"    # female polite
   - "သိပ်"    # intensifier "very" (colloquial for အလွန်)
 
 # ============================================================
@@ -194,11 +200,12 @@ sentence_final_particles:
     - "ပါသည်"
     - "မည်"
     - "ပါမည်"
+  polite:
+    - "ပါတယ်"
+    - "ပါမယ်"
   colloquial:
     - "တယ်"
-    - "ပါတယ်"
     - "မယ်"
-    - "ပါမယ်"
   discourse:
     - "နော်"      # tag question ("right?", "okay?")
     - "လား"       # yes/no question

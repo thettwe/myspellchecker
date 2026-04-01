@@ -6,16 +6,23 @@ For example: "မနက် ဖြန်" should be "မနက်ဖြန်" (t
 
 This is the inverse of MergedWordChecker, which detects wrongly-merged words.
 
-The strategy checks adjacent word pairs: if their concatenation forms a valid
-dictionary word that is significantly more common than the rarer component,
-it flags the pair as a broken compound.
+The strategy uses a two-layer approach:
+1. **Morphological validation** — curated rules from compound_morphology.yaml
+   provide high-confidence detection of mandatory compounds and suppress
+   false positives from known verb+particle sequences.
+2. **Frequency heuristic** — statistical fallback that checks if the
+   concatenated form is significantly more common than the rarer component.
 
 Priority: 25 (after SyntacticValidation 20, before POS 30)
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import threading
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import yaml  # type: ignore[import-untyped]
 
 from myspellchecker.core.config.algorithm_configs import BrokenCompoundStrategyConfig
 from myspellchecker.core.constants import ET_BROKEN_COMPOUND
@@ -27,6 +34,81 @@ if TYPE_CHECKING:
     from myspellchecker.providers.interfaces import WordRepository
 
 logger = get_logger(__name__)
+
+_COMPOUND_MORPHOLOGY_PATH = (
+    Path(__file__).resolve().parent.parent.parent / "rules" / "compound_morphology.yaml"
+)
+
+# Module-level cache for compound morphology data (loaded once, shared).
+_morphology_data: _CompoundMorphologyData | None = None
+_morphology_lock = threading.Lock()
+
+
+class _CompoundMorphologyData:
+    """Parsed and indexed compound morphology rules for O(1) lookup."""
+
+    __slots__ = (
+        "mandatory_by_parts",
+        "false_compound_keys",
+        "a_prefix_pattern_enabled",
+    )
+
+    def __init__(self, raw: dict[str, Any]) -> None:
+        # mandatory_compounds: map (part1, part2) -> compound string
+        self.mandatory_by_parts: dict[tuple[str, str], str] = {}
+        for entry in raw.get("mandatory_compounds", []):
+            parts = entry.get("parts", [])
+            compound = entry.get("compound", "")
+            if len(parts) == 2 and compound:
+                self.mandatory_by_parts[(parts[0], parts[1])] = compound
+
+        # false_compounds: set of (part1, part2) tuples to suppress
+        self.false_compound_keys: set[tuple[str, str]] = set()
+        for entry in raw.get("false_compounds", []):
+            parts = entry.get("parts", [])
+            if len(parts) == 2:
+                self.false_compound_keys.add((parts[0], parts[1]))
+
+        # compound_patterns: check for အ-prefix nominalization pattern
+        self.a_prefix_pattern_enabled = False
+        for pat in raw.get("compound_patterns", []):
+            if pat.get("pattern_id") == "a_prefix_nominalization":
+                self.a_prefix_pattern_enabled = True
+                break
+
+
+def _load_morphology_data() -> _CompoundMorphologyData | None:
+    """Load and cache compound morphology data from YAML (thread-safe)."""
+    global _morphology_data
+    if _morphology_data is not None:
+        return _morphology_data
+    with _morphology_lock:
+        if _morphology_data is not None:
+            return _morphology_data
+        if not _COMPOUND_MORPHOLOGY_PATH.exists():
+            logger.debug(
+                "Compound morphology rules not found: %s",
+                _COMPOUND_MORPHOLOGY_PATH,
+            )
+            return None
+        try:
+            with open(_COMPOUND_MORPHOLOGY_PATH, encoding="utf-8") as f:
+                raw = yaml.safe_load(f)
+            if isinstance(raw, dict):
+                _morphology_data = _CompoundMorphologyData(raw)
+                logger.debug(
+                    "Loaded compound morphology: %d mandatory, %d false",
+                    len(_morphology_data.mandatory_by_parts),
+                    len(_morphology_data.false_compound_keys),
+                )
+                return _morphology_data
+        except (yaml.YAMLError, OSError) as e:
+            logger.warning(
+                "Failed to load compound morphology from %s: %s",
+                _COMPOUND_MORPHOLOGY_PATH,
+                e,
+            )
+    return None
 
 
 class BrokenCompoundStrategy(ValidationStrategy):
@@ -40,6 +122,9 @@ class BrokenCompoundStrategy(ValidationStrategy):
 
     Priority: 25
     """
+
+    # Higher confidence for morphology-backed detections vs frequency heuristic.
+    _MORPHOLOGY_CONFIDENCE = 0.92
 
     def __init__(
         self,
@@ -83,6 +168,7 @@ class BrokenCompoundStrategy(ValidationStrategy):
         self._both_high_freq = self._config.both_high_freq
         self._min_compound_len = self._config.min_compound_len
         self.logger = logger
+        self._morphology = _load_morphology_data()
 
     def validate(self, context: ValidationContext) -> list[Error]:
         """Validate word pairs for broken compound errors."""
@@ -116,6 +202,37 @@ class BrokenCompoundStrategy(ValidationStrategy):
                 # that falsely appear as broken compounds
                 if "\u1039" in w1 or "\u1039" in w2:
                     continue
+
+                # Guard: skip if the two "words" are actually adjacent in the
+                # original text with no whitespace between them. This happens
+                # when the segmenter splits a valid compound like ကျောင်းသား
+                # into its component syllables. The user didn't insert a space,
+                # so there is no broken compound to fix.
+                if pos_next == pos_i + len(w1):
+                    continue
+
+                # ── Layer 1: Morphological validation (curated rules) ──
+                morpho_result = self._check_morphology(w1, w2)
+                if morpho_result == "false_compound":
+                    # Known verb+particle or similar — skip entirely
+                    continue
+                if morpho_result is not None:
+                    # morpho_result is the compound string from mandatory list
+                    error = self._build_error(
+                        context, i, w1, w2, morpho_result, self._MORPHOLOGY_CONFIDENCE
+                    )
+                    if error is not None:
+                        errors.append(error)
+                        self._mark_positions(
+                            context,
+                            pos_i,
+                            pos_next,
+                            morpho_result,
+                            self._MORPHOLOGY_CONFIDENCE,
+                        )
+                    continue
+
+                # ── Layer 2: Frequency heuristic (statistical fallback) ──
 
                 # Both must be valid individual words (we're detecting split, not typo)
                 if not self.provider.is_valid_word(w1) or not self.provider.is_valid_word(w2):
@@ -159,44 +276,97 @@ class BrokenCompoundStrategy(ValidationStrategy):
                 if rare_freq > 0 and compound_freq / rare_freq < self.compound_ratio:
                     continue
 
-                # Flag the full span covering BOTH words so that
-                # generate_corrected_text replaces "w1 w2" with the compound,
-                # not just one of the two words.
-                # Use absolute positions for error.position (needed by
-                # generate_corrected_text on full text), but derive span_text
-                # from the local sentence to avoid absolute/local mismatch.
-                span_start = pos_i
-                local_start = context.sentence.find(w1)
-                if local_start >= 0:
-                    local_end = context.sentence.find(w2, local_start + len(w1))
-                    if local_end >= 0:
-                        local_end += len(w2)
-                    else:
-                        local_end = local_start + len(w1)
-                    span_text = context.sentence[local_start:local_end]
-                else:
-                    span_text = w1 + w2
-
-                errors.append(
-                    WordError(
-                        text=span_text,
-                        position=span_start,
-                        error_type=ET_BROKEN_COMPOUND,
-                        suggestions=[compound],
-                        confidence=self.confidence,
-                    )
-                )
-                # Mark both positions to prevent duplicate detection from
-                # downstream strategies.
-                context.existing_errors[pos_i] = ET_BROKEN_COMPOUND
-                context.existing_suggestions[pos_i] = [compound]
-                context.existing_confidences[pos_i] = self.confidence
-                context.existing_errors[pos_next] = ET_BROKEN_COMPOUND
+                error = self._build_error(context, i, w1, w2, compound, self.confidence)
+                if error is not None:
+                    errors.append(error)
+                    self._mark_positions(context, pos_i, pos_next, compound, self.confidence)
 
         except (RuntimeError, ValueError, KeyError, IndexError, AttributeError, TypeError) as e:
             self.logger.error(f"Error in broken compound validation: {e}", exc_info=True)
 
         return errors
+
+    # ── Morphological helpers ──
+
+    def _check_morphology(self, w1: str, w2: str) -> str | None:
+        """Check morphological rules for a word pair.
+
+        Returns:
+            - The compound string if (w1, w2) is a mandatory compound.
+            - ``"false_compound"`` if the pair should be suppressed.
+            - ``None`` if no morphological rule applies (fall through to
+              frequency heuristic).
+        """
+        if self._morphology is None:
+            return None
+
+        pair = (w1, w2)
+
+        # 1. False compound suppression (verb+particle, etc.)
+        if pair in self._morphology.false_compound_keys:
+            return "false_compound"
+
+        # 2. Mandatory compound lookup
+        compound = self._morphology.mandatory_by_parts.get(pair)
+        if compound is not None:
+            return compound
+
+        # 3. Productive pattern: အ-prefix nominalization
+        #    If w1 == "အ" and w2 is a valid word, the combined form is
+        #    a nominalization that must stay joined.
+        if (
+            self._morphology.a_prefix_pattern_enabled
+            and w1 == "\u1021"  # အ
+            and hasattr(self.provider, "is_valid_word")
+            and self.provider.is_valid_word(w1 + w2)
+        ):
+            return w1 + w2
+
+        return None
+
+    def _build_error(
+        self,
+        context: ValidationContext,
+        i: int,
+        w1: str,
+        w2: str,
+        compound: str,
+        confidence: float,
+    ) -> WordError | None:
+        """Build a WordError spanning both words of a broken compound."""
+        pos_i = context.word_positions[i]
+        local_start = context.sentence.find(w1)
+        if local_start >= 0:
+            local_end = context.sentence.find(w2, local_start + len(w1))
+            if local_end >= 0:
+                local_end += len(w2)
+            else:
+                local_end = local_start + len(w1)
+            span_text = context.sentence[local_start:local_end]
+        else:
+            span_text = w1 + w2
+
+        return WordError(
+            text=span_text,
+            position=pos_i,
+            error_type=ET_BROKEN_COMPOUND,
+            suggestions=[compound],
+            confidence=confidence,
+        )
+
+    @staticmethod
+    def _mark_positions(
+        context: ValidationContext,
+        pos_i: int,
+        pos_next: int,
+        compound: str,
+        confidence: float,
+    ) -> None:
+        """Mark both word positions as flagged to prevent downstream duplicates."""
+        context.existing_errors[pos_i] = ET_BROKEN_COMPOUND
+        context.existing_suggestions[pos_i] = [compound]
+        context.existing_confidences[pos_i] = confidence
+        context.existing_errors[pos_next] = ET_BROKEN_COMPOUND
 
     def priority(self) -> int:
         """Return strategy execution priority (25)."""

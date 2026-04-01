@@ -8,7 +8,9 @@ from unittest.mock import MagicMock, Mock, mock_open, patch
 
 import pytest
 
-from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder
+duckdb = pytest.importorskip("duckdb", reason="DuckDB required for frequency builder tests")
+
+from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder  # noqa: E402
 
 
 class TestFrequencyBuilderInit:

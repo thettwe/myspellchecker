@@ -36,7 +36,9 @@ from myspellchecker.grammar.checkers.classifier import ClassifierChecker
 from myspellchecker.grammar.checkers.compound import CompoundChecker
 from myspellchecker.grammar.checkers.merged_word import MergedWordChecker
 from myspellchecker.grammar.checkers.negation import NegationChecker
+from myspellchecker.grammar.checkers.particle import ParticleChecker
 from myspellchecker.grammar.checkers.register import RegisterChecker
+from myspellchecker.grammar.checkers.tense_agreement import TenseAgreementChecker
 from myspellchecker.grammar.config import get_grammar_config
 from myspellchecker.grammar.mixins import (
     CheckerDelegationMixin,
@@ -78,6 +80,7 @@ class RuleMatch:
 
 # Default Grammar Engine configuration (module-level singleton)
 _default_grammar_config = GrammarEngineConfig()
+
 
 # Rule priority constants
 # Higher priority = checked first, wins in case of conflicts
@@ -159,7 +162,9 @@ class SyntacticRuleChecker(
         self.compound_checker = CompoundChecker()
         self.merged_word_checker = MergedWordChecker()
         self.negation_checker = NegationChecker()
+        self.particle_checker = ParticleChecker()
         self.register_checker = RegisterChecker(provider=provider)
+        self.tense_agreement_checker = TenseAgreementChecker()
 
     def check_sequence(self, words: list[str]) -> list[tuple[int, str, str, float]]:
         """
@@ -350,6 +355,8 @@ class SyntacticRuleChecker(
         all_errors.extend(self._check_negation(words))
         all_errors.extend(self._check_aspect(words, pos_tags))
         all_errors.extend(self._check_compound(words))
+        all_errors.extend(self._check_particles(words, pos_tags))
+        all_errors.extend(self._check_tense(words))
 
         # Merged word detection (requires POS tags)
         all_errors.extend(self._check_merged_words(words, pos_tags))
@@ -363,7 +370,8 @@ class SyntacticRuleChecker(
         # ClassifierChecker) called above via _check_register/_check_negation/
         # _check_classifiers. Running both produced overlapping errors.
 
-        # Tense agreement: future time word + past tense marker = error
+        # Basic tense agreement (legacy — kept alongside TenseAgreementChecker
+        # which covers more adverbs and markers; positions are deduplicated below)
         all_errors.extend(self._check_tense_agreement(words))
 
         # Filter by confidence and avoid duplicates

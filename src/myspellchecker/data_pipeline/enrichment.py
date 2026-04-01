@@ -120,6 +120,10 @@ class EnrichmentConfig:
     register_min_total: int = 50
     register_threshold: float = 0.3
 
+    # NER entity seeding
+    seed_ner_entities: bool = True
+    enrich_ner: bool = False  # Phase 3 stub — corpus mining not yet implemented
+
 
 # ---------------------------------------------------------------------------
 # Typed variant generation (wraps myanmar_confusables with type tags)
@@ -787,6 +791,7 @@ class EnrichmentReport:
     compound_confusions: int = 0
     collocations: int = 0
     register_tags: int = 0
+    ner_entities: int = 0
     elapsed_seconds: float = 0.0
     errors: list[str] = field(default_factory=list)
 
@@ -859,20 +864,85 @@ def run_enrichment(
                 logger.error(msg)
                 report.errors.append(msg)
 
+        # 5e: Seed NER entities from YAML gazetteer
+        if cfg.seed_ner_entities:
+            try:
+                report.ner_entities = seed_ner_from_gazetteer(conn)
+            except Exception as e:
+                msg = f"NER entity seeding failed: {e}"
+                logger.error(msg)
+                report.errors.append(msg)
+
     finally:
         conn.close()
 
     report.elapsed_seconds = time.monotonic() - t0
     logger.info(
         "Enrichment complete in %.1fs: %d confusables, %d compounds, "
-        "%d collocations, %d register tags",
+        "%d collocations, %d register tags, %d NER entities",
         report.elapsed_seconds,
         report.confusable_pairs,
         report.compound_confusions,
         report.collocations,
         report.register_tags,
+        report.ner_entities,
     )
     return report
+
+
+def seed_ner_from_gazetteer(conn: sqlite3.Connection) -> int:
+    """Seed ``ner_entities`` table from the YAML gazetteer.
+
+    Reads :func:`~myspellchecker.text.ner.get_gazetteer_data` and inserts all
+    entities with ``source='curated'``.  Uses ``INSERT OR IGNORE`` so it is
+    safe to call repeatedly.
+
+    Returns the number of entities inserted.
+    """
+    from myspellchecker.text.ner import get_gazetteer_data
+
+    gaz = get_gazetteer_data()
+    rows: list[tuple[str, str, str, float, int]] = []
+
+    # Map GazetteerData fields to entity_type codes
+    field_type_map = {
+        "person_prefixes": "PER",
+        "common_name_syllables": "PER",
+        "organizations": "ORG",
+        "townships": "LOC",
+        "states_regions": "LOC",
+        "major_cities": "LOC",
+        "historical_places": "LOC",
+        "international_places": "LOC",
+        "countries": "LOC",
+        "geographic_features": "LOC",
+        "ethnic_groups": "ETHNICITY",
+        "religious": "RELIGIOUS",
+        "historical_figures": "HISTORICAL",
+        "temporal": "TEMPORAL",
+        "pali_sanskrit": "PALI",
+    }
+
+    for field_name, entity_type in field_type_map.items():
+        entities = getattr(gaz, field_name, frozenset())
+        for entity in entities:
+            rows.append((entity, entity_type, "curated", 1.0, 0))
+
+    if not rows:
+        return 0
+
+    cursor = conn.cursor()
+    changes_before = conn.total_changes
+    cursor.executemany(
+        "INSERT OR IGNORE INTO ner_entities "
+        "(entity, entity_type, source, confidence, frequency) "
+        "VALUES (?, ?, ?, ?, ?)",
+        rows,
+    )
+    conn.commit()
+    inserted = conn.total_changes - changes_before
+    logger.info("Seeded %d NER entities from gazetteer", inserted)
+    return inserted
 
 
 def _ensure_enrichment_tables(conn: sqlite3.Connection) -> None:
@@ -890,6 +960,7 @@ def _ensure_enrichment_tables(conn: sqlite3.Connection) -> None:
         "compound_confusions",
         "collocations",
         "register_tags",
+        "ner_entities",
     ]
 
     for table_name in enrichment_tables:
@@ -907,6 +978,8 @@ def _ensure_enrichment_tables(conn: sqlite3.Connection) -> None:
         "idx_compound_parts",
         "idx_colloc_word1",
         "idx_colloc_word2",
+        "idx_ner_entity",
+        "idx_ner_entity_type",
     ]
     for idx_name in enrichment_indexes:
         sql = SchemaManager.INDEXES.get(idx_name)
@@ -914,3 +987,38 @@ def _ensure_enrichment_tables(conn: sqlite3.Connection) -> None:
             cursor.execute(sql)
 
     conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 stubs: corpus-based NER entity mining (not yet implemented)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class CorpusNEREntity:
+    """A corpus-mined NER entity for the ``ner_entities`` table."""
+
+    entity: str
+    entity_type: str  # PER, LOC, ORG, etc.
+    confidence: float = 0.0
+    frequency: int = 0
+    source: str = "corpus"
+
+
+def insert_ner_entities(conn: sqlite3.Connection, entities: list[CorpusNEREntity]) -> int:
+    """Insert corpus-mined NER entities into the ``ner_entities`` table.
+
+    Uses ``INSERT OR IGNORE`` for deduplication.
+    """
+    if not entities:
+        return 0
+    cursor = conn.cursor()
+    changes_before = conn.total_changes
+    cursor.executemany(
+        "INSERT OR IGNORE INTO ner_entities "
+        "(entity, entity_type, source, confidence, frequency) "
+        "VALUES (?, ?, ?, ?, ?)",
+        [(e.entity, e.entity_type, e.source, e.confidence, e.frequency) for e in entities],
+    )
+    conn.commit()
+    return conn.total_changes - changes_before

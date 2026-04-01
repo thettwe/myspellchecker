@@ -9,9 +9,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from myspellchecker.algorithms.pos_tagger_rule import RuleBasedPOSTagger
-from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder
-from myspellchecker.data_pipeline.pipeline import Pipeline
+duckdb = pytest.importorskip("duckdb", reason="DuckDB required for POS backward compat tests")
+
+from myspellchecker.algorithms.pos_tagger_rule import RuleBasedPOSTagger  # noqa: E402
+from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder  # noqa: E402
+from myspellchecker.data_pipeline.pipeline import Pipeline  # noqa: E402
 
 
 @pytest.fixture

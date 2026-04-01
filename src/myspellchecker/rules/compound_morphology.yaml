@@ -1,0 +1,792 @@
+# Myanmar Compound Morphology Rules - Version 1.0
+# Morphological validation for compound word boundaries.
+#
+# Three sections:
+#   1. mandatory_compounds — words that MUST be written as single compounds
+#      (splitting them is an error)
+#   2. compound_patterns — productive morphological rules that generate
+#      mandatory compounds (e.g., "အ + verb" nominalizations)
+#   3. false_compounds — word sequences that look like broken compounds but
+#      are intentionally separate (verb + particle, etc.)
+#
+# Used by BrokenCompoundStrategy to override frequency heuristics with
+# curated morphological knowledge.
+
+version: "1.0.0"
+category: "compound_morphology"
+description: "Compound word morphological validation rules"
+
+metadata:
+  created_date: "2026-03-31"
+
+# ============================================================
+# MANDATORY COMPOUNDS
+# ============================================================
+# Words that must be written as compounds (breaking them is an error).
+# Each entry: compound, parts, type, meaning.
+
+mandatory_compounds:
+  # ── Noun + Noun ──
+  - compound: "ကျောင်းသား"
+    parts: ["ကျောင်း", "သား"]
+    type: "noun_noun"
+    meaning: "student (school + child)"
+
+  - compound: "ကျောင်းသူ"
+    parts: ["ကျောင်း", "သူ"]
+    type: "noun_noun"
+    meaning: "female student"
+
+  - compound: "စာအုပ်"
+    parts: ["စာ", "အုပ်"]
+    type: "noun_noun"
+    meaning: "book (text + bound)"
+
+  - compound: "မနက်ဖြန်"
+    parts: ["မနက်", "ဖြန်"]
+    type: "noun_noun"
+    meaning: "tomorrow"
+
+  - compound: "ညနေ"
+    parts: ["ည", "နေ"]
+    type: "noun_noun"
+    meaning: "evening"
+
+  - compound: "နေ့လည်"
+    parts: ["နေ့", "လည်"]
+    type: "noun_noun"
+    meaning: "noon"
+
+  - compound: "မနက်စာ"
+    parts: ["မနက်", "စာ"]
+    type: "noun_noun"
+    meaning: "breakfast"
+
+  - compound: "ညစာ"
+    parts: ["ည", "စာ"]
+    type: "noun_noun"
+    meaning: "dinner"
+
+  - compound: "နေ့လယ်စာ"
+    parts: ["နေ့လယ်", "စာ"]
+    type: "noun_noun"
+    meaning: "lunch"
+
+  - compound: "ရေခဲ"
+    parts: ["ရေ", "ခဲ"]
+    type: "noun_noun"
+    meaning: "ice"
+
+  - compound: "ပန်းခြံ"
+    parts: ["ပန်း", "ခြံ"]
+    type: "noun_noun"
+    meaning: "garden (flower + enclosure)"
+
+  - compound: "လက်သည်း"
+    parts: ["လက်", "သည်း"]
+    type: "noun_noun"
+    meaning: "fingernail"
+
+  - compound: "ခြေဖဝါး"
+    parts: ["ခြေ", "ဖဝါး"]
+    type: "noun_noun"
+    meaning: "sole of foot"
+
+  - compound: "မိဘ"
+    parts: ["မိ", "ဘ"]
+    type: "noun_noun"
+    meaning: "parents (Pali: mata + pita)"
+
+  - compound: "သမီး"
+    parts: ["သ", "မီး"]
+    type: "noun_noun"
+    meaning: "daughter"
+
+  - compound: "ကလေး"
+    parts: ["က", "လေး"]
+    type: "noun_noun"
+    meaning: "child"
+
+  - compound: "ယောက်ျား"
+    parts: ["ယောက်", "ျား"]
+    type: "noun_noun"
+    meaning: "man/husband"
+
+  - compound: "မိန်းကလေး"
+    parts: ["မိန်း", "ကလေး"]
+    type: "noun_noun"
+    meaning: "girl"
+
+  - compound: "ယောက်ျားလေး"
+    parts: ["ယောက်ျား", "လေး"]
+    type: "noun_noun"
+    meaning: "boy"
+
+  # ── Place / Location ──
+  - compound: "မြို့တော်"
+    parts: ["မြို့", "တော်"]
+    type: "noun_noun"
+    meaning: "capital city"
+
+  - compound: "ရွာသူ"
+    parts: ["ရွာ", "သူ"]
+    type: "noun_noun"
+    meaning: "villager (female)"
+
+  - compound: "ရွာသား"
+    parts: ["ရွာ", "သား"]
+    type: "noun_noun"
+    meaning: "villager (male)"
+
+  - compound: "အိမ်ခြံ"
+    parts: ["အိမ်", "ခြံ"]
+    type: "noun_noun"
+    meaning: "house compound"
+
+  # ── Noun + Adj ──
+  - compound: "လူကြီး"
+    parts: ["လူ", "ကြီး"]
+    type: "noun_adj"
+    meaning: "adult/elder"
+
+  - compound: "လူငယ်"
+    parts: ["လူ", "ငယ်"]
+    type: "noun_adj"
+    meaning: "youth"
+
+  - compound: "ရေနွေး"
+    parts: ["ရေ", "နွေး"]
+    type: "noun_adj"
+    meaning: "warm water / tea"
+
+  - compound: "ရေအေး"
+    parts: ["ရေ", "အေး"]
+    type: "noun_adj"
+    meaning: "cold water"
+
+  - compound: "လမ်းမကြီး"
+    parts: ["လမ်းမ", "ကြီး"]
+    type: "noun_adj"
+    meaning: "main road"
+
+  # ── Noun + Verb ──
+  - compound: "ရေချိုး"
+    parts: ["ရေ", "ချိုး"]
+    type: "noun_verb"
+    meaning: "to bathe"
+
+  - compound: "ထမင်းစား"
+    parts: ["ထမင်း", "စား"]
+    type: "noun_verb"
+    meaning: "to eat rice/meal"
+
+  - compound: "အလုပ်လုပ်"
+    parts: ["အလုပ်", "လုပ်"]
+    type: "noun_verb"
+    meaning: "to work"
+
+  - compound: "စာရေး"
+    parts: ["စာ", "ရေး"]
+    type: "noun_verb"
+    meaning: "to write"
+
+  - compound: "စာဖတ်"
+    parts: ["စာ", "ဖတ်"]
+    type: "noun_verb"
+    meaning: "to read"
+
+  - compound: "စာသင်"
+    parts: ["စာ", "သင်"]
+    type: "noun_verb"
+    meaning: "to study"
+
+  - compound: "ဘောလုံးကန်"
+    parts: ["ဘောလုံး", "ကန်"]
+    type: "noun_verb"
+    meaning: "to play football"
+
+  # ── Verb + Verb (serial/complementary) ──
+  - compound: "သွားလာ"
+    parts: ["သွား", "လာ"]
+    type: "verb_verb"
+    meaning: "to travel/commute"
+
+  - compound: "စားသောက်"
+    parts: ["စား", "သောက်"]
+    type: "verb_verb"
+    meaning: "to dine"
+
+  - compound: "လုပ်ကိုင်"
+    parts: ["လုပ်", "ကိုင်"]
+    type: "verb_verb"
+    meaning: "to work/manage"
+
+  - compound: "ရှာဖွေ"
+    parts: ["ရှာ", "ဖွေ"]
+    type: "verb_verb"
+    meaning: "to search for"
+
+  - compound: "သင်ကြား"
+    parts: ["သင်", "ကြား"]
+    type: "verb_verb"
+    meaning: "to educate"
+
+  - compound: "ဝယ်ရောင်း"
+    parts: ["ဝယ်", "ရောင်း"]
+    type: "verb_verb"
+    meaning: "to trade"
+
+  - compound: "ပေးယူ"
+    parts: ["ပေး", "ယူ"]
+    type: "verb_verb"
+    meaning: "to exchange"
+
+  - compound: "ကြိုးစား"
+    parts: ["ကြိုး", "စား"]
+    type: "verb_verb"
+    meaning: "to strive"
+
+  - compound: "အားထုတ်"
+    parts: ["အား", "ထုတ်"]
+    type: "verb_verb"
+    meaning: "to exert effort"
+
+  - compound: "တွေ့ရှိ"
+    parts: ["တွေ့", "ရှိ"]
+    type: "verb_verb"
+    meaning: "to discover/find"
+
+  - compound: "ပြောဆို"
+    parts: ["ပြော", "ဆို"]
+    type: "verb_verb"
+    meaning: "to speak/say"
+
+  - compound: "ဝင်ထွက်"
+    parts: ["ဝင်", "ထွက်"]
+    type: "verb_verb"
+    meaning: "to enter and exit"
+
+  - compound: "ဖွင့်ပိတ်"
+    parts: ["ဖွင့်", "ပိတ်"]
+    type: "verb_verb"
+    meaning: "to open and close"
+
+  - compound: "ပြုပြင်"
+    parts: ["ပြု", "ပြင်"]
+    type: "verb_verb"
+    meaning: "to repair/fix"
+
+  - compound: "ပြင်ဆင်"
+    parts: ["ပြင်", "ဆင်"]
+    type: "verb_verb"
+    meaning: "to prepare"
+
+  # ── Adj + Adj (intensified / compound adjectives) ──
+  - compound: "ကြီးမား"
+    parts: ["ကြီး", "မား"]
+    type: "adj_adj"
+    meaning: "large/great"
+
+  - compound: "သေးငယ်"
+    parts: ["သေး", "ငယ်"]
+    type: "adj_adj"
+    meaning: "tiny/small"
+
+  - compound: "ကောင်းမွန်"
+    parts: ["ကောင်း", "မွန်"]
+    type: "adj_adj"
+    meaning: "good/fine"
+
+  # ── Common nominalizations (အ-prefix) ──
+  - compound: "အလုပ်"
+    parts: ["အ", "လုပ်"]
+    type: "nominalization"
+    meaning: "work/job"
+
+  - compound: "အစား"
+    parts: ["အ", "စား"]
+    type: "nominalization"
+    meaning: "food/substitute"
+
+  - compound: "အသုံး"
+    parts: ["အ", "သုံး"]
+    type: "nominalization"
+    meaning: "usage"
+
+  - compound: "အရေး"
+    parts: ["အ", "ရေး"]
+    type: "nominalization"
+    meaning: "matter/importance"
+
+  - compound: "အိမ်ရှင်"
+    parts: ["အိမ်", "ရှင်"]
+    type: "noun_noun"
+    meaning: "host/homeowner"
+
+  # ── Profession / Role compounds ──
+  - compound: "ဆရာဝန်"
+    parts: ["ဆရာ", "ဝန်"]
+    type: "noun_noun"
+    meaning: "doctor"
+
+  - compound: "ဆရာမ"
+    parts: ["ဆရာ", "မ"]
+    type: "noun_noun"
+    meaning: "female teacher"
+
+  - compound: "ကျောင်းဆရာ"
+    parts: ["ကျောင်း", "ဆရာ"]
+    type: "noun_noun"
+    meaning: "school teacher"
+
+  - compound: "စစ်သား"
+    parts: ["စစ်", "သား"]
+    type: "noun_noun"
+    meaning: "soldier"
+
+  - compound: "ရဲသား"
+    parts: ["ရဲ", "သား"]
+    type: "noun_noun"
+    meaning: "police officer"
+
+# ============================================================
+# COMPOUND PATTERNS (productive morphological rules)
+# ============================================================
+# These are generalizable rules, not exhaustive word lists.
+# The strategy uses these to catch compounds NOT in the explicit list.
+
+compound_patterns:
+  # အ-prefix nominalizations (verb -> noun): must stay joined
+  - pattern_id: "a_prefix_nominalization"
+    prefix: "အ"
+    description: "အ-prefix creates nouns from verbs; must stay joined"
+    examples: ["အလုပ်", "အစား", "အသုံး", "အပြော", "အရေး", "အကူ", "အမှု"]
+
+  # Reduplication compounds: reduplicated words are single units
+  - pattern_id: "reduplication"
+    description: "Reduplicated words must stay joined"
+    examples: ["ဖြည်းဖြည်း", "ချောချော", "လှလှ", "မြန်မြန်", "ကောင်းကောင်း"]
+
+# ============================================================
+# FALSE COMPOUNDS (should NOT be flagged as broken compounds)
+# ============================================================
+# Word sequences that frequency heuristics might wrongly flag as
+# broken compounds. These are intentionally separate words.
+
+false_compounds:
+  # Verb + sentence-final particle (never compounds)
+  - parts: ["သွား", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["လာ", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["စား", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["လုပ်", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["ရေး", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["ပြော", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["သိ", "တယ်"]
+    reason: "verb + SFP"
+
+  - parts: ["ကြည့်", "တယ်"]
+    reason: "verb + SFP"
+
+  # Verb + sequential particle (not compounds)
+  - parts: ["စား", "ပြီး"]
+    reason: "verb + sequential particle"
+
+  - parts: ["သွား", "ပြီး"]
+    reason: "verb + sequential particle"
+
+  - parts: ["လုပ်", "ပြီး"]
+    reason: "verb + sequential particle"
+
+  - parts: ["ရေး", "ပြီး"]
+    reason: "verb + sequential particle"
+
+  # Verb + completed aspect
+  - parts: ["သွား", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["လာ", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["စား", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["လုပ်", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  # Verb + future/irrealis
+  - parts: ["သွား", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["လာ", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["စား", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["လုပ်", "မယ်"]
+    reason: "verb + future particle"
+
+  # Noun + postposition (separate words)
+  - parts: ["အိမ်", "မှာ"]
+    reason: "noun + locative postposition"
+
+  - parts: ["ကျောင်း", "မှာ"]
+    reason: "noun + locative postposition"
+
+  - parts: ["ဈေး", "မှာ"]
+    reason: "noun + locative postposition"
+
+  - parts: ["အိမ်", "ကို"]
+    reason: "noun + accusative/directional postposition"
+
+  - parts: ["ကျောင်း", "ကို"]
+    reason: "noun + accusative/directional postposition"
+
+  # Verb + negation contexts
+  - parts: ["မ", "သွား"]
+    reason: "negation prefix + verb (written separately)"
+
+  - parts: ["မ", "လာ"]
+    reason: "negation prefix + verb"
+
+  - parts: ["မ", "စား"]
+    reason: "negation prefix + verb"
+
+  - parts: ["မ", "လုပ်"]
+    reason: "negation prefix + verb"
+
+  - parts: ["မ", "ရှိ"]
+    reason: "negation prefix + verb (not exist)"
+
+  - parts: ["မ", "ဟုတ်"]
+    reason: "negation prefix + verb (not correct)"
+
+  - parts: ["မ", "ပါ"]
+    reason: "negation prefix + verb (not included)"
+
+  - parts: ["မ", "လို"]
+    reason: "negation prefix + verb (not want)"
+
+  - parts: ["မ", "သိ"]
+    reason: "negation prefix + verb (not know)"
+
+  - parts: ["မ", "ကြ"]
+    reason: "negation prefix + plural verb marker"
+
+  - parts: ["မ", "နိုင်"]
+    reason: "negation prefix + potential verb (cannot)"
+
+  - parts: ["မ", "ဖြစ်"]
+    reason: "negation prefix + verb (not happen)"
+
+  - parts: ["မ", "ရ"]
+    reason: "negation prefix + verb (not get/must not)"
+
+  - parts: ["မ", "ကောင်း"]
+    reason: "negation prefix + adjective (not good)"
+
+  # ── Numeral + classifier (always separate) ──
+  - parts: ["တစ်", "ခု"]
+    reason: "numeral (one) + classifier (item)"
+
+  - parts: ["တစ်", "ဦး"]
+    reason: "numeral (one) + classifier (person/honorific)"
+
+  - parts: ["တစ်", "ယောက်"]
+    reason: "numeral (one) + classifier (person/informal)"
+
+  - parts: ["တစ်", "ကောင်"]
+    reason: "numeral (one) + classifier (animal)"
+
+  - parts: ["တစ်", "ခြောင်း"]
+    reason: "numeral (one) + classifier (long object)"
+
+  - parts: ["တစ်", "စုံ"]
+    reason: "numeral (one) + classifier (pair/set)"
+
+  - parts: ["တစ်", "လုံး"]
+    reason: "numeral (one) + classifier (round object/whole)"
+
+  - parts: ["တစ်", "ပင်"]
+    reason: "numeral (one) + classifier (plant/tree)"
+
+  - parts: ["တစ်", "စင်း"]
+    reason: "numeral (one) + classifier (vehicle/boat)"
+
+  - parts: ["တစ်", "ခွက်"]
+    reason: "numeral (one) + classifier (cup)"
+
+  - parts: ["တစ်", "ပွဲ"]
+    reason: "numeral (one) + classifier (event/plate)"
+
+  - parts: ["နှစ်", "ခု"]
+    reason: "numeral (two) + classifier (item)"
+
+  - parts: ["နှစ်", "ဦး"]
+    reason: "numeral (two) + classifier (person)"
+
+  - parts: ["နှစ်", "ယောက်"]
+    reason: "numeral (two) + classifier (person/informal)"
+
+  - parts: ["သုံး", "ခု"]
+    reason: "numeral (three) + classifier (item)"
+
+  - parts: ["သုံး", "ယောက်"]
+    reason: "numeral (three) + classifier (person)"
+
+  - parts: ["ခု", "နှစ်"]
+    reason: "classifier + numeral (year in dates)"
+
+  - parts: ["လေး", "ခု"]
+    reason: "numeral (four) + classifier (item)"
+
+  - parts: ["ငါး", "ခု"]
+    reason: "numeral (five) + classifier (item)"
+
+  # ── Verb + sequential/aspect particles (expanded) ──
+  - parts: ["ဖြစ်", "ပြီး"]
+    reason: "verb (be/happen) + sequential particle"
+
+  - parts: ["ပြော", "ပြီး"]
+    reason: "verb (say) + sequential particle"
+
+  - parts: ["လာ", "ပြီး"]
+    reason: "verb (come) + sequential particle"
+
+  - parts: ["ကြည့်", "ပြီး"]
+    reason: "verb (look) + sequential particle"
+
+  - parts: ["ပေး", "ပြီး"]
+    reason: "verb (give) + sequential particle"
+
+  - parts: ["ယူ", "ပြီး"]
+    reason: "verb (take) + sequential particle"
+
+  - parts: ["ဖတ်", "ပြီး"]
+    reason: "verb (read) + sequential particle"
+
+  - parts: ["သိ", "ပြီး"]
+    reason: "verb (know) + sequential particle"
+
+  - parts: ["ဖြစ်", "ပြီ"]
+    reason: "verb (be) + completed particle"
+
+  - parts: ["ပြီး", "ပြီ"]
+    reason: "sequential particle + completed particle"
+
+  - parts: ["သွား", "ပြီ"]
+    reason: "verb (go) + completed particle"
+
+  - parts: ["လာ", "ပြီ"]
+    reason: "verb (come) + completed particle"
+
+  - parts: ["ရ", "ပြီ"]
+    reason: "verb (get) + completed particle"
+
+  # ── Verb + auxiliary/potential verbs ──
+  - parts: ["သွား", "နိုင်"]
+    reason: "verb + potential auxiliary (can go)"
+
+  - parts: ["လုပ်", "နိုင်"]
+    reason: "verb + potential auxiliary (can do)"
+
+  - parts: ["ပြော", "နိုင်"]
+    reason: "verb + potential auxiliary (can say)"
+
+  - parts: ["လာ", "နိုင်"]
+    reason: "verb + potential auxiliary (can come)"
+
+  - parts: ["ဖြစ်", "နိုင်"]
+    reason: "verb + potential auxiliary (can be)"
+
+  - parts: ["သွား", "ရ"]
+    reason: "verb + obligation/permission auxiliary"
+
+  - parts: ["လုပ်", "ရ"]
+    reason: "verb + obligation/permission auxiliary"
+
+  - parts: ["ပြော", "ရ"]
+    reason: "verb + obligation/permission auxiliary"
+
+  # ── Verb + progressive/continuous (နေ) ──
+  - parts: ["လုပ်", "နေ"]
+    reason: "verb + progressive auxiliary (doing)"
+
+  - parts: ["ပြော", "နေ"]
+    reason: "verb + progressive auxiliary (saying)"
+
+  - parts: ["ကြည့်", "နေ"]
+    reason: "verb + progressive auxiliary (looking)"
+
+  - parts: ["စား", "နေ"]
+    reason: "verb + progressive auxiliary (eating)"
+
+  - parts: ["သွား", "နေ"]
+    reason: "verb + progressive auxiliary (going)"
+
+  - parts: ["နေ", "ရာ"]
+    reason: "progressive/place marker + noun (place/position)"
+
+  # ── Verb + SFP (formal/expanded) ──
+  - parts: ["သွား", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["လာ", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ဖြစ်", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ရှိ", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["လုပ်", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ပြော", "သည်"]
+    reason: "verb + formal SFP"
+
+  - parts: ["ဖြစ်", "တယ်"]
+    reason: "verb (be) + SFP"
+
+  - parts: ["ရှိ", "တယ်"]
+    reason: "verb (exist) + SFP"
+
+  - parts: ["နိုင်", "တယ်"]
+    reason: "potential auxiliary + SFP"
+
+  - parts: ["သွား", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["လာ", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["ဖြစ်", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["ရှိ", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["လုပ်", "ပါတယ်"]
+    reason: "verb + polite SFP"
+
+  - parts: ["ဖြစ်", "ပါသည်"]
+    reason: "verb + formal polite SFP"
+
+  - parts: ["ရှိ", "ပါသည်"]
+    reason: "verb + formal polite SFP"
+
+  - parts: ["လုပ်", "ပါသည်"]
+    reason: "verb + formal polite SFP"
+
+  # ── Verb + completed aspect (expanded) ──
+  - parts: ["ဖြစ်", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ပြော", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ရေး", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ပေး", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  - parts: ["ရှိ", "ခဲ့"]
+    reason: "verb + completed aspect marker"
+
+  # ── Verb + future (expanded) ──
+  - parts: ["ဖြစ်", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ရှိ", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ပြော", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ရေး", "မယ်"]
+    reason: "verb + future particle"
+
+  - parts: ["ပေး", "မယ်"]
+    reason: "verb + future particle"
+
+  # ── Compound nouns (properly spaced in formal writing) ──
+  - parts: ["မြန်မာ", "နိုင်ငံ"]
+    reason: "proper noun + noun (Myanmar country)"
+
+  - parts: ["ပြည်", "ထောင်စု"]
+    reason: "compound noun (Union/Federal) — written separately"
+
+  - parts: ["နိုင်ငံ", "ရေး"]
+    reason: "noun + suffix (politics/affairs)"
+
+  - parts: ["နိုင်ငံ", "တကာ"]
+    reason: "noun + suffix (international)"
+
+  - parts: ["အစိုးရ", "အဖွဲ့"]
+    reason: "noun + noun (government + organization)"
+
+  - parts: ["လွှတ်တော်", "ကိုယ်စားလှယ်"]
+    reason: "noun + noun (parliament + representative)"
+
+  - parts: ["သတင်း", "စာ"]
+    reason: "noun + noun (newspaper — often written separately)"
+
+  - parts: ["ရေး", "သား"]
+    reason: "verb + noun forming agent noun (writer — can be split)"
+
+  - parts: ["ဖွံ့", "ဖြိုး"]
+    reason: "verb + verb complement (develop — written separately)"
+
+  - parts: ["ပြည်", "သူ"]
+    reason: "noun + noun (citizen — can be split)"
+
+  - parts: ["ပြည်", "နယ်"]
+    reason: "noun + noun (province/region)"
+
+  - parts: ["ကျန်း", "မာ"]
+    reason: "adj + adj complement (healthy — can be split)"
+
+  - parts: ["စီး", "ပွား"]
+    reason: "verb + complement (economy/business — written separately)"
+
+  - parts: ["ပညာ", "ရေး"]
+    reason: "noun + suffix (education)"
+
+  - parts: ["လုံ", "ခြုံ"]
+    reason: "adj + complement (security/safety)"
+
+  - parts: ["အစိုးရ", "အရာရှိ"]
+    reason: "noun + noun (government + official)"
+
+  - parts: ["မြန်မာ", "ပြည်"]
+    reason: "proper noun + noun (Myanmar country)"
+
+  - parts: ["မြန်မာ", "စာ"]
+    reason: "proper noun + noun (Myanmar language/writing)"
+
+  # ── Additional postpositions ──
+  - parts: ["အိမ်", "က"]
+    reason: "noun + ablative postposition"
+
+  - parts: ["ကျောင်း", "က"]
+    reason: "noun + ablative postposition"
+
+  - parts: ["အိမ်", "တွင်"]
+    reason: "noun + formal locative postposition"
+
+  - parts: ["ကျောင်း", "တွင်"]
+    reason: "noun + formal locative postposition"

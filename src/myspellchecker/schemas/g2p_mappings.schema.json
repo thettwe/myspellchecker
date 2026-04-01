@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/g2p-mappings/v1.0",
+  "title": "Myanmar G2P Mappings Schema",
+  "description": "JSON Schema for validating g2p_mappings.yaml - Myanmar grapheme-to-phoneme mappings for homophone detection",
+
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "consonants", "vowels", "medials", "finals", "homophone_groups"],
+  "additionalProperties": false,
+
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version (must be '1.x.x')"
+    },
+
+    "category": {
+      "type": "string",
+      "const": "g2p_mappings",
+      "description": "Category type (must be 'g2p_mappings')"
+    },
+
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+
+    "consonants": {
+      "description": "Consonant grapheme-to-phoneme mappings",
+      "type": "array",
+      "items": { "$ref": "#/definitions/consonant_entry" }
+    },
+
+    "vowels": {
+      "description": "Vowel grapheme-to-phoneme mappings",
+      "type": "array",
+      "items": { "$ref": "#/definitions/vowel_entry" }
+    },
+
+    "medials": {
+      "description": "Medial consonant grapheme-to-phoneme mappings",
+      "type": "array",
+      "items": { "$ref": "#/definitions/medial_entry" }
+    },
+
+    "finals": {
+      "description": "Final marker phoneme mappings",
+      "type": "array",
+      "items": { "$ref": "#/definitions/final_entry" }
+    },
+
+    "homophone_groups": {
+      "description": "Groups of characters that produce identical or near-identical pronunciation",
+      "type": "array",
+      "items": { "$ref": "#/definitions/homophone_group_entry" }
+    }
+  },
+
+  "definitions": {
+    "consonant_entry": {
+      "description": "A consonant grapheme-to-phoneme mapping",
+      "type": "object",
+      "required": ["grapheme", "phonemes", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "grapheme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2,
+          "description": "Myanmar consonant character"
+        },
+        "phonemes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "IPA phoneme(s) for this grapheme"
+        },
+        "position": {
+          "type": "string",
+          "enum": ["initial", "final", "both"],
+          "description": "Syllable position where this mapping applies"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Phonological notes or allophonic context"
+        }
+      }
+    },
+
+    "vowel_entry": {
+      "description": "A vowel grapheme-to-phoneme mapping",
+      "type": "object",
+      "required": ["grapheme", "phonemes"],
+      "additionalProperties": false,
+      "properties": {
+        "grapheme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2,
+          "description": "Myanmar vowel sign or independent vowel"
+        },
+        "phonemes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "IPA phoneme(s) for this grapheme"
+        },
+        "length": {
+          "type": "string",
+          "enum": ["short", "long", "n/a"],
+          "description": "Vowel length distinction"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Phonological notes"
+        }
+      }
+    },
+
+    "medial_entry": {
+      "description": "A medial consonant grapheme-to-phoneme mapping",
+      "type": "object",
+      "required": ["grapheme", "phonemes"],
+      "additionalProperties": false,
+      "properties": {
+        "grapheme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1,
+          "description": "Myanmar medial consonant sign"
+        },
+        "phonemes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "IPA phoneme(s) for this medial"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Phonological notes"
+        }
+      }
+    },
+
+    "final_entry": {
+      "description": "A final marker phoneme mapping",
+      "type": "object",
+      "required": ["grapheme", "phonemes"],
+      "additionalProperties": false,
+      "properties": {
+        "grapheme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1,
+          "description": "Myanmar final marker character"
+        },
+        "phonemes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IPA phoneme(s); may be empty for structural markers"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Phonological notes"
+        }
+      }
+    },
+
+    "homophone_group_entry": {
+      "description": "A group of graphemes that sound identical or near-identical",
+      "type": "object",
+      "required": ["phoneme", "graphemes", "confusion_type", "frequency"],
+      "additionalProperties": false,
+      "properties": {
+        "phoneme": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Shared phoneme label for the group"
+        },
+        "graphemes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "description": "Characters that share this phoneme"
+        },
+        "confusion_type": {
+          "type": "string",
+          "enum": [
+            "aspiration",
+            "voicing",
+            "retroflex",
+            "liquid",
+            "sibilant",
+            "nasal",
+            "medial",
+            "vowel_length",
+            "lateral",
+            "nya_variant",
+            "final_marker",
+            "wa_zero"
+          ],
+          "description": "Category of phonetic confusion"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "How frequently this confusion occurs in practice"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Explanation of the confusion pattern"
+        }
+      }
+    }
+  }
+}

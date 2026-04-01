@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "myspellchecker"
-version = "1.0.0"
+version = "1.1.0"
 description = "Myanmar (Burmese) text intelligence library — spell checking, grammar validation, dictionary building, and AI model training"
 readme = "README.md"
 # NOTE: Codebase uses Python 3.10+ syntax (PEP 604 unions like `str | None`).
@@ -193,6 +193,15 @@ ignore = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests with pytest.importorskip() at module level need imports after the skip guard
+"tests/test_frequency_builder.py" = ["E402"]
+"tests/test_data_pipeline.py" = ["E402"]
+"tests/test_db_build_and_usage.py" = ["E402"]
+"tests/test_incremental_build.py" = ["E402"]
+"tests/test_pos_backward_compat.py" = ["E402"]
+"tests/test_disk_space.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"

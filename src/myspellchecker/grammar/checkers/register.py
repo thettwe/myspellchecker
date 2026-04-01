@@ -27,6 +27,7 @@ from myspellchecker.core.response import GrammarError
 from myspellchecker.grammar.config import get_grammar_config
 
 __all__ = [
+    "REGISTER_POLITE",
     "RegisterChecker",
     "RegisterError",
     "RegisterInfo",
@@ -38,6 +39,7 @@ _default_register_config = RegisterCheckerConfig()
 # Constants for internal use
 REGISTER_FORMAL = "formal"
 REGISTER_COLLOQUIAL = "colloquial"
+REGISTER_POLITE = "polite"
 REGISTER_NEUTRAL = "neutral"
 
 # Register pair types that are safe for suffix-based detection.
@@ -84,6 +86,10 @@ class RegisterInfo:
     def is_colloquial(self) -> bool:
         """Check if word is colloquial register."""
         return self.register == REGISTER_COLLOQUIAL
+
+    def is_polite(self) -> bool:
+        """Check if word is polite register."""
+        return self.register == REGISTER_POLITE
 
 
 @dataclass
@@ -153,6 +159,7 @@ class RegisterChecker:
         # Initialize sets and maps
         self.formal_words: set[str] = set()
         self.colloquial_words: set[str] = set()
+        self.polite_words: set[str] = set()
         self.neutral_words: set[str] = set()
         self.register_pairs: dict[str, str] = {}  # formal -> colloquial
         self.colloquial_to_formal: dict[str, str] = {}  # colloquial -> formal
@@ -180,6 +187,9 @@ class RegisterChecker:
         if "colloquial_words" in reg_config:
             self.colloquial_words.update(reg_config["colloquial_words"])
 
+        if "polite_words" in reg_config:
+            self.polite_words.update(reg_config["polite_words"])
+
         if "neutral_words" in reg_config:
             self.neutral_words.update(reg_config["neutral_words"])
 
@@ -205,7 +215,13 @@ class RegisterChecker:
                     self.colloquial_to_formal[colloquial] = formal
 
                     self.formal_words.add(formal)
-                    self.colloquial_words.add(colloquial)
+
+                    # Classify colloquial-side word based on register override
+                    pair_register = pair.get("register", "")
+                    if pair_register == "polite":
+                        self.polite_words.add(colloquial)
+                    else:
+                        self.colloquial_words.add(colloquial)
 
                     # Track suffix eligibility by pair type
                     pair_type = pair.get("type", "")
@@ -221,6 +237,10 @@ class RegisterChecker:
         for word in self.colloquial_words:
             formal_eq = self.colloquial_to_formal.get(word)
             self.word_register_map[word] = (REGISTER_COLLOQUIAL, formal_eq, word)
+
+        for word in self.polite_words:
+            formal_eq = self.colloquial_to_formal.get(word)
+            self.word_register_map[word] = (REGISTER_POLITE, formal_eq, word)
 
         for word in self.neutral_words:
             self.word_register_map[word] = (REGISTER_NEUTRAL, word, word)
@@ -246,6 +266,8 @@ class RegisterChecker:
             self._register_detection_words.update(reg_config["formal_words"])
         if "colloquial_words" in reg_config:
             self._register_detection_words.update(reg_config["colloquial_words"])
+        if "polite_words" in reg_config:
+            self._register_detection_words.update(reg_config["polite_words"])
 
         # Load vocabulary pairs (informal/slang words with formal equivalents).
         # These are used for vocabulary-level register mismatch detection:
@@ -334,6 +356,11 @@ class RegisterChecker:
                         pair = self.register_pairs.get(suffix)
                         full_colloquial = stem + pair if pair else colloquial_form
                         full_formal = word
+                    elif register == REGISTER_POLITE:
+                        # Word is polite; build formal full form
+                        pair = self.colloquial_to_formal.get(suffix)
+                        full_formal = stem + pair if pair else formal_form
+                        full_colloquial = word
                     else:
                         # Word is colloquial; build formal full form
                         pair = self.colloquial_to_formal.get(suffix)
@@ -395,6 +422,7 @@ class RegisterChecker:
             True
         """
         formal_count = 0
+        polite_count = 0
         colloquial_count = 0
         word_infos: list[RegisterInfo] = []
 
@@ -410,26 +438,40 @@ class RegisterChecker:
             if info.register == REGISTER_FORMAL:
                 formal_count += 1
                 word_infos.append(info)
+            elif info.register == REGISTER_POLITE:
+                polite_count += 1
+                word_infos.append(info)
             elif info.register == REGISTER_COLLOQUIAL:
                 colloquial_count += 1
                 word_infos.append(info)
             # Neutral words don't affect the count
 
-        total_register_words = formal_count + colloquial_count
+        total_register_words = formal_count + polite_count + colloquial_count
 
         if total_register_words == 0:
             # No register-significant words
             return (REGISTER_NEUTRAL, 1.0, word_infos)
 
-        # Determine predominant register
-        if formal_count > 0 and colloquial_count > 0:
-            # Mixed register
-            # Consistency score = dominant / total
-            dominant = max(formal_count, colloquial_count)
-            consistency = dominant / total_register_words
-            return ("mixed", consistency, word_infos)
-        elif formal_count > 0:
+        # Determine registers present
+        has_formal = formal_count > 0
+        has_polite = polite_count > 0
+        has_colloquial = colloquial_count > 0
+
+        # Polite + Casual = acceptable (return colloquial, no mixing)
+        if has_polite and has_colloquial and not has_formal:
+            dominant = max(polite_count, colloquial_count)
+            return (REGISTER_COLLOQUIAL, dominant / total_register_words, word_infos)
+
+        # Any combination with formal + casual/polite = mixed
+        if has_formal and (has_colloquial or has_polite):
+            dominant = max(formal_count, polite_count, colloquial_count)
+            return ("mixed", dominant / total_register_words, word_infos)
+
+        # Pure register
+        if has_formal:
             return (REGISTER_FORMAL, 1.0, word_infos)
+        elif has_polite:
+            return (REGISTER_POLITE, 1.0, word_infos)
         else:
             return (REGISTER_COLLOQUIAL, 1.0, word_infos)
 
@@ -462,13 +504,26 @@ class RegisterChecker:
         if predominant == "mixed":
             # Find which words don't match the majority
             formal_count = sum(1 for w in word_infos if w.is_formal())
+            polite_count = sum(1 for w in word_infos if w.is_polite())
             colloquial_count = sum(1 for w in word_infos if w.is_colloquial())
 
             # Determine expected register (majority wins)
-            if formal_count >= colloquial_count:
+            if formal_count >= max(polite_count, colloquial_count):
                 expected = REGISTER_FORMAL
+            elif polite_count >= colloquial_count:
+                expected = REGISTER_POLITE
             else:
                 expected = REGISTER_COLLOQUIAL
+
+            # Determine severity: formal+colloquial is a stronger mismatch
+            # than formal+polite (polite is closer to formal).
+            has_formal = formal_count > 0
+            has_colloquial = colloquial_count > 0
+            if has_formal and has_colloquial:
+                mismatch_confidence = self.register_cfg.register_mismatch_confidence
+            else:
+                # formal+polite only (no colloquial) — lower severity
+                mismatch_confidence = self.register_cfg.register_formality_gap_confidence
 
             # Find offending words (only register-significant ones)
             for i, word in enumerate(words):
@@ -485,15 +540,29 @@ class RegisterChecker:
                     # This word doesn't match the expected register
                     if expected == REGISTER_FORMAL:
                         suggestion = info.formal_form or word
+                        register_label = (
+                            "polite" if info.register == REGISTER_POLITE else "colloquial"
+                        )
                         reason = (
-                            f"Mixed register: '{word}' is colloquial, "
+                            f"Mixed register: '{word}' is {register_label}, "
                             f"but sentence is predominantly formal. "
+                            f"Consider using '{suggestion}'."
+                        )
+                    elif expected == REGISTER_POLITE:
+                        suggestion = info.colloquial_form or word
+                        register_label = (
+                            "formal" if info.register == REGISTER_FORMAL else "colloquial"
+                        )
+                        reason = (
+                            f"Mixed register: '{word}' is {register_label}, "
+                            f"but sentence is predominantly polite. "
                             f"Consider using '{suggestion}'."
                         )
                     else:
                         suggestion = info.colloquial_form or word
+                        register_label = "formal" if info.register == REGISTER_FORMAL else "polite"
                         reason = (
-                            f"Mixed register: '{word}' is formal, "
+                            f"Mixed register: '{word}' is {register_label}, "
                             f"but sentence is predominantly colloquial. "
                             f"Consider using '{suggestion}'."
                         )
@@ -504,7 +573,7 @@ class RegisterChecker:
                             position=i,
                             suggestions=[suggestion],
                             error_type=ET_MIXED_REGISTER,
-                            confidence=self.register_cfg.register_mismatch_confidence,
+                            confidence=mismatch_confidence,
                             reason=reason,
                             detected_register=info.register,
                             expected_register=expected,

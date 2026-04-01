@@ -273,7 +273,9 @@ class RegisterMixingMixin:
     provider: "DictionaryProvider"
     _FORMAL_ENDINGS: frozenset[str]
     _COLLOQUIAL_ENDINGS: frozenset[str]
+    _POLITE_ENDINGS: frozenset[str]
     _FORMAL_ENDINGS_WITH_STRIPPED: frozenset[str]
+    _POLITE_ENDINGS_WITH_STRIPPED: frozenset[str]
     _COLLOQUIAL_ENDINGS_WITH_STRIPPED: frozenset[str]
 
     # ----- Register pronoun sets -----
@@ -328,6 +330,7 @@ class RegisterMixingMixin:
         # (token_pos, token, matched_ending) — store the ending for suffix position
         # Suffix positions: sentence-final particles (သည်, တယ်, etc.)
         formal_suffix_pos: list[tuple[int, str, str]] = []
+        polite_suffix_pos: list[tuple[int, str, str]] = []
         colloquial_suffix_pos: list[tuple[int, str, str]] = []
         # Pronoun positions: strictly informal pronouns (ငါ, ငါတို့)
         colloquial_pronoun_pos: list[tuple[int, str, str]] = []
@@ -382,6 +385,7 @@ class RegisterMixingMixin:
             is_final_token = token == tokens[-1]
             for endings, dest in [
                 (self._FORMAL_ENDINGS_WITH_STRIPPED, formal_suffix_pos),
+                (self._POLITE_ENDINGS_WITH_STRIPPED, polite_suffix_pos),
                 (self._COLLOQUIAL_ENDINGS_WITH_STRIPPED, colloquial_suffix_pos),
             ]:
                 for ending in sorted(endings, key=len, reverse=True):
@@ -433,6 +437,7 @@ class RegisterMixingMixin:
 
         # Both registers must be present (from any signal) for mixing
         has_formal = len(formal_suffix_pos) > 0
+        has_polite = len(polite_suffix_pos) > 0
         # Literary particles are strong formal signals when 2+ appear.
         # Literary adverbs alone (e.g., "ယနေ့") are too weak as a formal signal
         # and frequently appear in colloquial sentences.
@@ -457,7 +462,13 @@ class RegisterMixingMixin:
         )
         has_first_person = any(t in _FIRST_PERSON_FORMS for t in tokens)
         has_colloquial = len(colloquial_suffix_pos) > 0 or len(colloquial_pronoun_pos) > 0
-        if not (has_formal or has_literary_formal or has_contextual_formal) or not has_colloquial:
+
+        # Polite + Casual without formal = acceptable, no mixing error
+        if not (has_formal or has_literary_formal or has_contextual_formal):
+            return  # No formal signal, no mixing to detect
+
+        # Must have some non-formal signal to flag
+        if not (has_colloquial or has_polite):
             return  # No mixing
 
         existing_positions = get_existing_positions(errors)
@@ -492,7 +503,13 @@ class RegisterMixingMixin:
         def _add_register_errors(
             positions: list[tuple[int, str, str]],
             is_formal: bool,
+            confidence_override: float | None = None,
         ) -> None:
+            base_confidence = (
+                confidence_override
+                if confidence_override is not None
+                else TEXT_DETECTOR_CONFIDENCES["register_mixing"]
+            )
             convert = _formal_to_colloquial if is_formal else _colloquial_to_formal
             full_form_suffix_map: dict[str, list[str]] = {
                 normalize("တယ်"): [normalize("ပါသည်"), normalize("သည်")],
@@ -533,7 +550,7 @@ class RegisterMixingMixin:
                                 text=token,
                                 position=token_pos,
                                 suggestions=full_suggestions,
-                                confidence=TEXT_DETECTOR_CONFIDENCES["register_mixing"],
+                                confidence=base_confidence,
                                 error_type=ET_REGISTER_MIXING,
                             )
                         )
@@ -558,7 +575,7 @@ class RegisterMixingMixin:
                             text=ending,
                             position=suffix_pos,
                             suggestions=list(suggestions),
-                            confidence=TEXT_DETECTOR_CONFIDENCES["register_mixing"],
+                            confidence=base_confidence,
                             error_type=ET_REGISTER_MIXING,
                         )
                     )
@@ -577,10 +594,34 @@ class RegisterMixingMixin:
         )
         total_colloquial = len(colloquial_suffix_pos) + len(colloquial_pronoun_pos)
 
+        # Formal + Polite (no casual) = lower confidence warning.
+        # Formal + Casual = full confidence error (regardless of polite).
+        # Polite + Casual = acceptable (already returned above).
+        _POLITE_CONFIDENCE_FACTOR = 0.76
+        polite_only_mixing = has_polite and not has_colloquial
+        reduced_confidence: float | None = (
+            TEXT_DETECTOR_CONFIDENCES["register_mixing"] * _POLITE_CONFIDENCE_FACTOR
+            if polite_only_mixing
+            else None
+        )
+
         if total_formal >= total_colloquial:
             # Formal dominant — flag colloquial suffixes and pronouns
             _add_register_errors(colloquial_suffix_pos, is_formal=False)
             _add_register_errors(colloquial_pronoun_pos, is_formal=False)
+            # Formal + Polite only: flag polite positions with reduced confidence
+            if polite_only_mixing:
+                _add_register_errors(
+                    polite_suffix_pos, is_formal=False, confidence_override=reduced_confidence
+                )
         else:
             # Colloquial dominant — flag formal suffixes
             _add_register_errors(formal_suffix_pos, is_formal=True)
+            # Polite-only mixing with colloquial dominant shouldn't happen
+            # (polite_only_mixing implies no colloquial), but guard anyway
+            if polite_only_mixing:
+                _add_register_errors(
+                    formal_suffix_pos,
+                    is_formal=True,
+                    confidence_override=reduced_confidence,
+                )
