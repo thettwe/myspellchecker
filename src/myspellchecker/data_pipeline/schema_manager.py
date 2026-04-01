@@ -242,9 +242,7 @@ class SchemaManager:
         ),
         "idx_colloc_word1": ("CREATE INDEX IF NOT EXISTS idx_colloc_word1 ON collocations (word1)"),
         "idx_colloc_word2": ("CREATE INDEX IF NOT EXISTS idx_colloc_word2 ON collocations (word2)"),
-        "idx_ner_entity": (
-            "CREATE INDEX IF NOT EXISTS idx_ner_entity ON ner_entities (entity)"
-        ),
+        "idx_ner_entity": ("CREATE INDEX IF NOT EXISTS idx_ner_entity ON ner_entities (entity)"),
         "idx_ner_entity_type": (
             "CREATE INDEX IF NOT EXISTS idx_ner_entity_type ON ner_entities (entity_type)"
         ),
