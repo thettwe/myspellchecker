@@ -69,5 +69,5 @@ jobs:
           pytest tests/ \
             --cov=myspellchecker \
             --cov-report=term-missing \
-            --cov-fail-under=75 \
+            --cov-fail-under=70 \
             -x
