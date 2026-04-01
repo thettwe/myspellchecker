@@ -263,8 +263,10 @@ class TestONNXExporter:
 
     def test_exporter_export_invalid_model_dir(self, monkeypatch):
         """Test exporter raises on invalid model directory deterministically."""
-        pytest.importorskip("transformers", reason="transformers required for exporter test")
         import myspellchecker.training.exporter as exporter_module
+
+        if not hasattr(exporter_module, "PreTrainedTokenizerFast"):
+            pytest.skip("PreTrainedTokenizerFast not available (torch/transformers import failed)")
 
         class _FailingTokenizerLoader:
             @staticmethod
