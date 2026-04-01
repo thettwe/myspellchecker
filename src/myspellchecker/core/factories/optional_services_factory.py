@@ -108,7 +108,9 @@ def create_syntactic_rule_checker(
         from myspellchecker.grammar.engine import SyntacticRuleChecker
 
         provider = container.get(SERVICE_PROVIDER)
-        return SyntacticRuleChecker(provider)
+        config = container.get_config()
+        grammar_config = getattr(config, "grammar_engine", None)
+        return SyntacticRuleChecker(provider, grammar_config=grammar_config)
     except ImportError as e:
         logger.debug("SyntacticRuleChecker dependency not available: %s", e)
         return None

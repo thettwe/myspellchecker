@@ -483,7 +483,7 @@ class ComponentFactory:
         """
         from myspellchecker.grammar.engine import SyntacticRuleChecker
 
-        return SyntacticRuleChecker(provider)
+        return SyntacticRuleChecker(provider, grammar_config=self.config.grammar_engine)
 
     def create_joint_segment_tagger(
         self,

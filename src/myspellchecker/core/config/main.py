@@ -26,6 +26,7 @@ from myspellchecker.core.config.algorithm_configs import (
     SymSpellConfig,
     TokenRefinementConfig,
 )
+from myspellchecker.core.config.grammar_configs import GrammarEngineConfig
 from myspellchecker.core.config.tagger_configs import (
     JointConfig,
     POSTaggerConfig,
@@ -261,6 +262,10 @@ class SpellCheckerConfig(BaseModel):
     token_refinement: TokenRefinementConfig = Field(
         default_factory=TokenRefinementConfig,
         description="Token boundary refinement scoring configuration",
+    )
+    grammar_engine: GrammarEngineConfig = Field(
+        default_factory=GrammarEngineConfig,
+        description="Grammar engine configuration (rule priorities, checker confidence thresholds)",
     )
     ner: NERConfig | None = Field(
         default=None,

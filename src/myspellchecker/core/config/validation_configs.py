@@ -376,6 +376,16 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    enable_fast_path: bool = Field(
+        default=True,
+        description=(
+            "Enable fast-path exit in context validation. When True, if structural "
+            "strategies (Tone, Orthography, Syntactic, BrokenCompound) find no errors, "
+            "contextual strategies are skipped. Reduces FPR on clean text but may miss "
+            "context-only errors. Set to False for maximum recall."
+        ),
+    )
+
     enable_strategy_timing: bool = Field(
         default=False,
         description=(

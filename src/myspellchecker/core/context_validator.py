@@ -405,21 +405,31 @@ class ContextValidator(Validator):
         errors: list[Error] = []
         timing_enabled = self.config.validation.enable_strategy_timing
         structural_phase_done = False
+        structural_phase_ran = False
 
         for strategy in self.strategies:
             if exclude_strategy_types and type(strategy) in exclude_strategy_types:
                 continue
 
             # Fast-path exit: if structural strategies found nothing, skip
-            # contextual strategies (POS, Homophone, Confusable, Ngram, Semantic)
+            # contextual strategies (POS, Homophone, Confusable, Ngram, Semantic).
+            # Only fires when fast-path is enabled and at least one structural
+            # strategy actually ran (not just skipped via exclude_strategy_types).
             if not structural_phase_done and strategy.priority() > self._FAST_PATH_PRIORITY_CUTOFF:
                 structural_phase_done = True
-                if not errors and not context.existing_errors:
+                if (
+                    self.config.validation.enable_fast_path
+                    and structural_phase_ran
+                    and not errors
+                    and not context.existing_errors
+                ):
                     logger.debug(
                         "Fast-path: structural strategies found no issues, "
                         "skipping contextual strategies"
                     )
                     break
+            if not structural_phase_done:
+                structural_phase_ran = True
             strategy_name = strategy.__class__.__name__
             pre_positions: set[int] = set()
             pre_error_types: dict[int, str] = {}

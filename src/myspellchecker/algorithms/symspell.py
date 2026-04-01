@@ -1219,23 +1219,13 @@ class SymSpell:
         # variant -> standard (most common case: user typed non-standard form)
         standards = get_loan_word_standard(term)
         for std in standards:
-            is_valid = (
-                self.provider.is_valid_syllable(std)
-                if level == ValidationLevel.SYLLABLE.value
-                else self.provider.is_valid_word(std)
-            )
-            if is_valid:
+            if self.provider.is_valid_word(std):
                 candidate_scores.setdefault(std, 0.0)
 
         # standard -> variants (less common: standard form typed, variants exist)
         variants = get_loan_word_variants(term)
         for variant in variants:
-            is_valid = (
-                self.provider.is_valid_syllable(variant)
-                if level == ValidationLevel.SYLLABLE.value
-                else self.provider.is_valid_word(variant)
-            )
-            if is_valid:
+            if self.provider.is_valid_word(variant):
                 candidate_scores.setdefault(variant, 0.0)
 
     def lookup_compound(

@@ -37,7 +37,7 @@ def _load_loan_word_data() -> tuple[dict[str, set[str]], dict[str, set[str]]]:
             with open(path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
     except Exception:
-        logger.debug("Failed to load loan_words.yaml")
+        logger.debug("Failed to load loan_words.yaml", exc_info=True)
         return variant_to_standard, standard_to_variants
 
     if not data:
@@ -67,16 +67,21 @@ def _load_loan_word_data() -> tuple[dict[str, set[str]], dict[str, set[str]]]:
     return variant_to_standard, standard_to_variants
 
 
-def get_loan_word_standard(word: str) -> set[str]:
+_EMPTY_FROZENSET: frozenset[str] = frozenset()
+
+
+def get_loan_word_standard(word: str) -> frozenset[str]:
     """Get standard form(s) for a loan word variant."""
     v2s, _ = _load_loan_word_data()
-    return v2s.get(word, set())
+    result = v2s.get(word)
+    return frozenset(result) if result else _EMPTY_FROZENSET
 
 
-def get_loan_word_variants(word: str) -> set[str]:
+def get_loan_word_variants(word: str) -> frozenset[str]:
     """Get known variant spellings for a standard loan word."""
     _, s2v = _load_loan_word_data()
-    return s2v.get(word, set())
+    result = s2v.get(word)
+    return frozenset(result) if result else _EMPTY_FROZENSET
 
 
 def is_loan_word_variant(word: str) -> bool:

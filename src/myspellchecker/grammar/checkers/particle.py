@@ -30,7 +30,7 @@ import yaml  # type: ignore[import-untyped]
 from myspellchecker.core.constants import ET_PARTICLE_MISUSE
 from myspellchecker.core.response import GrammarError
 from myspellchecker.utils.logging_utils import get_logger
-from myspellchecker.utils.singleton import Singleton
+from myspellchecker.utils.singleton import ThreadSafeSingleton
 
 logger = get_logger(__name__)
 
@@ -41,7 +41,7 @@ __all__ = [
 ]
 
 # Singleton registry for ParticleChecker
-_singleton: Singleton["ParticleChecker"] = Singleton()
+_singleton: ThreadSafeSingleton["ParticleChecker"] = ThreadSafeSingleton()
 
 # Default path to the particle_contexts YAML rule file.
 DEFAULT_PARTICLE_CONTEXTS_PATH = (
@@ -437,8 +437,8 @@ class ParticleChecker:
         if context == "static_location":
             verb = self._find_preceding_verb(words, pos_tags, position)
             if verb and verb in self._MOTION_VERBS:
-                # Motion verb context — static particle is wrong → True
-                return False
+                # Motion verb context — static particle is wrong
+                return True
             # Stative verb context — static particle is correct → no error
             if verb and verb in self._STATIVE_VERBS:
                 return False

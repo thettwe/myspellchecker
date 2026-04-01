@@ -371,7 +371,8 @@ class CompoundDetectionMixin:
     symspell: Any
 
     # ----- False compound suppression keys (loaded from compound_morphology.yaml) -----
-    _false_compound_keys_cache: set[tuple[str, str]] | None = None
+    _FALSE_COMPOUND_UNLOADED: object = object()  # sentinel: distinct from None and empty set
+    _false_compound_keys_cache: set[tuple[str, str]] | object = _FALSE_COMPOUND_UNLOADED
 
     @classmethod
     def _get_false_compound_keys(cls) -> set[tuple[str, str]] | None:
@@ -379,8 +380,9 @@ class CompoundDetectionMixin:
 
         Caches at class level (loaded once). Returns None if YAML unavailable.
         """
-        if cls._false_compound_keys_cache is not None:
-            return cls._false_compound_keys_cache
+        if cls._false_compound_keys_cache is not cls._FALSE_COMPOUND_UNLOADED:
+            cache = cls._false_compound_keys_cache
+            return cache if isinstance(cache, set) else None  # type: ignore[return-value]
 
         try:
             from myspellchecker.core.validation_strategies.broken_compound_strategy import (
@@ -390,12 +392,12 @@ class CompoundDetectionMixin:
             data = _load_morphology_data()
             if data is not None:
                 cls._false_compound_keys_cache = data.false_compound_keys
-                return cls._false_compound_keys_cache
+                return cls._false_compound_keys_cache  # type: ignore[return-value]
         except Exception:
-            pass
+            logger.debug("Failed to load false compound keys from morphology data", exc_info=True)
 
         cls._false_compound_keys_cache = set()
-        return cls._false_compound_keys_cache
+        return cls._false_compound_keys_cache  # type: ignore[return-value]
 
     # ----- Compound confusion data (loaded from YAML with hardcoded fallback) -----
     _HA_HTOE_COMPOUNDS: dict[str, tuple[str, str]] = _LOADED_HA_HTOE_COMPOUNDS
