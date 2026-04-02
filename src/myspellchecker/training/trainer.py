@@ -24,13 +24,11 @@ Example:
     ... )
 """
 
-from __future__ import annotations
-
 import json
 import os
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from myspellchecker.core.constants import DEFAULT_TOKENIZER_FILE
 from myspellchecker.training.constants import (
@@ -109,7 +107,7 @@ class TrainingMetricsCallback(TrainerCallback if TRAINING_AVAILABLE else object)
         """Initialize the callback."""
         self.output_dir = output_dir
         self.metrics_file = os.path.join(output_dir, "training_metrics.json")
-        self.metrics: list[dict[str, Any]] = []
+        self.metrics: List[Dict[str, Any]] = []
         self.logger = get_logger(__name__)
 
     def on_log(
@@ -117,7 +115,7 @@ class TrainingMetricsCallback(TrainerCallback if TRAINING_AVAILABLE else object)
         args: "TrainingArguments",
         state: "TrainerState",
         control: "TrainerControl",
-        logs: dict[str, Any] | None = None,
+        logs: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> None:
         """Called when the trainer logs metrics."""
@@ -190,20 +188,19 @@ class WholeWordMaskCollator:
         other:    0.10 — punctuation, etc.
     """
 
-    DEFAULT_OTHER_WEIGHT: float = 0.10
-    DEFAULT_POS_WEIGHTS: dict[str, float] = {
+    DEFAULT_POS_WEIGHTS: Dict[str, float] = {
         "n": 0.35,
         "v": 0.25,
         "adj": 0.15,
         "part": 0.15,
-        "other": DEFAULT_OTHER_WEIGHT,
     }
+    DEFAULT_OTHER_WEIGHT: float = 0.10
 
     def __init__(
         self,
         tokenizer: "TokenizerType",
         mlm_probability: float = 0.15,
-        pos_weights: dict[str, float] | None = None,
+        pos_weights: Optional[Dict[str, float]] = None,
     ):
         self.tokenizer = tokenizer
         self.mlm_probability = mlm_probability
@@ -224,7 +221,7 @@ class WholeWordMaskCollator:
             if tid is not None:
                 self._special_ids.add(tid)
 
-    def __call__(self, examples: list[dict[str, Any]]) -> dict[str, "torch.Tensor"]:
+    def __call__(self, examples: List[Dict[str, Any]]) -> Dict[str, "torch.Tensor"]:
         input_ids = torch.stack([e["input_ids"] for e in examples])
         attention_mask = torch.stack([e["attention_mask"] for e in examples])
         labels = input_ids.clone()
@@ -269,13 +266,13 @@ class WholeWordMaskCollator:
     def _whole_word_mask(
         self,
         input_ids: "torch.Tensor",
-        word_ids: list[int | None],
-        pos_tags: list[str] | None,
+        word_ids: List[Optional[int]],
+        pos_tags: Optional[List[str]],
         attention_mask: "torch.Tensor",
     ) -> "torch.Tensor":
         """Select whole words to mask, using POS weights if available."""
         # Build word groups: word_id → list of token positions
-        word_groups: dict[int, list[int]] = {}
+        word_groups: Dict[int, List[int]] = {}
         for pos, wid in enumerate(word_ids):
             if (
                 wid is not None
@@ -295,15 +292,11 @@ class WholeWordMaskCollator:
             if pos_tags and wid < len(pos_tags):
                 w = self.pos_weights.get(pos_tags[wid], self.default_weight)
             else:
-                w = self.default_weight  # uniform fallback when no POS tags
+                w = 1.0  # uniform when no POS tags
             weights.append(w)
 
         weights_t = torch.tensor(weights, dtype=torch.float)
-        total = weights_t.sum()
-        if total == 0:
-            weights_t = torch.ones_like(weights_t)
-            total = weights_t.sum()
-        weights_t = weights_t / total
+        weights_t = weights_t / weights_t.sum()
 
         # Select ~mlm_probability fraction of words
         num_to_mask = max(1, round(len(word_ids_sorted) * self.mlm_probability))
@@ -344,44 +337,48 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
         confusable_words: set,
         confusable_mask_ratio: float = 0.3,
         mlm_probability: float = 0.15,
-        pos_weights: dict[str, float] | None = None,
-        confusable_pairs: dict[str, list[str]] | None = None,
+        pos_weights: Optional[Dict[str, float]] = None,
+        confusable_pairs: Optional[Dict[str, List[str]]] = None,
         corruption_ratio: float = 0.0,
-        seed: int | None = None,
     ):
-        import random as _random
-
         super().__init__(tokenizer, mlm_probability, pos_weights)
         self.confusable_words = confusable_words
         self.confusable_mask_ratio = confusable_mask_ratio
         # word → list of confusable variants for corruption augmentation
         self.confusable_pairs = confusable_pairs or {}
         self.corruption_ratio = corruption_ratio
-        self._rng = _random.Random(seed if seed is not None else 42)
 
     @classmethod
-    def load_confusable_words(cls, homophones_path: str | None = None) -> set:
-        """Load confusable word set from homophones.yaml.
+    def load_confusable_words(cls, homophones_path: Optional[str] = None) -> set:
+        """Load confusable word set from homophones YAML or JSON.
 
         Extracts all words (both sides of every pair) into a flat set.
         Falls back to the bundled homophones.yaml if no path is given.
-        """
-        import yaml
 
+        Supports two formats:
+        - YAML: ``homophones.yaml`` with ``homophones`` key (legacy, ~200 words)
+        - JSON: export from production DB with ``confusable_words`` list (~34K words)
+        """
         if homophones_path is None:
             homophones_path = str(Path(__file__).parent.parent / "rules" / "homophones.yaml")
 
         words: set = set()
         try:
-            with open(homophones_path, encoding="utf-8") as f:
-                data = yaml.safe_load(f)
+            if homophones_path.endswith(".json"):
+                with open(homophones_path, encoding="utf-8") as f:
+                    data = json.load(f)
+                words = set(data.get("confusable_words", []))
+            else:
+                import yaml
 
-            homophones = data.get("homophones", {})
-            for word, variants in homophones.items():
-                words.add(word)
-                if isinstance(variants, list):
-                    words.update(variants)
-        except (FileNotFoundError, OSError, KeyError, yaml.YAMLError):
+                with open(homophones_path, encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                homophones = data.get("homophones", {})
+                for word, variants in homophones.items():
+                    words.add(word)
+                    if isinstance(variants, list):
+                        words.update(variants)
+        except Exception:
             get_logger(__name__).warning(
                 "Failed to load homophones from %s, confusable masking disabled",
                 homophones_path,
@@ -390,31 +387,40 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
         return words
 
     @classmethod
-    def load_confusable_pairs(cls, homophones_path: str | None = None) -> dict[str, list[str]]:
-        """Load confusable word→variants mapping from homophones.yaml.
+    def load_confusable_pairs(cls, homophones_path: Optional[str] = None) -> Dict[str, List[str]]:
+        """Load confusable word→variants mapping from homophones YAML or JSON.
 
         Returns a dict where each word maps to its confusable variants.
         Both directions are included (word→variants AND variant→[word]).
         Used for corruption augmentation: replacing a correct word with
         a confusable variant during training.
-        """
-        import yaml
 
+        Supports two formats:
+        - YAML: ``homophones.yaml`` with ``homophones`` key (legacy)
+        - JSON: export from production DB with ``confusable_pairs`` dict
+        """
         if homophones_path is None:
             homophones_path = str(Path(__file__).parent.parent / "rules" / "homophones.yaml")
 
-        pairs: dict[str, list[str]] = {}
+        pairs: Dict[str, List[str]] = {}
         try:
-            with open(homophones_path, encoding="utf-8") as f:
-                data = yaml.safe_load(f)
+            if homophones_path.endswith(".json"):
+                with open(homophones_path, encoding="utf-8") as f:
+                    data = json.load(f)
+                raw = data.get("confusable_pairs", {})
+                pairs = {k: list(v) for k, v in raw.items()}
+            else:
+                import yaml
 
-            homophones = data.get("homophones", {})
-            for word, variants in homophones.items():
-                if isinstance(variants, list):
-                    pairs.setdefault(word, []).extend(variants)
-                    for v in variants:
-                        pairs.setdefault(v, []).append(word)
-        except (FileNotFoundError, OSError, KeyError, yaml.YAMLError):
+                with open(homophones_path, encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                homophones = data.get("homophones", {})
+                for word, variants in homophones.items():
+                    if isinstance(variants, list):
+                        pairs.setdefault(word, []).extend(variants)
+                        for v in variants:
+                            pairs.setdefault(v, []).append(word)
+        except Exception:
             get_logger(__name__).warning(
                 "Failed to load confusable pairs from %s",
                 homophones_path,
@@ -425,13 +431,13 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
     def _whole_word_mask(
         self,
         input_ids: "torch.Tensor",
-        word_ids: list[int | None],
-        pos_tags: list[str] | None,
+        word_ids: List[Optional[int]],
+        pos_tags: Optional[List[str]],
         attention_mask: "torch.Tensor",
     ) -> "torch.Tensor":
         """Select whole words to mask, biasing toward confusable words."""
         # Build word groups: word_id → list of token positions
-        word_groups: dict[int, list[int]] = {}
+        word_groups: Dict[int, List[int]] = {}
         for pos, wid in enumerate(word_ids):
             if (
                 wid is not None
@@ -446,8 +452,8 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
         word_ids_sorted = sorted(word_groups.keys())
 
         # Classify words as confusable or not by decoding tokens
-        confusable_indices: list[int] = []
-        non_confusable_indices: list[int] = []
+        confusable_indices: List[int] = []
+        non_confusable_indices: List[int] = []
 
         for i, wid in enumerate(word_ids_sorted):
             token_ids = [input_ids[p].item() for p in word_groups[wid]]
@@ -464,7 +470,7 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
         num_to_mask = max(1, round(len(word_ids_sorted) * self.mlm_probability))
         num_to_mask = min(num_to_mask, len(word_ids_sorted))
 
-        selected_word_indices: list[int] = []
+        selected_word_indices: List[int] = []
 
         # Phase 1: Select from confusable words
         if confusable_indices:
@@ -508,9 +514,9 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
 
     def _compute_group_weights(
         self,
-        indices: list[int],
-        word_ids_sorted: list[int],
-        pos_tags: list[str] | None,
+        indices: List[int],
+        word_ids_sorted: List[int],
+        pos_tags: Optional[List[str]],
     ) -> "torch.Tensor":
         """Compute normalized POS-based weights for a subset of word indices."""
         weights = []
@@ -528,7 +534,7 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
             total = weights_t.sum()
         return weights_t / total
 
-    def __call__(self, examples: list[dict[str, Any]]) -> dict[str, "torch.Tensor"]:
+    def __call__(self, examples: List[Dict[str, Any]]) -> Dict[str, "torch.Tensor"]:
         """Collate with optional corruption augmentation.
 
         After standard MLM masking (80% [MASK], 10% random, 10% keep),
@@ -536,6 +542,8 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
         variant's tokens. Labels remain the original correct tokens, teaching
         the model to correct wrong-but-plausible words from context.
         """
+        import random as _random
+
         # Use parent's __call__ for standard masking
         batch = super().__call__(examples)
 
@@ -551,7 +559,7 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
                 continue
 
             # Rebuild word groups to identify confusable masked words
-            word_groups: dict[int, list[int]] = {}
+            word_groups: Dict[int, List[int]] = {}
             for pos, wid in enumerate(word_ids):
                 if wid is not None:
                     word_groups.setdefault(wid, []).append(pos)
@@ -573,11 +581,11 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
                     continue
 
                 # With corruption_ratio probability, replace with variant tokens
-                if self._rng.random() >= self.corruption_ratio:
+                if _random.random() >= self.corruption_ratio:
                     continue
 
                 variants = self.confusable_pairs[decoded]
-                variant = self._rng.choice(variants)
+                variant = _random.choice(variants)
 
                 # Tokenize the variant
                 variant_encoding = self.tokenizer(
@@ -613,7 +621,7 @@ class LineByLineDataset(torch.utils.data.Dataset if torch else object):  # type:
         file_path: str,
         block_size: int,
         include_word_ids: bool = False,
-        pos_file_path: str | None = None,
+        pos_file_path: Optional[str] = None,
         denoising_ratio: float = 0.0,
     ):
         """
@@ -666,16 +674,15 @@ class LineByLineDataset(torch.utils.data.Dataset if torch else object):  # type:
             logger.info(f"Denoising: corrupted {corrupted_count:,}/{len(lines):,} lines")
 
         # Load POS sidecar if provided
-        self.pos_data: list[list[str]] | None = None
+        self.pos_data: Optional[List[List[str]]] = None
         if pos_file_path:
             with open(pos_file_path, encoding="utf-8") as f:
                 self.pos_data = [json.loads(line)["pos"] for line in f if line.strip()]
             if len(self.pos_data) != len(lines):
                 logger.warning(
                     f"POS sidecar has {len(self.pos_data)} entries but corpus has "
-                    f"{len(lines)} lines. Disabling POS weighting entirely."
+                    f"{len(lines)} lines. POS weighting will be disabled for mismatched lines."
                 )
-                self.pos_data = None
 
         # Tokenize all lines at once for efficiency
         batch_encoding = tokenizer(
@@ -690,15 +697,15 @@ class LineByLineDataset(torch.utils.data.Dataset if torch else object):  # type:
         self.attention_masks = batch_encoding["attention_mask"]
 
         # Capture word_ids for Whole Word Masking
-        self.word_ids_list: list[list[int | None]] | None = None
+        self.word_ids_list: Optional[List[List[Optional[int]]]] = None
         if include_word_ids:
             self.word_ids_list = [batch_encoding.word_ids(i) for i in range(len(lines))]
 
     def __len__(self) -> int:
         return len(self.input_ids)
 
-    def __getitem__(self, idx: int) -> dict[str, Any]:
-        item: dict[str, Any] = {
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
+        item: Dict[str, Any] = {
             "input_ids": torch.tensor(self.input_ids[idx], dtype=torch.long),
             "attention_mask": torch.tensor(self.attention_masks[idx], dtype=torch.long),
         }
@@ -719,10 +726,10 @@ class LineByLineIterableDataset(torch.utils.data.IterableDataset if torch else o
     def __init__(
         self,
         tokenizer: "TokenizerType",
-        file_path: str | list[str],
+        file_path: Union[str, List[str]],
         block_size: int,
         include_word_ids: bool = False,
-        pos_file_path: str | None = None,
+        pos_file_path: Optional[str] = None,
         denoising_ratio: float = 0.0,
     ):
         if isinstance(file_path, str):
@@ -785,15 +792,16 @@ class LineByLineIterableDataset(torch.utils.data.IterableDataset if torch else o
             for path in self.file_paths:
                 with open(path, encoding="utf-8") as f:
                     for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        # Now read POS line (only for non-empty corpus lines)
+                        # Read POS line in sync (even if we skip this corpus line)
                         pos_line = None
                         if pos_iter is not None:
                             pos_raw = pos_iter.readline()
                             if pos_raw.strip():
                                 pos_line = pos_raw
+
+                        line = line.strip()
+                        if not line:
+                            continue
                         # Round-robin across DDP ranks * DataLoader workers
                         if line_idx % total_shards != shard_id:
                             line_idx += 1
@@ -811,7 +819,7 @@ class LineByLineIterableDataset(torch.utils.data.IterableDataset if torch else o
                             padding="max_length",
                             return_attention_mask=True,
                         )
-                        item: dict[str, Any] = {
+                        item: Dict[str, Any] = {
                             "input_ids": torch.tensor(encoding["input_ids"], dtype=torch.long),
                             "attention_mask": torch.tensor(
                                 encoding["attention_mask"], dtype=torch.long
@@ -970,25 +978,26 @@ class ModelTrainer:
         num_hidden_layers: int = 4,
         num_attention_heads: int = 4,
         architecture: ModelArchitecture = ModelArchitecture.ROBERTA,
-        resume_from_checkpoint: str | None = None,
+        resume_from_checkpoint: Optional[str] = None,
         warmup_ratio: float = 0.1,
         weight_decay: float = 0.01,
         save_metrics: bool = True,
-        max_steps: int | None = None,
-        save_steps: int | None = None,
+        max_steps: Optional[int] = None,
+        save_steps: Optional[int] = None,
         streaming: bool = False,
-        checkpoint_dir: str | None = None,
+        checkpoint_dir: Optional[str] = None,
         whole_word_masking: bool = False,
-        pos_file: str | None = None,
+        pos_file: Optional[str] = None,
         denoising_ratio: float = 0.0,
         fp16: bool = False,
         gradient_accumulation_steps: int = 1,
         reporter: "TrainingReporter | None" = None,
         confusable_masking: bool = False,
         confusable_mask_ratio: float = 0.3,
-        confusable_words_file: str | None = None,
+        confusable_words_file: Optional[str] = None,
         lr_scheduler_type: str = "linear",
         corruption_ratio: float = 0.0,
+        mlm_probability: float = DEFAULT_MLM_PROBABILITY,
         embedding_surgery: bool = False,
         embedding_warmup_steps: int = DEFAULT_EMBEDDING_WARMUP_STEPS,
         embedding_lr: float = DEFAULT_EMBEDDING_LR,
@@ -1130,7 +1139,7 @@ class ModelTrainer:
             confusable_words = ConfusableAwareMaskCollator.load_confusable_words(
                 confusable_words_file
             )
-            confusable_pairs: dict[str, list[str]] = {}
+            confusable_pairs: Dict[str, List[str]] = {}
             if corruption_ratio > 0:
                 confusable_pairs = ConfusableAwareMaskCollator.load_confusable_pairs(
                     confusable_words_file
@@ -1139,26 +1148,27 @@ class ModelTrainer:
                 tokenizer=tokenizer,
                 confusable_words=confusable_words,
                 confusable_mask_ratio=confusable_mask_ratio,
-                mlm_probability=DEFAULT_MLM_PROBABILITY,
+                mlm_probability=mlm_probability,
                 confusable_pairs=confusable_pairs,
                 corruption_ratio=corruption_ratio,
             )
             self.logger.info(
                 f"Using Confusable-Aware Masking collator "
                 f"(ratio={confusable_mask_ratio}, words={len(confusable_words)}, "
-                f"corruption={corruption_ratio})"
+                f"corruption={corruption_ratio}, mlm_prob={mlm_probability})"
             )
         elif whole_word_masking:
             data_collator = WholeWordMaskCollator(
                 tokenizer=tokenizer,
-                mlm_probability=DEFAULT_MLM_PROBABILITY,
+                mlm_probability=mlm_probability,
             )
             self.logger.info(
-                f"Using Whole Word Masking collator (POS-weighted={pos_file is not None})"
+                f"Using Whole Word Masking collator "
+                f"(POS-weighted={pos_file is not None}, mlm_prob={mlm_probability})"
             )
         else:
             data_collator = DataCollatorForLanguageModeling(
-                tokenizer=tokenizer, mlm=True, mlm_probability=DEFAULT_MLM_PROBABILITY
+                tokenizer=tokenizer, mlm=True, mlm_probability=mlm_probability
             )
 
         # 4. Setup Training Arguments with learning rate scheduler
@@ -1225,7 +1235,7 @@ class ModelTrainer:
             callbacks=callbacks,
         )
 
-        # Embedding surgery Phase 1: freeze body, warm up new embeddings
+        # 6a. Embedding surgery Phase 1: freeze body, warm up new embeddings
         if (
             embedding_surgery
             and pretrained_path
@@ -1287,7 +1297,7 @@ class ModelTrainer:
                 callbacks=callbacks,
             )
 
-        # Full training (Phase 2 if surgery, or standard training)
+        # 6b. Train (Phase 2 if surgery, or standard training)
         if training_checkpoint:
             self.logger.info(f"Resuming from training checkpoint: {training_checkpoint}")
             trainer.train(resume_from_checkpoint=training_checkpoint)

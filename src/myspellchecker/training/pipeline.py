@@ -113,6 +113,7 @@ class TrainingConfig:
     confusable_words_file: str | None = None
     lr_scheduler_type: str = "linear"
     corruption_ratio: float = 0.0
+    mlm_probability: float = 0.15
     embedding_surgery: bool = False
     embedding_warmup_steps: int = DEFAULT_EMBEDDING_WARMUP_STEPS
     embedding_lr: float = DEFAULT_EMBEDDING_LR
@@ -268,6 +269,7 @@ class TrainingPipeline:
                 confusable_words_file=config.confusable_words_file,
                 lr_scheduler_type=config.lr_scheduler_type,
                 corruption_ratio=config.corruption_ratio,
+                mlm_probability=config.mlm_probability,
                 embedding_surgery=config.embedding_surgery,
                 embedding_warmup_steps=config.embedding_warmup_steps,
                 embedding_lr=config.embedding_lr,
@@ -282,8 +284,7 @@ class TrainingPipeline:
             # Copy checkpoints BEFORE exporting to ONNX to prevent data loss
             if config.keep_checkpoints:
                 checkpoint_dest = output_path / "pytorch_source"
-                if not checkpoint_dest.exists():
-                    shutil.copytree(pytorch_model_dir, checkpoint_dest)
+                shutil.copytree(pytorch_model_dir, checkpoint_dest)
                 self.reporter.info(f"PyTorch source preserved at {checkpoint_dest}")
 
             # Step 3: Export to ONNX
@@ -375,9 +376,7 @@ class TrainingPipeline:
         with ThreadPoolExecutor(max_workers=2) as executor:
             line_count_future = executor.submit(_count_lines, str(input_path))
 
-            sentinel_path = tokenizer_dir / "tokenizer.ready"
-
-            if tokenizer_path.exists() and sentinel_path.exists():
+            if tokenizer_path.exists():
                 self.logger.info(f"Resuming: tokenizer found at {tokenizer_path}")
                 tokenizer_path_str = str(tokenizer_path)
             elif is_main:
@@ -389,16 +388,14 @@ class TrainingPipeline:
                     min_frequency=config.min_frequency,
                     word_boundary_aware=config.word_boundary_aware,
                 )
-                # Write sentinel after tokenizer is fully saved to disk
-                sentinel_path.write_text("ok", encoding="utf-8")
             else:
                 # Non-main ranks: poll until rank 0 finishes tokenizer training.
-                # Wait for the sentinel file (not the tokenizer file itself) to
-                # avoid reading a partially-written tokenizer.
+                # Can't use dist.barrier() here because rank 0 is in a different
+                # code branch and won't hit the same barrier call.
                 self.logger.info("Waiting for rank 0 to train tokenizer...")
                 import time as _time
 
-                while not sentinel_path.exists():
+                while not tokenizer_path.exists():
                     _time.sleep(2)
                 tokenizer_path_str = str(tokenizer_path)
 
@@ -432,9 +429,9 @@ class TrainingPipeline:
         # Auto-detect training checkpoint for resume.
         # Training checkpoints (with trainer_state.json) take priority over
         # pre-trained model paths because they represent more recent progress.
-        # This handles the vocabulary expansion resume case: config has the
-        # base pretrained model path, but checkpoint_dir has fine-tuning
-        # checkpoints from an interrupted run.
+        # This handles the embedding surgery resume case: config has the v2.1
+        # pretrained model path, but checkpoint_dir has Phase 2 checkpoints
+        # from an interrupted run.
         resume_path = config.resume_from_checkpoint
         ckpt_dir = work_dir / "checkpoints"
         if ckpt_dir.exists():
@@ -483,6 +480,7 @@ class TrainingPipeline:
             confusable_words_file=config.confusable_words_file,
             lr_scheduler_type=config.lr_scheduler_type,
             corruption_ratio=config.corruption_ratio,
+            mlm_probability=config.mlm_probability,
             embedding_surgery=config.embedding_surgery,
             embedding_warmup_steps=config.embedding_warmup_steps,
             embedding_lr=config.embedding_lr,
