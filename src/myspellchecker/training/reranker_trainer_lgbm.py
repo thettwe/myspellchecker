@@ -170,22 +170,6 @@ def train_lgbm_ranker(
         len(val_labels),
     )
 
-    # Create datasets
-    train_data = lgb.Dataset(
-        features,
-        label=labels,
-        group=groups.tolist(),
-        feature_name=FEATURE_NAMES[: features.shape[1]],
-        free_raw_data=False,
-    )
-    lgb.Dataset(
-        val_features,
-        label=val_labels,
-        group=val_groups.tolist(),
-        reference=train_data,
-        free_raw_data=False,
-    )
-
     # Train
     params = {
         "objective": "lambdarank",
