@@ -499,6 +499,7 @@ def run_benchmark(
     confusable_preset: str = "relaxed",
     enable_strategy_debug: bool = False,
     reranker_path: Optional[Path] = None,
+    confidence_gap: float | None = None,
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -581,11 +582,15 @@ def run_benchmark(
             print(f"Error: Reranker model not found: {model_file}", file=sys.stderr)
             sys.exit(1)
         print(f"  Neural reranker: {model_file}")
-        config_kwargs["neural_reranker"] = NeuralRerankerConfig(
-            enabled=True,
-            model_path=str(model_file),
-            stats_path=str(stats_file) if stats_file.exists() else None,
-        )
+        nr_kwargs: dict = {
+            "enabled": True,
+            "model_path": str(model_file),
+            "stats_path": str(stats_file) if stats_file.exists() else None,
+        }
+        if confidence_gap is not None:
+            nr_kwargs["confidence_gap_threshold"] = confidence_gap
+            print(f"  Confidence gap threshold: {confidence_gap}")
+        config_kwargs["neural_reranker"] = NeuralRerankerConfig(**nr_kwargs)
 
     config = SpellCheckerConfig(**config_kwargs)
     config.validation.enable_strategy_debug = enable_strategy_debug
@@ -1381,6 +1386,16 @@ def main():
             "for neural MLP suggestion reranking."
         ),
     )
+    parser.add_argument(
+        "--confidence-gap",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help=(
+            "Override confidence_gap_threshold for neural reranker gating. "
+            "Lower values allow more reranking (default: 0.15)."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -1411,6 +1426,7 @@ def main():
         confusable_preset=args.confusable_preset,
         enable_strategy_debug=args.debug_strategy_gates,
         reranker_path=args.reranker,
+        confidence_gap=args.confidence_gap,
     )
 
     # Print summary
