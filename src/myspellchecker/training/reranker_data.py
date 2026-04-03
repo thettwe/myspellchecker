@@ -11,8 +11,8 @@ Pipeline overview:
        (from ``training/generator.py``).
     3. Run the full spell-checker pipeline on the corrupted sentence to collect
        candidate suggestions.
-    4. Extract 20 features per candidate (edit distance, frequency, n-gram
-       context, phonetic similarity, confusable status, source indicators, etc.).
+    4. Extract 19 features per candidate (edit distance, frequency, n-gram
+       context, phonetic similarity, confusable status, edit type, etc.).
     5. Write labeled JSONL with the gold correction index for supervised training.
 
 System integration:
@@ -28,15 +28,15 @@ Key classes and functions:
     - ``RerankerDataGenerator``: Main class. Lazily initializes SpellChecker
       and SyntheticErrorGenerator, then processes sentences one at a time.
     - ``RerankerExample``: Dataclass for a single training example (sentence,
-      corrupted form, candidates, 20-feature vectors, gold index).
+      corrupted form, candidates, 19-feature vectors, gold index).
     - ``GenerationStats``: Tracks success/failure counts during generation.
     - ``generate_threaded()``: Preferred entry point for large-scale generation.
       Uses DuckDB for vectorized corpus sampling + ThreadPoolExecutor for
       processing (single-threaded due to SpellChecker thread-safety constraint).
     - ``generate_parallel()``: Legacy multiprocessing entry point (deprecated;
       duplicates ~500 MB SpellChecker per worker).
-    - ``NUM_FEATURES`` / ``FEATURE_NAMES``: Constants defining the 20-feature
-      schema. Must stay in sync with ``_extract_features()`` and the trainer.
+    - ``NUM_FEATURES`` / ``FEATURE_NAMES``: Constants defining the 19-feature
+      schema (v2). Must stay in sync with ``_extract_features()`` and the trainer.
 
 Usage (single-threaded):
     >>> from myspellchecker.training.reranker_data import RerankerDataGenerator
@@ -181,31 +181,53 @@ def _calculate_safe_workers(
 
 
 # Number of features per candidate (keep in sync with FEATURE_NAMES)
-NUM_FEATURES = 20
+NUM_FEATURES = 19
+
+# Legacy constant for backward-compatible loading of v1 training data.
+NUM_FEATURES_V1 = 20
 
 FEATURE_NAMES: list[str] = [
-    "edit_distance",
-    "weighted_distance",
-    "log_frequency",
-    "phonetic_score",
-    "syllable_count_diff",
-    "plausibility_ratio",
-    "span_length_ratio",
-    "mlm_logit",
-    "ngram_left_prob",
-    "ngram_right_prob",
-    "is_confusable",
-    "source_symspell",
-    "source_morpheme",
-    "source_context",
-    "source_compound",
-    "source_other",
-    # v2 features: address frequency/length bias
-    "relative_log_freq",  # log_freq / max(log_freq across candidates)
-    "char_length_diff",  # len(candidate) - len(error), signed
-    "is_substring",  # 1.0 if candidate contains error or vice versa
-    "original_rank",  # 1/(1+rank) — prior ranking signal (1.0=rank0, 0.5=rank1, ...)
+    # --- Distance features (0-6) ---
+    "edit_distance",  # 0: raw Damerau-Levenshtein distance
+    "weighted_distance",  # 1: Myanmar-weighted edit distance
+    "log_frequency",  # 2: log1p(word_frequency)
+    "phonetic_score",  # 3: phonetic similarity [0, 1]
+    "syllable_count_diff",  # 4: absolute syllable count difference
+    "plausibility_ratio",  # 5: weighted_dist / raw_dist
+    "span_length_ratio",  # 6: len(candidate) / len(error)
+    # --- Context features (7-9) ---
+    "mlm_logit",  # 7: MLM logit from semantic checker (wired in v2)
+    "ngram_left_prob",  # 8: left context n-gram probability
+    "ngram_right_prob",  # 9: right context n-gram probability
+    # --- Classification features (10) ---
+    "is_confusable",  # 10: 1.0 if Myanmar confusable variant
+    # --- Frequency/structure features (11-14) ---
+    "relative_log_freq",  # 11: log_freq / max(log_freq across candidates)
+    "char_length_diff",  # 12: len(candidate) - len(error), signed
+    "is_substring",  # 13: 1.0 if candidate contains error or vice versa
+    "original_rank",  # 14: 1/(1+rank) — prior ranking signal
+    # --- v2 features: edit type & similarity (15-18) ---
+    "ngram_improvement_ratio",  # 15: log(P_cand_ctx / P_error_ctx) improvement
+    "edit_type_subst",  # 16: 1.0 if primary edit is substitution
+    "edit_type_delete",  # 17: 1.0 if primary edit is deletion/insertion
+    "char_dice_coeff",  # 18: character bigram Dice coefficient
 ]
+
+# Index of the original_rank feature (label leakage for MLP; safe for GBT).
+ORIGINAL_RANK_INDEX = FEATURE_NAMES.index("original_rank")  # 14
+
+# MLP cross-feature definitions: (name, left_index, right_index).
+# These are computed from base features at training/inference time.
+# GBT models learn interactions via tree splits and do NOT need these.
+MLP_CROSS_FEATURES: list[tuple[str, int, int]] = [
+    ("edit_dist_x_ngram_improv", 0, 15),  # edit_distance * ngram_improvement_ratio
+    ("phonetic_x_confusable", 3, 10),  # phonetic_score * is_confusable
+    ("freq_x_dice", 11, 18),  # relative_log_freq * char_dice_coeff
+    ("mlm_x_ngram_sum", 7, -1),  # mlm_logit * (ngram_left + ngram_right) — special
+    ("edit_dist_x_freq", 0, 11),  # edit_distance * relative_log_freq (cost vs likelihood)
+]
+
+MLP_CROSS_FEATURE_NAMES: list[str] = [name for name, _, _ in MLP_CROSS_FEATURES]
 
 
 @dataclass
@@ -255,6 +277,9 @@ class RerankerDataGenerator:
         min_words: Minimum word count per sentence.
         max_words: Maximum word count per sentence.
         max_suggestions: Maximum suggestions to keep per error.
+        semantic_model_path: Optional path to semantic MLM model directory.
+            When provided, real MLM logits are wired into feature 7
+            (``mlm_logit``) instead of the placeholder ``0.0``.
     """
 
     def __init__(
@@ -265,6 +290,7 @@ class RerankerDataGenerator:
         min_words: int = 3,
         max_words: int = 20,
         max_suggestions: int = 10,
+        semantic_model_path: str | None = None,
     ):
         self.db_path = db_path
         self.arrow_corpus_path = arrow_corpus_path
@@ -272,12 +298,14 @@ class RerankerDataGenerator:
         self.min_words = min_words
         self.max_words = max_words
         self.max_suggestions = max_suggestions
+        self.semantic_model_path = semantic_model_path
         self.rng = random.Random(seed)
 
         # Lazy-initialized components
         self._checker = None
         self._error_gen = None
         self._phonetic_hasher = None
+        self._semantic_checker = None
 
     def _init_components(self):
         """Lazily initialize heavy components."""
@@ -314,6 +342,18 @@ class RerankerDataGenerator:
             corruption_ratio=0.5,  # Unused; we call _apply_corruption directly
             seed=self.seed,
         )
+
+        # Load semantic checker for MLM logit wiring (optional)
+        if self.semantic_model_path:
+            try:
+                from myspellchecker.algorithms.semantic_checker import SemanticChecker
+
+                self._semantic_checker = SemanticChecker(self.semantic_model_path)
+                logger.info("Semantic checker loaded from %s", self.semantic_model_path)
+            except Exception as e:
+                logger.warning("Failed to load semantic checker: %s (mlm_logit will be 0.0)", e)
+                self._semantic_checker = None
+
         logger.info("Components initialized successfully")
 
     @property
@@ -321,6 +361,12 @@ class RerankerDataGenerator:
         if self._checker is None:
             self._init_components()
         return self._checker
+
+    @property
+    def semantic_checker(self):
+        if self._checker is None:
+            self._init_components()
+        return self._semantic_checker
 
     @property
     def error_gen(self):
@@ -466,7 +512,7 @@ class RerankerDataGenerator:
         2. Corrupt it with SyntheticErrorGenerator
         3. Run spell checker on corrupted sentence
         4. Find the gold (original word) in suggestion list
-        5. Extract 20 features for each candidate
+        5. Extract 19 features (v2) for each candidate
         6. Return training example or None if gold not in candidates
 
         Args:
@@ -553,8 +599,28 @@ class RerankerDataGenerator:
             stats.gold_not_in_candidates += 1
             return None
 
+        # Compute MLM logits if semantic checker is available
+        mlm_scores: dict[str, float] = {}
+        if self.semantic_checker is not None:
+            try:
+                occurrence = corrupted_text[:error_position].count(corrupted_word)
+                mlm_scores = self.semantic_checker.score_mask_candidates(
+                    corrupted_text,
+                    corrupted_word,
+                    candidates,
+                    occurrence=occurrence,
+                )
+            except (AttributeError, TypeError, ValueError):
+                pass
+
         # Extract features for each candidate
-        features = self._extract_features(corrupted_word, candidates, words, target_idx)
+        features = self._extract_features(
+            corrupted_word,
+            candidates,
+            words,
+            target_idx,
+            mlm_scores=mlm_scores,
+        )
 
         return RerankerExample(
             sentence=text,
@@ -574,10 +640,11 @@ class RerankerDataGenerator:
         candidates: list[str],
         context_words: list[str],
         target_idx: int,
+        mlm_scores: dict[str, float] | None = None,
     ) -> list[list[float]]:
-        """Extract NUM_FEATURES (20) features for each candidate.
+        """Extract NUM_FEATURES (19) features for each candidate.
 
-        Features:
+        Features (v2, 19 total):
             0. edit_distance: raw Damerau-Levenshtein
             1. weighted_distance: Myanmar-weighted distance
             2. log_frequency: log1p(word_frequency)
@@ -585,15 +652,18 @@ class RerankerDataGenerator:
             4. syllable_count_diff: syllable count difference
             5. plausibility_ratio: weighted_dist / raw_dist
             6. span_length_ratio: len(candidate) / len(error)
-            7. mlm_logit: 0.0 (placeholder for MLM features)
+            7. mlm_logit: MLM logit from semantic checker (real when model loaded)
             8. ngram_left_prob: left context probability
             9. ngram_right_prob: right context probability
             10. is_confusable: 1.0 if Myanmar confusable
-            11. source_symspell: 1.0 if from SymSpell
-            12. source_morpheme: 1.0 if from morpheme strategy
-            13. source_context: 1.0 if from context strategy
-            14. source_compound: 1.0 if from compound reconstruction
-            15. source_other: 1.0 if from other source
+            11. relative_log_freq: normalized frequency within candidate list
+            12. char_length_diff: signed character length difference
+            13. is_substring: 1.0 if substring relationship exists
+            14. original_rank: 1/(1+rank) prior ranking signal
+            15. ngram_improvement_ratio: log(P_cand/P_error) context improvement
+            16. edit_type_subst: 1.0 if primary edit is substitution
+            17. edit_type_delete: 1.0 if primary edit is deletion/insertion
+            18. char_dice_coeff: character bigram Dice coefficient
 
         Args:
             error_word: The corrupted word.
@@ -670,8 +740,8 @@ class RerankerDataGenerator:
             # 6. Span length ratio
             span_ratio = len(cand) / error_len
 
-            # 7. MLM logit (placeholder)
-            mlm_logit = 0.0
+            # 7. MLM logit (real when semantic checker loaded, else 0.0)
+            mlm_logit = (mlm_scores or {}).get(cand, 0.0)
 
             # 8. N-gram left probability
             if ngram_checker and prev_words:
@@ -688,26 +758,50 @@ class RerankerDataGenerator:
             # 10. Is confusable
             is_conf = 1.0 if cand in confusable_set else 0.0
 
-            # 11-15. Source indicators
-            source_symspell = 1.0
-            source_morpheme = 0.0
-            source_context = 0.0
-            source_compound = 0.0
-            source_other = 0.0
-
-            # 16. Relative log frequency (within this candidate list)
+            # 11. Relative log frequency (within this candidate list)
             relative_log_freq = log_freq / max_log_freq if max_log_freq > 0 else 0.0
 
-            # 17. Character length difference (signed: positive = candidate longer)
+            # 12. Character length difference (signed: positive = candidate longer)
             char_length_diff = float(len(cand) - len(error_word))
 
-            # 18. Is substring (candidate contains error or vice versa)
+            # 13. Is substring (candidate contains error or vice versa)
             is_substr = 1.0 if (cand in error_word or error_word in cand) else 0.0
 
-            # 19. Original rank signal: 1/(1+rank) so rank0=1.0, rank1=0.5, ...
-            # Teaches the model that the pipeline's existing ranking is a
-            # strong prior — only override when other signals are compelling.
+            # 14. Original rank signal: 1/(1+rank) so rank0=1.0, rank1=0.5, ...
             original_rank = 1.0 / (1.0 + i)
+
+            # --- v2 features ---
+
+            # 15. N-gram improvement ratio: how much context improves with candidate
+            #     Uses best of left/right context.  Handles 0→nonzero transitions.
+            ngram_improv = 0.0
+            if ngram_checker:
+                improvements: list[float] = []
+                if prev_words:
+                    err_l = ngram_checker.get_best_left_probability(prev_words[-3:], error_word)
+                    if err_l > 0 and ngram_left > 0:
+                        improvements.append(math.log(ngram_left / err_l))
+                    elif err_l == 0.0 and ngram_left > 0:
+                        improvements.append(5.0)  # impossible → likely
+                if next_words:
+                    err_r = ngram_checker.get_best_right_probability(error_word, next_words[:3])
+                    if err_r > 0 and ngram_right > 0:
+                        improvements.append(math.log(ngram_right / err_r))
+                    elif err_r == 0.0 and ngram_right > 0:
+                        improvements.append(5.0)
+                if improvements:
+                    ngram_improv = max(-5.0, min(5.0, max(improvements)))
+
+            # 16-17. Edit type classification
+            edit_type_subst = 0.0
+            edit_type_delete = 0.0
+            if len(cand) == len(error_word):
+                edit_type_subst = 1.0  # Same length = likely substitution
+            elif len(cand) != len(error_word):
+                edit_type_delete = 1.0  # Different length = insertion/deletion
+
+            # 18. Character bigram Dice coefficient
+            char_dice = _char_bigram_dice(error_word, cand)
 
             feat_vec = [
                 edit_dist,
@@ -721,19 +815,40 @@ class RerankerDataGenerator:
                 ngram_left,
                 ngram_right,
                 is_conf,
-                source_symspell,
-                source_morpheme,
-                source_context,
-                source_compound,
-                source_other,
                 relative_log_freq,
                 char_length_diff,
                 is_substr,
                 original_rank,
+                ngram_improv,
+                edit_type_subst,
+                edit_type_delete,
+                char_dice,
             ]
             all_features.append(feat_vec)
 
         return all_features
+
+
+def _char_bigram_dice(a: str, b: str) -> float:
+    """Compute character bigram Dice coefficient between two strings.
+
+    Uses multiset intersection (Counter) to correctly handle repeated
+    bigrams, which is important for Myanmar reduplication patterns.
+
+    Returns 2*|intersection| / (|bigrams_a| + |bigrams_b|), a value in
+    [0, 1] measuring character-level overlap.
+    """
+    from collections import Counter
+
+    if len(a) < 2 and len(b) < 2:
+        return 1.0 if a == b else 0.0
+    bigrams_a = Counter(a[i : i + 2] for i in range(len(a) - 1)) if len(a) >= 2 else Counter()
+    bigrams_b = Counter(b[i : i + 2] for i in range(len(b) - 1)) if len(b) >= 2 else Counter()
+    total = sum(bigrams_a.values()) + sum(bigrams_b.values())
+    if total == 0:
+        return 0.0
+    intersection = sum(min(bigrams_a[bg], bigrams_b[bg]) for bg in bigrams_a)
+    return 2.0 * intersection / total
 
 
 def _is_myanmar_word(word: str) -> bool:
@@ -939,6 +1054,7 @@ def generate_threaded(
     seed: int = 42,
     log_interval: int = 1000,
     max_batches: int = 2000,
+    semantic_model_path: str | None = None,
 ) -> GenerationStats:
     """Generate reranker training data using DuckDB + threading.
 
@@ -970,6 +1086,8 @@ def generate_threaded(
         seed: Random seed.
         log_interval: Log progress every N examples.
         max_batches: Max Arrow batches to read during sampling.
+        semantic_model_path: Optional path to semantic MLM model for
+            wiring real MLM logits into feature 7.
 
     Returns:
         GenerationStats with generation counts.
@@ -1030,6 +1148,7 @@ def generate_threaded(
         min_words=min_words,
         max_words=max_words,
         max_suggestions=max_suggestions,
+        semantic_model_path=semantic_model_path,
     )
     generator._init_components()
 

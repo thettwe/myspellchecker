@@ -7,7 +7,7 @@ spell-checker suggestion lists. This module is used exclusively during the
 Pipeline context:
     - **Upstream**: Reads JSONL training data produced by
       ``RerankerDataGenerator`` in ``reranker_data.py``. Each JSONL line
-      contains 20 features per candidate plus a gold correction index.
+      contains 19 features (v2) per candidate plus a gold correction index.
     - **Downstream**: Exports an ONNX model (``reranker.onnx``) plus a
       ``reranker.onnx.stats.json`` file with per-feature normalization
       statistics (mean/std computed via Welford's online algorithm).
@@ -16,9 +16,9 @@ Pipeline context:
       itself is not involved at inference time.
 
 Architecture:
-    - ``RerankerMLP``: Linear(20, 64) -> ReLU -> Dropout(0.1) -> Linear(64, 1).
-      Input shape: (batch, num_candidates, 20). Output: scalar score per candidate.
-      Total parameters: ~5K. Inference overhead: negligible (~0ms on CPU).
+    - ``RerankerMLP``: Linear(input_dim, 64) -> ReLU -> Dropout(0.1) -> Linear(64, 1).
+      Input shape: (batch, num_candidates, input_dim). Output: scalar score per candidate.
+      Auto-detects feature dimension from training data (v2: 19 features).
     - Training uses listwise cross-entropy loss (scores over candidates treated
       as a classification problem with the gold index as the target).
     - Early stopping on validation Top-1 accuracy with configurable patience.
@@ -59,7 +59,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from myspellchecker.training.reranker_data import FEATURE_NAMES, NUM_FEATURES
+from myspellchecker.training.reranker_data import (
+    FEATURE_NAMES,
+    MLP_CROSS_FEATURE_NAMES,
+    MLP_CROSS_FEATURES,
+    NUM_FEATURES,
+    ORIGINAL_RANK_INDEX,
+)
 from myspellchecker.utils.logging_utils import get_logger
 
 try:
@@ -124,9 +130,9 @@ class TrainingMetrics:
 class RerankerMLP(nn.Module if TORCH_AVAILABLE else object):  # type: ignore[misc]
     """Small MLP for suggestion reranking.
 
-    Architecture: Linear(NUM_FEATURES, 64) -> ReLU -> Dropout -> Linear(64, 1)
+    Architecture: Linear(input_dim, hidden_dim) -> ReLU -> Dropout -> Linear(hidden_dim, 1)
 
-    Input:  (batch, num_candidates, NUM_FEATURES)  # NUM_FEATURES=20
+    Input:  (batch, num_candidates, input_dim)  # v2: 19 features
     Output: (batch, num_candidates) -- scalar score per candidate
     """
 
@@ -165,17 +171,41 @@ class RerankerDataset(Dataset if TORCH_AVAILABLE else object):  # type: ignore[m
 
     Reads JSONL, pads candidates to ``max_candidates``, and constructs
     feature tensors plus masks.
+
+    When ``drop_original_rank=True``, removes feature 14 (``original_rank``)
+    to prevent label leakage in MLP training.
+
+    When ``add_cross_features=True``, appends MLP-specific cross-features
+    computed from the base 19 features.
     """
 
     def __init__(
         self,
         examples: list[dict[str, Any]],
         max_candidates: int = DEFAULT_MAX_CANDIDATES,
+        drop_original_rank: bool = False,
+        add_cross_features: bool = False,
     ):
         self.max_candidates = max_candidates
         self.features: list[torch.Tensor] = []
         self.gold_indices: list[int] = []
         self.masks: list[torch.Tensor] = []
+        self.drop_original_rank = drop_original_rank
+        self.add_cross_features = add_cross_features
+
+        # Detect base feature dimension from data (supports both v1=20 and v2=19)
+        base_num_features = NUM_FEATURES
+        if examples and examples[0].get("features"):
+            first_feats = examples[0]["features"]
+            if first_feats:
+                base_num_features = len(first_feats[0])
+
+        # Compute final feature dimension after transforms
+        self.num_features = base_num_features
+        if drop_original_rank:
+            self.num_features -= 1
+        if add_cross_features:
+            self.num_features += len(MLP_CROSS_FEATURES)
 
         for ex in examples:
             feats = ex["features"]
@@ -190,13 +220,46 @@ class RerankerDataset(Dataset if TORCH_AVAILABLE else object):  # type: ignore[m
                 feats = feats[:max_candidates]
                 n_cands = max_candidates
 
-            # Pad features to (max_candidates, NUM_FEATURES)
-            padded = feats + [[0.0] * NUM_FEATURES] * (max_candidates - n_cands)
+            # Apply MLP feature transforms
+            if drop_original_rank or add_cross_features:
+                feats = [self._transform_feature_vec(fv, base_num_features) for fv in feats]
+
+            # Pad features to (max_candidates, num_features)
+            padded = feats + [[0.0] * self.num_features] * (max_candidates - n_cands)
             mask = [1.0] * n_cands + [0.0] * (max_candidates - n_cands)
 
             self.features.append(torch.tensor(padded, dtype=torch.float32))
             self.gold_indices.append(gold_idx)
             self.masks.append(torch.tensor(mask, dtype=torch.bool))
+
+    def _transform_feature_vec(
+        self,
+        fv: list[float],
+        base_dim: int,
+    ) -> list[float]:
+        """Apply MLP-specific feature transforms to a single candidate vector.
+
+        1. Drop ``original_rank`` (index 14) if configured.
+        2. Append cross-features computed from base features.
+        """
+        # Work on a copy to avoid mutating the input
+        base = list(fv[:base_dim])
+
+        # Compute cross-features BEFORE dropping (indices refer to base layout)
+        cross_vals: list[float] = []
+        if self.add_cross_features:
+            for _name, left_idx, right_idx in MLP_CROSS_FEATURES:
+                if right_idx == -1:
+                    # Special: mlm_logit * (ngram_left + ngram_right)
+                    cross_vals.append(base[left_idx] * (base[8] + base[9]))
+                else:
+                    cross_vals.append(base[left_idx] * base[right_idx])
+
+        # Drop original_rank after computing crosses (crosses don't use it)
+        if self.drop_original_rank and ORIGINAL_RANK_INDEX < len(base):
+            del base[ORIGINAL_RANK_INDEX]
+
+        return base + cross_vals
 
     def __len__(self) -> int:
         return len(self.features)
@@ -215,6 +278,11 @@ class RerankerDataset(Dataset if TORCH_AVAILABLE else object):  # type: ignore[m
 class RerankerTrainer:
     """Trains a RerankerMLP on JSONL data with early stopping.
 
+    MLP-specific optimizations (enabled by default):
+      - Drops ``original_rank`` feature to prevent label leakage.
+      - Adds 5 cross-features for explicit interaction modeling.
+      - Uses weighted sampling to oversample disagreement cases (gold_index > 0).
+
     Args:
         train_path: Path to JSONL training data.
         val_path: Optional path to JSONL validation data.  When ``None``,
@@ -225,6 +293,10 @@ class RerankerTrainer:
         hidden_dim: MLP hidden layer width.
         dropout: Dropout probability.
         seed: Random seed for reproducibility.
+        drop_original_rank: Remove feature 14 (label leakage).
+        add_cross_features: Append MLP-specific interaction features.
+        oversample_weight: Weight multiplier for examples where
+            gold_index > 0 (pipeline disagrees). Set to 1.0 to disable.
     """
 
     def __init__(
@@ -236,6 +308,9 @@ class RerankerTrainer:
         hidden_dim: int = DEFAULT_HIDDEN_DIM,
         dropout: float = DEFAULT_DROPOUT,
         seed: int = 42,
+        drop_original_rank: bool = True,
+        add_cross_features: bool = True,
+        oversample_weight: float = 2.0,
     ):
         if not TORCH_AVAILABLE:
             raise ImportError(
@@ -245,6 +320,9 @@ class RerankerTrainer:
 
         self.max_candidates = max_candidates
         self.seed = seed
+        self.drop_original_rank = drop_original_rank
+        self.add_cross_features = add_cross_features
+        self.oversample_weight = oversample_weight
         torch.manual_seed(seed)
 
         # Load data
@@ -271,20 +349,62 @@ class RerankerTrainer:
                 val_ratio,
             )
 
-        self.train_dataset = RerankerDataset(train_examples, max_candidates)
-        self.val_dataset = RerankerDataset(val_examples, max_candidates)
+        # MLP-specific transforms: drop original_rank, add cross-features
+        self.train_dataset = RerankerDataset(
+            train_examples,
+            max_candidates,
+            drop_original_rank=drop_original_rank,
+            add_cross_features=add_cross_features,
+        )
+        self.val_dataset = RerankerDataset(
+            val_examples,
+            max_candidates,
+            drop_original_rank=drop_original_rank,
+            add_cross_features=add_cross_features,
+        )
+
+        if drop_original_rank:
+            logger.info(
+                "MLP: dropped original_rank (feature %d) to prevent label leakage",
+                ORIGINAL_RANK_INDEX,
+            )
+        if add_cross_features:
+            logger.info(
+                "MLP: added %d cross-features: %s",
+                len(MLP_CROSS_FEATURES),
+                MLP_CROSS_FEATURE_NAMES,
+            )
+
+        # Compute sample weights for oversampling disagreement cases.
+        # Use gold_indices from the dataset (after filtering), not raw examples,
+        # to ensure weights and dataset have the same length.
+        self._sample_weights: list[float] | None = None
+        if oversample_weight > 1.0:
+            gold_indices = self.train_dataset.gold_indices
+            n_agree = sum(1 for gi in gold_indices if gi == 0)
+            n_disagree = len(gold_indices) - n_agree
+            self._sample_weights = [oversample_weight if gi > 0 else 1.0 for gi in gold_indices]
+            logger.info(
+                "MLP: weighted sampling — %d agree (1.0x), %d disagree (%.1fx)",
+                n_agree,
+                n_disagree,
+                oversample_weight,
+            )
+
+        # Detect feature dimension from training data (supports v1=20 and v2=19)
+        self.detected_dim = self.train_dataset.num_features
 
         # Compute normalization stats from training data
         self.feature_means, self.feature_stds = self._compute_norm_stats(self.train_dataset)
-        logger.info("Computed normalization stats for %d features", NUM_FEATURES)
+        logger.info("Computed normalization stats for %d features", self.detected_dim)
 
         # Apply normalization
         self._normalize_dataset(self.train_dataset)
         self._normalize_dataset(self.val_dataset)
 
-        # Build model
+        # Build model — use detected feature dimension from data
         self.model = RerankerMLP(
-            input_dim=NUM_FEATURES,
+            input_dim=self.detected_dim,
             hidden_dim=hidden_dim,
             dropout=dropout,
         )
@@ -356,15 +476,16 @@ class RerankerTrainer:
 
         Uses Welford's online algorithm to avoid numerical instability.
         """
+        feat_dim = dataset.num_features
         n = 0
-        mean = torch.zeros(NUM_FEATURES, dtype=torch.float64)
-        m2 = torch.zeros(NUM_FEATURES, dtype=torch.float64)
+        mean = torch.zeros(feat_dim, dtype=torch.float64)
+        m2 = torch.zeros(feat_dim, dtype=torch.float64)
 
         for i in range(len(dataset)):
-            feats = dataset.features[i]  # (max_cands, NUM_FEATURES)
+            feats = dataset.features[i]  # (max_cands, feat_dim)
             mask = dataset.masks[i]  # (max_cands,)
             # Only use real (non-padding) candidates
-            real_feats = feats[mask]  # (n_real, NUM_FEATURES)
+            real_feats = feats[mask]  # (n_real, feat_dim)
             for row in real_feats:
                 n += 1
                 delta = row.double() - mean
@@ -373,7 +494,7 @@ class RerankerTrainer:
                 m2 += delta * delta2
 
         if n < 2:
-            return mean.float(), torch.ones(NUM_FEATURES, dtype=torch.float32)
+            return mean.float(), torch.ones(feat_dim, dtype=torch.float32)
 
         variance = m2 / (n - 1)
         std = torch.sqrt(variance).float()
@@ -409,12 +530,28 @@ class RerankerTrainer:
 
         self.model.to(device)
 
-        train_loader = DataLoader(
-            self.train_dataset,
-            batch_size=batch_size,
-            shuffle=True,
-            drop_last=False,
-        )
+        # Use weighted sampling if oversampling is enabled
+        if self._sample_weights is not None:
+            from torch.utils.data import WeightedRandomSampler
+
+            sampler = WeightedRandomSampler(
+                weights=self._sample_weights,
+                num_samples=len(self._sample_weights),
+                replacement=True,
+            )
+            train_loader = DataLoader(
+                self.train_dataset,
+                batch_size=batch_size,
+                sampler=sampler,
+                drop_last=False,
+            )
+        else:
+            train_loader = DataLoader(
+                self.train_dataset,
+                batch_size=batch_size,
+                shuffle=True,
+                drop_last=False,
+            )
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
 
         metrics = TrainingMetrics()
@@ -563,8 +700,8 @@ class RerankerTrainer:
         self.model.eval()
         self.model.cpu()
 
-        # Dummy input: (1, max_candidates, NUM_FEATURES)
-        dummy = torch.randn(1, self.max_candidates, NUM_FEATURES)
+        # Dummy input: (1, max_candidates, detected_dim)
+        dummy = torch.randn(1, self.max_candidates, self.detected_dim)
 
         torch.onnx.export(
             self.model,
@@ -580,13 +717,24 @@ class RerankerTrainer:
         )
 
         # Save normalization stats alongside model
+        # Build feature names list reflecting MLP transforms
+        mlp_feature_names = list(FEATURE_NAMES)
+        if self.drop_original_rank:
+            mlp_feature_names.pop(ORIGINAL_RANK_INDEX)
+        if self.add_cross_features:
+            mlp_feature_names.extend(MLP_CROSS_FEATURE_NAMES)
+
         stats_path = str(output) + ".stats.json"
         stats = {
-            "feature_names": FEATURE_NAMES,
+            "feature_names": mlp_feature_names,
             "feature_means": self.feature_means.tolist(),
             "feature_stds": self.feature_stds.tolist(),
             "max_candidates": self.max_candidates,
-            "num_features": NUM_FEATURES,
+            "num_features": self.detected_dim,
+            "model_type": "mlp",
+            "feature_schema": "mlp_v3",
+            "drop_original_rank": self.drop_original_rank,
+            "cross_features": MLP_CROSS_FEATURE_NAMES if self.add_cross_features else [],
         }
         with open(stats_path, "w", encoding="utf-8") as f:
             json.dump(stats, f, indent=2, ensure_ascii=False)
@@ -645,6 +793,22 @@ def main() -> None:
     parser.add_argument("--max-candidates", type=int, default=DEFAULT_MAX_CANDIDATES)
     parser.add_argument("--patience", type=int, default=DEFAULT_PATIENCE)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--no-drop-rank",
+        action="store_true",
+        help="Keep original_rank feature (default: drop for MLP).",
+    )
+    parser.add_argument(
+        "--no-cross-features",
+        action="store_true",
+        help="Skip MLP cross-feature generation.",
+    )
+    parser.add_argument(
+        "--oversample-weight",
+        type=float,
+        default=2.0,
+        help="Weight for oversampling gold_index>0 examples.",
+    )
 
     args = parser.parse_args()
 
@@ -659,6 +823,9 @@ def main() -> None:
         hidden_dim=args.hidden_dim,
         dropout=args.dropout,
         seed=args.seed,
+        drop_original_rank=not args.no_drop_rank,
+        add_cross_features=not args.no_cross_features,
+        oversample_weight=args.oversample_weight,
     )
 
     metrics = trainer.train(
