@@ -348,7 +348,20 @@ class RerankerDataGenerator:
             try:
                 from myspellchecker.algorithms.semantic_checker import SemanticChecker
 
-                self._semantic_checker = SemanticChecker(self.semantic_model_path)
+                sem_path = Path(self.semantic_model_path)
+                if sem_path.is_dir():
+                    # Directory: resolve model.onnx + tokenizer.json inside it
+                    model_file = sem_path / "model.onnx"
+                    tokenizer_file = sem_path / "tokenizer.json"
+                    if not model_file.exists():
+                        raise FileNotFoundError(f"No model.onnx in {sem_path}")
+                    self._semantic_checker = SemanticChecker(
+                        model_path=str(model_file),
+                        tokenizer_path=str(tokenizer_file) if tokenizer_file.exists() else None,
+                    )
+                else:
+                    # Direct file path (e.g., model.onnx)
+                    self._semantic_checker = SemanticChecker(model_path=str(sem_path))
                 logger.info("Semantic checker loaded from %s", self.semantic_model_path)
             except Exception as e:
                 logger.warning("Failed to load semantic checker: %s (mlm_logit will be 0.0)", e)
