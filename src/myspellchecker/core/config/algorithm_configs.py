@@ -2849,7 +2849,7 @@ class BrokenCompoundStrategyConfig(BaseModel):
         description="Minimum compound frequency to flag broken compound.",
     )
     compound_ratio: float = Field(
-        default=5.0,
+        default=10.0,
         ge=1.0,
         description="Minimum ratio of compound_freq / rare_word_freq.",
     )
@@ -2860,7 +2860,7 @@ class BrokenCompoundStrategyConfig(BaseModel):
         description="Default confidence for broken compound errors.",
     )
     both_high_freq: int = Field(
-        default=5000,
+        default=10000,
         ge=0,
         description="Frequency guard for multi-syllable both-high compounds.",
     )

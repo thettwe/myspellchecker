@@ -680,7 +680,8 @@ class SemanticChecker:
         """Build numpy arrays for a single-sequence inference call.
 
         Allocates fresh arrays per call to ensure thread safety under
-        concurrent ``check_batch_async`` usage.
+        concurrent ``check_batch_async`` usage.  Truncates to the model's
+        max sequence length to prevent ONNX runtime errors on long inputs.
 
         Args:
             token_ids: 1-D list of integer token IDs.
@@ -689,6 +690,8 @@ class SemanticChecker:
             ``(input_ids, attention_mask)`` -- contiguous arrays of shape
             ``(1, seq_len)``.
         """
+        if len(token_ids) > self._max_seq_len:
+            token_ids = token_ids[: self._max_seq_len]
         input_ids = np.array([token_ids], dtype=np.int64)
         attention_mask = np.ones((1, len(token_ids)), dtype=np.int64)
         return input_ids, attention_mask
@@ -920,8 +923,13 @@ class SemanticChecker:
         mask_indices = []
 
         for i in range(start_idx, end_idx):
+            if i >= self._max_seq_len:
+                break
             input_ids[i] = self.mask_token_id
             mask_indices.append(i)
+
+        if not mask_indices:
+            return None, None, []
 
         # Reuse pre-allocated buffers instead of allocating new arrays
         input_ids_np, attention_mask_np = self._prepare_single_inference_inputs(input_ids)
@@ -1218,8 +1226,19 @@ class SemanticChecker:
         """Execute ONNX forward pass for a masked target (uncached).
 
         Uses pre-allocated buffers via ``_prepare_single_inference_inputs``
-        to avoid per-call numpy array allocation.
+        to avoid per-call numpy array allocation.  Gracefully returns
+        ``(None, [])`` when the ONNX runtime encounters out-of-range token
+        IDs (e.g. on very long inputs that exceed the model vocabulary).
         """
+        try:
+            return self._run_mask_inference_inner(sentence, target_word, occurrence)
+        except Exception:
+            return None, []
+
+    def _run_mask_inference_inner(
+        self, sentence: str, target_word: str, occurrence: int = 0
+    ) -> tuple[np.ndarray | None, list[int]]:
+        """Inner implementation — may raise on ONNX runtime errors."""
         use_alignment = self.use_word_alignment and self._is_myanmar_text(target_word)
         if use_alignment:
             input_ids, attention_mask, mask_indices = self._create_word_aligned_mask(

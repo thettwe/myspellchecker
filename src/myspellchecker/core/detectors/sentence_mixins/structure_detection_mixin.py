@@ -280,7 +280,7 @@ class StructureDetectionMixin:
     # G02 dangling word: suppress for high-frequency function words.
     # Words above this corpus frequency are common particles/markers that
     # naturally appear at clause boundaries and should not be flagged.
-    _DANGLING_HIGH_FREQ_THRESHOLD: int = 5_000
+    _DANGLING_HIGH_FREQ_THRESHOLD: int = 15_000
 
     def _detect_sentence_structure_issues(self, text: str, errors: list[Error]) -> None:
         """Detect sentence structure issues across the full text.

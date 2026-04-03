@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -29,6 +30,10 @@ from myspellchecker.utils.logging_utils import get_logger
 
 # Module logger
 logger = get_logger(__name__)
+
+# Regex for stripping non-Myanmar punctuation attached to token boundaries.
+# Matches leading/trailing quotes, brackets, colons, etc.
+_BOUNDARY_PUNCT_RE = re.compile(r'^["\'"()\[\]{},;:\-–—/\\]+|["\'"()\[\]{},;:\-–—/\\]+$')
 
 # Informal pronouns that are register-critical -- colloquial_info should still
 # be emitted for these even when high-frequency, since they signal informal register.
@@ -565,6 +570,13 @@ class WordValidator(Validator):
             )
             if not is_valid_word:
                 continue
+
+            # Strip non-Myanmar punctuation from token boundaries.
+            # Corpus text often has quotes/brackets attached to words
+            # (e.g., "word", word(, word)) which cause invalid_word FPs.
+            stripped = _BOUNDARY_PUNCT_RE.sub("", word)
+            if stripped and stripped != word and self._is_myanmar_with_config(stripped):
+                word = stripped
 
             syllables = self.segmenter.segment_syllables(word)
 
