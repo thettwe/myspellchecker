@@ -351,6 +351,7 @@ class SpellChecker(
 
         # Initialize neural reranker (graceful degradation)
         self._neural_reranker = self._create_neural_reranker()
+        self._neural_reranker_gap_threshold = self.config.neural_reranker.confidence_gap_threshold
 
     def _init_validators(
         self,

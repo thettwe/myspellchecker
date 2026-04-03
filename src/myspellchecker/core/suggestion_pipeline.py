@@ -1576,16 +1576,29 @@ class SuggestionPipelineMixin:
 
     # --- Neural reranker methods -------------------------------------------------
 
+    # Error types that are deterministic BUT may have multiple valid
+    # alternatives — allow neural reranking to pick the best one.
+    # These are excluded from _NGRAM_RERANK_PROTECTED_TYPES to enable
+    # context-aware ranking of grammar correction alternatives.
+    _NEURAL_RERANK_ALLOWED_GRAMMAR_TYPES: frozenset[str] = frozenset(
+        {
+            ET_GRAMMAR,
+        }
+    )
+
     def _apply_neural_reranking(self, text: str, errors: list[Error]) -> None:
         """Apply neural MLP reranking as the final suggestion reranking step.
 
-        For each error with 2+ suggestions (skipping rule-based types),
+        For each error with 2+ suggestions (skipping structural-fix types),
         extracts features per candidate, scores them via the neural
         reranker, and reorders suggestions by neural score.
 
-        Gating: only reranks when the model's top pick differs from the
-        pipeline's top pick AND the model pick is not longer than
-        the current top-1 (prevents suffixed variant promotion).
+        Gating (three checks):
+        1. Model must disagree with pipeline's top-1 pick.
+        2. Score gap between model's top-1 and top-2 must exceed the
+           confidence_gap_threshold (prevents marginal overrides).
+        3. Model's pick must not be longer than pipeline's top-1
+           (prevents suffixed variant promotion).
 
         This should be called AFTER both ``_apply_ngram_reranking`` and
         ``_apply_semantic_reranking`` so that the neural model gets the
@@ -1595,11 +1608,28 @@ class SuggestionPipelineMixin:
         if not neural_reranker:
             return
 
+        gap_threshold: float = getattr(self, "_neural_reranker_gap_threshold", 0.15)
+
+        # Gate telemetry counters (for diagnostic logging)
+        _g_scored = 0
+        _g_agree = 0
+        _g_gap = 0
+        _g_length = 0
+        _g_protected = 0
+        _g_reranked = 0
+
         for e in errors:
             if len(e.suggestions) < 2:
                 continue
-            if e.error_type in self._NGRAM_RERANK_PROTECTED_TYPES:
-                continue  # Don't rerank rule-based corrections
+
+            # Skip structural/deterministic types UNLESS they are in the
+            # grammar-allowed set (grammar errors can have valid alternatives).
+            if (
+                e.error_type in self._NGRAM_RERANK_PROTECTED_TYPES
+                and e.error_type not in self._NEURAL_RERANK_ALLOWED_GRAMMAR_TYPES
+            ):
+                _g_protected += 1
+                continue
 
             # Extract features for each candidate
             features = self._extract_reranker_features(text, e)
@@ -1611,17 +1641,48 @@ class SuggestionPipelineMixin:
             if not scores or len(scores) != len(e.suggestions):
                 continue
 
-            # Conservative gating: only rerank when the model's top
-            # pick DIFFERS from the pipeline's top pick AND the model
-            # is confident about the override.
+            _g_scored += 1
+
+            # Gate 1: Model must disagree with pipeline's top-1
             model_top_idx = max(range(len(scores)), key=lambda k: scores[k])
             if model_top_idx == 0:
+                _g_agree += 1
                 continue  # Model agrees with pipeline — keep current order
+
+            # Gate 2: Confidence gap — model must be confident about override
+            sorted_scores = sorted(scores, reverse=True)
+            if len(sorted_scores) >= 2:
+                score_gap = sorted_scores[0] - sorted_scores[1]
+                if score_gap < gap_threshold:
+                    _g_gap += 1
+                    continue  # Model's margin too thin — skip override
+
+            # Gate 3: Length guard — prevent promoting suffixed variants.
+            # Allow promotion if the candidate is at most 1 character longer
+            # (common for asat/visarga corrections), but block significantly
+            # longer candidates (likely suffixed variants).
+            model_pick = e.suggestions[model_top_idx]
+            current_top = e.suggestions[0]
+            if len(model_pick) > len(current_top) + 1:
+                _g_length += 1
+                continue  # Don't promote much-longer candidates
+
+            _g_reranked += 1
 
             # Reorder suggestions by score
             paired = list(zip(scores, e.suggestions, strict=False))
             paired.sort(key=lambda x: x[0], reverse=True)
             e.suggestions = [s for _, s in paired]
+
+        # Store gate telemetry for diagnostic access
+        self._last_neural_rerank_telemetry = {
+            "scored": _g_scored,
+            "gate1_agree": _g_agree,
+            "gate2_gap": _g_gap,
+            "gate3_length": _g_length,
+            "protected": _g_protected,
+            "reranked": _g_reranked,
+        }
 
     # ------------------------------------------------------------------
     # Reranker feature helpers
@@ -1706,10 +1767,10 @@ class SuggestionPipelineMixin:
         return ngram_left, ngram_right, is_conf
 
     def _extract_reranker_features(self, text: str, error: Error) -> list[list[float]]:
-        """Extract 20 features for each candidate suggestion.
+        """Extract 19 features (v2) for each candidate suggestion.
 
         Uses the same feature definitions as
-        ``training/reranker_data.py::_extract_features`` to ensure
+        ``training/reranker_data.py::FEATURE_NAMES`` to ensure
         consistency between training and inference.
 
         Args:
@@ -1770,15 +1831,20 @@ class SuggestionPipelineMixin:
         next_words = words[best_wi + 1 : best_wi + 4]
 
         # Count error syllables once
+        syllable_seg = None
+        error_syllables = 1
         try:
             from myspellchecker.segmenters.regex import RegexSegmenter
 
             syllable_seg = RegexSegmenter()
             error_syllables = len(syllable_seg.segment_syllables(error_word))
         except (ImportError, ValueError, TypeError):
-            error_syllables = 1
+            pass
 
         error_len = len(error_word) or 1
+
+        # Try to get semantic checker for MLM logits
+        semantic_checker = getattr(self, "_semantic_checker", None)
 
         all_features: list[list[float]] = []
 
@@ -1792,6 +1858,30 @@ class SuggestionPipelineMixin:
                 log_freqs.append(0.0)
         max_log_freq = max(log_freqs) if log_freqs else 1.0
 
+        # Pre-compute error word n-gram context probability (for improvement ratio)
+        error_ngram_left = 0.0
+        error_ngram_right = 0.0
+        if ngram_checker:
+            if prev_words:
+                error_ngram_left = ngram_checker.get_best_left_probability(
+                    prev_words[-3:], error_word
+                )
+            if next_words:
+                error_ngram_right = ngram_checker.get_best_right_probability(
+                    error_word, next_words[:3]
+                )
+
+        # Pre-compute MLM scores for all candidates via score_mask_candidates
+        mlm_scores: dict[str, float] = {}
+        if semantic_checker is not None:
+            try:
+                occurrence = text[: error.position].count(error_word)
+                mlm_scores = semantic_checker.score_mask_candidates(
+                    text, error_word, candidates, occurrence=occurrence
+                )
+            except (AttributeError, TypeError, ValueError):
+                pass
+
         for i, cand in enumerate(candidates):
             # Distance-related features (0-6)
             edit_dist, weighted_dist, phon_score, syl_diff, plausibility, span_ratio = (
@@ -1803,32 +1893,48 @@ class SuggestionPipelineMixin:
             # 2. Log frequency (absolute)
             log_freq = log_freqs[i]
 
-            # 7. MLM logit (placeholder)
-            mlm_logit = 0.0
+            # 7. MLM logit — wire actual semantic checker score (pre-computed)
+            mlm_logit = mlm_scores.get(cand, 0.0) if mlm_scores else 0.0
 
             # Context-related features (8-10)
             ngram_left, ngram_right, is_conf = self._compute_context_features(
                 cand, confusable_set, ngram_checker, prev_words, next_words
             )
 
-            # 11-15. Source indicators (default to symspell=1)
-            source_symspell = 1.0
-            source_morpheme = 0.0
-            source_context = 0.0
-            source_compound = 0.0
-            source_other = 0.0
-
-            # 16. Relative log frequency
+            # 11. Relative log frequency
             relative_log_freq = log_freq / max_log_freq if max_log_freq > 0 else 0.0
 
-            # 17. Character length difference (signed)
+            # 12. Character length difference (signed)
             char_length_diff = float(len(cand) - len(error_word))
 
-            # 18. Is substring
+            # 13. Is substring
             is_substr = 1.0 if (cand in error_word or error_word in cand) else 0.0
 
-            # Original rank signal: pipeline's existing rank as a prior
+            # 14. Original rank signal: pipeline's existing rank as a prior
             original_rank = 1.0 / (1.0 + i)
+
+            # --- v2 features ---
+
+            # 15. N-gram improvement ratio: best of left/right context
+            ngram_improv = 0.0
+            improvements: list[float] = []
+            if error_ngram_left > 0 and ngram_left > 0:
+                improvements.append(math.log(ngram_left / error_ngram_left))
+            elif error_ngram_left == 0.0 and ngram_left > 0:
+                improvements.append(5.0)  # impossible → likely
+            if error_ngram_right > 0 and ngram_right > 0:
+                improvements.append(math.log(ngram_right / error_ngram_right))
+            elif error_ngram_right == 0.0 and ngram_right > 0:
+                improvements.append(5.0)
+            if improvements:
+                ngram_improv = max(-5.0, min(5.0, max(improvements)))
+
+            # 16-17. Edit type classification
+            edit_type_subst = 1.0 if len(cand) == len(error_word) else 0.0
+            edit_type_delete = 1.0 if len(cand) != len(error_word) else 0.0
+
+            # 18. Character bigram Dice coefficient
+            char_dice = self._char_bigram_dice(error_word, cand)
 
             feat_vec = [
                 edit_dist,
@@ -1842,16 +1948,30 @@ class SuggestionPipelineMixin:
                 ngram_left,
                 ngram_right,
                 is_conf,
-                source_symspell,
-                source_morpheme,
-                source_context,
-                source_compound,
-                source_other,
                 relative_log_freq,
                 char_length_diff,
                 is_substr,
                 original_rank,
+                ngram_improv,
+                edit_type_subst,
+                edit_type_delete,
+                char_dice,
             ]
             all_features.append(feat_vec)
 
         return all_features
+
+    @staticmethod
+    def _char_bigram_dice(a: str, b: str) -> float:
+        """Character bigram Dice coefficient (multiset) between two strings."""
+        from collections import Counter
+
+        if len(a) < 2 and len(b) < 2:
+            return 1.0 if a == b else 0.0
+        bigrams_a = Counter(a[i : i + 2] for i in range(len(a) - 1)) if len(a) >= 2 else Counter()
+        bigrams_b = Counter(b[i : i + 2] for i in range(len(b) - 1)) if len(b) >= 2 else Counter()
+        total = sum(bigrams_a.values()) + sum(bigrams_b.values())
+        if total == 0:
+            return 0.0
+        intersection = sum(min(bigrams_a[bg], bigrams_b[bg]) for bg in bigrams_a)
+        return 2.0 * intersection / total
