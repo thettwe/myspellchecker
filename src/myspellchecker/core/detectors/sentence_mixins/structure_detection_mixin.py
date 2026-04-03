@@ -352,17 +352,12 @@ class StructureDetectionMixin:
                     has_later_sfp = any(is_sent_final[k] for k in range(j + 1, len(tokens)))
                     if has_later_sfp:
                         continue
-                    # High-frequency words are common particles/markers (e.g.,
-                    # ခဲ့, ဖြစ်, များ, က, ပါ) that naturally appear at clause
-                    # boundaries.  Suppress dangling-word FPs for these.
+                    # Suppress dangling-word FPs for known dictionary words
+                    # and high-frequency particles/markers.
                     provider = getattr(self, "provider", None)
                     if provider is not None:
                         try:
-                            freq = provider.get_word_frequency(next_stripped)
-                            if (
-                                isinstance(freq, (int, float))
-                                and freq >= self._DANGLING_HIGH_FREQ_THRESHOLD
-                            ):
+                            if provider.is_valid_word(next_stripped):
                                 continue
                         except Exception:
                             pass

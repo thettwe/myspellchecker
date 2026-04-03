@@ -500,6 +500,7 @@ def run_benchmark(
     enable_strategy_debug: bool = False,
     reranker_path: Optional[Path] = None,
     confidence_gap: float | None = None,
+    scope: str = "spelling",
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -509,6 +510,8 @@ def run_benchmark(
         db_path: Path to spell checker database.
         level: Validation level ("syllable" or "word").
         warmup: Number of warmup runs before timing.
+        scope: Comma-separated scopes to include (default: "spelling").
+            Use "all" to include every error regardless of scope field.
 
         enable_ner: Enable NER-based FP suppression (PER+LOC) using heuristic
             NER with place-name dictionary.
@@ -624,17 +627,39 @@ def run_benchmark(
     for _ in range(warmup):
         checker.check(warmup_text, level=val_level)
 
+    # Scope filtering — parse once, apply per-sentence.
+    if scope == "all":
+        _scope_set: set[str] | None = None  # None = no filtering
+    else:
+        _scope_set = {s.strip() for s in scope.split(",")}
+
+    def _in_scope(err: dict) -> bool:
+        """Return True if a gold error is in the active scope set."""
+        if _scope_set is None:
+            return True
+        return err.get("scope", "spelling") in _scope_set
+
     # Run benchmark
     results: list[SentenceResult] = []
     rerank_rule_telemetry: dict[str, dict[str, int]] = {}
     strategy_debug_telemetry: dict[str, Any] = {"enabled": False, "strategies": {}}
     fn_reason_telemetry: dict[str, Any] = {"histogram": {}, "examples": []}
     total_start = time.perf_counter()
+    total_out_of_scope = 0
 
     for sentence in sentences:
         input_text = sentence["input"]
         is_clean = sentence["is_clean"]
-        gold_errors = sentence.get("expected_errors", [])
+        all_gold_errors = sentence.get("expected_errors", [])
+        in_scope_errors = [e for e in all_gold_errors if _in_scope(e)]
+        out_of_scope_errors = [e for e in all_gold_errors if not _in_scope(e)]
+        total_out_of_scope += len(out_of_scope_errors)
+        # For matching, use ALL gold errors so out-of-scope matches
+        # absorb system detections (not counted as FP).
+        gold_errors = all_gold_errors
+        # Sentences with no in-scope errors are "spelling-clean" for FPR.
+        if not in_scope_errors and out_of_scope_errors:
+            is_clean = True
 
         # Time the check
         start = time.perf_counter()
@@ -665,8 +690,15 @@ def run_benchmark(
 
         if is_clean:
             # Clean sentence — any detection is a false positive
-            # (exclude informational notes like colloquial_info)
-            fp = sum(1 for e in system_errors if e.get("error_type", "") not in {"colloquial_info"})
+            # (exclude informational notes like colloquial_info).
+            # For scoped-clean sentences (all errors out of scope), run
+            # match_errors so out-of-scope gold absorbs system detections.
+            if out_of_scope_errors and system_errors:
+                _, _absorbed_tp, fp, _ = match_errors(out_of_scope_errors, system_errors)
+            else:
+                fp = sum(
+                    1 for e in system_errors if e.get("error_type", "") not in {"colloquial_info"}
+                )
             result = SentenceResult(
                 sentence_id=sentence["id"],
                 input_text=input_text,
@@ -684,17 +716,28 @@ def run_benchmark(
                 has_system_errors=response.has_errors,
             )
         else:
-            # Error sentence — match detections to gold
+            # Error sentence — match detections to ALL gold (in-scope + out-of-scope).
+            # Out-of-scope matches absorb system detections (not counted as FP).
             span_matches, tp, fp, fn = match_errors(gold_errors, system_errors)
+
+            # Re-count TP/FN considering only in-scope gold errors.
+            if _scope_set is not None and out_of_scope_errors:
+                in_scope_ids = {e.get("error_id") for e in in_scope_errors}
+                tp = sum(1 for m in span_matches if m.matched and m.gold_error_id in in_scope_ids)
+                fn = len(in_scope_errors) - tp
+                # FP: match_errors already excluded system detections that matched
+                # ANY gold (in-scope or out). Remaining unmatched = real FPs.
 
             if fn > 0:
                 segmented_words = checker.segmenter.segment_words(input_text)
                 gold_by_id = {
-                    err.get("error_id"): err for err in gold_errors if isinstance(err, dict)
+                    err.get("error_id"): err for err in in_scope_errors if isinstance(err, dict)
                 }
                 for match in span_matches:
                     if match.matched:
                         continue
+                    if match.gold_error_id not in gold_by_id:
+                        continue  # out-of-scope FN — skip telemetry
                     gold = gold_by_id.get(match.gold_error_id)
                     if not isinstance(gold, dict):
                         continue
@@ -734,7 +777,7 @@ def run_benchmark(
                 difficulty_tier=sentence.get("difficulty_tier"),
                 domain=sentence.get("domain", ""),
                 latency_ms=elapsed_ms,
-                expected_error_count=len(gold_errors),
+                expected_error_count=len(in_scope_errors),
                 detected_error_count=len(system_errors),
                 true_positives=tp,
                 false_positives=fp,
@@ -759,6 +802,8 @@ def run_benchmark(
         rerank_rule_telemetry=rerank_rule_telemetry,
         strategy_debug_telemetry=strategy_debug_telemetry if enable_strategy_debug else None,
         fn_reason_telemetry=fn_reason_telemetry,
+        scope=scope,
+        total_out_of_scope=total_out_of_scope,
     )
     report["config"]["targeted_rerank_hints"] = targeted_rerank_hints
     report["config"]["targeted_candidate_injections"] = targeted_candidate_injections
@@ -778,6 +823,8 @@ def compute_report(
     rerank_rule_telemetry: dict[str, dict[str, int]] | None = None,
     strategy_debug_telemetry: dict[str, Any] | None = None,
     fn_reason_telemetry: dict[str, Any] | None = None,
+    scope: str = "spelling",
+    total_out_of_scope: int = 0,
 ) -> dict:
     """Compute all metrics and produce the final report."""
 
@@ -899,6 +946,8 @@ def compute_report(
             "total_sentences": len(results),
             "clean_sentences": clean_total,
             "error_sentences": len(results) - clean_total,
+            "scope": scope,
+            "out_of_scope_errors_excluded": total_out_of_scope,
         },
         "overall_metrics": {
             "detection": {
@@ -1097,6 +1146,8 @@ def print_summary(report: dict) -> None:
     errs = cfg["error_sentences"]
     print(f"  Sentences: {total} ({clean} clean, {errs} with errors)")
     print(f"  Run: {report['run_timestamp']}")
+    if cfg.get("out_of_scope_errors_excluded", 0) > 0:
+        print(f"  Scope: {cfg['scope']} ({cfg['out_of_scope_errors_excluded']} errors excluded)")
 
     print(f"\n{'─' * 70}")
     print("  OVERALL DETECTION")
@@ -1396,6 +1447,18 @@ def main():
             "Lower values allow more reranking (default: 0.15)."
         ),
     )
+    parser.add_argument(
+        "--scope",
+        type=str,
+        default="spelling",
+        metavar="SCOPES",
+        help=(
+            "Comma-separated scopes to include in evaluation. "
+            "Errors with a 'scope' field not in this list are excluded from FN count. "
+            "Errors without a 'scope' field default to 'spelling'. "
+            "Use 'all' to include everything. (default: spelling)"
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -1427,6 +1490,7 @@ def main():
         enable_strategy_debug=args.debug_strategy_gates,
         reranker_path=args.reranker,
         confidence_gap=args.confidence_gap,
+        scope=args.scope,
     )
 
     # Print summary
