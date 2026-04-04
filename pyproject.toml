@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "myspellchecker"
-version = "1.1.0"
+version = "1.2.0"
 description = "Myanmar (Burmese) text intelligence library — spell checking, grammar validation, dictionary building, and AI model training"
 readme = "README.md"
 # NOTE: Codebase uses Python 3.10+ syntax (PEP 604 unions like `str | None`).
