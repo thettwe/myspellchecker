@@ -475,6 +475,7 @@ class NegationChecker:
                                         ),
                                     )
                                 )
+                                flagged_positions.add(pattern.end_index + 1)
 
                     # Skip to end of pattern
                     i = pattern.end_index + 1

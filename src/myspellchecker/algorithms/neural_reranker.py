@@ -253,9 +253,17 @@ class NeuralReranker:
 
     def _score_mlp(self, feat_array: np.ndarray) -> list[float]:
         """Score candidates using MLP model (3D input)."""
-        # Normalize if stats are available
+        # Normalize if stats are available and dimensions match
         if self._feature_means is not None and self._feature_stds is not None:
-            feat_array = (feat_array - self._feature_means) / self._feature_stds
+            if feat_array.shape[-1] != len(self._feature_means):
+                logger.warning(
+                    "Feature dimension mismatch: array has %d features but stats have %d; "
+                    "skipping normalization",
+                    feat_array.shape[-1],
+                    len(self._feature_means),
+                )
+            else:
+                feat_array = (feat_array - self._feature_means) / self._feature_stds
 
         # MLP expects (batch, candidates, features) — add batch dim
         if feat_array.ndim == 2:

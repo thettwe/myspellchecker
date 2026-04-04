@@ -34,7 +34,7 @@ from ..core.constants import (
     QUALITY_MAX_EMPTY_PCT,
     QUALITY_MIN_AVG_WORDS,
 )
-from ..core.exceptions import InsufficientStorageError, PipelineError
+from ..core.exceptions import InsufficientStorageError, PackagingError, PipelineError
 from ..utils.console import PipelineConsole, create_build_complete_panel
 from ..utils.io_utils import check_disk_space
 from ..utils.logging_utils import get_logger
@@ -1043,7 +1043,7 @@ class Pipeline:
             )
             step_durations["4. Database Packaging"] = ("complete", step4_duration, sub_steps)
 
-        except (sqlite3.Error, OSError, ValueError) as e:
+        except (sqlite3.Error, OSError, ValueError, PackagingError) as e:
             # Rollback transaction on any database/IO/data failure
             self.reporter.report_error(f"Database packaging failed: {e}")
             packager.rollback_transaction()

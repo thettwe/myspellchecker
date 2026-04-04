@@ -765,7 +765,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                             position=word_positions[i],
                             error_type=ET_SEMANTIC_ERROR,
                             suggestions=person_suggestions,
-                            confidence=min(0.95, person_count / len(first_tokens)),
+                            confidence=min(0.95, person_count / max(len(first_tokens), 1)),
                             probability=0.0,
                             prev_word=words[i - 1] if i > 0 else "",
                         )

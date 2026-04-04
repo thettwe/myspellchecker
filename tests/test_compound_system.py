@@ -43,7 +43,7 @@ class TestCompoundCheckerInitialization:
         checker = CompoundChecker()
         assert checker.prefixes is not None
         assert checker.suffixes is not None
-        assert checker.noun_compounds is not None
+        assert checker.component_compounds is not None
         assert checker.verb_compounds is not None
         assert checker.typo_map is not None
 
@@ -59,7 +59,7 @@ class TestCompoundCheckerInitialization:
         # Verify data structures are populated from config
         assert len(checker.prefixes) > 0
         assert len(checker.suffixes) > 0
-        assert len(checker.noun_compounds) > 0
+        assert len(checker.component_compounds) > 0
         assert len(checker.verb_compounds) > 0
 
 
@@ -446,7 +446,7 @@ class TestConstantsIntegrity:
     def test_noun_compounds_format(self):
         """Noun-noun compounds have correct format."""
         checker = CompoundChecker()
-        for (first, second), compound in checker.noun_compounds.items():
+        for (first, second), compound in checker.component_compounds.items():
             assert isinstance(first, str)
             assert isinstance(second, str)
             assert isinstance(compound, str)
@@ -491,7 +491,7 @@ class TestBuildLookups:
     def test_build_lookups_creates_component_maps(self):
         """_build_lookups creates first/second component maps from noun and verb compounds."""
         checker = CompoundChecker()
-        checker.noun_compounds[("first", "second")] = "compound"
+        checker.component_compounds[("first", "second")] = "compound"
         checker.verb_compounds[("v1", "v2")] = "vcompound"
         checker._build_lookups()
 

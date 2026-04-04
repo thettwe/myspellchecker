@@ -90,16 +90,8 @@ class WordRuleMixin:
         Returns:
             Tuple of (correction, reason, confidence) or None if no error.
         """
-        typo_info = self.config.get_particle_typo(word)
-        if typo_info and typo_info.get("context") == "after_verb":
-            if self._has_tag(prev_pos, "V"):
-                correction = typo_info["correction"]
-                meaning = typo_info.get("meaning", "")
-                return (
-                    correction,
-                    f"After verb: {correction} ({meaning})",
-                    self.grammar_config.medium_confidence,
-                )
+        # Note: after_verb particle typos are handled by _check_particle_typos;
+        # this method focuses on structural verb-particle agreement issues.
 
         # Check if word is a verb particle appearing after non-verb
         if self.config.is_verb_particle(word):
@@ -117,26 +109,8 @@ class WordRuleMixin:
                             self.grammar_config.tense_marker_confidence,
                         )
 
-        word_correction = self.config.get_word_correction(word)
-        if word_correction:
-            # Respect excluded_pos from YAML (e.g., don't correct after verbs)
-            excluded_pos = word_correction.get("excluded_pos", [])
-            if prev_pos and excluded_pos:
-                prev_tags = self._get_all_tags(prev_pos)
-                if prev_tags & set(excluded_pos):
-                    return None
-            # Respect context requirements
-            context = word_correction.get("context", "")
-            if context == "context_dependent":
-                return None  # Skip context-dependent entries without enough info
-            correction = word_correction["correction"]
-            meaning = word_correction.get("meaning", "")
-            confidence = word_correction.get("confidence", self.grammar_config.medium_confidence)
-            return (
-                correction,
-                f"Common error: {correction} ({meaning})",
-                confidence,
-            )
+        # Word corrections are handled by _check_config_patterns (Rule 4-11)
+        # to avoid duplicate matching at different priority levels.
 
         return None
 
@@ -295,20 +269,32 @@ class WordRuleMixin:
         word_correction = self.config.get_word_correction(curr_word)
         if word_correction and "correction" in word_correction:
             conf = word_correction.get("confidence", self.grammar_config.medium_confidence)
-            # Respect excluded_pos from YAML
+            # Respect excluded_pos from YAML — check independently of prev_pos
             excluded_pos = word_correction.get("excluded_pos", [])
-            if prev_pos and excluded_pos:
+            if excluded_pos and prev_pos:
                 prev_tags = self._get_all_tags(prev_pos)
                 if prev_tags & set(excluded_pos):
-                    pass  # Skip this correction
-                else:
-                    context = word_correction.get("context", "")
-                    if context != "context_dependent":
-                        return (i, curr_word, word_correction["correction"], conf)
-            else:
-                context = word_correction.get("context", "")
-                if context != "context_dependent":
+                    return None  # Skip this correction
+
+            # Dispatch on context value
+            context = word_correction.get("context", "")
+            if context == "context_dependent":
+                pass  # Skip — needs more info than available here
+            elif context == "sentence_initial":
+                if i == 0:
                     return (i, curr_word, word_correction["correction"], conf)
+            elif context == "after_verb":
+                if self._has_tag(prev_pos, "V"):
+                    return (i, curr_word, word_correction["correction"], conf)
+            elif context == "after_noun":
+                if self._has_tag(prev_pos, "N"):
+                    return (i, curr_word, word_correction["correction"], conf)
+            elif context == "sentence_final_after_verb":
+                if i == word_count - 1 and self._has_tag(prev_pos, "V"):
+                    return (i, curr_word, word_correction["correction"], conf)
+            else:
+                # No context restriction (empty string or unknown) — fire unconditionally
+                return (i, curr_word, word_correction["correction"], conf)
 
         # Check question particle corrections (position-dependent)
         is_sentence_final = i == word_count - 1

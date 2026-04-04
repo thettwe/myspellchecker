@@ -171,7 +171,7 @@ class StatisticalConfusableStrategy(ValidationStrategy):
                 else:
                     # Word has zero prob, variant has nonzero
                     # → strong signal (use a large but finite ratio)
-                    ratio = p_variant * 1e6
+                    ratio = 1e6  # Fixed sentinel: variant seen, word unseen
                 best = max(best, ratio)
 
         if next_word:
@@ -187,7 +187,7 @@ class StatisticalConfusableStrategy(ValidationStrategy):
                 if p_word > 0:
                     ratio = p_variant / p_word
                 else:
-                    ratio = p_variant * 1e6
+                    ratio = 1e6  # Fixed sentinel: variant seen, word unseen
                 best = max(best, ratio)
 
         return best

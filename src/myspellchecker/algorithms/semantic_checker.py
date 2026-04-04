@@ -202,6 +202,12 @@ class SemanticChecker:
         self.check_top_k = check_top_k
         self.allow_extended_myanmar = allow_extended_myanmar
 
+        # Pre-initialize cache attributes so close() is safe even if
+        # __init__ fails partway through (e.g., model load error).
+        self._encoding_cache = None  # type: ignore[assignment]
+        self._alignment_cache = None  # type: ignore[assignment]
+        self._logits_cache = None  # type: ignore[assignment]
+
         if model and tokenizer:
             self.session = model
             self.tokenizer = tokenizer
@@ -337,7 +343,8 @@ class SemanticChecker:
 
     def clear_inference_cache(self) -> None:
         """Clear the logits cache between documents to free memory."""
-        self._logits_cache.clear()
+        if self._logits_cache is not None:
+            self._logits_cache.clear()
 
     def has_cached_logits(self, sentence: str, word: str, occurrence: int = 0) -> bool:
         """Check whether logits for the given (sentence, word, occurrence) are cached.
@@ -346,6 +353,8 @@ class SemanticChecker:
         redundant ``predict_mask`` call when ConfusableSemanticStrategy has
         already analyzed the same position and found it clean.
         """
+        if self._logits_cache is None:
+            return False
         return (sentence, word, occurrence) in self._logits_cache
 
     def _is_hf_model_name(self, name: str) -> bool:
@@ -740,8 +749,10 @@ class SemanticChecker:
         internal caches.  Idempotent.
         """
         self.session = None  # type: ignore[assignment]
-        self._encoding_cache.clear()
-        self._alignment_cache.clear()
+        if self._encoding_cache is not None:
+            self._encoding_cache.clear()
+        if self._alignment_cache is not None:
+            self._alignment_cache.clear()
 
     def cache_stats(self) -> dict[str, dict[str, Any]]:
         """
