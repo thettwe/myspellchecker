@@ -659,9 +659,10 @@ class SymSpell:
             term, level, candidate_scores, include_known, max_suggestions
         )
 
-        # Store in session cache (bounded)
+        # Store in session cache (bounded, evict oldest entry on overflow)
         if len(self._lookup_cache) >= self._LOOKUP_CACHE_MAX:
-            self._lookup_cache.clear()
+            oldest_key = next(iter(self._lookup_cache))
+            del self._lookup_cache[oldest_key]
         self._lookup_cache[cache_key] = result
 
         return result
@@ -916,9 +917,10 @@ class SymSpell:
 
             current_level = next_level
 
-        # Bound cache size
+        # Bound cache size (evict oldest entry on overflow)
         if len(self._deletes_cache) >= self._DELETES_CACHE_MAX:
-            self._deletes_cache.clear()
+            oldest_key = next(iter(self._deletes_cache))
+            del self._deletes_cache[oldest_key]
         self._deletes_cache[term] = deletes
         return deletes
 

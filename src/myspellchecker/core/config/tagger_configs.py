@@ -115,20 +115,28 @@ class POSTaggerConfig(BaseModel):
     )
 
     # Viterbi-specific settings
+    # DEPRECATED: These top-level fields duplicate the viterbi_* prefixed fields
+    # below (viterbi_beam_width, viterbi_emission_weight, viterbi_min_prob).
+    # They are kept for backward compatibility with component_factory and
+    # data_pipeline, which read pos_config.beam_width etc.
+    # Prefer the viterbi_* prefixed fields for new code. These will be removed
+    # in a future version once all consumers are migrated.
     beam_width: int = Field(
         default=DEFAULT_ALGORITHM_THRESHOLDS.beam_width_minimal,
         ge=1,
-        description="Beam width for Viterbi decoding",
+        description="Beam width for Viterbi decoding (deprecated: use viterbi_beam_width)",
     )
     emission_weight: float = Field(
         default=1.2,
         gt=0.0,
-        description="Weight for emission probabilities in HMM",
+        description=(
+            "Weight for emission probabilities in HMM (deprecated: use viterbi_emission_weight)"
+        ),
     )
     min_prob: float = Field(
         default=1e-10,
         gt=0.0,
-        description="Minimum probability threshold to prevent underflow",
+        description="Minimum probability threshold (deprecated: use viterbi_min_prob)",
     )
     hmm_params_path: str | None = Field(
         default=None,
@@ -170,7 +178,8 @@ class POSTaggerConfig(BaseModel):
         description="LRU cache size for transition probability lookups.",
     )
 
-    # Viterbi algorithm parameters
+    # Viterbi algorithm parameters (canonical — prefer these over the
+    # deprecated top-level beam_width / emission_weight / min_prob fields)
     viterbi_min_prob: float = Field(
         default=1e-10,
         gt=0.0,

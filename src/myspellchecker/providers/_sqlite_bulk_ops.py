@@ -51,6 +51,8 @@ class BulkQueryExecutor:
         self._word_freq_cache = word_freq_cache
         self._curated_min_frequency = curated_min_frequency
         self._logger = logger
+        # Lazy cache for PRAGMA table_info(words) — schema doesn't change at runtime
+        self._words_columns: set[str] | None = None
 
     # ------------------------------------------------------------------
     # Core helper
@@ -232,13 +234,14 @@ class BulkQueryExecutor:
         if not words:
             return {}
 
-        with self._execute_query() as conn:
-            cursor = conn.cursor()
-            cursor.execute("PRAGMA table_info(words)")
-            columns = {row["name"] for row in cursor.fetchall()}
+        if self._words_columns is None:
+            with self._execute_query() as conn:
+                cursor = conn.cursor()
+                cursor.execute("PRAGMA table_info(words)")
+                self._words_columns = {row["name"] for row in cursor.fetchall()}
 
-        has_pos_tag = "pos_tag" in columns
-        has_inferred = "inferred_pos" in columns
+        has_pos_tag = "pos_tag" in self._words_columns
+        has_inferred = "inferred_pos" in self._words_columns
         if not has_pos_tag and not has_inferred:
             return {w: None for w in words}
 

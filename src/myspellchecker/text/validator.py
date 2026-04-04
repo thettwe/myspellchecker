@@ -517,7 +517,7 @@ def validate_text(text: str, *, allow_extended_myanmar: bool = False) -> Validat
 
     # Ends with consonant + medial but no vowel/asat
     # Only flag if the word is very short (likely a fragment)
-    if len(text) <= 3 and INCOMPLETE_CONSONANT_MEDIAL_PATTERN.match(text):
+    if len(text) <= 3 and INCOMPLETE_CONSONANT_MEDIAL_PATTERN.search(text):
         issues.append(
             (
                 ValidationIssue.INCOMPLETE_WORD,

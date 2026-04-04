@@ -4,12 +4,12 @@ ONNX Export module.
 Converts PyTorch Transformer models to optimized ONNX format.
 """
 
+import contextlib
+import io
 import logging
 import os
 import shutil
-import sys
 import warnings
-from io import StringIO
 from pathlib import Path
 
 from myspellchecker.core.constants import DEFAULT_TOKENIZER_FILE
@@ -130,11 +130,10 @@ class ONNXExporter:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore")
 
-            old_stdout, old_stderr = sys.stdout, sys.stderr
-            sys.stdout = StringIO()
-            sys.stderr = StringIO()
-
-            try:
+            with (
+                contextlib.redirect_stdout(io.StringIO()),
+                contextlib.redirect_stderr(io.StringIO()),
+            ):
                 torch.onnx.export(
                     model,
                     input_tuple,
@@ -146,8 +145,6 @@ class ONNXExporter:
                     dynamic_axes=dynamic_axes,
                     dynamo=False,
                 )
-            finally:
-                sys.stdout, sys.stderr = old_stdout, old_stderr
 
         self.logger.info(f"Base ONNX model exported to {onnx_path}")
 
@@ -165,29 +162,28 @@ class ONNXExporter:
                 prev_root_level = root_logger.level
                 root_logger.setLevel(logging.ERROR)
 
-                old_stdout, old_stderr = sys.stdout, sys.stderr
-                sys.stdout = StringIO()
-                sys.stderr = StringIO()
-
-                try:
-                    quantize_input = onnx_path
+                with (
+                    contextlib.redirect_stdout(io.StringIO()),
+                    contextlib.redirect_stderr(io.StringIO()),
+                ):
                     try:
-                        quant_pre_process(
-                            input_model_path=onnx_path,
-                            output_model_path=preprocessed_path,
-                        )
-                        quantize_input = preprocessed_path
-                    except Exception as e:
-                        self.logger.debug("ONNX preprocessing skipped: %s", e)
+                        quantize_input = onnx_path
+                        try:
+                            quant_pre_process(
+                                input_model_path=onnx_path,
+                                output_model_path=preprocessed_path,
+                            )
+                            quantize_input = preprocessed_path
+                        except Exception as e:
+                            self.logger.debug("ONNX preprocessing skipped: %s", e)
 
-                    quantize_dynamic(
-                        model_input=quantize_input,
-                        model_output=quantized_path,
-                        weight_type=QuantType.QUInt8,
-                    )
-                finally:
-                    sys.stdout, sys.stderr = old_stdout, old_stderr
-                    root_logger.setLevel(prev_root_level)
+                        quantize_dynamic(
+                            model_input=quantize_input,
+                            model_output=quantized_path,
+                            weight_type=QuantType.QUInt8,
+                        )
+                    finally:
+                        root_logger.setLevel(prev_root_level)
 
             Path(preprocessed_path).unlink(missing_ok=True)
 

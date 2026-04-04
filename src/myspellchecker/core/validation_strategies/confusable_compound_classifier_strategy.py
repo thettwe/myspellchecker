@@ -34,6 +34,9 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
+# NOTE: Duplicates _TITLE_SUFFIXES in broken_compound_strategy.py.
+# Kept here as a module-level constant for MLP feature extraction;
+# consider consolidating into a shared module if a third user appears.
 TITLE_SUFFIXES = frozenset(
     {
         "ကြီး",
@@ -45,8 +48,6 @@ TITLE_SUFFIXES = frozenset(
         "မှူး",
     }
 )
-
-CONFUSABLE_ERROR_TYPE = "confusable_error"
 
 
 class ConfusableCompoundClassifierStrategy(ValidationStrategy):
@@ -162,7 +163,8 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
 
             if score >= self._threshold:
                 compound = w1 + w2
-                # Determine error type
+                # Only handle compound detection; confusable detection
+                # requires a variant pipeline that is not yet implemented.
                 if self._is_compound_pair(w1, w2, compound):
                     error = self._build_compound_error(
                         context,
@@ -172,18 +174,11 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
                         compound,
                         score,
                     )
-                else:
-                    error = self._build_confusable_error(
-                        context,
-                        i,
-                        w1,
-                        w2,
-                        score,
-                    )
-                if error is not None:
-                    errors.append(error)
-                    context.existing_errors[pos_i] = error.error_type
-                    context.existing_confidences[pos_i] = self._confidence * score
+                    if error is not None:
+                        errors.append(error)
+                        context.existing_errors[pos_i] = error.error_type
+                        context.existing_confidences[pos_i] = self._confidence * score
+                        context.existing_suggestions[pos_i] = [compound]
 
         return errors
 
@@ -338,20 +333,6 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
             suggestions=[compound],
             confidence=self._confidence * score,
         )
-
-    def _build_confusable_error(
-        self,
-        context: ValidationContext,
-        i: int,
-        w1: str,
-        w2: str,
-        score: float,
-    ) -> WordError | None:
-        """Build a confusable error (placeholder — needs variant gen)."""
-        # For now, the MLP detects that this pair is confusable
-        # but generating the correct suggestion requires the variant
-        # pipeline. Return None to avoid flagging without a suggestion.
-        return None
 
     def priority(self) -> int:
         """Return strategy execution priority (47)."""

@@ -165,7 +165,10 @@ class ServiceContainer:
             >>> provider = container.get("provider")
             >>> symspell = container.get("symspell")
         """
-        # Fast path: return cached instance without lock
+        # Fast path: return cached instance without lock (dict read is atomic
+        # under CPython's GIL, but another thread could modify the cache between
+        # this check and the lock acquisition below — the double-check inside
+        # the lock handles that race).
         if service_name in self._services:
             instance = self._services[service_name]
             if service_type is not None and not isinstance(instance, service_type):
@@ -176,15 +179,15 @@ class ServiceContainer:
             logger.debug(f"Retrieved cached service '{service_name}'")
             return instance
 
-        # Check if factory exists (before acquiring lock)
-        if service_name not in self._factories:
-            raise ValueError(
-                f"Service '{service_name}' not registered. "
-                f"Available services: {sorted(self._factories.keys())}"
-            )
-
         # Thread-safe singleton creation
         with self._lock:
+            # Check if factory exists (inside lock to avoid TOCTOU with cache)
+            if service_name not in self._factories and service_name not in self._services:
+                raise ValueError(
+                    f"Service '{service_name}' not registered. "
+                    f"Available services: {sorted(self._factories.keys())}"
+                )
+
             # Double-check after acquiring lock (another thread may have created it)
             if service_name in self._services:
                 instance = self._services[service_name]

@@ -303,7 +303,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         self._trigram_map: dict[tuple[str, str, str], float] | None = None
 
         # In-memory enrichment caches (loaded lazily on first access)
-        self._confusable_map: dict[str, list[tuple[str, str, float, int]]] | None = None
+        self._confusable_map: dict[str, list[tuple[str, str, float, float, int]]] | None = None
         self._compound_map: dict[str, tuple[str, str, int, int, float]] | None = None
         self._collocation_map: dict[tuple[str, str], float] | None = None
         self._register_map: dict[str, str] | None = None

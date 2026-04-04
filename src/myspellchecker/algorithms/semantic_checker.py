@@ -1232,7 +1232,8 @@ class SemanticChecker:
         """
         try:
             return self._run_mask_inference_inner(sentence, target_word, occurrence)
-        except Exception:
+        except Exception as exc:
+            self.logger.debug("ONNX mask inference failed: %s", exc)
             return None, []
 
     def _run_mask_inference_inner(

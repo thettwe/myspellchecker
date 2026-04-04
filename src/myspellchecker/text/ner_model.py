@@ -246,6 +246,8 @@ class HeuristicNER(NERModel):
         self.logger = get_logger(__name__)
         self._segmenter = segmenter
         self._allow_extended_myanmar = allow_extended_myanmar
+        # Cache a default segmenter instance to avoid recreating on every call
+        self._default_segmenter: DefaultSegmenter | None = None
 
         # Import the existing NameHeuristic
         from myspellchecker.text.ner import NameHeuristic
@@ -268,10 +270,15 @@ class HeuristicNER(NERModel):
         if not text or not text.strip():
             return []
 
-        # Use injected segmenter or create default (lazy initialization)
-        segmenter = self._segmenter or DefaultSegmenter(
-            allow_extended_myanmar=self._allow_extended_myanmar
-        )
+        # Use injected segmenter or lazily-created default instance
+        if self._segmenter:
+            segmenter = self._segmenter
+        else:
+            if self._default_segmenter is None:
+                self._default_segmenter = DefaultSegmenter(
+                    allow_extended_myanmar=self._allow_extended_myanmar
+                )
+            segmenter = self._default_segmenter
         words = segmenter.segment_words(text)
 
         entities = []

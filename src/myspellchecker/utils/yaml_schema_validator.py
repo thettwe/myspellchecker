@@ -10,11 +10,12 @@ continues to work in minimal environments.
 from __future__ import annotations
 
 import json
-import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from myspellchecker.utils.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 __all__ = [
     "get_schema_path_for_yaml",

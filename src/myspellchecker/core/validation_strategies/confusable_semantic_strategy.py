@@ -72,6 +72,11 @@ class ConfusableSemanticStrategy(ValidationStrategy):
     # Accessed at runtime via self._config.<field_name>.
     _SENTENCE_FINAL_PUNCT: frozenset[str] = frozenset({"\u104a", "\u104b"})
 
+    # CMS (Contextual Multi-Signal) scaling factors used to normalize raw
+    # n-gram ratio and collocation PMI differences into [0, 1] scores.
+    _CMS_NGRAM_RATIO_SCALE: float = 10.0  # bigram ratio of 10x = full score
+    _CMS_COLLOC_PMI_SCALE: float = 5.0  # PMI difference of 5.0 = full score
+
     def __init__(
         self,
         semantic_checker: "SemanticChecker",
@@ -467,8 +472,6 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 )
 
                 if best_variant:
-                    prev_word = context.words[i - 1] if i > 0 else ""
-
                     # Guard 1: Adjacency dampening -- reduce confidence when
                     # an existing error is within 3 words.  The MLM context
                     # is corrupted by nearby errors, making detections at
@@ -737,7 +740,7 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 if p_variant_given_prev > p_word_given_prev and p_variant_given_prev > 0:
                     # Variant fits the left context better
                     ratio = p_variant_given_prev / max(p_word_given_prev, 1e-10)
-                    ngram_score += min(ratio / 10.0, 1.0)  # Cap at 1.0, 10x = full score
+                    ngram_score += min(ratio / self._CMS_NGRAM_RATIO_SCALE, 1.0)
                     ngram_count += 1
 
             if next_word:
@@ -745,7 +748,7 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 p_next_given_variant = self.provider.get_bigram_probability(variant, next_word)
                 if p_next_given_variant > p_next_given_word and p_next_given_variant > 0:
                     ratio = p_next_given_variant / max(p_next_given_word, 1e-10)
-                    ngram_score += min(ratio / 10.0, 1.0)
+                    ngram_score += min(ratio / self._CMS_NGRAM_RATIO_SCALE, 1.0)
                     ngram_count += 1
 
             if ngram_count > 0:
@@ -772,7 +775,7 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 if best_variant_pmi > best_word_pmi:
                     # Variant has stronger collocation with this context word
                     diff = best_variant_pmi - best_word_pmi
-                    colloc_diff += min(diff / 5.0, 1.0)  # Cap at 1.0, 5 PMI diff = full
+                    colloc_diff += min(diff / self._CMS_COLLOC_PMI_SCALE, 1.0)
                     colloc_count += 1
 
             if colloc_count > 0:

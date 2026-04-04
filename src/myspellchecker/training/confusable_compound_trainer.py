@@ -19,6 +19,10 @@ from pathlib import Path
 
 import numpy as np
 
+from myspellchecker.utils.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
 NUM_FEATURES = 22
 FEATURE_NAMES = [
     "log_freq_w1",
@@ -50,7 +54,7 @@ def load_data(path: str) -> tuple[np.ndarray, np.ndarray]:
     """Load JSONL training data into feature matrix and label vector."""
     features_list = []
     labels_list = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             record = json.loads(line)
             features_list.append(record["features"])
@@ -81,7 +85,7 @@ def train_mlp(
         import torch
         import torch.nn as nn
     except ImportError:
-        print("ERROR: PyTorch required. Install with: pip install torch")
+        logger.error("PyTorch required. Install with: pip install torch")
         sys.exit(1)
 
     class BinaryMLP(nn.Module):
@@ -128,9 +132,14 @@ def train_mlp(
             f1 = 2 * prec * rec / max(prec + rec, 1e-8)
 
         if epoch % 10 == 0 or epoch == epochs - 1:
-            print(
-                f"  Epoch {epoch:3d}: loss={loss.item():.4f} "
-                f"val_loss={val_loss:.4f} F1={f1:.3f} P={prec:.3f} R={rec:.3f}"
+            logger.info(
+                "Epoch %3d: loss=%.4f val_loss=%.4f F1=%.3f P=%.3f R=%.3f",
+                epoch,
+                loss.item(),
+                val_loss,
+                f1,
+                prec,
+                rec,
             )
 
         if val_loss < best_val_loss:
@@ -140,7 +149,7 @@ def train_mlp(
         else:
             wait += 1
             if wait >= patience:
-                print(f"  Early stopping at epoch {epoch}")
+                logger.info("Early stopping at epoch %d", epoch)
                 break
 
     model.load_state_dict(best_state)
@@ -162,10 +171,10 @@ def export_onnx(model, mean: np.ndarray, std: np.ndarray, output_path: str) -> N
         dynamic_axes={"features": {0: "batch"}, "logit": {0: "batch"}},
         opset_version=13,
     )
-    print(f"  ONNX: {onnx_path}")
+    logger.info("ONNX: %s", onnx_path)
 
     stats_path = onnx_path.with_suffix(".stats.json")
-    with open(stats_path, "w") as f:
+    with open(stats_path, "w", encoding="utf-8") as f:
         json.dump(
             {
                 "feature_names": FEATURE_NAMES,
@@ -176,7 +185,7 @@ def export_onnx(model, mean: np.ndarray, std: np.ndarray, output_path: str) -> N
             f,
             indent=2,
         )
-    print(f"  Stats: {stats_path}")
+    logger.info("Stats: %s", stats_path)
 
 
 def main():
@@ -190,9 +199,9 @@ def main():
     parser.add_argument("--val-split", type=float, default=0.2)
     args = parser.parse_args()
 
-    print(f"Loading {args.data}...")
+    logger.info("Loading %s...", args.data)
     x, y = load_data(args.data)
-    print(f"  {len(x)} samples ({int(y.sum())} pos, {int(len(y) - y.sum())} neg)")
+    logger.info("%d samples (%d pos, %d neg)", len(x), int(y.sum()), int(len(y) - y.sum()))
 
     # Stratified split
     pos_idx = np.where(y == 1)[0]
@@ -207,16 +216,19 @@ def main():
 
     x_train, y_train = x[train_idx], y[train_idx]
     x_val, y_val = x[val_idx], y[val_idx]
-    print(
-        f"  Train: {len(x_train)} ({int(y_train.sum())} pos)"
-        f" | Val: {len(x_val)} ({int(y_val.sum())} pos)"
+    logger.info(
+        "Train: %d (%d pos) | Val: %d (%d pos)",
+        len(x_train),
+        int(y_train.sum()),
+        len(x_val),
+        int(y_val.sum()),
     )
 
     mean, std = compute_stats(x_train)
     x_train = (x_train - mean) / std
     x_val = (x_val - mean) / std
 
-    print(f"\nTraining (hidden={args.hidden}, lr={args.lr})...")
+    logger.info("Training (hidden=%d, lr=%s)...", args.hidden, args.lr)
     model = train_mlp(
         x_train,
         y_train,
@@ -241,11 +253,20 @@ def main():
     prec = tp / max(tp + fp, 1)
     rec = tp / max(tp + fn, 1)
     f1 = 2 * prec * rec / max(prec + rec, 1e-8)
-    print(f"\nFinal: TP={tp} FP={fp} FN={fn} TN={tn} P={prec:.3f} R={rec:.3f} F1={f1:.3f}")
+    logger.info(
+        "Final: TP=%d FP=%d FN=%d TN=%d P=%.3f R=%.3f F1=%.3f",
+        tp,
+        fp,
+        fn,
+        tn,
+        prec,
+        rec,
+        f1,
+    )
 
-    print(f"\nExporting to {args.output}...")
+    logger.info("Exporting to %s...", args.output)
     export_onnx(model, mean, std, args.output)
-    print("Done!")
+    logger.info("Done!")
 
 
 if __name__ == "__main__":

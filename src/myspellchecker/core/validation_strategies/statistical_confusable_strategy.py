@@ -61,7 +61,7 @@ class StatisticalConfusableStrategy(ValidationStrategy):
         self._threshold = threshold
         self._confidence = confidence
         self._all_confusable_words = frozenset(confusable_map.keys())
-        logger.info(
+        logger.debug(
             "StatisticalConfusableStrategy: %d words, threshold=%.1f",
             len(self._all_confusable_words),
             threshold,
@@ -125,6 +125,7 @@ class StatisticalConfusableStrategy(ValidationStrategy):
                 errors.append(error)
                 context.existing_errors[pos_i] = ET_CONFUSABLE_ERROR
                 context.existing_confidences[pos_i] = conf
+                context.existing_suggestions[pos_i] = [best_variant]
 
                 logger.debug(
                     "statistical_confusable: %s→%s ratio=%.1f conf=%.2f prev=%s next=%s",
