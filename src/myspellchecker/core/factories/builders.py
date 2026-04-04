@@ -489,7 +489,35 @@ def build_context_validation_strategies(
         )
         logger.debug("Added HomophoneValidationStrategy (priority 45)")
 
-    # Priority 47: MLP-based Confusable/Compound Classifier
+    # Priority 47: Statistical Confusable Gate (bigram ratio)
+    if getattr(validation_config, "use_statistical_confusable_gate", True):
+        from myspellchecker.core.detection_rules import load_confusable_pairs
+        from myspellchecker.core.validation_strategies.statistical_confusable_strategy import (
+            StatisticalConfusableStrategy,
+        )
+
+        curated_pairs, near_synonym_pairs = load_confusable_pairs()
+        # Merge curated + near_synonym into one map for the gate
+        merged_map: dict[str, set[str]] = {}
+        for src in (curated_pairs, near_synonym_pairs):
+            for word, variants in src.items():
+                merged_map.setdefault(word, set()).update(variants)
+
+        if merged_map:
+            strategies.append(
+                StatisticalConfusableStrategy(
+                    provider=provider,
+                    confusable_map=merged_map,
+                    threshold=getattr(
+                        validation_config,
+                        "statistical_confusable_threshold",
+                        50.0,
+                    ),
+                )
+            )
+            logger.debug("Added StatisticalConfusableStrategy (priority 47)")
+
+    # Priority 47b: MLP-based Confusable/Compound Classifier
     classifier_model_path = getattr(
         validation_config,
         "confusable_compound_classifier_path",
