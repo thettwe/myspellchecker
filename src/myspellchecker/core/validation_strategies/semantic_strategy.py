@@ -15,6 +15,7 @@ from myspellchecker.core.config.algorithm_configs import SemanticStrategyConfig
 from myspellchecker.core.constants import ET_SEMANTIC_ERROR
 from myspellchecker.core.response import ContextError, Error
 from myspellchecker.core.validation_strategies.base import ValidationContext, ValidationStrategy
+from myspellchecker.core.validation_strategies.conflict_rules import should_skip_position
 from myspellchecker.core.validation_strategies.semantic_helpers import (
     build_contrast_candidate_pool,
     build_escalation_candidate_pool,
@@ -264,7 +265,9 @@ class SemanticValidationStrategy(ValidationStrategy):
                     continue
 
                 position = word_positions[i]
-                if position in existing_error_positions:
+                if should_skip_position(
+                    "SemanticValidationStrategy", position, existing_error_positions
+                ):
                     continue
                 if is_name_mask[i]:
                     continue
@@ -639,8 +642,10 @@ class SemanticValidationStrategy(ValidationStrategy):
 
                 abs_pos = word_positions[word_idx]
 
-                # Skip if already flagged by an earlier strategy
-                if abs_pos in existing_error_positions:
+                # Skip if already flagged (unless overridable)
+                if should_skip_position(
+                    "SemanticValidationStrategy", abs_pos, existing_error_positions
+                ):
                     continue
 
                 # Skip named entities
@@ -701,8 +706,10 @@ class SemanticValidationStrategy(ValidationStrategy):
 
         try:
             for i in range(len(words) - 1):
-                # Skip already-flagged positions and named entities
-                if word_positions[i] in existing_error_positions:
+                # Skip already-flagged positions (unless overridable) and named entities
+                if should_skip_position(
+                    "SemanticValidationStrategy", word_positions[i], existing_error_positions
+                ):
                     continue
                 if is_name_mask[i]:
                     continue

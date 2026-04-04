@@ -16,7 +16,12 @@ from typing import TYPE_CHECKING, Any
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.response import Error
 from myspellchecker.core.token_refinement import build_validation_token_paths
-from myspellchecker.core.validation_strategies import ValidationContext, ValidationStrategy
+from myspellchecker.core.validation_strategies import (
+    ErrorCandidate,
+    ValidationContext,
+    ValidationStrategy,
+)
+from myspellchecker.core.validation_strategies.arbiter import arbitrate_candidates
 from myspellchecker.core.validators import Validator
 from myspellchecker.segmenters.base import Segmenter
 from myspellchecker.text.ner import NameHeuristic
@@ -260,6 +265,7 @@ class ContextValidator(Validator):
         path_existing_errors: dict[int, str] = {}
         path_existing_suggestions: dict[int, list[str]] = {}
         path_existing_confidences: dict[int, float] = {}
+        path_error_candidates: dict[int, list[ErrorCandidate]] = {}
 
         path_iteration = token_paths[1:] + token_paths[:1] if len(token_paths) > 1 else token_paths
         for path_words in path_iteration:
@@ -280,6 +286,8 @@ class ContextValidator(Validator):
             context.existing_errors.update(path_existing_errors)
             context.existing_suggestions.update(path_existing_suggestions)
             context.existing_confidences.update(path_existing_confidences)
+            for pos, candidates in path_error_candidates.items():
+                context.error_candidates.setdefault(pos, []).extend(candidates)
 
             strategy_errors = self._execute_strategies(
                 context=context,
@@ -296,6 +304,8 @@ class ContextValidator(Validator):
             path_existing_errors.update(context.existing_errors)
             path_existing_suggestions.update(context.existing_suggestions)
             path_existing_confidences.update(context.existing_confidences)
+            for pos, candidates in context.error_candidates.items():
+                path_error_candidates.setdefault(pos, []).extend(candidates)
 
         if path_existing_suggestions:
             merged_context = ValidationContext(
@@ -306,6 +316,14 @@ class ContextValidator(Validator):
             )
             merged_context.existing_suggestions = path_existing_suggestions
             self._merge_appended_suggestions(errors, merged_context)
+
+        # Arbiter: for positions with multiple candidates, let the
+        # higher-tier strategy win.  Replace the mutex-selected error
+        # with the arbiter's choice when they disagree.
+        if path_error_candidates:
+            winners = arbitrate_candidates(path_error_candidates)
+            if winners:
+                self._apply_arbiter_winners(errors, winners)
 
         return errors
 
@@ -449,6 +467,19 @@ class ContextValidator(Validator):
                 strategy_errors = strategy.validate(context)
                 errors.extend(strategy_errors)
 
+                # Collect error candidates for arbiter (Phase 2 infrastructure).
+                # Candidates are emitted alongside the mutex -- both systems
+                # active, mutex still determines output.
+                for error in strategy_errors:
+                    candidate = ErrorCandidate(
+                        strategy_name=strategy_name,
+                        error_type=error.error_type,
+                        confidence=getattr(error, "confidence", 0.0),
+                        suggestion=error.suggestions[0] if error.suggestions else None,
+                        evidence=strategy_name,
+                    )
+                    context.error_candidates.setdefault(error.position, []).append(candidate)
+
                 if strategy_debug_telemetry is not None:
                     self._update_strategy_debug_telemetry(
                         strategy_debug_telemetry,
@@ -510,6 +541,47 @@ class ContextValidator(Validator):
             for suggestion in all_suggestions:
                 if suggestion not in error.suggestions:
                     error.suggestions.append(suggestion)
+
+    @staticmethod
+    def _apply_arbiter_winners(
+        errors: list[Error],
+        winners: dict[int, ErrorCandidate],
+    ) -> None:
+        """Replace mutex-selected errors with arbiter winners where they disagree.
+
+        For each position where the arbiter selected a different strategy
+        than the one that produced the current error, update the error's
+        suggestions and confidence in-place.  The error_type and position
+        are preserved to maintain response schema compatibility.
+
+        Only modifies errors at contested positions (>1 candidate).
+        Single-candidate positions are never touched.
+        """
+        error_by_pos: dict[int, Error] = {}
+        for error in errors:
+            if error.position not in error_by_pos:
+                error_by_pos[error.position] = error
+
+        for position, winner in winners.items():
+            error = error_by_pos.get(position)
+            if error is None:
+                continue
+
+            # If arbiter picked a different strategy, update suggestion
+            if winner.suggestion and winner.suggestion not in error.suggestions:
+                error.suggestions.insert(0, winner.suggestion)
+
+            # Update confidence if arbiter's candidate has higher confidence
+            if hasattr(error, "confidence") and winner.confidence > error.confidence:
+                error.confidence = winner.confidence
+
+            logger.debug(
+                "arbiter applied: pos=%d winner=%s type=%s conf=%.2f",
+                position,
+                winner.strategy_name,
+                winner.error_type,
+                winner.confidence,
+            )
 
     @staticmethod
     def _init_strategy_debug_entry() -> dict[str, Any]:

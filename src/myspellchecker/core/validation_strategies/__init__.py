@@ -24,6 +24,7 @@ Default strategies (wired by SpellCheckerBuilder, in priority order):
 """
 
 from myspellchecker.core.validation_strategies.base import (
+    ErrorCandidate,
     ValidationContext,
     ValidationStrategy,
 )
@@ -49,6 +50,7 @@ from myspellchecker.core.validation_strategies.syntactic_strategy import Syntact
 from myspellchecker.core.validation_strategies.tone_strategy import ToneValidationStrategy
 
 __all__ = [
+    "ErrorCandidate",
     "ValidationContext",
     "ValidationStrategy",
     "ToneValidationStrategy",

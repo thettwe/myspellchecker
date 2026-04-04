@@ -27,6 +27,7 @@ from myspellchecker.core.constants import (
 )
 from myspellchecker.core.response import ContextError, Error
 from myspellchecker.core.validation_strategies.base import ValidationContext, ValidationStrategy
+from myspellchecker.core.validation_strategies.conflict_rules import should_skip_position
 from myspellchecker.core.validation_strategies.confusable_helpers import (
     cap_threshold,
     is_db_suppressed,
@@ -218,7 +219,9 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if context.is_name_mask[i]:
                 occurrence_counts[word] = occurrence_counts.get(word, 0) + 1
                 continue
-            if position in context.existing_errors:
+            if should_skip_position(
+                "ConfusableSemanticStrategy", position, context.existing_errors
+            ):
                 occurrence_counts[word] = occurrence_counts.get(word, 0) + 1
                 continue
 
@@ -310,10 +313,12 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 word = context.words[i]
                 position = context.word_positions[i]
 
-                # Skip names, existing errors, short words
+                # Skip names, existing errors (unless overridable), short words
                 if context.is_name_mask[i]:
                     continue
-                if position in context.existing_errors:
+                if should_skip_position(
+                    "ConfusableSemanticStrategy", position, context.existing_errors
+                ):
                     continue
                 is_particle_confusable_flag = word in PARTICLE_CONFUSABLES
                 is_curated = word in self._curated_pairs
