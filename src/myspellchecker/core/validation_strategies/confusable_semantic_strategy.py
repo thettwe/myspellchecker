@@ -284,14 +284,19 @@ class ConfusableSemanticStrategy(ValidationStrategy):
         if not hasattr(self.provider, "is_valid_word"):
             return []
 
-        # Guard: Error budget -- skip confusable semantic when the sentence
-        # (or a previous sentence/chunk) already has errors from higher-priority
-        # strategies.  The MLM context is corrupted by existing errors, causing
-        # cascade FPs where valid words are flagged because nearby errors distort
-        # the probability distribution (error misattribution).
+        # Guard: Error budget -- only skip the ENTIRE strategy when the
+        # sentence is heavily corrupted (many errors).  Individual words
+        # near prior errors are protected by the per-word position check
+        # (line: ``if position in context.existing_errors: continue``)
+        # and the adjacency dampening that reduces confidence near errors.
+        #
+        # Previous behavior (threshold=1) blocked ALL confusable detection
+        # whenever ANY prior strategy flagged an error, preventing
+        # detection of valid confusable pairs that the MLM can distinguish.
+        _heavy_error_count = self._error_budget_threshold * 3
         if (
-            len(context.existing_errors) >= self._error_budget_threshold
-            or context.global_error_count >= self._error_budget_threshold
+            len(context.existing_errors) >= _heavy_error_count
+            or context.global_error_count >= _heavy_error_count
         ):
             return []
 
