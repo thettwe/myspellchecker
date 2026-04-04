@@ -282,43 +282,19 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
         return 1.0 / (1.0 + math.exp(-logit_val))
 
     def _get_pos(self, word: str) -> str:
-        """Get primary POS tag from provider."""
-        if not hasattr(self.provider, "get_word_pos"):
-            # Fallback: check pos_tag column
-            if hasattr(self.provider, "_execute_query"):
-                import sqlite3
-
-                try:
-                    with self.provider._execute_query() as conn:
-                        cursor = conn.cursor()
-                        cursor.execute(
-                            "SELECT pos_tag FROM words WHERE word = ?",
-                            (word,),
-                        )
-                        row = cursor.fetchone()
-                        if row and row[0]:
-                            return row[0].split("|")[0]
-                except (sqlite3.OperationalError, AttributeError):
-                    pass
+        """Get primary POS tag via provider interface."""
+        if hasattr(self.provider, "get_word_pos"):
+            result = self.provider.get_word_pos(word)
+            if result:
+                return result.split("|")[0]
         return "UNK"
 
     def _get_syllable_count(self, word: str) -> int:
-        """Get syllable count from provider."""
-        if hasattr(self.provider, "_execute_query"):
-            import sqlite3
-
-            try:
-                with self.provider._execute_query() as conn:
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        "SELECT syllable_count FROM words WHERE word = ?",
-                        (word,),
-                    )
-                    row = cursor.fetchone()
-                    if row and row[0]:
-                        return row[0]
-            except (sqlite3.OperationalError, AttributeError):
-                pass
+        """Get syllable count via provider interface."""
+        if hasattr(self.provider, "get_syllable_count"):
+            result = self.provider.get_syllable_count(word)
+            if result and result > 0:
+                return result
         return max(1, len(word) // 3)
 
     def _is_compound_pair(

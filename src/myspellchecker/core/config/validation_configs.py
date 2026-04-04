@@ -231,6 +231,23 @@ class ValidationConfig(BaseModel):
         default=True,
         description="Enable homophone detection in validation pipeline",
     )
+    # Statistical Confusable Gate (priority 24)
+    use_statistical_confusable_gate: bool = Field(
+        default=True,
+        description=(
+            "Enable bigram-ratio confusable detection at priority 24. "
+            "Runs within the structural phase to avoid fast-path skip."
+        ),
+    )
+    statistical_confusable_threshold: float = Field(
+        default=50.0,
+        ge=1.0,
+        description=(
+            "Bigram ratio threshold for the statistical confusable gate. "
+            "Higher = fewer detections, more precision."
+        ),
+    )
+
     # MLP Confusable/Compound Classifier (priority 47)
     confusable_compound_classifier_path: str | None = Field(
         default=None,

@@ -6,7 +6,7 @@ word, flags it as a confusable error.
 
 No neural models — pure database lookups. ~0.3ms per confusable word.
 
-Priority: 47 (after Homophone 45, before ConfusableSemantic 48)
+Priority: 24 (within structural phase, before fast-path cutoff of 25)
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
+from myspellchecker.core.constants import ET_CONFUSABLE_ERROR
 from myspellchecker.core.response import Error, WordError
 from myspellchecker.core.validation_strategies.base import (
     ValidationContext,
@@ -25,9 +26,6 @@ if TYPE_CHECKING:
     from myspellchecker.providers.interfaces import WordRepository
 
 logger = get_logger(__name__)
-
-# Error type for confusable detections
-_ERROR_TYPE = "confusable_error"
 
 
 class StatisticalConfusableStrategy(ValidationStrategy):
@@ -41,12 +39,12 @@ class StatisticalConfusableStrategy(ValidationStrategy):
 
     Independent of MLM and error budget.
 
-    Priority: 47
+    Priority: 24 (within structural phase to avoid fast-path skip)
     """
 
-    # Priority 24: within the structural phase (cutoff=25) so the
-    # fast-path optimization does NOT skip this strategy on clean
-    # sentences. Confusable errors are "structurally clean" text
+    # Within the structural phase (cutoff=25) so the fast-path
+    # optimization does NOT skip this strategy on clean sentences.
+    # Confusable errors are "structurally clean" text
     # that contains the wrong valid word — they MUST be checked
     # even when no structural errors are found.
     _PRIORITY = 24
@@ -120,12 +118,12 @@ class StatisticalConfusableStrategy(ValidationStrategy):
                 error = WordError(
                     text=word,
                     position=pos_i,
-                    error_type=_ERROR_TYPE,
+                    error_type=ET_CONFUSABLE_ERROR,
                     suggestions=[best_variant],
                     confidence=conf,
                 )
                 errors.append(error)
-                context.existing_errors[pos_i] = _ERROR_TYPE
+                context.existing_errors[pos_i] = ET_CONFUSABLE_ERROR
                 context.existing_confidences[pos_i] = conf
 
                 logger.debug(
