@@ -614,18 +614,33 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 variant_in_topk = variant in pred_map
                 if not variant_in_topk:
                     threshold += self._config.explicit_non_topk_homophone_penalty
+
+                # CMS threshold reduction for curated pairs too — when
+                # n-gram and collocation evidence supports the variant,
+                # reduce the threshold to catch pairs the MLM can't distinguish.
+                cms_reduction = self._compute_cms_reduction(
+                    word,
+                    variant,
+                    word_freq,
+                    variant_freq,
+                    prev_word,
+                    next_word,
+                )
+                threshold = max(threshold - cms_reduction, 0.5)
+
                 threshold = cap_threshold(threshold, self.max_threshold)
 
                 logger.debug(
                     "confusable_semantic: word=%s variant=%s (CURATED) word_freq=%d "
                     "variant_freq=%d logit_diff=%.2f threshold=%.2f "
-                    "sentence_final=%s decision=%s",
+                    "cms_reduction=%.2f sentence_final=%s decision=%s",
                     word,
                     variant,
                     word_freq,
                     variant_freq,
                     logit_diff,
                     threshold,
+                    cms_reduction,
                     is_sentence_final,
                     "FLAGGED" if logit_diff >= threshold else "skip",
                 )
