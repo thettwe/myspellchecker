@@ -39,6 +39,24 @@ _COMPOUND_MORPHOLOGY_PATH = (
     Path(__file__).resolve().parent.parent.parent / "rules" / "compound_morphology.yaml"
 )
 
+# Closed-class title/role suffixes in Myanmar.
+# When these follow a role/title noun and the concatenation is a valid
+# dictionary word, the pair is a mandatory compound.
+# Excludes ambiguous suffixes (သူ=pronoun, မ=negation prefix).
+_TITLE_SUFFIXES: frozenset[str] = frozenset(
+    {
+        "ကြီး",  # senior/chief (ဝန်ကြီး, ဗိုလ်ကြီး, အုပ်ကြီး)
+        "ငယ်",  # junior/small (လူငယ်, ဗိုလ်ငယ်)
+        "သား",  # male/son (ကျောင်းသား, စစ်သား)
+        "ဝန်",  # minister/official (ဆရာဝန်)
+        "တော်",  # royal (မြို့တော်, ဘုရားတော်)
+        "တန်း",  # rank/class (အထက်တန်း, အလယ်တန်း)
+        "မှူး",  # head/chief (ရဲမှူး, အုပ်ချုပ်ရေးမှူး)
+    }
+)
+
+_TITLE_SUFFIX_CONFIDENCE = 0.88
+
 # Module-level cache for compound morphology data (loaded once, shared).
 _morphology_data: _CompoundMorphologyData | None = None
 _morphology_lock = threading.Lock()
@@ -231,6 +249,28 @@ class BrokenCompoundStrategy(ValidationStrategy):
                             self._MORPHOLOGY_CONFIDENCE,
                         )
                     continue
+
+                # ── Layer 1b: Title/suffix pattern (closed-class) ──
+                # When w2 is a title suffix and concatenation is valid,
+                # this is a mandatory compound regardless of frequency.
+                if w2 in _TITLE_SUFFIXES:
+                    compound_ts = w1 + w2
+                    if hasattr(self.provider, "is_valid_word") and self.provider.is_valid_word(
+                        compound_ts
+                    ):
+                        error = self._build_error(
+                            context, i, w1, w2, compound_ts, _TITLE_SUFFIX_CONFIDENCE
+                        )
+                        if error is not None:
+                            errors.append(error)
+                            self._mark_positions(
+                                context,
+                                pos_i,
+                                pos_next,
+                                compound_ts,
+                                _TITLE_SUFFIX_CONFIDENCE,
+                            )
+                        continue
 
                 # ── Layer 2: Frequency heuristic (statistical fallback) ──
 
