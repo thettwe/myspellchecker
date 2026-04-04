@@ -12,8 +12,8 @@ metadata:
   observable_error_span_count: 564
   annotation_anomaly_count: 0
   difficulty_distribution:
-    tier_1: 188
-    tier_2: 183
+    tier_1: 182
+    tier_2: 379
     tier_3: 133
   domain_distribution:
     conversational: 201
