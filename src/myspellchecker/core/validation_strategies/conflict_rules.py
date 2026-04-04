@@ -20,11 +20,15 @@ from __future__ import annotations
 # Strategies not listed here (or with an empty set) never override --
 # they either skip claimed positions or append suggestions.
 STRATEGY_OVERRIDE_RULES: dict[str, set[str]] = {
-    # Existing behavior: statistical confusable overrides POS sequence
+    # Preserved from original inline logic.  Currently unreachable because
+    # StatisticalConfusable(24) runs before POS(30), but kept for safety
+    # in case pipeline ordering changes.
     "StatisticalConfusableStrategy": {"pos_sequence_error"},
-    # NEW: ConfusableSemantic (MLM) can override POS and n-gram claims
+    # ConfusableSemantic(48) can override POS(30) claims.
+    # Note: context_probability from Ngram(50) is unreachable here since
+    # Ngram runs after ConfusableSemantic; kept for lattice-path carry-over.
     "ConfusableSemanticStrategy": {"pos_sequence_error", "context_probability"},
-    # NEW: Semantic (MLM proactive/contrast/animacy) can override POS and n-gram claims
+    # Semantic(70) can override both POS(30) and Ngram(50) claims.
     "SemanticValidationStrategy": {"pos_sequence_error", "context_probability"},
 }
 

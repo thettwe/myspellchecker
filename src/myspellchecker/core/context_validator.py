@@ -547,15 +547,15 @@ class ContextValidator(Validator):
         errors: list[Error],
         winners: dict[int, ErrorCandidate],
     ) -> None:
-        """Replace mutex-selected errors with arbiter winners where they disagree.
+        """Log arbiter divergence from mutex-selected errors.
 
-        For each position where the arbiter selected a different strategy
-        than the one that produced the current error, update the error's
-        suggestions and confidence in-place.  The error_type and position
-        are preserved to maintain response schema compatibility.
+        v1.3.0 shadow mode: the arbiter does NOT mutate live Error
+        objects.  It only logs positions where the arbiter disagrees
+        with the mutex, to collect divergence data for v1.4.0.
 
-        Only modifies errors at contested positions (>1 candidate).
-        Single-candidate positions are never touched.
+        When ready to activate (v1.4.0+), this method should update
+        error.error_type, error.suggestions, and error.confidence
+        from the winning candidate.
         """
         error_by_pos: dict[int, Error] = {}
         for error in errors:
@@ -567,21 +567,15 @@ class ContextValidator(Validator):
             if error is None:
                 continue
 
-            # If arbiter picked a different strategy, update suggestion
-            if winner.suggestion and winner.suggestion not in error.suggestions:
-                error.suggestions.insert(0, winner.suggestion)
-
-            # Update confidence if arbiter's candidate has higher confidence
-            if hasattr(error, "confidence") and winner.confidence > error.confidence:
-                error.confidence = winner.confidence
-
-            logger.debug(
-                "arbiter applied: pos=%d winner=%s type=%s conf=%.2f",
-                position,
-                winner.strategy_name,
-                winner.error_type,
-                winner.confidence,
-            )
+            # Shadow mode: log divergence only, do not mutate errors.
+            if error.error_type != winner.error_type:
+                logger.debug(
+                    "arbiter divergence: pos=%d mutex=%s arbiter=%s (conf=%.2f)",
+                    position,
+                    error.error_type,
+                    winner.error_type,
+                    winner.confidence,
+                )
 
     @staticmethod
     def _init_strategy_debug_entry() -> dict[str, Any]:

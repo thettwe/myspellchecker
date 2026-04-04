@@ -74,12 +74,14 @@ def select_winner(candidates: list[ErrorCandidate]) -> ErrorCandidate:
     if len(candidates) == 1:
         return candidates[0]
 
-    # Sort: highest tier first, then highest confidence, then lowest
-    # tier number as tiebreaker (earlier strategy = more evidence).
+    # Highest tier first, then highest confidence.  On exact tie,
+    # prefer the candidate that appeared first in the list (i.e. the
+    # earlier-running strategy, which had more evidence when it ran).
+    # The negated index (-i) ensures max() picks the first element on tie.
     winner = max(
-        candidates,
-        key=lambda c: (_get_tier(c.strategy_name), c.confidence),
-    )
+        enumerate(candidates),
+        key=lambda ic: (_get_tier(ic[1].strategy_name), ic[1].confidence, -ic[0]),
+    )[1]
 
     if logger.isEnabledFor(10):  # DEBUG
         losers = [c for c in candidates if c is not winner]
