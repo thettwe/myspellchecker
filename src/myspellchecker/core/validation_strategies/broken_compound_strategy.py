@@ -198,6 +198,9 @@ class BrokenCompoundStrategy(ValidationStrategy):
         ):
             return []
 
+        # POS tags for V+particle detection (generalizes false_compound_keys)
+        has_pos = bool(context.pos_tags) and len(context.pos_tags) == len(context.words)
+
         errors: list[Error] = []
 
         try:
@@ -227,6 +230,14 @@ class BrokenCompoundStrategy(ValidationStrategy):
                 # into its component syllables. The user didn't insert a space,
                 # so there is no broken compound to fix.
                 if pos_next == pos_i + len(w1):
+                    continue
+
+                # ── POS-based V+particle detection ──
+                # Generalizes false_compound_keys to ALL verb+particle
+                # combinations. POS tags use: PART (particle), PPM
+                # (postpositional marker). Blocklist always runs as backup
+                # to guard against POS tagger errors (~15%).
+                if has_pos and context.pos_tags[i + 1] in ("PART", "PPM"):
                     continue
 
                 # ── Layer 1: Morphological validation (curated rules) ──
