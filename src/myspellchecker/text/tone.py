@@ -252,6 +252,12 @@ class ToneDisambiguator:
 
         return left_context, right_context
 
+    # Context weights for tone disambiguation scoring.
+    # Left (preceding) context is weighted higher because Myanmar is head-final:
+    # preceding words constrain the following word's grammatical role and tone.
+    LEFT_CONTEXT_WEIGHT: float = 0.6
+    RIGHT_CONTEXT_WEIGHT: float = 0.4
+
     def _match_context(self, patterns: tuple[str, ...], context: list[str]) -> float:
         """
         Calculate how well context matches the patterns.
@@ -290,13 +296,14 @@ class ToneDisambiguator:
             return None
 
         left_ctx, right_ctx = self._get_context_words(words, index)
-        full_context = left_ctx + right_ctx
 
         best_match: tuple[str, str, float] | None = None
         best_score = 0.0
 
         for _context_type, (patterns, form, meaning) in self.ambiguous_words[word].items():
-            score = self._match_context(patterns, full_context)
+            left_score = self._match_context(patterns, left_ctx)
+            right_score = self._match_context(patterns, right_ctx)
+            score = self.LEFT_CONTEXT_WEIGHT * left_score + self.RIGHT_CONTEXT_WEIGHT * right_score
 
             if score > best_score:
                 best_score = score

@@ -122,7 +122,8 @@ class ThreadSafeSingleton(Generic[T]):
         Returns:
             The singleton instance.
         """
-        # Fast path: return cached instance without lock
+        # Fast path: dict read is atomic under CPython's GIL; the slow path
+        # below re-checks under the lock to guard against races.
         if cls in self._instances:
             return self._instances[cls]  # type: ignore[return-value]
 

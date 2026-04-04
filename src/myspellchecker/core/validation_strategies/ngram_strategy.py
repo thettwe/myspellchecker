@@ -126,14 +126,18 @@ class NgramContextValidationStrategy(ValidationStrategy):
                 # Get surrounding context for better analysis, applying
                 # error-correction to each context word so that higher-order
                 # n-gram lookups use corrected forms (not raw misspellings).
-                prev_prev_word = (
+                #
+                # Variable naming is relative to the loop index i:
+                #   word_at_im1 = filtered_words[i-1] (2 back from checked word)
+                #   word_at_ip2 = filtered_words[i+2] (1 after checked word)
+                word_at_im1 = (
                     self._get_effective_word(
                         filtered_words[i - 1][0], filtered_words[i - 1][1], context
                     )
                     if i > 0
                     else None
                 )
-                next_next_word = filtered_words[i + 2][0] if i + 2 < len(filtered_words) else None
+                word_at_ip2 = filtered_words[i + 2][0] if i + 2 < len(filtered_words) else None
 
                 if next_pos in context.existing_errors:
                     # Position already flagged by higher-priority strategy —
@@ -141,7 +145,7 @@ class NgramContextValidationStrategy(ValidationStrategy):
                     suggestions = self._generate_suggestions(
                         current_word=effective_current,
                         next_word=next_word,
-                        next_next_word=next_next_word,
+                        next_next_word=word_at_ip2,
                     )
                     if suggestions:
                         existing = context.existing_suggestions.get(next_pos, [])
@@ -151,30 +155,32 @@ class NgramContextValidationStrategy(ValidationStrategy):
                         context.existing_suggestions[next_pos] = existing
                     continue
 
-                # Build context word lists for check_word_in_context
+                # Build context word lists for check_word_in_context.
+                # The checked word is next_word (i+1).  prev_words are ordered
+                # oldest-first, so [i-3, i-2, i-1, i] with closest last.
                 prev_words: list[str] = []
                 if i > 1:
-                    prev_prev_prev_word = self._get_effective_word(
+                    word_at_im2 = self._get_effective_word(
                         filtered_words[i - 2][0], filtered_words[i - 2][1], context
                     )
-                    prev_words.append(prev_prev_prev_word)
+                    prev_words.append(word_at_im2)
                 if i > 2:
-                    prev_prev_prev_prev_word = self._get_effective_word(
+                    word_at_im3 = self._get_effective_word(
                         filtered_words[i - 3][0], filtered_words[i - 3][1], context
                     )
-                    prev_words.insert(0, prev_prev_prev_prev_word)
-                if prev_prev_word:
-                    prev_words.append(prev_prev_word)
+                    prev_words.insert(0, word_at_im3)
+                if word_at_im1:
+                    prev_words.append(word_at_im1)
                 prev_words.append(effective_current)
 
                 next_words: list[str] = [next_word]
-                if next_next_word:
-                    next_words.append(next_next_word)
+                if word_at_ip2:
+                    next_words.append(word_at_ip2)
 
                 # check_word_in_context API:
-                #   prev_words = [..., prev_prev, prev] (closest last)
-                #   next_words = [next, next_next, ...] (closest first)
-                # When checking next_word, effective_current is the closest prev.
+                #   prev_words = [..., i-2, i-1, i] (closest last)
+                #   next_words = [i+1, i+2, ...] (closest first)
+                # When checking next_word (i+1), effective_current (i) is the closest prev.
 
                 # Use check_word_in_context (absolute threshold, no candidates)
                 verdict = self.context_checker.check_word_in_context(
@@ -192,7 +198,7 @@ class NgramContextValidationStrategy(ValidationStrategy):
                 suggestions = self._generate_suggestions(
                     current_word=effective_current,
                     next_word=next_word,
-                    next_next_word=next_next_word,
+                    next_next_word=word_at_ip2,
                 )
 
                 # High-frequency word guard: suppress FP when a common word

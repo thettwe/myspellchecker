@@ -2247,11 +2247,13 @@ class ConfusableSemanticConfig(BaseModel):
         description=("Word frequency above which the high-freq logit diff applies."),
     )
     high_freq_logit_diff: float = Field(
-        default=6.0,
+        default=4.5,
         ge=0.0,
         description=(
-            "Logit diff threshold for high-frequency words (~403x "
-            "ratio). Protects common particles/words against FPs."
+            "Logit diff threshold for high-frequency words (~90x "
+            "ratio). Protects common particles/words against FPs. "
+            "Lowered from 6.0 to catch medial ျ↔ြ confusion on "
+            "high-frequency pairs like ကျား/ကြား."
         ),
     )
     min_word_length: int = Field(

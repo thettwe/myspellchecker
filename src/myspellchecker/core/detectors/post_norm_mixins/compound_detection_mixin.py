@@ -9,6 +9,7 @@ preserving the exact same method signatures and behaviour.
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -661,6 +662,54 @@ class CompoundDetectionMixin:
         "ပြီး",
     )
 
+    # Lock for thread-safe lazy init of _fallback_segmenter.
+    _segmenter_lock: threading.Lock = threading.Lock()
+
+    def _get_compound_segmenter(self) -> Any | None:
+        """Return a segmenter for compound resolution (thread-safe).
+
+        Prefers the injected ``self.segmenter``; falls back to a lazily
+        created ``DefaultSegmenter`` (guarded by ``_segmenter_lock``).
+        """
+        seg = getattr(self, "segmenter", None)
+        if seg is not None and hasattr(seg, "segment_words"):
+            return seg
+        seg = getattr(self, "_fallback_segmenter", None)
+        if seg is not None:
+            return seg
+        with self._segmenter_lock:
+            # Double-check after acquiring lock.
+            seg = getattr(self, "_fallback_segmenter", None)
+            if seg is not None:
+                return seg
+            from myspellchecker.segmenters.default import DefaultSegmenter
+
+            try:
+                seg = DefaultSegmenter()
+                self._fallback_segmenter = seg
+                return seg
+            except (ImportError, OSError, ValueError):
+                return None
+
+    def _resolve_compound_split(self, token: str) -> tuple[list[str], list[int]] | None:
+        """Split *token* via the segmenter and validate all parts.
+
+        Returns ``(parts, freqs)`` when every part is a valid dictionary
+        word and there are at least 2 parts.  Returns ``None`` otherwise.
+        This is the single source of truth for "is this a valid compound
+        concatenation?" — used by both the pre-check and the Option C guard.
+        """
+        seg = self._get_compound_segmenter()
+        if seg is None:
+            return None
+        parts = seg.segment_words(token)
+        if len(parts) < 2:
+            return None
+        if not all(self.provider.is_valid_word(p) for p in parts):
+            return None
+        freqs = [int(self.provider.get_word_frequency(p)) for p in parts]
+        return parts, freqs
+
     def _is_valid_verb_chain_or_compound(self, token: str) -> bool:
         """Check if an OOV token is a valid verb chain or compound.
 
@@ -679,26 +728,17 @@ class CompoundDetectionMixin:
                 if self.provider.is_valid_word(stem):
                     return True
 
-        # Check 2: compound via segmenter — all parts valid and the
-        # dominant (first/largest) part has high frequency.
-        _segmenter = getattr(self, "segmenter", None)
-        if _segmenter is not None and hasattr(_segmenter, "segment_words"):
-            parts = _segmenter.segment_words(token)
-            if len(parts) >= 2 and all(self.provider.is_valid_word(p) for p in parts):
-                freqs = [int(self.provider.get_word_frequency(p)) for p in parts]
-                # 2-part: require both parts high-frequency (avoid
-                # misspellings like ခစားကွင်း where ခစား freq=344).
-                if (
-                    len(parts) == 2
-                    and min(freqs) >= self._compound_thresholds.compound_both_parts_min_freq
-                ):
+        # Check 2: compound via shared resolution.
+        result = self._resolve_compound_split(token)
+        if result is not None:
+            parts, freqs = result
+            if len(parts) == 2:
+                # Both parts high-frequency → confident compound.
+                if min(freqs) >= self._compound_thresholds.compound_both_parts_min_freq:
                     return True
-                # 2-part: accept when first part is a known multi-syllable
-                # compound word (freq >= 5000) and second part is valid.
-                # Catches compounds like သင်ခန်းစာအစ where အစ freq=0.
+                # Leading part is a known multi-syllable word → accept.
                 if (
-                    len(parts) == 2
-                    and freqs[0] >= self._compound_thresholds.compound_leading_part_min_freq
+                    freqs[0] >= self._compound_thresholds.compound_leading_part_min_freq
                     and len(parts[0]) > 3
                 ):
                     return True
@@ -870,6 +910,15 @@ class CompoundDetectionMixin:
                     and top_edit >= -second_edit_neg
                 ):
                     continue
+
+            # Segmenter-based compound guard (Option C): if the word
+            # segmenter splits this OOV token into ALL valid words AND
+            # the best correction candidate has edit distance > 1 (weak
+            # evidence), suppress the error.  Strong corrections (edit
+            # distance <= 1) override the guard — the misspelling is
+            # close enough to a known word that it's likely real.
+            if top_edit > 1 and self._resolve_compound_split(core_token) is not None:
+                continue
 
             suggestions = [
                 candidate

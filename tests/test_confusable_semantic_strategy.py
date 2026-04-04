@@ -41,6 +41,9 @@ def _make_provider(
     freqs = frequencies or {}
     provider.is_valid_word.side_effect = lambda w: w in valid
     provider.get_word_frequency.side_effect = lambda w: freqs.get(w, 0)
+    # CMS reduction calls these — return 0.0 so MagicMock doesn't break comparisons
+    provider.get_bigram_probability.return_value = 0.0
+    provider.get_collocation_pmi.return_value = 0.0
     return provider
 
 
@@ -719,7 +722,10 @@ class TestFindBestVariant:
         )
 
         pred_map = {word: 19.0, variant: 10.0}
-        explicit_scores = {word: 1.0, variant: 7.0}
+        # logit_diff = 5.0 sits between base threshold (4.5) and
+        # base + non_boundary_penalty (5.5), so boundary passes but
+        # non-boundary does not.
+        explicit_scores = {word: 1.0, variant: 6.0}
 
         boundary_variant = strategy._find_best_variant(
             word=word,

@@ -72,6 +72,11 @@ class ConfusableSemanticStrategy(ValidationStrategy):
     # Accessed at runtime via self._config.<field_name>.
     _SENTENCE_FINAL_PUNCT: frozenset[str] = frozenset({"\u104a", "\u104b"})
 
+    # CMS (Contextual Multi-Signal) scaling factors used to normalize raw
+    # n-gram ratio and collocation PMI differences into [0, 1] scores.
+    _CMS_NGRAM_RATIO_SCALE: float = 10.0  # bigram ratio of 10x = full score
+    _CMS_COLLOC_PMI_SCALE: float = 5.0  # PMI difference of 5.0 = full score
+
     def __init__(
         self,
         semantic_checker: "SemanticChecker",
@@ -284,14 +289,13 @@ class ConfusableSemanticStrategy(ValidationStrategy):
         if not hasattr(self.provider, "is_valid_word"):
             return []
 
-        # Guard: Error budget -- skip confusable semantic when the sentence
-        # (or a previous sentence/chunk) already has errors from higher-priority
-        # strategies.  The MLM context is corrupted by existing errors, causing
-        # cascade FPs where valid words are flagged because nearby errors distort
-        # the probability distribution (error misattribution).
+        # Guard: skip only when heavily corrupted (many prior errors).
+        # Per-word position check and adjacency dampening protect
+        # individual words near flagged positions.
+        _heavy_error_count = self._error_budget_threshold * 3
         if (
-            len(context.existing_errors) >= self._error_budget_threshold
-            or context.global_error_count >= self._error_budget_threshold
+            len(context.existing_errors) >= _heavy_error_count
+            or context.global_error_count >= _heavy_error_count
         ):
             return []
 
@@ -445,6 +449,10 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                     and context.words[i + 1] in self._SENTENCE_FINAL_PUNCT
                 )
 
+                # Compute context for multi-signal scoring
+                prev_word = context.words[i - 1] if i > 0 else ""
+                next_word = context.words[i + 1] if i + 1 < len(context.words) else ""
+
                 # Find best variant that exceeds threshold
                 best_variant = self._find_best_variant(
                     word,
@@ -459,11 +467,11 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                     is_boundary,
                     curated_variants=curated_variants_for_word,
                     near_synonym_variants=near_synonym_variants_for_word,
+                    prev_word=prev_word,
+                    next_word=next_word,
                 )
 
                 if best_variant:
-                    prev_word = context.words[i - 1] if i > 0 else ""
-
                     # Guard 1: Adjacency dampening -- reduce confidence when
                     # an existing error is within 3 words.  The MLM context
                     # is corrupted by nearby errors, making detections at
@@ -516,9 +524,16 @@ class ConfusableSemanticStrategy(ValidationStrategy):
         is_boundary_occurrence: bool = True,
         curated_variants: set[str] | None = None,
         near_synonym_variants: set[str] | None = None,
+        prev_word: str = "",
+        next_word: str = "",
     ) -> str | None:
         """
         Find the best variant that exceeds the logit diff threshold.
+
+        Uses Contrastive Multi-Signal (CMS) scoring: when n-gram and/or
+        collocation evidence supports the variant, the MLM threshold is
+        reduced proportionally. This allows detection of confusable pairs
+        where the MLM alone produces near-identical logits.
 
         Returns the best variant string, or None if no variant qualifies.
         """
@@ -601,18 +616,33 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 variant_in_topk = variant in pred_map
                 if not variant_in_topk:
                     threshold += self._config.explicit_non_topk_homophone_penalty
+
+                # CMS threshold reduction for curated pairs too — when
+                # n-gram and collocation evidence supports the variant,
+                # reduce the threshold to catch pairs the MLM can't distinguish.
+                cms_reduction = self._compute_cms_reduction(
+                    word,
+                    variant,
+                    word_freq,
+                    variant_freq,
+                    prev_word,
+                    next_word,
+                )
+                threshold = max(threshold - cms_reduction, 0.5)
+
                 threshold = cap_threshold(threshold, self.max_threshold)
 
                 logger.debug(
                     "confusable_semantic: word=%s variant=%s (CURATED) word_freq=%d "
                     "variant_freq=%d logit_diff=%.2f threshold=%.2f "
-                    "sentence_final=%s decision=%s",
+                    "cms_reduction=%.2f sentence_final=%s decision=%s",
                     word,
                     variant,
                     word_freq,
                     variant_freq,
                     logit_diff,
                     threshold,
+                    cms_reduction,
                     is_sentence_final,
                     "FLAGGED" if logit_diff >= threshold else "skip",
                 )
@@ -640,16 +670,29 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if not is_boundary_occurrence and not self._is_known_homophone(word, variant):
                 threshold += self._config.non_boundary_penalty
 
+            # CMS threshold reduction: when n-gram and/or collocation
+            # evidence supports the variant, reduce the MLM threshold.
+            cms_reduction = self._compute_cms_reduction(
+                word,
+                variant,
+                word_freq,
+                variant_freq,
+                prev_word,
+                next_word,
+            )
+            threshold = max(threshold - cms_reduction, 1.0)
+
             logger.debug(
                 "confusable_semantic: word=%s variant=%s word_freq=%d "
                 "variant_freq=%d logit_diff=%.2f threshold=%.2f "
-                "sentence_final=%s decision=%s",
+                "cms_reduction=%.2f sentence_final=%s decision=%s",
                 word,
                 variant,
                 word_freq,
                 variant_freq,
                 logit_diff,
                 threshold,
+                cms_reduction,
                 is_sentence_final,
                 "FLAGGED" if logit_diff >= threshold else "skip",
             )
@@ -659,6 +702,86 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 best_variant = variant
 
         return best_variant
+
+    def _compute_cms_reduction(
+        self,
+        word: str,
+        variant: str,
+        word_freq: int,
+        variant_freq: int,
+        prev_word: str,
+        next_word: str,
+    ) -> float:
+        """Compute CMS threshold reduction from n-gram and collocation signals.
+
+        When contextual evidence supports the variant over the current word,
+        the MLM threshold is reduced. This enables detection of confusable
+        pairs where the MLM logit diff alone is insufficient.
+
+        The reduction is computed as the sum of two independent signals:
+        - S_ngram: bidirectional n-gram preference (max 1.0 reduction)
+        - S_colloc: collocation PMI preference (max 1.0 reduction)
+        Total max reduction: 2.0 (capped by caller at threshold >= 1.0)
+        """
+        reduction = 0.0
+
+        if not prev_word and not next_word:
+            return reduction
+
+        # ── S_ngram: bidirectional n-gram preference ──
+        # Compare P(variant|prev) vs P(word|prev) and P(next|variant) vs P(next|word)
+        if hasattr(self.provider, "get_bigram_probability"):
+            ngram_score = 0.0
+            ngram_count = 0
+
+            if prev_word:
+                p_word_given_prev = self.provider.get_bigram_probability(prev_word, word)
+                p_variant_given_prev = self.provider.get_bigram_probability(prev_word, variant)
+                if p_variant_given_prev > p_word_given_prev and p_variant_given_prev > 0:
+                    # Variant fits the left context better
+                    ratio = p_variant_given_prev / max(p_word_given_prev, 1e-10)
+                    ngram_score += min(ratio / self._CMS_NGRAM_RATIO_SCALE, 1.0)
+                    ngram_count += 1
+
+            if next_word:
+                p_next_given_word = self.provider.get_bigram_probability(word, next_word)
+                p_next_given_variant = self.provider.get_bigram_probability(variant, next_word)
+                if p_next_given_variant > p_next_given_word and p_next_given_variant > 0:
+                    ratio = p_next_given_variant / max(p_next_given_word, 1e-10)
+                    ngram_score += min(ratio / self._CMS_NGRAM_RATIO_SCALE, 1.0)
+                    ngram_count += 1
+
+            if ngram_count > 0:
+                reduction += ngram_score / ngram_count  # Average of available directions
+
+        # ── S_colloc: collocation PMI preference ──
+        # Check if the variant has stronger collocations with context words
+        if hasattr(self.provider, "get_collocation_pmi"):
+            colloc_diff = 0.0
+            colloc_count = 0
+
+            for ctx_word in (prev_word, next_word):
+                if not ctx_word:
+                    continue
+                pmi_word = self.provider.get_collocation_pmi(ctx_word, word)
+                pmi_variant = self.provider.get_collocation_pmi(ctx_word, variant)
+                # Also check reverse direction
+                pmi_word_rev = self.provider.get_collocation_pmi(word, ctx_word)
+                pmi_variant_rev = self.provider.get_collocation_pmi(variant, ctx_word)
+
+                best_word_pmi = max(pmi_word or 0.0, pmi_word_rev or 0.0)
+                best_variant_pmi = max(pmi_variant or 0.0, pmi_variant_rev or 0.0)
+
+                if best_variant_pmi > best_word_pmi:
+                    # Variant has stronger collocation with this context word
+                    diff = best_variant_pmi - best_word_pmi
+                    colloc_diff += min(diff / self._CMS_COLLOC_PMI_SCALE, 1.0)
+                    colloc_count += 1
+
+            if colloc_count > 0:
+                reduction += colloc_diff / colloc_count
+
+        return reduction
 
     def _get_threshold(
         self,

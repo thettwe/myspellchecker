@@ -205,7 +205,7 @@ class NeuralReranker:
             else:
                 return self._score_gbt(feat_array)
         except Exception as e:
-            logger.debug("Neural reranker inference failed: %s", e)
+            logger.warning("Neural reranker inference failed: %s", e)
             return []
 
     def _apply_mlp_transforms(self, feat_array: np.ndarray) -> np.ndarray:

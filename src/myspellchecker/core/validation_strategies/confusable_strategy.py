@@ -9,6 +9,15 @@ The ``ConfusableVariantStrategy`` class that previously lived here has been
 removed.  Its n-gram comparison logic is now handled by
 ``NgramContextChecker.check_word_in_context()`` which the homophone and
 n-gram validation strategies delegate to.
+
+**Why private names are re-exported:**
+The ``_get_medial_variants``, ``_get_nasal_variants``, and
+``_get_stop_coda_variants`` helpers are implementation details of variant
+generation.  They are re-exported here because test modules
+(``tests/test_confusable_*.py``) import them from this path, and
+``confusable_semantic_strategy`` also references this module.  Keeping
+these re-exports avoids breaking existing test imports while the canonical
+source remains ``myanmar_confusables``.
 """
 
 from __future__ import annotations

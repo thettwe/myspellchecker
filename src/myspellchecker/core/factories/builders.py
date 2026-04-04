@@ -375,6 +375,7 @@ def build_context_validation_strategies(
     4. POSSequenceValidationStrategy (priority 30)
     5. QuestionStructureValidationStrategy (priority 40)
     6. HomophoneValidationStrategy (priority 45)
+    6.25. ConfusableCompoundClassifierStrategy (priority 47)
     6.5. ConfusableSemanticStrategy (priority 48)
     7. NgramContextValidationStrategy (priority 50)
     8. SemanticValidationStrategy (priority 70)
@@ -487,6 +488,61 @@ def build_context_validation_strategies(
             )
         )
         logger.debug("Added HomophoneValidationStrategy (priority 45)")
+
+    # Priority 24: Statistical Confusable Gate (bigram ratio)
+    if validation_config.use_statistical_confusable_gate:
+        from myspellchecker.core.detection_rules import load_confusable_pairs
+        from myspellchecker.core.validation_strategies.statistical_confusable_strategy import (
+            StatisticalConfusableStrategy,
+        )
+
+        curated_pairs, near_synonym_pairs = load_confusable_pairs()
+        merged_map: dict[str, set[str]] = {}
+        for src in (curated_pairs, near_synonym_pairs):
+            for word, variants in src.items():
+                merged_map.setdefault(word, set()).update(variants)
+
+        if merged_map:
+            strategies.append(
+                StatisticalConfusableStrategy(
+                    provider=provider,
+                    confusable_map=merged_map,
+                    threshold=validation_config.statistical_confusable_threshold,
+                )
+            )
+            logger.debug("Added StatisticalConfusableStrategy (priority 24)")
+
+    # Priority 47b: MLP-based Confusable/Compound Classifier
+    classifier_model_path = getattr(
+        validation_config,
+        "confusable_compound_classifier_path",
+        None,
+    )
+    if classifier_model_path:
+        import pathlib as _pl
+
+        _classifier_exists = _pl.Path(classifier_model_path).exists()
+    else:
+        _classifier_exists = False
+    if _classifier_exists:
+        from myspellchecker.core.validation_strategies import (
+            confusable_compound_classifier_strategy as _cc_mod,
+        )
+
+        ConfusableCompoundClassifierStrategy = _cc_mod.ConfusableCompoundClassifierStrategy
+
+        strategies.append(
+            ConfusableCompoundClassifierStrategy(
+                provider=provider,
+                model_path=str(classifier_model_path),
+                threshold=getattr(
+                    validation_config,
+                    "confusable_compound_classifier_threshold",
+                    0.5,
+                ),
+            )
+        )
+        logger.debug("Added ConfusableCompoundClassifierStrategy (priority 47)")
 
     # Priority 48: Confusable Semantic Detection (MLM-enhanced)
     if semantic_checker and validation_config.use_confusable_semantic:

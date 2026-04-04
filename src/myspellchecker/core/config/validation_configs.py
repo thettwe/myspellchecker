@@ -231,6 +231,39 @@ class ValidationConfig(BaseModel):
         default=True,
         description="Enable homophone detection in validation pipeline",
     )
+    # Statistical Confusable Gate (priority 24)
+    use_statistical_confusable_gate: bool = Field(
+        default=True,
+        description=(
+            "Enable bigram-ratio confusable detection at priority 24. "
+            "Runs within the structural phase to avoid fast-path skip."
+        ),
+    )
+    statistical_confusable_threshold: float = Field(
+        default=50.0,
+        ge=1.0,
+        description=(
+            "Bigram ratio threshold for the statistical confusable gate. "
+            "Higher = fewer detections, more precision."
+        ),
+    )
+
+    # MLP Confusable/Compound Classifier (priority 47)
+    confusable_compound_classifier_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to ONNX MLP classifier for confusable/compound detection. "
+            "When set, enables the ConfusableCompoundClassifierStrategy "
+            "at priority 47. Independent of MLM and error budget."
+        ),
+    )
+    confusable_compound_classifier_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Sigmoid threshold for the MLP classifier.",
+    )
+
     # Confusable Semantic Detection (MLM-enhanced, priority 48)
     use_confusable_semantic: bool = Field(
         default=False,
@@ -355,24 +388,24 @@ class ValidationConfig(BaseModel):
         description="Enable orthography validation in validation pipeline",
     )
     # Output confidence filter thresholds
+    # Calibration: confusable_error FPs cluster at 0.72, TPs at 0.88+.
+    # colloquial_info notes use confidence 0.3 (informational, not errors)
+    # and are suppressed by default; lower the threshold to surface them.
     output_confidence_thresholds: dict[str, float] = Field(
         default={"confusable_error": 0.75, "colloquial_info": 0.35},
         description=(
             "Per-error-type minimum confidence for the output filter. "
             "Errors whose confidence is below the threshold for their type "
-            "are suppressed. Empirically calibrated: confusable_error FPs "
-            "cluster at 0.72, TPs at 0.88+. colloquial_info notes use "
-            "confidence 0.3 (informational, not errors) and are suppressed "
-            "by default; lower this threshold to surface them."
+            "are suppressed."
         ),
     )
+    # Calibration: typical cascade FP has conf=0.80, gold TPs are 0.85+.
     secondary_confidence_thresholds: dict[str, float] = Field(
         default={"semantic_error": 0.85},
         description=(
             "Cascade guard: suppress error types when the sentence already "
-            "has a higher-confidence error of a DIFFERENT type. Prevents "
-            "non-deterministic cascade FPs from the semantic model. "
-            "Typical cascade FP has conf=0.80, gold TPs are 0.85+."
+            "has a higher-confidence error of a different type. Prevents "
+            "cascade false positives from the semantic model."
         ),
     )
 

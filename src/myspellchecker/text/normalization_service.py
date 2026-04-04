@@ -253,9 +253,10 @@ class NormalizationService:
             3. Unicode normalization (NFC/NFD/NFKC/NFKD)
             4. Zero-width character removal (ZWSP, ZWNJ, ZWJ, BOM)
             5. Myanmar diacritic reordering (UTN #11 compliant)
-            6. Character variant normalization (Tall-AA, etc.)
-            7. Lowercase conversion (if enabled, for non-Myanmar)
-            8. Final strip (catch edge cases from earlier steps)
+            6. Sequence-level normalizations (Tall-AA, E-vowel, U-vowel fixes)
+            7. Character variant normalization (Extended-A mappings, etc.)
+            8. Lowercase conversion (if enabled, for non-Myanmar)
+            9. Final strip (catch edge cases from earlier steps)
 
         Note:
             The step order is important. Zawgyi conversion must happen before

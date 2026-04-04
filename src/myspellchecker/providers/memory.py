@@ -122,7 +122,7 @@ class MemoryProvider(DictionaryProvider):
         self._rebuild_bigram_index()
 
         # Enrichment data (populated via set_* methods or directly)
-        self._confusable_pairs: dict[str, list[tuple[str, str, float, int]]] = {}
+        self._confusable_pairs: dict[str, list[tuple[str, str, float, float, int]]] = {}
         self._compound_confusions: dict[str, tuple[str, str, int, int, float]] = {}
         self._collocations: dict[tuple[str, str], float] = {}
         self._register_tags: dict[str, str] = {}

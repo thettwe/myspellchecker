@@ -1,24 +1,24 @@
 # mySpellChecker Benchmark
 
 Benchmark suite for evaluating the myspellchecker error detection and suggestion pipeline.
-489 hand-annotated Myanmar sentences covering syllable errors, word errors, grammar errors,
-register violations, and adversarial near-misses.
+1,138 hand-annotated Myanmar sentences covering syllable errors, word errors, grammar errors,
+register violations, and adversarial near-misses across 6 domains.
 
 ## Benchmark Suite
 
 - **Version**: 1.0.0
-- **Total sentences**: 489 (60 clean, 429 with errors, 470 total error spans)
+- **Total sentences**: 1,138 (444 clean, 694 with errors, 564 total error spans)
 - **Definition**: [`myspellchecker_benchmark.yaml`](myspellchecker_benchmark.yaml)
 - **Runner**: [`run_benchmark.py`](run_benchmark.py)
 
 ### Sentence Distribution
 
-| Tier | Errors | What It Tests |
-|------|-------:|---------------|
-| Tier 1 (Easy) | 160 | Invalid syllable structure |
-| Tier 2 (Medium) | 164 | Valid syllable, wrong word |
-| Tier 3 (Hard) | 146 | Valid word, wrong in context |
-| Clean | 0 | False positive resistance (60 sentences) |
+| Tier | Sentences | What It Tests |
+|------|----------:|---------------|
+| Tier 1 (Easy) | 182 | Invalid syllable structure |
+| Tier 2 (Medium) | 379 | Valid syllable, wrong word |
+| Tier 3 (Hard) | 133 | Valid word, wrong in context |
+| Clean | 444 | False positive resistance |
 
 ### Composite Score Formula
 

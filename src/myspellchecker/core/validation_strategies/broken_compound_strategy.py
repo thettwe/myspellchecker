@@ -39,6 +39,24 @@ _COMPOUND_MORPHOLOGY_PATH = (
     Path(__file__).resolve().parent.parent.parent / "rules" / "compound_morphology.yaml"
 )
 
+# Closed-class title/role suffixes in Myanmar.
+# When these follow a role/title noun and the concatenation is a valid
+# dictionary word, the pair is a mandatory compound.
+# Excludes ambiguous suffixes (သူ=pronoun, မ=negation prefix).
+_TITLE_SUFFIXES: frozenset[str] = frozenset(
+    {
+        "ကြီး",  # senior/chief (ဝန်ကြီး, ဗိုလ်ကြီး, အုပ်ကြီး)
+        "ငယ်",  # junior/small (လူငယ်, ဗိုလ်ငယ်)
+        "သား",  # male/son (ကျောင်းသား, စစ်သား)
+        "ဝန်",  # minister/official (ဆရာဝန်)
+        "တော်",  # royal (မြို့တော်, ဘုရားတော်)
+        "တန်း",  # rank/class (အထက်တန်း, အလယ်တန်း)
+        "မှူး",  # head/chief (ရဲမှူး, အုပ်ချုပ်ရေးမှူး)
+    }
+)
+
+_TITLE_SUFFIX_CONFIDENCE = 0.88
+
 # Module-level cache for compound morphology data (loaded once, shared).
 _morphology_data: _CompoundMorphologyData | None = None
 _morphology_lock = threading.Lock()
@@ -180,6 +198,9 @@ class BrokenCompoundStrategy(ValidationStrategy):
         ):
             return []
 
+        # POS tags for V+particle detection (generalizes false_compound_keys)
+        has_pos = bool(context.pos_tags) and len(context.pos_tags) == len(context.words)
+
         errors: list[Error] = []
 
         try:
@@ -211,6 +232,14 @@ class BrokenCompoundStrategy(ValidationStrategy):
                 if pos_next == pos_i + len(w1):
                     continue
 
+                # ── POS-based V+particle detection ──
+                # Generalizes false_compound_keys to ALL verb+particle
+                # combinations. POS tags use: PART (particle), PPM
+                # (postpositional marker). Blocklist always runs as backup
+                # to guard against POS tagger errors (~15%).
+                if has_pos and context.pos_tags[i + 1] in ("PART", "PPM"):
+                    continue
+
                 # ── Layer 1: Morphological validation (curated rules) ──
                 morpho_result = self._check_morphology(w1, w2)
                 if morpho_result == "false_compound":
@@ -231,6 +260,28 @@ class BrokenCompoundStrategy(ValidationStrategy):
                             self._MORPHOLOGY_CONFIDENCE,
                         )
                     continue
+
+                # ── Layer 1b: Title/suffix pattern (closed-class) ──
+                # When w2 is a title suffix and concatenation is valid,
+                # this is a mandatory compound regardless of frequency.
+                if w2 in _TITLE_SUFFIXES:
+                    compound_ts = w1 + w2
+                    if hasattr(self.provider, "is_valid_word") and self.provider.is_valid_word(
+                        compound_ts
+                    ):
+                        error = self._build_error(
+                            context, i, w1, w2, compound_ts, _TITLE_SUFFIX_CONFIDENCE
+                        )
+                        if error is not None:
+                            errors.append(error)
+                            self._mark_positions(
+                                context,
+                                pos_i,
+                                pos_next,
+                                compound_ts,
+                                _TITLE_SUFFIX_CONFIDENCE,
+                            )
+                        continue
 
                 # ── Layer 2: Frequency heuristic (statistical fallback) ──
 
@@ -335,16 +386,12 @@ class BrokenCompoundStrategy(ValidationStrategy):
     ) -> WordError | None:
         """Build a WordError spanning both words of a broken compound."""
         pos_i = context.word_positions[i]
-        local_start = context.sentence.find(w1)
-        if local_start >= 0:
-            local_end = context.sentence.find(w2, local_start + len(w1))
-            if local_end >= 0:
-                local_end += len(w2)
-            else:
-                local_end = local_start + len(w1)
-            span_text = context.sentence[local_start:local_end]
-        else:
-            span_text = w1 + w2
+        pos_next = context.word_positions[i + 1]
+        # Use known character positions instead of sentence.find() to avoid
+        # matching the wrong occurrence when w1 appears multiple times.
+        local_start = pos_i
+        local_end = pos_next + len(w2)
+        span_text = context.sentence[local_start:local_end]
 
         return WordError(
             text=span_text,
