@@ -15,6 +15,7 @@ For more information, see the documentation at: https://github.com/thettwe/my-sp
 """
 
 import logging
+from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING
 
 # Lightweight imports that don't require external dependencies
@@ -48,7 +49,10 @@ if TYPE_CHECKING:
     )
     from myspellchecker.providers import SQLiteProvider
 
-__version__ = "1.0.0"
+try:
+    __version__ = version("myspellchecker")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 __author__ = "Thet Twe Aung"
 __license__ = "MIT"
 

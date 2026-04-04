@@ -58,27 +58,24 @@ def test_check_particle_typos():
 
 
 def test_check_verb_particle_agreement():
-    """Test verb-particle agreement."""
+    """Test verb-particle agreement.
+
+    Note: after_verb typo detection and word_correction are handled by
+    _check_particle_typos and _check_config_patterns respectively.
+    This method focuses on structural verb-particle agreement issues.
+    """
     checker = SyntacticRuleChecker(MagicMock())
 
-    # Case 1: Typo after verb
-    checker.config.get_particle_typo = MagicMock(
-        return_value={"correction": "c", "context": "after_verb", "meaning": "m"}
-    )
-    res = checker._check_verb_particle_agreement("word", "V", None)
-    assert res[0] == "c"
-
-    # Case 2: Verb particle after non-verb
-    checker.config.get_particle_typo.return_value = None
+    # Case 1: Verb particle (tense marker) after non-verb (noun)
+    checker.config.get_particle_typo = MagicMock(return_value=None)
     checker.config.is_verb_particle = MagicMock(return_value=True)
     res = checker._check_verb_particle_agreement("မယ်", "N", None)
     assert res[0] == "မယ်"
 
-    # Case 3: Word correction
+    # Case 2: Non-verb-particle returns None
     checker.config.is_verb_particle.return_value = False
-    checker.config.get_word_correction = MagicMock(return_value={"correction": "c", "meaning": "m"})
     res = checker._check_verb_particle_agreement("word", None, None)
-    assert res[0] == "c"
+    assert res is None
 
 
 def test_check_medial_confusions():

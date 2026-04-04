@@ -370,9 +370,9 @@ class SyntacticRuleChecker(
         # ClassifierChecker) called above via _check_register/_check_negation/
         # _check_classifiers. Running both produced overlapping errors.
 
-        # Basic tense agreement (legacy — kept alongside TenseAgreementChecker
-        # which covers more adverbs and markers; positions are deduplicated below)
-        all_errors.extend(self._check_tense_agreement(words))
+        # Legacy _check_tense_agreement removed — TenseAgreementChecker
+        # (called via _check_tense above) covers all its patterns plus more
+        # adverbs and markers. Running both produced duplicate errors.
 
         # Filter by confidence and avoid duplicates
         # Deduplicate by (position, suggestion) to allow multiple different

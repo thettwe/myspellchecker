@@ -533,7 +533,7 @@ def mine_collocations(
 
     results: list[Collocation] = []
 
-    for w1, w2, count in cursor.fetchall():
+    for w1, w2, count in cursor:
         f1 = word_freq.get(w1, 0)
         f2 = word_freq.get(w2, 0)
         if f1 == 0 or f2 == 0:

@@ -239,9 +239,21 @@ class ViterbiTagger:
         # Re-apply floor after normalization to handle floating-point precision
         # When one lambda is tiny and others are large, division can push the
         # tiny value slightly below min_prob due to floating-point arithmetic
-        self.lambda_unigram = max(lambda_unigram, min_prob)
-        self.lambda_bigram = max(lambda_bigram, min_prob)
-        self.lambda_trigram = max(lambda_trigram, min_prob)
+        lambda_unigram = max(lambda_unigram, min_prob)
+        lambda_bigram = max(lambda_bigram, min_prob)
+        lambda_trigram = max(lambda_trigram, min_prob)
+
+        # Renormalize after flooring so weights still sum to 1.0
+        final_sum = lambda_unigram + lambda_bigram + lambda_trigram
+        if final_sum > 0:
+            self.lambda_unigram = lambda_unigram / final_sum
+            self.lambda_bigram = lambda_bigram / final_sum
+            self.lambda_trigram = lambda_trigram / final_sum
+        else:
+            # All zero (impossible with default min_prob>0, but guard anyway)
+            self.lambda_unigram = 1 / 3
+            self.lambda_bigram = 1 / 3
+            self.lambda_trigram = 1 / 3
 
         # Morphology analyzer for OOV word tagging
         self.morphology_analyzer = MorphologyAnalyzer() if use_morphology_fallback else None

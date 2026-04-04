@@ -188,21 +188,29 @@ class DatabasePackager:
         instance.conn = sqlite3.connect(str(database_path), check_same_thread=False)
         instance.cursor = instance.conn.cursor()
 
-        # Build-mode optimization PRAGMAs (safe to lose data on crash -- rebuild)
-        instance.conn.execute("PRAGMA journal_mode = WAL")
-        instance.conn.execute("PRAGMA synchronous = OFF")
-        instance.conn.execute(f"PRAGMA cache_size = {BUILD_PRAGMA_CACHE_SIZE}")
-        instance.conn.execute("PRAGMA temp_store = MEMORY")
-        instance.conn.execute(f"PRAGMA mmap_size = {BUILD_PRAGMA_MMAP_SIZE}")
+        try:
+            # Build-mode optimization PRAGMAs (safe to lose data on crash -- rebuild)
+            instance.conn.execute("PRAGMA journal_mode = WAL")
+            instance.conn.execute("PRAGMA synchronous = OFF")
+            instance.conn.execute(f"PRAGMA cache_size = {BUILD_PRAGMA_CACHE_SIZE}")
+            instance.conn.execute("PRAGMA temp_store = MEMORY")
+            instance.conn.execute(f"PRAGMA mmap_size = {BUILD_PRAGMA_MMAP_SIZE}")
 
-        # Initialize managers
-        instance._schema_manager = SchemaManager(instance.conn, instance.cursor, instance.console)
-        instance._pos_inference_manager = POSInferenceManager(
-            instance.conn, instance.cursor, instance.console
-        )
+            # Initialize managers
+            instance._schema_manager = SchemaManager(
+                instance.conn, instance.cursor, instance.console
+            )
+            instance._pos_inference_manager = POSInferenceManager(
+                instance.conn, instance.cursor, instance.console
+            )
 
-        # Check and add missing columns for POS inference
-        instance._ensure_inferred_pos_columns()
+            # Check and add missing columns for POS inference
+            instance._ensure_inferred_pos_columns()
+        except Exception:
+            instance.conn.close()
+            instance.conn = None
+            instance.cursor = None
+            raise
 
         return instance
 
@@ -1223,6 +1231,8 @@ class DatabasePackager:
             "INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)",
             (key, value),
         )
+        if not self._in_transaction:
+            self.conn.commit()
 
     def optimize_database(self) -> None:
         """Optimize database for read performance."""
@@ -1233,13 +1243,19 @@ class DatabasePackager:
 
         # Analyze tables for query optimization
         self.cursor.execute("ANALYZE")
+        self.conn.commit()
 
-        # Vacuum to reclaim space and defragment (resets journal mode to DELETE)
-        self.cursor.execute("VACUUM")
+        # VACUUM requires autocommit (no implicit transaction).
+        # Temporarily switch to autocommit, run VACUUM, then restore.
+        prev_isolation = self.conn.isolation_level
+        self.conn.isolation_level = None
+        try:
+            self.cursor.execute("VACUUM")
+        finally:
+            self.conn.isolation_level = prev_isolation
 
         # Restore WAL journal mode (VACUUM silently resets it)
         self.cursor.execute("PRAGMA journal_mode = WAL")
-
         self.conn.commit()
         self.console.success("Database optimized")
 

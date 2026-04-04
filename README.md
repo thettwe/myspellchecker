@@ -5,8 +5,8 @@
 [![PyPI](https://img.shields.io/pypi/v/myspellchecker)](https://pypi.org/project/myspellchecker/)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Coverage](https://img.shields.io/badge/coverage-75%25-green)](tests/)
-[![Tests](https://img.shields.io/badge/tests-4%2C758_passed-brightgreen)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-74%25-green)](tests/)
+[![Tests](https://img.shields.io/badge/tests-4%2C658_passed-brightgreen)](tests/)
 
 ## Overview
 
@@ -454,7 +454,7 @@ pip install -e ".[dev]"
 
 ### Testing
 
-The test suite has 4,758 tests across 213 files with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
+The test suite has 4,658 tests across 213 files with 74% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
 
 ```bash
 # Run default test suite (~5 min, skips slow tests)

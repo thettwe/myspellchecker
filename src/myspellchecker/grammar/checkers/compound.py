@@ -139,7 +139,8 @@ class CompoundChecker:
         # Initialize internal structures
         self.prefixes: dict[str, tuple[str, str]] = {}
         self.suffixes: dict[str, tuple[str, str]] = {}
-        self.noun_compounds: dict[tuple[str, str], str] = {}  # (first, second) -> compound
+        # Noun + adjective compounds keyed by (first, second) -> compound word
+        self.component_compounds: dict[tuple[str, str], str] = {}
         self.verb_compounds: dict[tuple[str, str], str] = {}  # (first, second) -> compound
         self.reduplication: dict[str, str] = {}  # base -> reduplicated
         self.typo_map: dict[str, str] = {}
@@ -172,7 +173,7 @@ class CompoundChecker:
             for item in comp_config["noun_compounds"]:
                 components = tuple(item["components"])
                 compound = item["compound"]
-                self.noun_compounds[components] = compound
+                self.component_compounds[components] = compound
                 self.valid_compounds.add(compound)
 
         # Load verb compounds
@@ -197,9 +198,8 @@ class CompoundChecker:
                 components = tuple(item["components"])
                 compound = item["compound"]
                 self.valid_compounds.add(compound)
-                # Store in noun_compounds for component lookup (adjective compounds
-                # follow the same structure as noun compounds)
-                self.noun_compounds[components] = compound
+                # Adjective compounds follow the same structure as noun compounds
+                self.component_compounds[components] = compound
 
         # Load typos
         if "typos" in comp_config:
@@ -213,7 +213,7 @@ class CompoundChecker:
         self.second_component_map: dict[str, list[tuple[str, str]]] = {}
 
         # Build from noun-noun compounds
-        for (first, second), compound in self.noun_compounds.items():
+        for (first, second), compound in self.component_compounds.items():
             if first not in self.first_component_map:
                 self.first_component_map[first] = []
             self.first_component_map[first].append((second, compound))
@@ -223,7 +223,7 @@ class CompoundChecker:
             self.second_component_map[second].append((first, compound))
 
         # Build from verb-verb compounds (guard against duplicates if a component
-        # pair appears in both noun_compounds and verb_compounds)
+        # pair appears in both component_compounds and verb_compounds)
         for (first, second), compound in self.verb_compounds.items():
             if first not in self.first_component_map:
                 self.first_component_map[first] = []
@@ -365,7 +365,7 @@ class CompoundChecker:
         # Check if it's a known valid compound
         if word in self.valid_compounds:
             # Find the components
-            for (first, second), compound in self.noun_compounds.items():
+            for (first, second), compound in self.component_compounds.items():
                 if compound == word:
                     return CompoundInfo(
                         word=word,

@@ -49,9 +49,9 @@ def get_grammar_config(config_path: str | None = None) -> "GrammarRuleConfig":
         factory=lambda: GrammarRuleConfig(config_path=config_path),
     )
     if config_path is not None and already_created:
-        logger.debug(
+        logger.warning(
             "get_grammar_config called with config_path=%s but singleton already initialized; "
-            "using cached instance",
+            "using cached instance (new path ignored)",
             config_path,
         )
     return instance

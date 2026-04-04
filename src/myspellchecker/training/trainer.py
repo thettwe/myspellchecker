@@ -363,6 +363,7 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
             homophones_path = str(Path(__file__).parent.parent / "rules" / "homophones.yaml")
 
         words: set = set()
+        _log = get_logger(__name__)
         try:
             if homophones_path.endswith(".json"):
                 with open(homophones_path, encoding="utf-8") as f:
@@ -371,17 +372,26 @@ class ConfusableAwareMaskCollator(WholeWordMaskCollator):
             else:
                 import yaml
 
-                with open(homophones_path, encoding="utf-8") as f:
-                    data = yaml.safe_load(f)
-                homophones = data.get("homophones", {})
+                try:
+                    with open(homophones_path, encoding="utf-8") as f:
+                        data = yaml.safe_load(f)
+                except yaml.YAMLError as exc:
+                    _log.warning(
+                        "Malformed YAML in %s: %s — confusable masking disabled",
+                        homophones_path,
+                        exc,
+                    )
+                    return words
+                homophones = (data or {}).get("homophones", {})
                 for word, variants in homophones.items():
                     words.add(word)
                     if isinstance(variants, list):
                         words.update(variants)
-        except Exception:
-            get_logger(__name__).warning(
-                "Failed to load homophones from %s, confusable masking disabled",
+        except (OSError, ValueError, KeyError, ImportError) as exc:
+            _log.warning(
+                "Failed to load homophones from %s: %s — confusable masking disabled",
                 homophones_path,
+                exc,
             )
 
         return words

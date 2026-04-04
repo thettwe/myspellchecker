@@ -39,6 +39,7 @@ from myspellchecker.core.constants import (
     ET_TENSE_MISMATCH,
     ET_VOWEL_AFTER_ASAT,
     ET_WRONG_PUNCTUATION,
+    ActionType,
 )
 from myspellchecker.core.response import Error, SyllableError
 
@@ -191,6 +192,10 @@ def generate_corrected_text(text: str, errors: list[Error]) -> str:
 
     for error in sorted_errors:
         if not error.suggestions:
+            continue
+
+        # Skip advisory-only errors — INFORM means "notify, don't auto-correct"
+        if error.action == ActionType.INFORM:
             continue
 
         top_suggestion = error.suggestions[0]

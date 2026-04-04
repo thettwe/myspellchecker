@@ -315,9 +315,9 @@ def validate_text(text: str, *, allow_extended_myanmar: bool = False) -> Validat
                 )
             )
 
-    # Check for Non-Standard Characters (Mon/Shan in core block)
-    # Skip this check if extended Myanmar is allowed (these chars are valid in extended mode)
-    if not allow_extended_myanmar:
+        # Check for Non-Standard Characters (Mon/Shan in core block)
+        # These cover disjoint Unicode ranges from EXTENDED_MYANMAR_PATTERN,
+        # so both checks must run independently.
         match = NON_STANDARD_PATTERN.search(text)
         if match:
             char = match.group(0)

@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/compound-morphology/v1.0",
+  "title": "Myanmar Compound Morphology Schema",
+  "description": "JSON Schema for validating compound_morphology.yaml - Compound word morphological validation rules",
+  "type": "object",
+  "required": [
+    "version",
+    "category",
+    "description",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version"
+    },
+    "category": {
+      "type": "string",
+      "const": "compound_morphology",
+      "description": "Category type (must be 'compound_morphology')"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of the file contents"
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "mandatory_compounds": {
+      "description": "Compounds that must stay joined (splitting is an error)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["compound", "parts", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "compound": {
+            "type": "string",
+            "description": "The compound word"
+          },
+          "parts": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 2,
+            "description": "Component words of the compound"
+          },
+          "type": {
+            "type": "string",
+            "description": "Compound type (e.g., noun_noun, verb_particle)"
+          },
+          "meaning": {
+            "type": "string",
+            "description": "English meaning of the compound"
+          }
+        }
+      }
+    },
+    "compound_patterns": {
+      "description": "Morphological patterns that form compounds",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pattern_id", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "pattern_id": {
+            "type": "string",
+            "description": "Unique identifier for the pattern"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Prefix character or string"
+          },
+          "suffix": {
+            "type": "string",
+            "description": "Suffix character or string"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the pattern"
+          }
+        }
+      }
+    },
+    "false_compounds": {
+      "description": "Sequences that look like compounds but are separate words",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["parts"],
+        "additionalProperties": false,
+        "properties": {
+          "parts": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 2,
+            "description": "Words that should NOT be joined"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why these words are not a compound"
+          }
+        }
+      }
+    }
+  }
+}
