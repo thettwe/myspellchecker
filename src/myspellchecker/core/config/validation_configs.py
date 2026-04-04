@@ -231,6 +231,22 @@ class ValidationConfig(BaseModel):
         default=True,
         description="Enable homophone detection in validation pipeline",
     )
+    # MLP Confusable/Compound Classifier (priority 47)
+    confusable_compound_classifier_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to ONNX MLP classifier for confusable/compound detection. "
+            "When set, enables the ConfusableCompoundClassifierStrategy "
+            "at priority 47. Independent of MLM and error budget."
+        ),
+    )
+    confusable_compound_classifier_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Sigmoid threshold for the MLP classifier.",
+    )
+
     # Confusable Semantic Detection (MLM-enhanced, priority 48)
     use_confusable_semantic: bool = Field(
         default=False,
