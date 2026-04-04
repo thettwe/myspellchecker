@@ -20063,9 +20063,9 @@ sentences:
   register: colloquial
   domain: conversational
   difficulty_tier: 2
-  scope: spelling
+  scope: context_dependent
   notes: 'Confusable pair: စား→ဆား. ထည့်ပါ (add) requires noun object. ဆား (salt)
-    is the ingredient.'
+    is the ingredient. Weak n-gram context — acceptable miss for spelling scope.'
   expected_errors:
   - error_id: BM-CONF-007-E1
     error_type: wrong_word
@@ -20079,6 +20079,7 @@ sentences:
     edit_distance: 1
     context_required: true
     notes: ထည့်ပါ (add) requires noun object. ဆား (salt) is the ingredient.
+    scope: context_dependent
 - id: BM-CONF-008
   input: သရက်သီးတွေ မှည့်နေပြီ ဆားလို့ ရပြီ။
   is_clean: false
@@ -20304,8 +20305,9 @@ sentences:
   register: colloquial
   domain: news
   difficulty_tier: 2
-  scope: spelling
-  notes: 'Confusable pair: ကာ→ကား. ကား+လမ်း (highway). ကာလမ်း doesn''t exist.'
+  scope: context_dependent
+  notes: 'Confusable pair: ကာ→ကား. ကား+လမ်း (highway). ကာလမ်း doesn''t exist. Weak
+    n-gram context — acceptable miss for spelling scope.'
   expected_errors:
   - error_id: BM-CONF-018-E1
     error_type: wrong_word
@@ -20319,14 +20321,16 @@ sentences:
     edit_distance: 1
     context_required: true
     notes: ကား+လမ်း (highway). ကာလမ်း doesn't exist.
+    scope: context_dependent
 - id: BM-CONF-019
   input: မနက်တိုင်း ကာ စီးပြီး ရုံးသွားတယ်။
   is_clean: false
   register: colloquial
   domain: conversational
   difficulty_tier: 2
-  scope: spelling
-  notes: 'Confusable pair: ကာ→ကား. ကား+စီး (ride car). ကာ cannot collocate with စီး.'
+  scope: context_dependent
+  notes: 'Confusable pair: ကာ→ကား. ကား+စီး (ride car). ကာ cannot collocate with စီး.
+    Weak n-gram context — acceptable miss for spelling scope.'
   expected_errors:
   - error_id: BM-CONF-019-E1
     error_type: wrong_word
@@ -20340,6 +20344,7 @@ sentences:
     edit_distance: 1
     context_required: true
     notes: ကား+စီး (ride car). ကာ cannot collocate with စီး.
+    scope: context_dependent
 - id: BM-CONF-020
   input: ဘတ်စ်ကာ ဂိတ်မှာ လူတွေ တန်းစီနေကြတယ်။
   is_clean: false
@@ -20431,8 +20436,9 @@ sentences:
   register: colloquial
   domain: academic
   difficulty_tier: 2
-  scope: spelling
-  notes: 'Confusable pair: ပြီး→ပြီ. Sentence-final completive. အောင်ပြီ (passed already).'
+  scope: context_dependent
+  notes: 'Confusable pair: ပြီး→ပြီ. Sentence-final completive. အောင်ပြီ (passed already).
+    Weak n-gram context — acceptable miss for spelling scope.'
   expected_errors:
   - error_id: BM-CONF-024-E1
     error_type: wrong_word
@@ -20446,6 +20452,7 @@ sentences:
     edit_distance: 1
     context_required: true
     notes: Sentence-final completive. အောင်ပြီ (passed already).
+    scope: context_dependent
 - id: BM-CONF-025
   input: တက္ကသိုလ် ကျောင်းသာ တွေ စာမေးပွဲ ပြင်ဆင်နေကြတယ်။
   is_clean: false
@@ -20494,8 +20501,9 @@ sentences:
   register: colloquial
   domain: conversational
   difficulty_tier: 2
-  scope: spelling
-  notes: 'Confusable pair: သာ→သား. Possessive+သား (my son). သာ (only) cannot be possessed.'
+  scope: context_dependent
+  notes: 'Confusable pair: သာ→သား. Possessive+သား (my son). သာ (only) cannot be possessed.
+    Weak n-gram context — acceptable miss for spelling scope.'
   expected_errors:
   - error_id: BM-CONF-027-E1
     error_type: wrong_word
@@ -20509,6 +20517,7 @@ sentences:
     edit_distance: 1
     context_required: true
     notes: Possessive+သား (my son). သာ (only) cannot be possessed.
+    scope: context_dependent
 - id: BM-CONF-028
   input: မိဘတွေက သာ သမီးတွေကို ချစ်တယ်။
   is_clean: false
