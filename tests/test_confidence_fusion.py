@@ -85,8 +85,32 @@ class TestIndependenceClusters:
         assert "statistical" in INDEPENDENCE_CLUSTERS
 
     def test_neural_cluster_strategies(self):
+        assert "ConfusableCompoundClassifierStrategy" in INDEPENDENCE_CLUSTERS["neural"]
         assert "ConfusableSemanticStrategy" in INDEPENDENCE_CLUSTERS["neural"]
         assert "SemanticValidationStrategy" in INDEPENDENCE_CLUSTERS["neural"]
+
+    def test_registry_tables_in_sync(self):
+        """STRATEGY_TIER, STRATEGY_RELIABILITY, and INDEPENDENCE_CLUSTERS must cover
+        exactly the same set of strategies."""
+        from myspellchecker.core.calibration import STRATEGY_RELIABILITY
+        from myspellchecker.core.validation_strategies.arbiter import STRATEGY_TIER
+
+        tier_keys = set(STRATEGY_TIER.keys())
+        reliability_keys = set(STRATEGY_RELIABILITY.keys())
+        cluster_keys = set()
+        for strategies in INDEPENDENCE_CLUSTERS.values():
+            cluster_keys.update(strategies)
+
+        assert tier_keys == reliability_keys, (
+            f"TIER vs RELIABILITY mismatch: "
+            f"only in TIER={tier_keys - reliability_keys}, "
+            f"only in RELIABILITY={reliability_keys - tier_keys}"
+        )
+        assert tier_keys == cluster_keys, (
+            f"TIER vs CLUSTERS mismatch: "
+            f"only in TIER={tier_keys - cluster_keys}, "
+            f"only in CLUSTERS={cluster_keys - tier_keys}"
+        )
 
     def test_unknown_strategy_gets_singleton_cluster(self):
         cluster = _get_cluster("CustomStrategy")

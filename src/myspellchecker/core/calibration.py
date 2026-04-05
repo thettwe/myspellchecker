@@ -30,6 +30,7 @@ STRATEGY_RELIABILITY: dict[str, float] = {
     "HomophoneValidationStrategy": 0.65,
     "NgramContextValidationStrategy": 0.65,
     # Tier 4: Neural -- highest accuracy but also highest FPR risk
+    "ConfusableCompoundClassifierStrategy": 0.75,
     "ConfusableSemanticStrategy": 0.70,
     "SemanticValidationStrategy": 0.65,
 }
@@ -130,20 +131,45 @@ class StrategyCalibrator:
         The YAML schema must have ``calibrations`` (per-strategy breakpoints)
         and ``reliability_weights`` (per-strategy lambda) keys, as produced
         by ``scripts/train_calibrators.py``.
+
+        Falls back to bootstrap defaults on missing file, empty YAML, or
+        malformed entries.
         """
         import yaml  # noqa: PLC0415
 
-        with open(path) as f:
-            data = yaml.safe_load(f)
+        from myspellchecker.utils.logging_utils import get_logger
+
+        _log = get_logger(__name__)
+
+        try:
+            with open(path) as f:
+                data = yaml.safe_load(f)
+        except (OSError, yaml.YAMLError) as exc:
+            _log.warning("Failed to load calibration from %s: %s", path, exc)
+            return cls()
+
+        if not isinstance(data, dict):
+            _log.warning("Calibration file %s is not a dict, using bootstrap", path)
+            return cls()
 
         cal_data: dict[str, CalibrationData] = {}
         for name, entry in data.get("calibrations", {}).items():
+            if not isinstance(entry, dict):
+                continue
             x = entry.get("x_thresholds")
             y = entry.get("y_thresholds")
-            if x and y and len(x) >= 2:
+            if (
+                x and y
+                and len(x) >= 2
+                and len(x) == len(y)
+                and x == sorted(x)
+            ):
                 cal_data[name] = CalibrationData(
                     x_thresholds=x, y_thresholds=y
                 )
 
-        weights = data.get("reliability_weights", {})
+        # Fall back to bootstrap reliability when YAML section is absent
+        # or empty.  An explicit empty dict {} must NOT replace the
+        # bootstrap defaults (see STRATEGY_RELIABILITY).
+        weights = data.get("reliability_weights") or None
         return cls(calibration_data=cal_data, reliability=weights)

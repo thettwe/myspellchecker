@@ -46,7 +46,8 @@ STRATEGY_TIER: dict[str, int] = {
     "QuestionStructureValidationStrategy": 3,
     "HomophoneValidationStrategy": 3,
     "NgramContextValidationStrategy": 3,
-    # Tier 4: Neural (MLM-powered, highest accuracy, highest cost)
+    # Tier 4: Neural (MLM/MLP-powered, highest accuracy, highest cost)
+    "ConfusableCompoundClassifierStrategy": 4,
     "ConfusableSemanticStrategy": 4,
     "SemanticValidationStrategy": 4,
 }
@@ -138,7 +139,11 @@ INDEPENDENCE_CLUSTERS: dict[str, list[str]] = {
         "NgramContextValidationStrategy",
         "HomophoneValidationStrategy",
     ],
-    "neural": ["ConfusableSemanticStrategy", "SemanticValidationStrategy"],
+    "neural": [
+        "ConfusableCompoundClassifierStrategy",
+        "ConfusableSemanticStrategy",
+        "SemanticValidationStrategy",
+    ],
     "compound": ["BrokenCompoundStrategy"],
     "question": ["QuestionStructureValidationStrategy"],
 }
@@ -212,7 +217,7 @@ def fuse_candidates(
         c = candidates[0]
         cal_conf = calibrator.calibrate(c.strategy_name, c.confidence)
         reliability = calibrator.get_reliability(c.strategy_name)
-        return reliability * cal_conf, winner
+        return min(reliability * cal_conf, 1.0), winner
 
     # Group by cluster, keep per-cluster max weighted score
     cluster_max: dict[str, float] = {}
@@ -220,7 +225,7 @@ def fuse_candidates(
         cluster = _get_cluster(c.strategy_name)
         cal_conf = calibrator.calibrate(c.strategy_name, c.confidence)
         reliability = calibrator.get_reliability(c.strategy_name)
-        weighted = reliability * cal_conf
+        weighted = min(reliability * cal_conf, 1.0)
 
         prev = cluster_max.get(cluster, -1.0)
         if weighted > prev:
