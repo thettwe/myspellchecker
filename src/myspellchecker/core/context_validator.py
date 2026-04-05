@@ -343,14 +343,19 @@ class ContextValidator(Validator):
                     threshold=self._fusion_threshold,
                 )
                 self._apply_fusion_winners(errors, fused)
-                # Suppress mutex errors whose fused confidence fell below
-                # the threshold.  Without this, the threshold has no effect
-                # because the mutex-emitted errors survive unchanged.
+                # Suppress context-strategy errors whose fused confidence fell
+                # below the threshold.  Only suppress errors with a source_strategy
+                # (context-level); word/syllable errors (empty source_strategy)
+                # must survive even if a context candidate at the same position
+                # was rejected.
                 rejected = {
                     pos for pos in path_error_candidates if pos not in fused
                 }
                 if rejected:
-                    errors[:] = [e for e in errors if e.position not in rejected]
+                    errors[:] = [
+                        e for e in errors
+                        if e.position not in rejected or not e.source_strategy
+                    ]
             else:
                 # Shadow mode: tier-based arbiter, log-only divergence
                 winners = arbitrate_candidates(path_error_candidates)
