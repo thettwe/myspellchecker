@@ -584,6 +584,32 @@ class ContextValidator(Validator):
                     error.suggestions.append(suggestion)
 
     @staticmethod
+    def _build_error_by_pos(errors: list[Error]) -> dict[int, Error]:
+        """Build position -> first Error lookup from an error list."""
+        by_pos: dict[int, Error] = {}
+        for error in errors:
+            if error.position not in by_pos:
+                by_pos[error.position] = error
+        return by_pos
+
+    @staticmethod
+    def _dedup_errors_at_positions(
+        errors: list[Error], positions: set[int]
+    ) -> None:
+        """Remove duplicate errors at given positions (keep first per position)."""
+        if not positions:
+            return
+        seen: set[int] = set()
+        deduped: list[Error] = []
+        for e in errors:
+            if e.position in positions:
+                if e.position in seen:
+                    continue
+                seen.add(e.position)
+            deduped.append(e)
+        errors[:] = deduped
+
+    @staticmethod
     def _apply_arbiter_winners(
         errors: list[Error],
         winners: dict[int, ErrorCandidate],
@@ -592,23 +618,15 @@ class ContextValidator(Validator):
 
         v1.3.0 shadow mode: the arbiter does NOT mutate live Error
         objects.  It only logs positions where the arbiter disagrees
-        with the mutex, to collect divergence data for v1.4.0.
-
-        When ready to activate (v1.4.0+), this method should update
-        error.error_type, error.suggestions, and error.confidence
-        from the winning candidate.
+        with the mutex, to collect divergence data.
         """
-        error_by_pos: dict[int, Error] = {}
-        for error in errors:
-            if error.position not in error_by_pos:
-                error_by_pos[error.position] = error
+        error_by_pos = ContextValidator._build_error_by_pos(errors)
 
         for position, winner in winners.items():
             error = error_by_pos.get(position)
             if error is None:
                 continue
 
-            # Shadow mode: log divergence only, do not mutate errors.
             if error.error_type != winner.error_type:
                 logger.debug(
                     "arbiter divergence: pos=%d mutex=%s arbiter=%s (conf=%.2f)",
@@ -628,22 +646,9 @@ class ContextValidator(Validator):
         For positions where the fusion winner disagrees with the mutex-selected
         error, the first error at that position is updated in-place and any
         duplicate errors at the same position are removed.
-
-        Args:
-            errors: Collected Error objects from all strategies (mutated in-place).
-            fused: Map of position -> ``(fused_confidence, winner_candidate)``
-                from ``fuse_all_candidates()``.
         """
-        # In fusion mode, multiple strategies may emit errors at the same
-        # position with different error_types.  Keep only the first error
-        # per position (updated to the fusion winner) and discard the rest.
-        error_by_pos: dict[int, Error] = {}
-        duplicate_positions: set[int] = set()
-        for error in errors:
-            if error.position not in error_by_pos:
-                error_by_pos[error.position] = error
-            elif error.position in fused:
-                duplicate_positions.add(error.position)
+        error_by_pos = ContextValidator._build_error_by_pos(errors)
+        fused_positions = set(fused.keys())
 
         for position, (fused_conf, winner) in fused.items():
             error = error_by_pos.get(position)
@@ -665,17 +670,15 @@ class ContextValidator(Validator):
                     ]
             error.confidence = fused_conf
 
-        # Remove duplicate errors at fused positions (keep the first per position).
-        if duplicate_positions:
-            seen: set[int] = set()
-            deduped: list[Error] = []
-            for e in errors:
-                if e.position in duplicate_positions:
-                    if e.position in seen:
-                        continue
-                    seen.add(e.position)
-                deduped.append(e)
-            errors[:] = deduped
+        # Find positions with duplicate errors and dedup.
+        dup_positions: set[int] = set()
+        seen_count: dict[int, int] = {}
+        for e in errors:
+            if e.position in fused_positions:
+                seen_count[e.position] = seen_count.get(e.position, 0) + 1
+                if seen_count[e.position] > 1:
+                    dup_positions.add(e.position)
+        ContextValidator._dedup_errors_at_positions(errors, dup_positions)
 
     @staticmethod
     def _init_strategy_debug_entry() -> dict[str, Any]:

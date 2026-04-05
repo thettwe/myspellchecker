@@ -63,6 +63,8 @@ class CalibrationData:
             raise ValueError("CalibrationData requires at least 2 breakpoints")
         if self.x_thresholds != sorted(self.x_thresholds):
             raise ValueError("x_thresholds must be sorted in ascending order")
+        if any(v < 0.0 or v > 1.0 for v in self.y_thresholds):
+            raise ValueError("y_thresholds values must be in [0.0, 1.0]")
 
     def calibrate(self, raw_score: float) -> float:
         """Map a raw confidence score to a calibrated probability.

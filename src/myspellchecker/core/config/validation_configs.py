@@ -423,7 +423,8 @@ class ValidationConfig(BaseModel):
         description=(
             "Enable calibrated Noisy-OR candidate fusion instead of mutex-based "
             "winner selection. When True, all strategies may fire at every position "
-            "(mutex bypass), and the arbiter uses calibrated confidence fusion "
+            "(mutex bypass), fast-path exit is automatically disabled, and the "
+            "arbiter uses calibrated confidence fusion "
             "across independence clusters to determine which errors to emit. "
             "When False (default), the v1.2 mutex-and-shadow-mode behaviour is used."
         ),
@@ -453,7 +454,8 @@ class ValidationConfig(BaseModel):
             "Enable fast-path exit in context validation. When True, if structural "
             "strategies (Tone, Orthography, Syntactic, BrokenCompound) find no errors, "
             "contextual strategies are skipped. Reduces FPR on clean text but may miss "
-            "context-only errors. Set to False for maximum recall."
+            "context-only errors. Set to False for maximum recall. "
+            "Note: automatically disabled when use_candidate_fusion=True."
         ),
     )
 

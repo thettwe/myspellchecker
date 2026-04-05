@@ -77,6 +77,14 @@ class TestCalibrationData:
         with pytest.raises(ValueError, match="sorted in ascending order"):
             CalibrationData(x_thresholds=[0.8, 0.2], y_thresholds=[0.9, 0.1])
 
+    def test_y_thresholds_out_of_range_raises(self):
+        with pytest.raises(ValueError, match="y_thresholds values must be in"):
+            CalibrationData(x_thresholds=[0.0, 1.0], y_thresholds=[0.0, 1.5])
+
+    def test_y_thresholds_negative_raises(self):
+        with pytest.raises(ValueError, match="y_thresholds values must be in"):
+            CalibrationData(x_thresholds=[0.0, 1.0], y_thresholds=[-0.1, 0.5])
+
 
 class TestStrategyCalibrator:
     """Tests for the strategy calibrator."""
@@ -116,3 +124,72 @@ class TestStrategyCalibrator:
             assert strategy_name in STRATEGY_RELIABILITY, (
                 f"{strategy_name} missing from STRATEGY_RELIABILITY"
             )
+
+
+class TestFromYaml:
+    """Tests for StrategyCalibrator.from_yaml."""
+
+    def test_load_valid_yaml(self, tmp_path):
+        yaml_file = tmp_path / "cal.yaml"
+        yaml_file.write_text(
+            "calibrations:\n"
+            "  TestStrategy:\n"
+            "    x_thresholds: [0.0, 0.5, 1.0]\n"
+            "    y_thresholds: [0.0, 0.3, 1.0]\n"
+            "reliability_weights:\n"
+            "  TestStrategy: 0.8\n"
+        )
+        cal = StrategyCalibrator.from_yaml(str(yaml_file))
+        assert cal.calibrate("TestStrategy", 0.5) == pytest.approx(0.3)
+        assert cal.get_reliability("TestStrategy") == 0.8
+
+    def test_missing_file_returns_bootstrap(self):
+        cal = StrategyCalibrator.from_yaml("/nonexistent/path.yaml")
+        # Falls back to bootstrap defaults
+        assert cal.get_reliability("OrthographyValidationStrategy") == 0.90
+
+    def test_empty_yaml_returns_bootstrap(self, tmp_path):
+        yaml_file = tmp_path / "empty.yaml"
+        yaml_file.write_text("")
+        cal = StrategyCalibrator.from_yaml(str(yaml_file))
+        assert cal.get_reliability("OrthographyValidationStrategy") == 0.90
+
+    def test_missing_reliability_section_uses_bootstrap(self, tmp_path):
+        yaml_file = tmp_path / "no_weights.yaml"
+        yaml_file.write_text(
+            "calibrations:\n"
+            "  TestStrategy:\n"
+            "    x_thresholds: [0.0, 1.0]\n"
+            "    y_thresholds: [0.0, 1.0]\n"
+        )
+        cal = StrategyCalibrator.from_yaml(str(yaml_file))
+        # Should fall back to bootstrap, not empty dict
+        assert cal.get_reliability("OrthographyValidationStrategy") == 0.90
+
+    def test_mismatched_thresholds_skipped(self, tmp_path):
+        yaml_file = tmp_path / "bad.yaml"
+        yaml_file.write_text(
+            "calibrations:\n"
+            "  BadStrategy:\n"
+            "    x_thresholds: [0.0, 0.5, 1.0]\n"
+            "    y_thresholds: [0.0, 1.0]\n"
+            "  GoodStrategy:\n"
+            "    x_thresholds: [0.0, 1.0]\n"
+            "    y_thresholds: [0.0, 1.0]\n"
+        )
+        cal = StrategyCalibrator.from_yaml(str(yaml_file))
+        # BadStrategy skipped (length mismatch), GoodStrategy loaded
+        assert cal.calibrate("BadStrategy", 0.5) == pytest.approx(0.5)  # identity
+        assert cal.calibrate("GoodStrategy", 0.5) == pytest.approx(0.5)
+
+    def test_unsorted_thresholds_skipped(self, tmp_path):
+        yaml_file = tmp_path / "unsorted.yaml"
+        yaml_file.write_text(
+            "calibrations:\n"
+            "  UnsortedStrategy:\n"
+            "    x_thresholds: [1.0, 0.0]\n"
+            "    y_thresholds: [1.0, 0.0]\n"
+        )
+        cal = StrategyCalibrator.from_yaml(str(yaml_file))
+        # Unsorted skipped, falls back to identity
+        assert cal.calibrate("UnsortedStrategy", 0.5) == pytest.approx(0.5)
