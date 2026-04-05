@@ -392,20 +392,28 @@ class ValidationConfig(BaseModel):
     # colloquial_info notes use confidence 0.3 (informational, not errors)
     # and are suppressed by default; lower the threshold to surface them.
     output_confidence_thresholds: dict[str, float] = Field(
-        default={"confusable_error": 0.75, "colloquial_info": 0.35},
+        default={
+            "confusable_error": 0.75,
+            "colloquial_info": 0.35,
+            "homophone_error": 0.72,
+            "question_structure": 0.68,
+        },
         description=(
             "Per-error-type minimum confidence for the output filter. "
             "Errors whose confidence is below the threshold for their type "
             "are suppressed."
         ),
     )
-    # Calibration: typical cascade FP has conf=0.80, gold TPs are 0.85+.
     secondary_confidence_thresholds: dict[str, float] = Field(
-        default={"semantic_error": 0.85},
+        default={
+            "semantic_error": 0.85,
+            "pos_sequence_error": 0.70,
+            "syntax_error": 0.75,
+        },
         description=(
             "Cascade guard: suppress error types when the sentence already "
             "has a higher-confidence error of a different type. Prevents "
-            "cascade false positives from the semantic model."
+            "cascade false positives from context strategies."
         ),
     )
 

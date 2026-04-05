@@ -1,5 +1,5 @@
 version: 1
-generated: '2026-04-05T06:50:38.927066+00:00'
+generated: '2026-04-05T07:58:12.023743+00:00'
 description: Per-strategy calibration breakpoints and reliability weights for myspellchecker
   voting architecture.
 calibrations:
@@ -58,62 +58,6 @@ calibrations:
     score_range:
     - 0.704
     - 0.736
-  HomophoneValidationStrategy:
-    method: platt
-    a: -0.52017
-    b: -1.176855
-    x_thresholds:
-    - 0.0
-    - 0.05
-    - 0.1
-    - 0.15
-    - 0.2
-    - 0.25
-    - 0.3
-    - 0.35
-    - 0.4
-    - 0.45
-    - 0.5
-    - 0.55
-    - 0.6
-    - 0.65
-    - 0.7
-    - 0.75
-    - 0.8
-    - 0.85
-    - 0.9
-    - 0.95
-    - 1.0
-    y_thresholds:
-    - 0.235618
-    - 0.230966
-    - 0.226379
-    - 0.221856
-    - 0.217399
-    - 0.213006
-    - 0.208679
-    - 0.204417
-    - 0.200219
-    - 0.196087
-    - 0.19202
-    - 0.188017
-    - 0.184078
-    - 0.180204
-    - 0.176394
-    - 0.172647
-    - 0.168963
-    - 0.165343
-    - 0.161785
-    - 0.158289
-    - 0.154854
-    n_samples: 61
-    n_positive: 12
-    n_negative: 49
-    raw_precision: 0.1967
-    cv_brier: 0.1584
-    score_range:
-    - 0.442
-    - 0.442
   NgramContextValidationStrategy:
     method: temperature
     T: 19.999995
@@ -186,20 +130,6 @@ calibrations:
     - 0.81
     - 0.81
   POSSequenceValidationStrategy:
-    method: isotonic
-    x_thresholds:
-    - 0.408
-    y_thresholds:
-    - 0.136691
-    n_samples: 278
-    n_positive: 38
-    n_negative: 240
-    raw_precision: 0.1367
-    cv_brier: 0.118
-    score_range:
-    - 0.408
-    - 0.408
-  QuestionStructureValidationStrategy:
     method: identity
     x_thresholds:
     - 0.0
@@ -207,14 +137,14 @@ calibrations:
     y_thresholds:
     - 0.0
     - 1.0
-    n_samples: 16
+    n_samples: 60
     n_positive: 2
-    n_negative: 14
-    raw_precision: 0.125
+    n_negative: 58
+    raw_precision: 0.0333
     cv_brier: null
     score_range:
-    - 0.385
-    - 0.385
+    - 0.408
+    - 0.408
   SemanticValidationStrategy:
     method: identity
     x_thresholds:
@@ -248,9 +178,8 @@ calibrations:
     - 0.7828
     - 0.7854
   SyntacticValidationStrategy:
-    method: platt
-    a: 26.639395
-    b: -17.229383
+    method: temperature
+    T: 19.999994
     x_thresholds:
     - 0.0
     - 0.05
@@ -274,35 +203,35 @@ calibrations:
     - 0.95
     - 1.0
     y_thresholds:
-    - 0.0
-    - 0.0
-    - 0.0
-    - 2.0e-06
-    - 7.0e-06
-    - 2.6e-05
-    - 9.7e-05
-    - 0.000369
-    - 0.001395
-    - 0.005264
-    - 0.019653
-    - 0.070586
-    - 0.223437
-    - 0.521543
-    - 0.805055
-    - 0.939923
-    - 0.983408
-    - 0.995566
-    - 0.998826
-    - 0.99969
-    - 0.999918
-    n_samples: 119
-    n_positive: 16
-    n_negative: 103
-    raw_precision: 0.1345
-    cv_brier: 0.1159
+    - 0.308764
+    - 0.463261
+    - 0.472562
+    - 0.478331
+    - 0.482678
+    - 0.486271
+    - 0.48941
+    - 0.492263
+    - 0.494932
+    - 0.497492
+    - 0.5
+    - 0.502508
+    - 0.505068
+    - 0.507737
+    - 0.51059
+    - 0.513729
+    - 0.517322
+    - 0.521669
+    - 0.527438
+    - 0.536739
+    - 0.691236
+    n_samples: 42
+    n_positive: 13
+    n_negative: 29
+    raw_precision: 0.3095
+    cv_brier: 0.251
     score_range:
     - 0.56
-    - 0.665
+    - 0.63
   ToneValidationStrategy:
     method: identity
     x_thresholds:
@@ -320,13 +249,11 @@ calibrations:
     - 0.7225
     - 0.7225
 reliability_weights:
-  SyntacticValidationStrategy: 0.1463
-  POSSequenceValidationStrategy: 0.1418
-  HomophoneValidationStrategy: 0.2154
+  POSSequenceValidationStrategy: 0.0625
   StatisticalConfusableStrategy: 0.5714
   NgramContextValidationStrategy: 0.068
+  SyntacticValidationStrategy: 0.3261
   OrthographyValidationStrategy: 0.0968
-  QuestionStructureValidationStrategy: 0.2
   SemanticValidationStrategy: 0.3333
   BrokenCompoundStrategy: 0.1389
   ToneValidationStrategy: 0.1429

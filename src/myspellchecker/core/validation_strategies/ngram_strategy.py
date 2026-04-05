@@ -194,6 +194,15 @@ class NgramContextValidationStrategy(ValidationStrategy):
                 if not verdict.is_error:
                     continue
 
+                # Minimum context evidence: skip when the context word
+                # (previous word) has very low frequency. Bigram P(next|prev)
+                # is unreliable when prev itself is rare in the corpus.
+                _ctx_freq_fn = getattr(self.provider, "get_word_frequency", None)
+                if _ctx_freq_fn is not None:
+                    ctx_freq = _ctx_freq_fn(effective_current)
+                    if isinstance(ctx_freq, (int, float)) and ctx_freq < 50:
+                        continue
+
                 # Generate context-aware suggestions
                 suggestions = self._generate_suggestions(
                     current_word=effective_current,

@@ -909,6 +909,7 @@ class SpellChecker(
         # final candidate lists to avoid widening suppression scope.
         self._suppress_low_value_confusable_errors(errors, text=normalized_text)
         self._suppress_low_value_semantic_errors(errors, text=normalized_text)
+        self._suppress_low_value_word_errors(errors, text=normalized_text)
 
         # Confidence-gated output filter: suppress error types where the
         # system has low precision unless confidence exceeds a per-type
