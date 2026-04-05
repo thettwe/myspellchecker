@@ -1,5 +1,16 @@
 name: Dependency Audit
 
+on:
+  push:
+    branches: [develop]
+    paths:
+      - ".github/workflows/audit.yml"
+      - "src/**"
+      - "tests/**"
+      - "setup.py"
+      - "pyproject.toml"
+  workflow_dispatch:
+
 jobs:
   audit:
     runs-on: ubuntu-latest
