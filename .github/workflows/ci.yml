@@ -34,8 +34,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - uses: astral-sh/setup-uv@v7
+
       - name: Install dependencies
-        run: pip install ruff
+        run: uv pip install --system ruff
 
       - name: Check formatting
         run: ruff format --check .
@@ -60,9 +62,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
+      - uses: astral-sh/setup-uv@v7
+
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
+          uv pip install --system -e ".[dev]"
 
       - name: Run tests with coverage
         run: |
