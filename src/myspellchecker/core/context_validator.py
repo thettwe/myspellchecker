@@ -336,6 +336,14 @@ class ContextValidator(Validator):
                     threshold=self._fusion_threshold,
                 )
                 self._apply_fusion_winners(errors, fused)
+                # Suppress mutex errors whose fused confidence fell below
+                # the threshold.  Without this, the threshold has no effect
+                # because the mutex-emitted errors survive unchanged.
+                rejected = {
+                    pos for pos in path_error_candidates if pos not in fused
+                }
+                if rejected:
+                    errors[:] = [e for e in errors if e.position not in rejected]
             else:
                 # Shadow mode: tier-based arbiter, log-only divergence
                 winners = arbitrate_candidates(path_error_candidates)
@@ -455,6 +463,7 @@ class ContextValidator(Validator):
                 structural_phase_done = True
                 if (
                     self.config.validation.enable_fast_path
+                    and not self._fusion_enabled
                     and structural_phase_ran
                     and not errors
                     and not context.existing_errors
@@ -603,18 +612,24 @@ class ContextValidator(Validator):
         """Apply fusion results: update error details from winning candidates.
 
         For positions where the fusion winner disagrees with the mutex-selected
-        error, the error is updated in-place with the winner's type, suggestion,
-        and fused confidence.
+        error, the first error at that position is updated in-place and any
+        duplicate errors at the same position are removed.
 
         Args:
-            errors: Collected Error objects from all strategies.
+            errors: Collected Error objects from all strategies (mutated in-place).
             fused: Map of position -> ``(fused_confidence, winner_candidate)``
                 from ``fuse_all_candidates()``.
         """
+        # In fusion mode, multiple strategies may emit errors at the same
+        # position with different error_types.  Keep only the first error
+        # per position (updated to the fusion winner) and discard the rest.
         error_by_pos: dict[int, Error] = {}
+        duplicate_positions: set[int] = set()
         for error in errors:
             if error.position not in error_by_pos:
                 error_by_pos[error.position] = error
+            elif error.position in fused:
+                duplicate_positions.add(error.position)
 
         for position, (fused_conf, winner) in fused.items():
             error = error_by_pos.get(position)
@@ -635,6 +650,18 @@ class ContextValidator(Validator):
                         s for s in error.suggestions if s != winner.suggestion
                     ]
             error.confidence = fused_conf
+
+        # Remove duplicate errors at fused positions (keep the first per position).
+        if duplicate_positions:
+            seen: set[int] = set()
+            deduped: list[Error] = []
+            for e in errors:
+                if e.position in duplicate_positions:
+                    if e.position in seen:
+                        continue
+                    seen.add(e.position)
+                deduped.append(e)
+            errors[:] = deduped
 
     @staticmethod
     def _init_strategy_debug_entry() -> dict[str, Any]:

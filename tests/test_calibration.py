@@ -73,6 +73,10 @@ class TestCalibrationData:
         with pytest.raises(ValueError, match="at least 2"):
             CalibrationData(x_thresholds=[0.5], y_thresholds=[0.5])
 
+    def test_unsorted_x_thresholds_raises(self):
+        with pytest.raises(ValueError, match="sorted in ascending order"):
+            CalibrationData(x_thresholds=[0.8, 0.2], y_thresholds=[0.9, 0.1])
+
 
 class TestStrategyCalibrator:
     """Tests for the strategy calibrator."""
