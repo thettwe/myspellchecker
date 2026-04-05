@@ -429,6 +429,15 @@ class ValidationConfig(BaseModel):
             "in candidate-fusion mode. Lower values increase recall but risk FPR."
         ),
     )
+    calibration_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to a YAML file with per-strategy calibration breakpoints "
+            "and reliability weights, as produced by train_calibrators.py. "
+            "When set and use_candidate_fusion=True, the fusion pipeline "
+            "uses data-driven calibration instead of bootstrap weights."
+        ),
+    )
 
     enable_fast_path: bool = Field(
         default=True,

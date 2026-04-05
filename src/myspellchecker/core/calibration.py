@@ -122,3 +122,28 @@ class StrategyCalibrator:
     def get_reliability(self, strategy_name: str) -> float:
         """Return the reliability weight (lambda) for *strategy_name*."""
         return self._reliability.get(strategy_name, DEFAULT_RELIABILITY)
+
+    @classmethod
+    def from_yaml(cls, path: str) -> "StrategyCalibrator":
+        """Load calibration data and reliability weights from a YAML file.
+
+        The YAML schema must have ``calibrations`` (per-strategy breakpoints)
+        and ``reliability_weights`` (per-strategy lambda) keys, as produced
+        by ``scripts/train_calibrators.py``.
+        """
+        import yaml  # noqa: PLC0415
+
+        with open(path) as f:
+            data = yaml.safe_load(f)
+
+        cal_data: dict[str, CalibrationData] = {}
+        for name, entry in data.get("calibrations", {}).items():
+            x = entry.get("x_thresholds")
+            y = entry.get("y_thresholds")
+            if x and y and len(x) >= 2:
+                cal_data[name] = CalibrationData(
+                    x_thresholds=x, y_thresholds=y
+                )
+
+        weights = data.get("reliability_weights", {})
+        return cls(calibration_data=cal_data, reliability=weights)

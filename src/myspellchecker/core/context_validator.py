@@ -129,7 +129,14 @@ class ContextValidator(Validator):
         self.strategies = sorted(strategies or [], key=lambda s: s.priority())
         self._fusion_enabled = config.validation.use_candidate_fusion
         self._fusion_threshold = config.validation.fusion_confidence_threshold
-        self._calibrator = StrategyCalibrator() if self._fusion_enabled else None
+        if self._fusion_enabled:
+            cal_path = config.validation.calibration_path
+            if cal_path and isinstance(cal_path, str):
+                self._calibrator = StrategyCalibrator.from_yaml(cal_path)
+            else:
+                self._calibrator = StrategyCalibrator()
+        else:
+            self._calibrator = None
         self._refine_is_valid_word = self._resolve_word_validator_callback("is_valid_word")
         self._refine_get_word_frequency = self._resolve_word_validator_callback(
             "get_word_frequency"
