@@ -1,5 +1,15 @@
 name: Publish to PyPI
 
+on:
+  push:
+    branches: [develop]
+    paths:
+      - ".github/workflows/publish.yml"
+      - "src/**"
+      - "setup.py"
+      - "pyproject.toml"
+  workflow_dispatch:
+
 jobs:
   publish:
     runs-on: ubuntu-latest
