@@ -492,6 +492,8 @@ class ContextValidator(Validator):
                     t0 = time.perf_counter()
 
                 strategy_errors = strategy.validate(context)
+                for error in strategy_errors:
+                    error.source_strategy = strategy_name
                 errors.extend(strategy_errors)
 
                 # Collect error candidates for arbiter (Phase 2 infrastructure).

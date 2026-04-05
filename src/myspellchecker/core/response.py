@@ -118,6 +118,7 @@ class Error:
     suggestions: list[str]
     error_type: str
     confidence: float = 1.0
+    source_strategy: str = ""
 
     @property
     def action(self) -> ActionType:
