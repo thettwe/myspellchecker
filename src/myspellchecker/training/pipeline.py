@@ -284,7 +284,8 @@ class TrainingPipeline:
             # Copy checkpoints BEFORE exporting to ONNX to prevent data loss
             if config.keep_checkpoints:
                 checkpoint_dest = output_path / "pytorch_source"
-                shutil.copytree(pytorch_model_dir, checkpoint_dest)
+                if not checkpoint_dest.exists():
+                    shutil.copytree(pytorch_model_dir, checkpoint_dest)
                 self.reporter.info(f"PyTorch source preserved at {checkpoint_dest}")
 
             # Step 3: Export to ONNX

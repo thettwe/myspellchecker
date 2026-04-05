@@ -177,6 +177,7 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
                     if error is not None:
                         errors.append(error)
                         context.existing_errors[pos_i] = error.error_type
+                        context.existing_errors[pos_next] = error.error_type
                         context.existing_confidences[pos_i] = self._confidence * score
                         context.existing_suggestions[pos_i] = [compound]
 
@@ -315,16 +316,7 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
     ) -> WordError | None:
         """Build a broken compound error."""
         pos_i = context.word_positions[i]
-        local_start = context.sentence.find(w1)
-        if local_start >= 0:
-            local_end = context.sentence.find(w2, local_start + len(w1))
-            if local_end >= 0:
-                local_end += len(w2)
-            else:
-                local_end = local_start + len(w1)
-            span_text = context.sentence[local_start:local_end]
-        else:
-            span_text = w1 + w2
+        span_text = w1 + " " + w2
 
         return WordError(
             text=span_text,

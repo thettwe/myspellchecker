@@ -1542,8 +1542,13 @@ class SemanticChecker:
                 logit = direct_scores[candidate]
             else:
                 # Prefix match: model may predict a compound starting with candidate
+                # Only allow prefix match for candidates with 2+ characters
                 matched_logit = next(
-                    (lg for pw, lg in predictions if pw.startswith(candidate)),
+                    (
+                        lg
+                        for pw, lg in predictions
+                        if len(candidate) >= 2 and pw.startswith(candidate)
+                    ),
                     floor_logit,
                 )
                 logit = matched_logit

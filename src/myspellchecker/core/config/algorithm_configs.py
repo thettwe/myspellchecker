@@ -1266,12 +1266,6 @@ class RankerConfig(BaseModel):
         le=1.0,
         description="Weight for phonetic similarity bonus (0.0-1.0)",
     )
-    syllable_bonus_weight: float = Field(
-        default=0.3,
-        ge=0.0,
-        le=1.0,
-        description="Weight for syllable-aware scoring (0.0-1.0)",
-    )
     nasal_bonus_weight: float = Field(
         default=0.15,
         ge=0.0,

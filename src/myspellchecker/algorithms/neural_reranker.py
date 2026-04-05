@@ -233,7 +233,10 @@ class NeuralReranker:
         # Compute cross-features from the base layout
         cross_cols: list[np.ndarray] = []
         if self._cross_features:
+            cross_set = set(self._cross_features)
             for _name, left_idx, right_idx in MLP_CROSS_FEATURES:
+                if _name not in cross_set:
+                    continue
                 if right_idx == -1:
                     # mlm_logit * (ngram_left + ngram_right)
                     cross_cols.append(base[:, left_idx] * (base[:, 8] + base[:, 9]))

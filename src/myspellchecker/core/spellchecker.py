@@ -1189,7 +1189,10 @@ class SpellChecker(
         return await asyncio.to_thread(self.check, text, level, use_semantic)
 
     def check_batch(
-        self, texts: list[str], level: ValidationLevel = ValidationLevel.SYLLABLE
+        self,
+        texts: list[str],
+        level: ValidationLevel = ValidationLevel.SYLLABLE,
+        use_semantic: bool | None = None,
     ) -> list[Response]:
         """
         Check multiple texts for spelling errors in batch.
@@ -1201,6 +1204,7 @@ class SpellChecker(
             texts: List of Myanmar texts to check. Each text is processed
                 independently with the same validation level.
             level: Validation level for all texts (default: SYLLABLE).
+            use_semantic: Override semantic checking. If None, uses config setting.
 
         Returns:
             List of Response objects in the same order as input texts.
@@ -1229,7 +1233,7 @@ class SpellChecker(
             if not isinstance(text, str):
                 raise ProcessingError(f"texts[{i}] must be a string, got {type(text).__name__}")
 
-        return [self.check(text, level=level) for text in texts]
+        return [self.check(text, level=level, use_semantic=use_semantic) for text in texts]
 
     async def check_batch_async(
         self,

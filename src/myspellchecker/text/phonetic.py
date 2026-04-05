@@ -80,10 +80,10 @@ class PhoneticHasher:
         ignore_tones: bool = True,
         normalize_length: bool = True,
         normalize_nasals: bool = False,
-        max_code_length: int = 10,
+        max_code_length: int | None = None,
         adaptive_length: bool = True,
-        chars_per_code_unit: int = 6,
-        cache_size: int = 4096,
+        chars_per_code_unit: int | None = None,
+        cache_size: int | None = None,
         config: PhoneticConfig | None = None,
     ):
         """
@@ -116,21 +116,25 @@ class PhoneticHasher:
         if config is not None:
             self._config = config
             self.max_code_length = (
-                max_code_length if max_code_length != 10 else config.max_code_length
+                max_code_length if max_code_length is not None else config.max_code_length
             )
             self.chars_per_code_unit = (
-                chars_per_code_unit if chars_per_code_unit != 6 else config.chars_per_code_unit
+                chars_per_code_unit
+                if chars_per_code_unit is not None
+                else config.chars_per_code_unit
             )
-            self.cache_size = cache_size if cache_size != 4096 else config.cache_size
+            self.cache_size = cache_size if cache_size is not None else config.cache_size
         else:
             from myspellchecker.core.config.algorithm_configs import (
                 PhoneticConfig as _PhoneticConfig,
             )
 
             self._config = _PhoneticConfig()
-            self.max_code_length = max_code_length
-            self.chars_per_code_unit = chars_per_code_unit
-            self.cache_size = cache_size
+            self.max_code_length = max_code_length if max_code_length is not None else 10
+            self.chars_per_code_unit = (
+                chars_per_code_unit if chars_per_code_unit is not None else 6
+            )
+            self.cache_size = cache_size if cache_size is not None else 4096
 
         self.ignore_tones = ignore_tones
         self.normalize_length = normalize_length

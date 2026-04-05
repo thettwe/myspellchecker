@@ -276,8 +276,6 @@ class SentenceStructureMixin:
                             self.grammar_config.pos_sequence_confidence,
                         )
                     )
-                    if question_context:
-                        question_fallback_added = True
 
         # Rule 2: Check for invalid POS sequences
         for i in range(1, len(words)):
