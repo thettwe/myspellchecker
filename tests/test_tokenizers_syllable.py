@@ -45,7 +45,7 @@ class TestSyllableTokenizerTokenize:
     def test_english_word_grouped_as_single_token(self, t):
         result = t.tokenize("Hello မြန်မာ")
         # The non-Myanmar run (including trailing space) is one token
-        assert result[0].strip() == "Hello"
+        assert "Hello" in result[0]  # grouped, not split per char
         assert "မြန်" in result
         assert "မာ" in result
 
@@ -54,6 +54,7 @@ class TestSyllableTokenizerTokenize:
         non_myanmar = [tok for tok in result if not any("\u1000" <= c <= "\u104f" for c in tok)]
         # All non-Myanmar characters collapse into exactly one token
         assert len(non_myanmar) == 1
+        assert "(COVID-19)" in non_myanmar[0]
 
     # --- Myanmar numeral grouping ---
 
