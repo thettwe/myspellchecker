@@ -10,6 +10,10 @@ import re
 
 from myspellchecker.core.constants import KINZI_SEQUENCE
 
+# Unicode noncharacter used as internal separator during segmentation.
+# U+FFFF is guaranteed never to appear in valid Unicode text.
+_SEP = "\uffff"
+
 
 class SyllableTokenizer:
     """
@@ -26,27 +30,28 @@ class SyllableTokenizer:
     """
 
     def __init__(self) -> None:
-        # Myanmar consonant range
-        self._my_consonant = r"က-အ"
-        # English alphanumeric
-        self._en_char = r"a-zA-Z0-9"
-        # Other Myanmar characters and punctuation
-        # Note: ၌၍၎၏ are logographic particles (U+104C-104F) - all should be standalone
-        self._other_char = r"ဣဤဥဦဧဩဪဿ၌၍၎၏၀-၉၊။!-/:-@\\[-`{-~\\s"
-        # Stacked consonant marker (္)
-        self._ss_symbol = "္"
-        # Asat/Virama marker (်)
-        self._a_that = "်"
-
-        # Build the syllable break pattern
-        pattern = (
-            # negative-lookbehind: not preceded by Myanmar consonant + stacked marker
-            rf"((?<![{self._my_consonant}]{self._ss_symbol})["
-            rf"{self._my_consonant}"  # any Burmese consonant
-            rf"](?![{self._a_that}{self._ss_symbol}])"  # not followed by virama
-            rf"|[{self._en_char}{self._other_char}])"
+        # Pattern identifies characters that START a new syllable.
+        #
+        # Alternative 1: single Myanmar character that can open a syllable
+        #   [က-ဪ]  U+1000-U+102A: consonants and independent vowels
+        #   ဿ      U+103F: Great Sa
+        #   [၊-၏]  U+104A-U+104F: punctuation and logographic particles
+        #
+        # Alternative 2: run of Myanmar numerals (grouped, not split per digit)
+        #   [၀-၉]+  U+1040-U+1049
+        #
+        # Alternative 3: run of non-Myanmar characters (ASCII, English, spaces …)
+        #   [^က-၏]+  anything outside U+1000-U+104F
+        #
+        # Lookbehind (?<!္): stacked consonants (after virama U+1039) are not
+        #   new-syllable starters; leave them attached to their cluster.
+        #
+        # Lookahead (?![ှျ]?[့္်]): a consonant followed by an optional
+        #   ha-htoe/ya-pin medial then asat/virama/dot-below is a coda (final)
+        #   consonant, not the onset of a new syllable — no break.
+        self._break_pattern: re.Pattern[str] = re.compile(
+            r"(?:(?<!္)([က-ဪဿ၊-၏]|[၀-၉]+|[^က-၏]+)(?![ှျ]?[့္်]))"
         )
-        self._break_pattern: re.Pattern[str] = re.compile(pattern)
 
     def tokenize(self, text: str) -> list[str]:
         """
@@ -56,14 +61,14 @@ class SyllableTokenizer:
             text: Input Myanmar text string.
 
         Returns:
-            List of syllables.
+            List of syllables. Non-Myanmar runs (English, spaces) and Myanmar
+            numeral runs are each returned as a single token.
         """
         if not text:
             return []
 
-        # Insert space before each syllable boundary
-        lined_text = re.sub(self._break_pattern, r" \1", text)
-        parts = lined_text.split()
+        segmented = self._break_pattern.sub(lambda m: _SEP + m.group(0), text)
+        parts = [s for s in segmented.split(_SEP) if s]
         return self._merge_kinzi_codas(parts)
 
     @staticmethod
