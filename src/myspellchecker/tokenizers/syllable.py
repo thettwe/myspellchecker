@@ -68,7 +68,7 @@ class SyllableTokenizer:
             return []
 
         segmented = self._break_pattern.sub(lambda m: _SEP + m.group(0), text)
-        parts = [s for s in segmented.split(_SEP) if s and not s.isspace()]
+        parts = [s.strip() for s in segmented.split(_SEP) if s.strip()]
         return self._merge_kinzi_codas(parts)
 
     @staticmethod
