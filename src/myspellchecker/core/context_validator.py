@@ -13,6 +13,7 @@ import threading
 import time
 from typing import TYPE_CHECKING, Any
 
+from myspellchecker.core.calibration import StrategyCalibrator
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.response import Error
 from myspellchecker.core.token_refinement import build_validation_token_paths
@@ -21,7 +22,10 @@ from myspellchecker.core.validation_strategies import (
     ValidationContext,
     ValidationStrategy,
 )
-from myspellchecker.core.validation_strategies.arbiter import arbitrate_candidates
+from myspellchecker.core.validation_strategies.arbiter import (
+    arbitrate_candidates,
+    fuse_all_candidates,
+)
 from myspellchecker.core.validators import Validator
 from myspellchecker.segmenters.base import Segmenter
 from myspellchecker.text.ner import NameHeuristic
@@ -123,6 +127,9 @@ class ContextValidator(Validator):
         # Sort strategies by priority (lower values run first)
         # Use sorted() to avoid modifying caller's list
         self.strategies = sorted(strategies or [], key=lambda s: s.priority())
+        self._fusion_enabled = config.validation.use_candidate_fusion
+        self._fusion_threshold = config.validation.fusion_confidence_threshold
+        self._calibrator = StrategyCalibrator() if self._fusion_enabled else None
         self._refine_is_valid_word = self._resolve_word_validator_callback("is_valid_word")
         self._refine_get_word_frequency = self._resolve_word_validator_callback(
             "get_word_frequency"
@@ -321,9 +328,19 @@ class ContextValidator(Validator):
         # higher-tier strategy win.  Replace the mutex-selected error
         # with the arbiter's choice when they disagree.
         if path_error_candidates:
-            winners = arbitrate_candidates(path_error_candidates)
-            if winners:
-                self._apply_arbiter_winners(errors, winners)
+            if self._fusion_enabled and self._calibrator is not None:
+                # Full fusion mode: calibrate + cluster + Noisy-OR merge
+                fused = fuse_all_candidates(
+                    path_error_candidates,
+                    self._calibrator,
+                    threshold=self._fusion_threshold,
+                )
+                self._apply_fusion_winners(errors, fused)
+            else:
+                # Shadow mode: tier-based arbiter, log-only divergence
+                winners = arbitrate_candidates(path_error_candidates)
+                if winners:
+                    self._apply_arbiter_winners(errors, winners)
 
         return errors
 
@@ -387,6 +404,7 @@ class ContextValidator(Validator):
             word_positions=filtered_positions,
             is_name_mask=filtered_is_name,
             full_text=full_text,
+            fusion_mode=self._fusion_enabled,
         )
 
         if self._viterbi_tagger and len(filtered_words) >= 2:
@@ -576,6 +594,47 @@ class ContextValidator(Validator):
                     winner.error_type,
                     winner.confidence,
                 )
+
+    @staticmethod
+    def _apply_fusion_winners(
+        errors: list[Error],
+        fused: dict[int, tuple[float, ErrorCandidate]],
+    ) -> None:
+        """Apply fusion results: update error details from winning candidates.
+
+        For positions where the fusion winner disagrees with the mutex-selected
+        error, the error is updated in-place with the winner's type, suggestion,
+        and fused confidence.
+
+        Args:
+            errors: Collected Error objects from all strategies.
+            fused: Map of position -> ``(fused_confidence, winner_candidate)``
+                from ``fuse_all_candidates()``.
+        """
+        error_by_pos: dict[int, Error] = {}
+        for error in errors:
+            if error.position not in error_by_pos:
+                error_by_pos[error.position] = error
+
+        for position, (fused_conf, winner) in fused.items():
+            error = error_by_pos.get(position)
+            if error is None:
+                continue
+
+            if error.error_type != winner.error_type:
+                logger.debug(
+                    "fusion override: pos=%d mutex=%s winner=%s (fused=%.3f)",
+                    position,
+                    error.error_type,
+                    winner.error_type,
+                    fused_conf,
+                )
+                error.error_type = winner.error_type
+                if winner.suggestion:
+                    error.suggestions = [winner.suggestion] + [
+                        s for s in error.suggestions if s != winner.suggestion
+                    ]
+            error.confidence = fused_conf
 
     @staticmethod
     def _init_strategy_debug_entry() -> dict[str, Any]:

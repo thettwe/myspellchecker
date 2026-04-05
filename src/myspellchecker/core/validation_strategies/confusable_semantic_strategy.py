@@ -220,7 +220,10 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 occurrence_counts[word] = occurrence_counts.get(word, 0) + 1
                 continue
             if should_skip_position(
-                "ConfusableSemanticStrategy", position, context.existing_errors
+                "ConfusableSemanticStrategy",
+                position,
+                context.existing_errors,
+                fusion_mode=context.fusion_mode,
             ):
                 occurrence_counts[word] = occurrence_counts.get(word, 0) + 1
                 continue
@@ -317,7 +320,10 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 if context.is_name_mask[i]:
                     continue
                 if should_skip_position(
-                    "ConfusableSemanticStrategy", position, context.existing_errors
+                    "ConfusableSemanticStrategy",
+                    position,
+                    context.existing_errors,
+                    fusion_mode=context.fusion_mode,
                 ):
                     continue
                 is_particle_confusable_flag = word in PARTICLE_CONFUSABLES

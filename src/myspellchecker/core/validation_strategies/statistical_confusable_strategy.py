@@ -85,7 +85,10 @@ class StatisticalConfusableStrategy(ValidationStrategy):
             # this strategy to re-diagnose the position (e.g., POS
             # sequence errors that might actually be confusables).
             if should_skip_position(
-                "StatisticalConfusableStrategy", pos_i, context.existing_errors
+                "StatisticalConfusableStrategy",
+                pos_i,
+                context.existing_errors,
+                fusion_mode=context.fusion_mode,
             ):
                 continue
             if context.is_name_mask[i]:

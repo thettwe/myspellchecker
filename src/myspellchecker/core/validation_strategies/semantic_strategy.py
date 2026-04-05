@@ -168,6 +168,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                     word_positions=context.word_positions,
                     is_name_mask=context.is_name_mask,
                     existing_error_positions=context.existing_errors,
+                    fusion_mode=context.fusion_mode,
                 )
                 errors.extend(semantic_errors)
 
@@ -181,6 +182,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                 word_positions=context.word_positions,
                 is_name_mask=context.is_name_mask,
                 existing_error_positions=context.existing_errors,
+                fusion_mode=context.fusion_mode,
             )
             errors.extend(animacy_errors)
 
@@ -195,6 +197,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                     word_positions=context.word_positions,
                     is_name_mask=context.is_name_mask,
                     existing_error_positions=context.existing_errors,
+                    fusion_mode=context.fusion_mode,
                 )
                 errors.extend(contrast_errors)
 
@@ -245,6 +248,7 @@ class SemanticValidationStrategy(ValidationStrategy):
         word_positions: list[int],
         is_name_mask: list[bool],
         existing_error_positions: dict,
+        fusion_mode: bool = False,
     ) -> list[ContextError]:
         """
         Semantic contrast fallback for unresolved tokens.
@@ -266,7 +270,10 @@ class SemanticValidationStrategy(ValidationStrategy):
 
                 position = word_positions[i]
                 if should_skip_position(
-                    "SemanticValidationStrategy", position, existing_error_positions
+                    "SemanticValidationStrategy",
+                    position,
+                    existing_error_positions,
+                    fusion_mode=fusion_mode,
                 ):
                     continue
                 if is_name_mask[i]:
@@ -611,6 +618,7 @@ class SemanticValidationStrategy(ValidationStrategy):
         word_positions: list[int],
         is_name_mask: list[bool],
         existing_error_positions: dict,
+        fusion_mode: bool = False,
     ) -> list[ContextError]:
         """
         Broad proactive semantic scan using scan_sentence().
@@ -644,7 +652,10 @@ class SemanticValidationStrategy(ValidationStrategy):
 
                 # Skip if already flagged (unless overridable)
                 if should_skip_position(
-                    "SemanticValidationStrategy", abs_pos, existing_error_positions
+                    "SemanticValidationStrategy",
+                    abs_pos,
+                    existing_error_positions,
+                    fusion_mode=fusion_mode,
                 ):
                     continue
 
@@ -687,6 +698,7 @@ class SemanticValidationStrategy(ValidationStrategy):
         word_positions: list[int],
         is_name_mask: list[bool],
         existing_error_positions: dict,
+        fusion_mode: bool = False,
     ) -> list[ContextError]:
         """
         Detect animacy mismatches in subject position.
@@ -708,7 +720,10 @@ class SemanticValidationStrategy(ValidationStrategy):
             for i in range(len(words) - 1):
                 # Skip already-flagged positions (unless overridable) and named entities
                 if should_skip_position(
-                    "SemanticValidationStrategy", word_positions[i], existing_error_positions
+                    "SemanticValidationStrategy",
+                    word_positions[i],
+                    existing_error_positions,
+                    fusion_mode=fusion_mode,
                 ):
                     continue
                 if is_name_mask[i]:

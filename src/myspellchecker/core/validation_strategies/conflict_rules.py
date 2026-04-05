@@ -5,8 +5,10 @@ earlier (lower-priority) strategies.  This replaces the ad-hoc inline
 override in StatisticalConfusableStrategy and extends the pattern to
 ConfusableSemantic and Semantic strategies.
 
-The override matrix is intentionally small (~5 entries).  If it grows
-past ~6 rules, migrate to the full candidate/voting system (v2.0.0).
+When ``use_candidate_fusion`` is enabled in the config, all strategies
+are allowed to fire at every position (mutex bypass).  The fusion
+pipeline then arbitrates using calibrated Noisy-OR across independence
+clusters.
 """
 
 from __future__ import annotations
@@ -37,6 +39,8 @@ def should_skip_position(
     strategy_name: str,
     position: int,
     existing_errors: dict[int, str],
+    *,
+    fusion_mode: bool = False,
 ) -> bool:
     """Decide whether a strategy should skip a claimed position.
 
@@ -45,12 +49,18 @@ def should_skip_position(
         position: The absolute character position being considered.
         existing_errors: Map of position -> error_type for already-claimed
             positions (typically ``context.existing_errors``).
+        fusion_mode: When ``True``, always returns ``False`` (mutex bypass).
+            All strategies fire at every position and the fusion pipeline
+            arbitrates afterwards.
 
     Returns:
         ``True`` if the strategy should **skip** this position (the existing
         claim stands), ``False`` if the strategy may proceed (either the
         position is unclaimed, or the strategy is allowed to override).
     """
+    if fusion_mode:
+        return False
+
     if position not in existing_errors:
         return False
 

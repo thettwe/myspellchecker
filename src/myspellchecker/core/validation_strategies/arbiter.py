@@ -2,7 +2,7 @@
 
 When multiple strategies produce ErrorCandidates for the same position,
 the arbiter selects the winner using tier-based priority with confidence
-tiebreaking.
+tiebreaking, and optionally fuses confidences using calibrated Noisy-OR.
 
 Tier hierarchy (higher tier wins):
     Tier 4 — Neural/MLM:   ConfusableSemanticStrategy, SemanticValidationStrategy
@@ -16,15 +16,19 @@ Within the same tier, the candidate with higher confidence wins.
 On confidence tie, the candidate from the earlier (lower-priority) strategy
 wins (it had more evidence available when it ran).
 
-v1.3.0 scope: only arbitrates POS(30) vs ConfusableSemantic(48) and
-POS(30) vs Semantic(70) conflict pairs.  All other single-candidate
-positions pass through unchanged.
+v1.3.0: full candidate fusion pipeline with calibrated Noisy-OR across
+independence clusters, gated by ``use_candidate_fusion`` config flag.
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from myspellchecker.core.validation_strategies.base import ErrorCandidate
 from myspellchecker.utils.logging_utils import get_logger
+
+if TYPE_CHECKING:
+    from myspellchecker.core.calibration import StrategyCalibrator
 
 logger = get_logger(__name__)
 
@@ -117,3 +121,136 @@ def arbitrate_candidates(
         if len(candidates) > 1:
             winners[position] = select_winner(candidates)
     return winners
+
+
+# ---------------------------------------------------------------------------
+# Independence clusters (Component 4)
+# ---------------------------------------------------------------------------
+
+# Strategies within the same cluster are treated as correlated.
+# Within a cluster we take max(reliability * calibrated_confidence).
+# Across clusters we use Noisy-OR merge (Component 2).
+INDEPENDENCE_CLUSTERS: dict[str, list[str]] = {
+    "deterministic": ["ToneValidationStrategy", "OrthographyValidationStrategy"],
+    "structural_grammar": ["SyntacticValidationStrategy", "POSSequenceValidationStrategy"],
+    "statistical": [
+        "StatisticalConfusableStrategy",
+        "NgramContextValidationStrategy",
+        "HomophoneValidationStrategy",
+    ],
+    "neural": ["ConfusableSemanticStrategy", "SemanticValidationStrategy"],
+    "compound": ["BrokenCompoundStrategy"],
+    "question": ["QuestionStructureValidationStrategy"],
+}
+
+# Reverse lookup: strategy name -> cluster name (built once at import).
+_STRATEGY_TO_CLUSTER: dict[str, str] = {}
+for _cluster_name, _cluster_strategies in INDEPENDENCE_CLUSTERS.items():
+    for _strat in _cluster_strategies:
+        _STRATEGY_TO_CLUSTER[_strat] = _cluster_name
+
+_UNCLUSTERED_PREFIX = "unclustered_"
+
+
+def _get_cluster(strategy_name: str) -> str:
+    """Return cluster name for a strategy, creating a singleton cluster for unknowns."""
+    return _STRATEGY_TO_CLUSTER.get(strategy_name, f"{_UNCLUSTERED_PREFIX}{strategy_name}")
+
+
+# ---------------------------------------------------------------------------
+# Noisy-OR confidence merge (Component 2)
+# ---------------------------------------------------------------------------
+
+
+def noisy_or_merge(cluster_scores: list[float]) -> float:
+    """Merge independent cluster scores using Noisy-OR.
+
+    ``P(error) = 1 - prod(1 - score_i)``
+
+    Args:
+        cluster_scores: Per-cluster max scores (already weighted by
+            reliability and calibrated).
+
+    Returns:
+        Merged confidence in ``[0.0, 1.0]``.
+    """
+    prob_no_error = 1.0
+    for score in cluster_scores:
+        prob_no_error *= 1.0 - score
+    return 1.0 - prob_no_error
+
+
+# ---------------------------------------------------------------------------
+# Candidate fusion (Component 5 entry point)
+# ---------------------------------------------------------------------------
+
+
+def fuse_candidates(
+    candidates: list[ErrorCandidate],
+    calibrator: "StrategyCalibrator",
+) -> tuple[float, ErrorCandidate]:
+    """Fuse multiple candidates at a position using calibrated Noisy-OR.
+
+    Pipeline:
+        1. Calibrate each candidate's confidence.
+        2. Group by independence cluster.
+        3. Within each cluster: ``max(reliability * calibrated_confidence)``.
+        4. Across clusters: Noisy-OR merge.
+        5. Return ``(merged_confidence, winner)`` where *winner* is
+           selected via tier-based priority (for error details / suggestion).
+
+    Args:
+        candidates: Non-empty list of ErrorCandidates at the same position.
+        calibrator: ``StrategyCalibrator`` instance.
+
+    Returns:
+        ``(merged_confidence, winner_candidate)``.
+    """
+    winner = select_winner(candidates)
+
+    if len(candidates) == 1:
+        c = candidates[0]
+        cal_conf = calibrator.calibrate(c.strategy_name, c.confidence)
+        reliability = calibrator.get_reliability(c.strategy_name)
+        return reliability * cal_conf, winner
+
+    # Group by cluster, keep per-cluster max weighted score
+    cluster_max: dict[str, float] = {}
+    for c in candidates:
+        cluster = _get_cluster(c.strategy_name)
+        cal_conf = calibrator.calibrate(c.strategy_name, c.confidence)
+        reliability = calibrator.get_reliability(c.strategy_name)
+        weighted = reliability * cal_conf
+
+        prev = cluster_max.get(cluster, -1.0)
+        if weighted > prev:
+            cluster_max[cluster] = weighted
+
+    merged = noisy_or_merge(list(cluster_max.values()))
+    return merged, winner
+
+
+def fuse_all_candidates(
+    error_candidates: dict[int, list[ErrorCandidate]],
+    calibrator: "StrategyCalibrator",
+    threshold: float = 0.5,
+) -> dict[int, tuple[float, ErrorCandidate]]:
+    """Run fusion on all positions and filter by confidence threshold.
+
+    Args:
+        error_candidates: Map of position -> list of ErrorCandidates.
+        calibrator: ``StrategyCalibrator`` instance.
+        threshold: Minimum fused confidence to keep a position.
+
+    Returns:
+        Map of position -> ``(fused_confidence, winner)`` for positions
+        that meet the threshold.
+    """
+    results: dict[int, tuple[float, ErrorCandidate]] = {}
+    for position, candidates in error_candidates.items():
+        if not candidates:
+            continue
+        fused_conf, winner = fuse_candidates(candidates, calibrator)
+        if fused_conf >= threshold:
+            results[position] = (fused_conf, winner)
+    return results

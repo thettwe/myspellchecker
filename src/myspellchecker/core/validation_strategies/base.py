@@ -25,6 +25,7 @@ class ErrorCandidate:
     confidence: float
     suggestion: str | None = None
     evidence: str = ""
+    word_indices: tuple[int, ...] = ()
 
 
 @dataclass
@@ -63,6 +64,7 @@ class ValidationContext:
     full_text: str = ""
     global_error_count: int = 0
     error_candidates: dict[int, list[ErrorCandidate]] = field(default_factory=dict)
+    fusion_mode: bool = False
 
     def __post_init__(self) -> None:
         """Validate consistency of parallel lists."""

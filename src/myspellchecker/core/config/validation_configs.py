@@ -409,6 +409,27 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # -- Candidate fusion (voting architecture) --
+    use_candidate_fusion: bool = Field(
+        default=False,
+        description=(
+            "Enable calibrated Noisy-OR candidate fusion instead of mutex-based "
+            "winner selection. When True, all strategies may fire at every position "
+            "(mutex bypass), and the arbiter uses calibrated confidence fusion "
+            "across independence clusters to determine which errors to emit. "
+            "When False (default), the v1.2 mutex-and-shadow-mode behaviour is used."
+        ),
+    )
+    fusion_confidence_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Minimum fused confidence (after calibrated Noisy-OR) to emit an error "
+            "in candidate-fusion mode. Lower values increase recall but risk FPR."
+        ),
+    )
+
     enable_fast_path: bool = Field(
         default=True,
         description=(
