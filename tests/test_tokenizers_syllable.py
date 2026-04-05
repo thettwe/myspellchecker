@@ -56,6 +56,22 @@ class TestSyllableTokenizerTokenize:
         assert len(non_myanmar) == 1
         assert "(COVID-19)" in non_myanmar[0]
 
+    # --- Whitespace handling ---
+
+    def test_space_between_myanmar_words_not_a_token(self, t):
+        # Spaces between words must be dropped, not emitted as standalone tokens
+        result = t.tokenize("မြန်မာ နိုင်ငံ")
+        assert result == ["မြန်", "မာ", "နိုင်", "ငံ"]
+        assert " " not in result
+
+    # --- Stacking consonants ---
+
+    def test_stacking_consonant_stays_attached(self, t):
+        # virama (္) glues the stacked consonant to its base — no break inside the cluster
+        assert t.tokenize("သတ္တဝါ") == ["သတ္တ", "ဝါ"]   # creature
+        assert t.tokenize("ပစ္စည်း") == ["ပစ္စည်း"]       # item/equipment
+        assert t.tokenize("သဒ္ဒါ") == ["သဒ္ဒါ"]           # grammar
+
     # --- Myanmar numeral grouping ---
 
     def test_myanmar_numerals_grouped(self, t):
