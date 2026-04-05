@@ -374,12 +374,25 @@ class SyntacticRuleChecker(
         # (called via _check_tense above) covers all its patterns plus more
         # adverbs and markers. Running both produced duplicate errors.
 
-        # Filter by confidence and avoid duplicates
+        # Filter by confidence, frequency guard, and avoid duplicates.
         # Deduplicate by (position, suggestion) to allow multiple different
-        # errors at the same position (e.g., classifier + negation issues)
+        # errors at the same position (e.g., classifier + negation issues).
+        #
+        # Frequency guard: rare words (freq < 50) need higher confidence
+        # to be flagged. Prevents FPs on uncommon but valid words that
+        # happen to match grammar patterns.
+        rare_freq = getattr(self.grammar_config, "rare_word_frequency_threshold", 50)
+        rare_conf = getattr(self.grammar_config, "rare_word_min_confidence", 0.85)
         existing_errors = {(c[0], c[2]) for c in corrections}  # (position, suggestion)
         for idx, err_word, suggestion, confidence in all_errors:
             error_key = (idx, suggestion)
-            if confidence >= threshold and error_key not in existing_errors:
+            if confidence < threshold:
+                continue
+            # Skip rare words unless confidence is very high
+            if self.provider and rare_freq > 0:
+                word_freq = self.provider.get_word_frequency(err_word)
+                if isinstance(word_freq, int) and word_freq < rare_freq and confidence < rare_conf:
+                    continue
+            if error_key not in existing_errors:
                 corrections.append((idx, err_word, suggestion, confidence))
                 existing_errors.add(error_key)

@@ -1,5 +1,5 @@
 version: 1
-generated: '2026-04-05T05:48:23.833437+00:00'
+generated: '2026-04-05T06:36:45.497269+00:00'
 description: Per-strategy calibration breakpoints and reliability weights for myspellchecker
   voting architecture.
 calibrations:
@@ -190,12 +190,12 @@ calibrations:
     x_thresholds:
     - 0.408
     y_thresholds:
-    - 0.129568
-    n_samples: 301
-    n_positive: 39
-    n_negative: 262
-    raw_precision: 0.1296
-    cv_brier: 0.1128
+    - 0.136691
+    n_samples: 278
+    n_positive: 38
+    n_negative: 240
+    raw_precision: 0.1367
+    cv_brier: 0.118
     score_range:
     - 0.408
     - 0.408
@@ -321,7 +321,7 @@ calibrations:
     - 0.7225
 reliability_weights:
   SyntacticValidationStrategy: 0.1463
-  POSSequenceValidationStrategy: 0.1344
+  POSSequenceValidationStrategy: 0.1418
   HomophoneValidationStrategy: 0.2154
   StatisticalConfusableStrategy: 0.5714
   NgramContextValidationStrategy: 0.068

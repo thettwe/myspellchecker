@@ -146,6 +146,24 @@ class GrammarEngineConfig(BaseModel):
             "classifier, merged_word, compound, register, aspect, negation."
         ),
     )
+    rare_word_frequency_threshold: int = Field(
+        default=50,
+        ge=0,
+        description=(
+            "Words with corpus frequency below this are considered 'rare'. "
+            "Rare words require higher confidence to be flagged by grammar "
+            "checkers, reducing FPs on uncommon but valid words."
+        ),
+    )
+    rare_word_min_confidence: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Minimum confidence required to flag rare words (freq below "
+            "rare_word_frequency_threshold). Set to 0.0 to disable the guard."
+        ),
+    )
 
 
 class AspectCheckerConfig(BaseModel):

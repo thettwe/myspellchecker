@@ -389,7 +389,7 @@ class POSSequenceValidationStrategy(ValidationStrategy):
                     if has_structural and not has_verb:
                         # Resolve multi-POS for last word
                         resolved_last = last_tag.split("|")[0] if "|" in last_tag else last_tag
-                        is_verb_like = resolved_last in ("V", "PPM", "PART")
+                        is_verb_like = resolved_last in ("V", "PPM", "PART", "ADJ", "NUM")
 
                         # Special -စရာ suffix: always needs copula ဖြစ် when predicative
                         ends_with_sara = last_word.endswith("စရာ")
