@@ -169,13 +169,13 @@ class ValidationConfig(BaseModel):
         description="Confidence threshold for tone validation strategy",
     )
     syntactic_validation_confidence: float = Field(
-        default=0.9,
+        default=0.78,
         ge=0.0,
         le=1.0,
         description="Confidence for syntactic (rule-based) validation strategy",
     )
     pos_sequence_confidence: float = Field(
-        default=0.85,
+        default=0.68,
         ge=0.0,
         le=1.0,
         description="Confidence for POS sequence validation strategy",
@@ -187,7 +187,7 @@ class ValidationConfig(BaseModel):
         description="Confidence for question structure validation strategy",
     )
     homophone_confidence: float = Field(
-        default=0.8,
+        default=0.68,
         ge=0.0,
         le=1.0,
         description="Confidence for homophone validation strategy",
@@ -240,7 +240,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     statistical_confusable_threshold: float = Field(
-        default=50.0,
+        default=5.0,
         ge=1.0,
         description=(
             "Bigram ratio threshold for the statistical confusable gate. "
@@ -553,7 +553,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     compound_min_morpheme_frequency: int = Field(
-        default=10,
+        default=50,
         ge=0,
         description=(
             "Minimum corpus frequency for each morpheme in compound validation. "
@@ -603,7 +603,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     broken_compound_rare_threshold: int = Field(
-        default=2000,
+        default=500,
         ge=0,
         description=(
             "Maximum word frequency for a word to be considered 'rare'. "
@@ -611,12 +611,12 @@ class ValidationConfig(BaseModel):
         ),
     )
     broken_compound_min_frequency: int = Field(
-        default=5000,
+        default=10000,
         ge=0,
         description="Minimum compound frequency required to flag a broken compound.",
     )
     broken_compound_ratio: float = Field(
-        default=5.0,
+        default=25.0,
         ge=1.0,
         description="Minimum ratio of compound_freq / rare_word_freq to flag.",
     )

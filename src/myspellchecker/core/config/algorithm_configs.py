@@ -2606,7 +2606,7 @@ class NgramStrategyConfig(BaseModel):
         description=("Confidence for high-probability context errors."),
     )
     confidence_low: float = Field(
-        default=0.6,
+        default=0.45,
         ge=0.0,
         le=1.0,
         description=("Confidence for low-probability context errors."),
