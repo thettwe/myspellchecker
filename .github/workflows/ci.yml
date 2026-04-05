@@ -71,6 +71,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           pytest tests/ \
+            -n auto \
             --cov=myspellchecker \
             --cov-report=term-missing \
             --cov-fail-under=70 \
