@@ -68,7 +68,7 @@ class SyllableTokenizer:
             return []
 
         segmented = self._break_pattern.sub(lambda m: _SEP + m.group(0), text)
-        parts = [s for s in segmented.split(_SEP) if s]
+        parts = [s for s in segmented.split(_SEP) if s and not s.isspace()]
         return self._merge_kinzi_codas(parts)
 
     @staticmethod
@@ -78,6 +78,10 @@ class SyllableTokenizer:
 
         The regex splitter may emit fragments that end with င်္, such as "သင်္".
         These should be attached to the following syllable.
+
+        Note: the (?<!္) lookbehind in the current regex already keeps kinzi
+        clusters intact at the pattern level, so this method rarely finds
+        anything to merge. It is retained as a safety net for edge cases.
         """
         if not parts:
             return parts
