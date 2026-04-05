@@ -44,8 +44,7 @@ class TestSyllableTokenizerTokenize:
 
     def test_english_word_grouped_as_single_token(self, t):
         result = t.tokenize("Hello မြန်မာ")
-        # The non-Myanmar run (including trailing space) is one token
-        assert "Hello" in result[0]  # grouped, not split per char
+        assert result[0] == "Hello"  # grouped as one token, no trailing space
         assert "မြန်" in result
         assert "မာ" in result
 
