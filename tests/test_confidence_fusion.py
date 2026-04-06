@@ -125,9 +125,7 @@ class TestIndependenceClusters:
         )
 
     def test_independent_strategies_different_clusters(self):
-        assert _get_cluster("ToneValidationStrategy") != _get_cluster(
-            "ConfusableSemanticStrategy"
-        )
+        assert _get_cluster("ToneValidationStrategy") != _get_cluster("ConfusableSemanticStrategy")
         assert _get_cluster("BrokenCompoundStrategy") != _get_cluster(
             "NgramContextValidationStrategy"
         )
@@ -347,8 +345,6 @@ class TestShouldSkipPositionFusionMode:
         # Non-overridable: should skip
         assert should_skip_position("POSSequenceValidationStrategy", 0, existing) is True
         assert (
-            should_skip_position(
-                "POSSequenceValidationStrategy", 0, existing, fusion_mode=False
-            )
+            should_skip_position("POSSequenceValidationStrategy", 0, existing, fusion_mode=False)
             is True
         )

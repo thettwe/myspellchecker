@@ -638,9 +638,7 @@ class ErrorSuppressionMixin:
 
             # Suppress if top suggestion IS the word itself
             if e.suggestions:
-                norm_sugs = [
-                    normalize(s) for s in e.suggestions if isinstance(s, str)
-                ]
+                norm_sugs = [normalize(s) for s in e.suggestions if isinstance(s, str)]
                 if norm_sugs and norm_sugs[0] == token:
                     continue
 

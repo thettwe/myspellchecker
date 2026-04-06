@@ -131,9 +131,7 @@ class PhoneticHasher:
 
             self._config = _PhoneticConfig()
             self.max_code_length = max_code_length if max_code_length is not None else 10
-            self.chars_per_code_unit = (
-                chars_per_code_unit if chars_per_code_unit is not None else 6
-            )
+            self.chars_per_code_unit = chars_per_code_unit if chars_per_code_unit is not None else 6
             self.cache_size = cache_size if cache_size is not None else 4096
 
         self.ignore_tones = ignore_tones

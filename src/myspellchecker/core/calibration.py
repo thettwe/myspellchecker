@@ -160,15 +160,8 @@ class StrategyCalibrator:
                 continue
             x = entry.get("x_thresholds")
             y = entry.get("y_thresholds")
-            if (
-                x and y
-                and len(x) >= 2
-                and len(x) == len(y)
-                and x == sorted(x)
-            ):
-                cal_data[name] = CalibrationData(
-                    x_thresholds=x, y_thresholds=y
-                )
+            if x and y and len(x) >= 2 and len(x) == len(y) and x == sorted(x):
+                cal_data[name] = CalibrationData(x_thresholds=x, y_thresholds=y)
 
         # Fall back to bootstrap reliability when YAML section is absent
         # or empty.  An explicit empty dict {} must NOT replace the

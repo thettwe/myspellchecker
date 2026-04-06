@@ -348,13 +348,10 @@ class ContextValidator(Validator):
                 # (context-level); word/syllable errors (empty source_strategy)
                 # must survive even if a context candidate at the same position
                 # was rejected.
-                rejected = {
-                    pos for pos in path_error_candidates if pos not in fused
-                }
+                rejected = {pos for pos in path_error_candidates if pos not in fused}
                 if rejected:
                     errors[:] = [
-                        e for e in errors
-                        if e.position not in rejected or not e.source_strategy
+                        e for e in errors if e.position not in rejected or not e.source_strategy
                     ]
             else:
                 # Shadow mode: tier-based arbiter, log-only divergence
@@ -593,9 +590,7 @@ class ContextValidator(Validator):
         return by_pos
 
     @staticmethod
-    def _dedup_errors_at_positions(
-        errors: list[Error], positions: set[int]
-    ) -> None:
+    def _dedup_errors_at_positions(errors: list[Error], positions: set[int]) -> None:
         """Remove duplicate errors at given positions (keep first per position)."""
         if not positions:
             return
