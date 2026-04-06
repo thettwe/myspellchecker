@@ -14,13 +14,15 @@ Default strategies (wired by SpellCheckerBuilder, in priority order):
 1. ToneValidationStrategy (priority 10) - Tone mark disambiguation
 2. OrthographyValidationStrategy (priority 15) - Medial order and compatibility
 3. SyntacticValidationStrategy (priority 20) - Grammar rules
-4. BrokenCompoundStrategy (priority 25) - Wrongly split compound words
-5. POSSequenceValidationStrategy (priority 30) - POS patterns
-6. QuestionStructureValidationStrategy (priority 40) - Question particles
-7. HomophoneValidationStrategy (priority 45) - Homophone detection
-8. ConfusableSemanticStrategy (priority 48) - MLM-enhanced confusable detection
-9. NgramContextValidationStrategy (priority 50) - Bigram/trigram checks
-10. SemanticValidationStrategy (priority 70) - AI-powered semantic checking
+4. StatisticalConfusableStrategy (priority 24) - Bigram-based confusable detection
+5. BrokenCompoundStrategy (priority 25) - Wrongly split compound words
+6. POSSequenceValidationStrategy (priority 30) - POS patterns
+7. QuestionStructureValidationStrategy (priority 40) - Question particles
+8. HomophoneValidationStrategy (priority 45) - Homophone detection
+9. ConfusableCompoundClassifierStrategy (priority 47) - MLP-based compound detection
+10. ConfusableSemanticStrategy (priority 48) - MLM-enhanced confusable detection
+11. NgramContextValidationStrategy (priority 50) - Bigram/trigram checks
+12. SemanticValidationStrategy (priority 70) - AI-powered semantic checking
 """
 
 from myspellchecker.core.validation_strategies.base import (
@@ -30,6 +32,9 @@ from myspellchecker.core.validation_strategies.base import (
 )
 from myspellchecker.core.validation_strategies.broken_compound_strategy import (
     BrokenCompoundStrategy,
+)
+from myspellchecker.core.validation_strategies.confusable_compound_classifier_strategy import (
+    ConfusableCompoundClassifierStrategy,
 )
 from myspellchecker.core.validation_strategies.confusable_semantic_strategy import (
     ConfusableSemanticStrategy,
@@ -46,6 +51,9 @@ from myspellchecker.core.validation_strategies.question_strategy import (
     QuestionStructureValidationStrategy,
 )
 from myspellchecker.core.validation_strategies.semantic_strategy import SemanticValidationStrategy
+from myspellchecker.core.validation_strategies.statistical_confusable_strategy import (
+    StatisticalConfusableStrategy,
+)
 from myspellchecker.core.validation_strategies.syntactic_strategy import SyntacticValidationStrategy
 from myspellchecker.core.validation_strategies.tone_strategy import ToneValidationStrategy
 
@@ -56,10 +64,12 @@ __all__ = [
     "ToneValidationStrategy",
     "OrthographyValidationStrategy",
     "SyntacticValidationStrategy",
+    "StatisticalConfusableStrategy",
     "BrokenCompoundStrategy",
     "POSSequenceValidationStrategy",
     "QuestionStructureValidationStrategy",
     "HomophoneValidationStrategy",
+    "ConfusableCompoundClassifierStrategy",
     "ConfusableSemanticStrategy",
     "NgramContextValidationStrategy",
     "SemanticValidationStrategy",

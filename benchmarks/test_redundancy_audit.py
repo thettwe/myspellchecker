@@ -7,7 +7,7 @@ Usage:
     source venv/bin/activate
     python benchmarks/test_redundancy_audit.py \
         --db data/mySpellChecker_production.db \
-        --semantic /Users/thettwe/Works/myspellchecker-training/models/semantic-v2.3-final
+        --semantic path/to/semantic-model
 """
 
 from __future__ import annotations

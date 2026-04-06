@@ -274,12 +274,7 @@ ha_htoe_compounds:
     error_type: "ha_htoe_confusion"
     confidence: 0.90
     meaning: "pain → nose (ha-htoe on na)"
-  - pattern: "နူနာ"
-    wrong: "နူ"
-    correct: "နှူ"
-    error_type: "ha_htoe_confusion"
-    confidence: 0.90
-    meaning: "နူ → နှူ (leprosy, missing ha-htoe)"
+  # Removed: "နူနာ" — MLC dictionary lists နူနာ (without ha-htoe) as standard
   - pattern: "ငက်ကို"
     wrong: "ငက်"
     correct: "ငှက်"

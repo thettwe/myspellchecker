@@ -120,6 +120,10 @@ class NeuralReranker:
 
         if stats_path and os.path.exists(stats_path):
             self._load_stats(stats_path)
+        elif stats_path:
+            logger.warning(
+                "Stats file not found: %s — MLP will use unnormalized features", stats_path
+            )
 
         logger.info(
             "Loaded NeuralReranker from %s (type=%s, schema=%s, stats=%s)",

@@ -94,7 +94,7 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
             self._input_name = self._session.get_inputs()[0].name
             self._output_name = self._session.get_outputs()[0].name
             logger.info("Loaded classifier from %s", model_path)
-        except (ImportError, Exception) as e:
+        except (ImportError, OSError, RuntimeError, ValueError) as e:
             logger.warning("Failed to load classifier: %s", e)
             self._session = None
             return
@@ -316,7 +316,19 @@ class ConfusableCompoundClassifierStrategy(ValidationStrategy):
     ) -> WordError | None:
         """Build a broken compound error."""
         pos_i = context.word_positions[i]
-        span_text = w1 + " " + w2
+        # Convert absolute word_positions to sentence-local offsets.
+        first_local = context.sentence.find(context.words[0])
+        sentence_base = context.word_positions[0] - max(first_local, 0)
+        if i + 1 < len(context.word_positions):
+            w1_local = pos_i - sentence_base
+            w2_local = context.word_positions[i + 1] - sentence_base
+            end = w2_local + len(w2)
+            if 0 <= w1_local < len(context.sentence) and end <= len(context.sentence):
+                span_text = context.sentence[w1_local:end]
+            else:
+                span_text = w1 + " " + w2
+        else:
+            span_text = w1 + " " + w2
 
         return WordError(
             text=span_text,

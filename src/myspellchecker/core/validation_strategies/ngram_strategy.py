@@ -137,7 +137,13 @@ class NgramContextValidationStrategy(ValidationStrategy):
                     if i > 0
                     else None
                 )
-                word_at_ip2 = filtered_words[i + 2][0] if i + 2 < len(filtered_words) else None
+                word_at_ip2 = (
+                    self._get_effective_word(
+                        filtered_words[i + 2][0], filtered_words[i + 2][1], context
+                    )
+                    if i + 2 < len(filtered_words)
+                    else None
+                )
 
                 if next_pos in context.existing_errors:
                     # Position already flagged by higher-priority strategy —

@@ -145,7 +145,7 @@ from myspellchecker.core.config.validation_configs import (
 )
 
 # NER configuration (re-exported for convenience)
-from myspellchecker.text.ner_model import NERConfig
+from myspellchecker.text.ner_config import NERConfig
 
 __all__ = [
     # Main configuration

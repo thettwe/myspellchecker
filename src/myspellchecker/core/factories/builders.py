@@ -372,13 +372,15 @@ def build_context_validation_strategies(
     1. ToneValidationStrategy (priority 10)
     2. OrthographyValidationStrategy (priority 15)
     3. SyntacticValidationStrategy (priority 20)
-    4. POSSequenceValidationStrategy (priority 30)
-    5. QuestionStructureValidationStrategy (priority 40)
-    6. HomophoneValidationStrategy (priority 45)
-    6.25. ConfusableCompoundClassifierStrategy (priority 47)
-    6.5. ConfusableSemanticStrategy (priority 48)
-    7. NgramContextValidationStrategy (priority 50)
-    8. SemanticValidationStrategy (priority 70)
+    4. StatisticalConfusableStrategy (priority 24)
+    5. BrokenCompoundStrategy (priority 25)
+    6. POSSequenceValidationStrategy (priority 30)
+    7. QuestionStructureValidationStrategy (priority 40)
+    8. HomophoneValidationStrategy (priority 45)
+    9. ConfusableCompoundClassifierStrategy (priority 47)
+    10. ConfusableSemanticStrategy (priority 48)
+    11. NgramContextValidationStrategy (priority 50)
+    12. SemanticValidationStrategy (priority 70)
 
     This is the canonical strategy building logic used by both
     DI factories and ComponentFactory.

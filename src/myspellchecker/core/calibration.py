@@ -127,6 +127,20 @@ class StrategyCalibrator:
         return self._reliability.get(strategy_name, DEFAULT_RELIABILITY)
 
     @classmethod
+    def from_bundled(cls) -> "StrategyCalibrator":
+        """Load calibration from the bundled ``rules/calibration_data.yaml``.
+
+        Convenience wrapper that locates the YAML file shipped with the
+        package.  Falls back to bootstrap defaults if the file is missing.
+        """
+        from pathlib import Path
+
+        bundled = Path(__file__).resolve().parent.parent / "rules" / "calibration_data.yaml"
+        if bundled.exists():
+            return cls.from_yaml(str(bundled))
+        return cls()
+
+    @classmethod
     def from_yaml(cls, path: str) -> "StrategyCalibrator":
         """Load calibration data and reliability weights from a YAML file.
 
@@ -161,7 +175,10 @@ class StrategyCalibrator:
             x = entry.get("x_thresholds")
             y = entry.get("y_thresholds")
             if x and y and len(x) >= 2 and len(x) == len(y) and x == sorted(x):
-                cal_data[name] = CalibrationData(x_thresholds=x, y_thresholds=y)
+                try:
+                    cal_data[name] = CalibrationData(x_thresholds=x, y_thresholds=y)
+                except ValueError as exc:
+                    _log.warning("Skipping calibration '%s': %s", name, exc)
 
         # Fall back to bootstrap reliability when YAML section is absent
         # or empty.  An explicit empty dict {} must NOT replace the

@@ -165,6 +165,35 @@ class SpellCheckerBuilder:
         self._config.use_rule_based_validation = enabled
         return self
 
+    def with_candidate_fusion(
+        self,
+        enabled: bool = True,
+        calibration_path: str | None = None,
+        fusion_threshold: float = 0.5,
+    ) -> "SpellCheckerBuilder":
+        """
+        Enable or disable calibrated Noisy-OR candidate fusion.
+
+        When enabled, all strategies may fire at every position and the
+        arbiter uses calibrated confidence fusion to determine which
+        errors to emit. Replaces the default mutex-based selection.
+
+        Args:
+            enabled: Whether to enable candidate fusion (default: True).
+            calibration_path: Optional path to a YAML file with per-strategy
+                calibration breakpoints (produced by train_calibrators.py).
+            fusion_threshold: Minimum fused confidence to emit an error
+                (default: 0.5).
+
+        Returns:
+            Self for method chaining.
+        """
+        self._config.validation.use_candidate_fusion = enabled
+        if calibration_path is not None:
+            self._config.validation.calibration_path = calibration_path
+        self._config.validation.fusion_confidence_threshold = fusion_threshold
+        return self
+
     # --- Performance tuning ---
 
     def with_max_edit_distance(self, distance: int) -> "SpellCheckerBuilder":

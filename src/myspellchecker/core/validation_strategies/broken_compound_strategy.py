@@ -386,13 +386,17 @@ class BrokenCompoundStrategy(ValidationStrategy):
     ) -> WordError | None:
         """Build a WordError spanning both words of a broken compound."""
         pos_i = context.word_positions[i]
-        # Find w1 and w2 in the local sentence to avoid absolute-position
-        # mismatches when context.sentence is a substring of the full text.
-        w1_local = context.sentence.find(w1)
-        if w1_local >= 0:
-            w2_local = context.sentence.find(w2, w1_local + len(w1))
-            if w2_local >= 0:
-                span_text = context.sentence[w1_local : w2_local + len(w2)]
+        # Convert absolute word_positions to sentence-local offsets.
+        # word_positions stores sentence_offset + local_idx, so derive
+        # the base offset from the first word.
+        first_local = context.sentence.find(context.words[0])
+        sentence_base = context.word_positions[0] - max(first_local, 0)
+        w1_local = pos_i - sentence_base
+        if i + 1 < len(context.word_positions):
+            w2_local = context.word_positions[i + 1] - sentence_base
+            end = w2_local + len(w2)
+            if 0 <= w1_local < len(context.sentence) and end <= len(context.sentence):
+                span_text = context.sentence[w1_local:end]
             else:
                 span_text = w1 + " " + w2
         else:
