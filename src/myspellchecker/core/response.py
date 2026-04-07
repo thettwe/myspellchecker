@@ -39,6 +39,7 @@ __all__ = [
     "Error",
     "GrammarError",
     "Response",
+    "Suggestion",
     "SyllableError",
     "WordError",
     "classify_action",
@@ -74,6 +75,60 @@ _INFORM_TYPES: frozenset[str] = frozenset(
 
 # Confidence threshold below which we downgrade to INFORM.
 _INFORM_CONFIDENCE_THRESHOLD: float = 0.60
+
+
+def _suggestion_text(s: "str | Suggestion") -> str:
+    """Extract plain text from a Suggestion or string."""
+    return str(s)
+
+
+def _suggestion_detail(s: "str | Suggestion") -> dict[str, Any]:
+    """Build a detail dict from a Suggestion or string."""
+    if isinstance(s, Suggestion):
+        return {"text": s.text, "confidence": s.confidence, "source": s.source}
+    return {"text": str(s), "confidence": 0.0, "source": ""}
+
+
+class Suggestion(str):
+    """A correction suggestion with confidence score and source attribution.
+
+    Inherits from :class:`str` so that every string operation (slicing,
+    ``startswith``, ``len()``, etc.) works transparently.  The extra
+    metadata is stored as instance attributes.
+
+    Attributes:
+        text: The suggestion text (same as ``str(self)``).
+        confidence: Confidence score for this suggestion [0.0, 1.0].
+        source: Origin of the suggestion (e.g. "symspell", "phonetic",
+                "compound_resolver").
+    """
+
+    confidence: float
+    source: str
+
+    def __new__(
+        cls,
+        text: str = "",
+        confidence: float = 0.0,
+        source: str = "",
+    ) -> "Suggestion":
+        instance = super().__new__(cls, text)
+        instance.confidence = confidence
+        instance.source = source
+        return instance
+
+    @property
+    def text(self) -> str:  # noqa: D401
+        """The suggestion string (identical to ``str(self)``)."""
+        return str.__str__(self)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, str):
+            return str.__eq__(self, other)
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return str.__hash__(self)
 
 
 def classify_action(error_type: str, confidence: float) -> ActionType:
@@ -115,10 +170,16 @@ class Error:
 
     text: str
     position: int
-    suggestions: list[str]
+    suggestions: list[Suggestion]
     error_type: str
     confidence: float = 1.0
     source_strategy: str = ""
+
+    def __post_init__(self) -> None:
+        """Auto-convert plain strings to Suggestion objects."""
+        self.suggestions = [
+            s if isinstance(s, Suggestion) else Suggestion(text=s) for s in self.suggestions
+        ]
 
     @property
     def end(self) -> int:
@@ -176,6 +237,8 @@ class Error:
             }
         """
         d = asdict(self)
+        d["suggestions"] = [_suggestion_text(s) for s in self.suggestions]
+        d["suggestions_detail"] = [_suggestion_detail(s) for s in self.suggestions]
         d["end"] = self.end
         d["action"] = self.action.value
         d["severity"] = self.severity
@@ -184,7 +247,9 @@ class Error:
 
     @staticmethod
     def _add_action(d: dict[str, Any], error: "Error") -> dict[str, Any]:
-        """Add computed fields to an asdict() result. Used by subclasses."""
+        """Add computed fields and flatten suggestions. Used by subclasses."""
+        d["suggestions"] = [_suggestion_text(s) for s in error.suggestions]
+        d["suggestions_detail"] = [_suggestion_detail(s) for s in error.suggestions]
         d["end"] = error.end
         d["action"] = error.action.value
         d["severity"] = error.severity

@@ -33,14 +33,14 @@ from myspellchecker.core.i18n import (
     get_supported_languages,
     set_language,
 )
-from myspellchecker.core.response import ActionType, classify_action
+from myspellchecker.core.response import ActionType, Suggestion, classify_action
 
 # For type checking only - doesn't trigger runtime imports
 if TYPE_CHECKING:
     from myspellchecker.core import SpellChecker
     from myspellchecker.core.builder import ConfigPresets, SpellCheckerBuilder
-    from myspellchecker.core.config import SpellCheckerConfig
     from myspellchecker.core.check_options import CheckOptions
+    from myspellchecker.core.config import SpellCheckerConfig
     from myspellchecker.core.response import GrammarError
     from myspellchecker.core.streaming import (
         ChunkResult,
@@ -148,6 +148,7 @@ __all__ = [
     "WordError",
     "ContextError",
     "GrammarError",
+    "Suggestion",
     "CheckOptions",
     "ValidationLevel",
     "SQLiteProvider",
