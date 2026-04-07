@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from myspellchecker.core import SpellChecker
     from myspellchecker.core.builder import ConfigPresets, SpellCheckerBuilder
     from myspellchecker.core.config import SpellCheckerConfig
+    from myspellchecker.core.check_options import CheckOptions
     from myspellchecker.core.response import GrammarError
     from myspellchecker.core.streaming import (
         ChunkResult,
@@ -68,6 +69,7 @@ _lazy_imports = {
     "ConfigPresets": "myspellchecker.core.builder",
     "SpellCheckerConfig": "myspellchecker.core.config",
     "GrammarError": "myspellchecker.core.response",
+    "CheckOptions": "myspellchecker.core.check_options",
     "SQLiteProvider": "myspellchecker.providers",
     "StreamingChecker": "myspellchecker.core.streaming",
     "StreamingConfig": "myspellchecker.core.streaming",
@@ -146,6 +148,7 @@ __all__ = [
     "WordError",
     "ContextError",
     "GrammarError",
+    "CheckOptions",
     "ValidationLevel",
     "SQLiteProvider",
     "StreamingChecker",

@@ -65,6 +65,7 @@ if TYPE_CHECKING:
 from myspellchecker.algorithms import NgramContextChecker
 from myspellchecker.algorithms.semantic_checker import SemanticChecker
 from myspellchecker.algorithms.symspell import SymSpell
+from myspellchecker.core.check_options import CheckOptions
 from myspellchecker.core.component_factory import ComponentFactory, ComponentFactoryProtocol
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.constants import ValidationLevel
@@ -88,6 +89,7 @@ from myspellchecker.core.exceptions import (
 )
 from myspellchecker.core.response import (
     Error,
+    GrammarError,
     Response,
 )
 from myspellchecker.core.response_builder import build_response_metadata
@@ -575,6 +577,7 @@ class SpellChecker(
         text: str,
         level: ValidationLevel = ValidationLevel.SYLLABLE,
         use_semantic: bool | None = None,
+        options: CheckOptions | None = None,
     ) -> Response:
         """
         Check Myanmar text for spelling errors.
@@ -633,6 +636,11 @@ class SpellChecker(
             >>> for error in result.errors:
             ...     print(f"{error.text} at {error.position}: {error.suggestions[:3]}")
         """
+        # Merge per-request options into effective values.
+        if options is not None:
+            if options.use_semantic is not None:
+                use_semantic = options.use_semantic
+
         if not isinstance(text, str):
             raise TypeError(f"text must be a string, got {type(text).__name__}")
 
@@ -666,13 +674,23 @@ class SpellChecker(
 
         normalized_text = prepared["normalized_text"]
 
+        # If context_checking is explicitly disabled via options, skip context
+        # validation by forcing syllable-level for the validation pipeline.
+        effective_level = level
+        if options is not None and options.context_checking is False:
+            effective_level = ValidationLevel.SYLLABLE
+
         # Phase 2: Run validation pipeline on normalized text.
         errors, layers_applied = self._run_validation(
-            normalized_text, level, use_semantic, prepared
+            normalized_text, effective_level, use_semantic, prepared
         )
 
+        # Apply per-request grammar filtering.
+        if options is not None and options.grammar_checking is False:
+            errors = [e for e in errors if not isinstance(e, GrammarError)]
+
         # Phase 3: Post-processing, dedup, and response building.
-        return self._finalize_response(
+        response = self._finalize_response(
             text=text,
             normalized_text=normalized_text,
             errors=errors,
@@ -681,6 +699,14 @@ class SpellChecker(
             zawgyi_warning=prepared["zawgyi_warning"],
             level=level,
         )
+
+        # Apply per-request max_suggestions limit.
+        if options is not None and options.max_suggestions is not None:
+            max_s = options.max_suggestions
+            for error in response.errors:
+                error.suggestions = error.suggestions[:max_s]
+
+        return response
 
     def _prepare_text(self, text: str, level: ValidationLevel) -> dict[str, Any]:
         """Zawgyi detection, normalization, length validation, zero-width detection.
@@ -1170,6 +1196,7 @@ class SpellChecker(
         text: str,
         level: ValidationLevel = ValidationLevel.SYLLABLE,
         use_semantic: bool | None = None,
+        options: CheckOptions | None = None,
     ) -> Response:
         """
         Asynchronously check Myanmar text for spelling errors.
@@ -1182,17 +1209,19 @@ class SpellChecker(
             text: Myanmar text to check.
             level: Validation level.
             use_semantic: Override semantic checking. If None, uses config setting.
+            options: Per-request overrides (see :class:`CheckOptions`).
 
         Returns:
             Response object containing results.
         """
-        return await asyncio.to_thread(self.check, text, level, use_semantic)
+        return await asyncio.to_thread(self.check, text, level, use_semantic, options)
 
     def check_batch(
         self,
         texts: list[str],
         level: ValidationLevel = ValidationLevel.SYLLABLE,
         use_semantic: bool | None = None,
+        options: CheckOptions | None = None,
     ) -> list[Response]:
         """
         Check multiple texts for spelling errors in batch.
@@ -1205,6 +1234,7 @@ class SpellChecker(
                 independently with the same validation level.
             level: Validation level for all texts (default: SYLLABLE).
             use_semantic: Override semantic checking. If None, uses config setting.
+            options: Per-request overrides (see :class:`CheckOptions`).
 
         Returns:
             List of Response objects in the same order as input texts.
@@ -1233,7 +1263,10 @@ class SpellChecker(
             if not isinstance(text, str):
                 raise ProcessingError(f"texts[{i}] must be a string, got {type(text).__name__}")
 
-        return [self.check(text, level=level, use_semantic=use_semantic) for text in texts]
+        return [
+            self.check(text, level=level, use_semantic=use_semantic, options=options)
+            for text in texts
+        ]
 
     async def check_batch_async(
         self,
@@ -1241,6 +1274,7 @@ class SpellChecker(
         level: ValidationLevel = ValidationLevel.SYLLABLE,
         max_concurrency: int = 4,
         use_semantic: bool | None = None,
+        options: CheckOptions | None = None,
     ) -> list[Response]:
         """
         Async batch spell checking with configurable concurrency.
@@ -1254,6 +1288,7 @@ class SpellChecker(
             max_concurrency: Maximum concurrent checks (default: 4).
                 Higher values use more CPU but complete faster.
             use_semantic: Override semantic checking. If None, uses config setting.
+            options: Per-request overrides (see :class:`CheckOptions`).
 
         Returns:
             List of Response objects in same order as input.
@@ -1286,7 +1321,7 @@ class SpellChecker(
 
         async def check_with_semaphore(text: str) -> Response:
             async with semaphore:
-                return await self.check_async(text, level, use_semantic)
+                return await self.check_async(text, level, use_semantic, options)
 
         return list(await asyncio.gather(*[check_with_semaphore(text) for text in texts]))
 
