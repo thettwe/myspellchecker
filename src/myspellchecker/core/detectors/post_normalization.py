@@ -145,7 +145,7 @@ def _load_homophone_confusion() -> tuple[
         )
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_YAML_PATH, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)

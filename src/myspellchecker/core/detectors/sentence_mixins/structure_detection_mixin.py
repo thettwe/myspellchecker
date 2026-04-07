@@ -124,7 +124,7 @@ def _load_structure_data() -> tuple[frozenset[str], frozenset[str], tuple[str, .
         return _DEFAULT_CONJUNCTIONS, _DEFAULT_SUFFIX_SAFE, _DEFAULT_WORD_ORDER_VERB_ENDINGS
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)

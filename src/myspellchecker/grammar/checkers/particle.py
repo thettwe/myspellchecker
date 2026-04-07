@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from myspellchecker.core.constants import ET_PARTICLE_MISUSE
 from myspellchecker.core.response import GrammarError

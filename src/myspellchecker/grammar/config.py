@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable, cast
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from myspellchecker.utils.logging_utils import get_logger
 from myspellchecker.utils.singleton import Singleton

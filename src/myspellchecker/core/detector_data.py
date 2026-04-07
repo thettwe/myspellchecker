@@ -131,7 +131,7 @@ def _load_detector_confidences() -> dict[str, float]:
     """Load detector confidences from YAML, falling back to defaults."""
     if _DETECTOR_CONFIDENCES_PATH.exists():
         try:
-            import yaml  # type: ignore[import-untyped]
+            import yaml
 
             with open(_DETECTOR_CONFIDENCES_PATH, encoding="utf-8") as f:
                 data = yaml.safe_load(f)

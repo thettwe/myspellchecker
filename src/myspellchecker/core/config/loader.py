@@ -151,7 +151,7 @@ def load_config_from_file(path: str | Path) -> dict[str, Any]:
     if path.suffix in [".yaml", ".yml"]:
         if not is_yaml_available():
             raise ImportError("PyYAML is required to load YAML config files")
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
@@ -218,7 +218,7 @@ def init_config_file(path: str | Path | None = None, *, force: bool = False) -> 
     if config_path.suffix in [".yaml", ".yml"]:
         if not is_yaml_available():
             raise ImportError("PyYAML is required to create YAML config files")
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(config_path, "w", encoding="utf-8") as f:
             yaml.dump(default_config, f, default_flow_style=False)
@@ -405,7 +405,7 @@ class ConfigLoader:
             ValueError: If invalid YAML content
         """
         try:
-            import yaml  # type: ignore[import-untyped]
+            import yaml
         except ImportError as err:
             raise ImportError(
                 "PyYAML is required to load YAML configuration files. "

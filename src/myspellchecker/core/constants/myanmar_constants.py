@@ -524,7 +524,7 @@ def _load_confusable_exemptions() -> tuple[frozenset[tuple[str, str]], frozenset
         return _DEFAULT_CONFUSABLE_EXEMPT_PAIRS, _DEFAULT_CONFUSABLE_EXEMPT_SUFFIX_PAIRS
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_CONFUSABLE_PAIRS_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)

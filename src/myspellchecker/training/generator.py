@@ -16,7 +16,7 @@ import importlib.resources
 import random
 from typing import TYPE_CHECKING, Callable
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from myspellchecker.core.constants.myanmar_constants import (
     ANUSVARA,

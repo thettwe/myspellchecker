@@ -55,40 +55,40 @@ build = [
 
 # AI features (Semantic Context Checking)
 ai = [
-    "onnxruntime>=1.15.0",
+    "onnxruntime>=1.17.0",
     "tokenizers>=0.13.0",
 ]
 
 # Transformer-based POS tagging (Optional)
 transformers = [
-    "transformers>=4.30.0",
+    "transformers>=4.38.0",
     "torch>=2.6.0",  # CVE-2025-32434 RCE fixed in 2.6.0
 ]
 
 # Complete AI stack (Semantic + Transformer POS)
 ai-full = [
-    "onnxruntime>=1.15.0",
+    "onnxruntime>=1.17.0",
     "tokenizers>=0.13.0",
-    "transformers>=4.30.0",
+    "transformers>=4.38.0",
     "torch>=2.6.0",
 ]
 
 # Training dependencies (for custom model training)
 # Includes ONNX export dependencies since training pipeline exports to ONNX
 train = [
-    "transformers>=4.30.0",
+    "transformers>=4.38.0",
     "datasets>=2.14.0",
     "accelerate>=0.21.0",
     "torch>=2.6.0",
     "onnx>=1.14.0",         # ONNX model format (required by onnxruntime.quantization)
-    "onnxruntime>=1.15.0",  # For ONNX export step
+    "onnxruntime>=1.17.0",  # For ONNX export step
     "onnxscript>=0.1.0",    # Required by torch.onnx.export
     "tokenizers>=0.13.0",   # For BPE tokenizer training
 ]
 
 dev = [
     # Testing
-    "pytest>=7.0.0",
+    "pytest>=8.0.0",
     "pytest-cov>=4.0.0",
     "pytest-benchmark>=4.0.0",
     "pytest-xdist>=3.0.0",  # Parallel test execution
@@ -98,10 +98,11 @@ dev = [
 
     # Type checking and linting
     "mypy>=1.0.0",
+    "types-PyYAML>=2024.1.1.20240311",
     "ruff>=0.3.0",
 
     # AI Training (Only needed for model development, not usage)
-    "transformers>=4.30.0",
+    "transformers>=4.38.0",
     "datasets>=2.14.0",
     "accelerate>=0.21.0",
     "torch>=2.6.0",

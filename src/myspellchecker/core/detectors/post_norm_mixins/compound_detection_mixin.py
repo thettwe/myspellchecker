@@ -162,7 +162,7 @@ def _load_compound_confusion() -> tuple[
         )
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)

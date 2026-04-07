@@ -131,7 +131,7 @@ def _load_register_endings() -> tuple[
         return defaults
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_REGISTER_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)
@@ -283,7 +283,7 @@ def _load_semantic_rules() -> tuple[
         )
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)
