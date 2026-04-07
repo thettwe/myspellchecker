@@ -39,14 +39,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Neural reranker now warns when stats file is missing instead of silently using unnormalized features.
 - Hardcoded paths in benchmark files replaced with relative paths.
 
-## [1.2.1] - 2026-03-23
+## [1.2.1] - 2026-04-04
 
 ### Fixed
 
 - Fixed error position offsets, edge cases in validation pipeline, and batch processor robustness.
 - Improved suggestion generation, error deduplication, and POS tagger fallback paths.
 
-## [1.2.0] - 2026-03-20
+## [1.2.0] - 2026-04-04
+
+### Added
+
+- **StatisticalConfusableStrategy**: Bigram ratio gate for confusable word pair detection.
+- **ConfusableCompoundClassifierStrategy**: MLP-based confusable/compound detection with ONNX inference.
+- **CMS multi-signal scoring** for confusable detection with curated pair threshold reduction.
+- **POS-based V+particle detection** for broken compounds.
+- **Title/suffix compound detection layer**.
+- Expanded mandatory compounds from 63 to 3,315 via template mining.
+- 28 confusable pair benchmark sentences.
+- Benchmark `--confidence-gap` flag for analysis.
+- Dual MLP/LightGBM training pipelines with MLM logit wiring.
+- v2 inference features and 3-gate neural reranking.
+
+### Changed
+
+- Error budget relaxed from per-sentence skip to heavy-error-only.
+- Benchmark scope filtering for targeted evaluation.
+
+### Fixed
+
+- Reduced FPR on expanded benchmark with pipeline hardening.
+- Scoped 5 weak-context confusable sentences as `context_dependent`.
+- Resolved 29 code review issues across 24 files.
+
+## [1.1.0] - 2026-04-01
+
+### Added
+
+- **ParticleChecker** and **TenseAgreementChecker** grammar checkers wired into grammar engine.
+- **Polite register tier** for 3-way register detection (formal/polite/informal).
+- **G2P phonetic mappings**, named entity gazetteer, and loan word variant rules.
+- **Fast-path exit** in context_validator for clean sentences (performance optimization).
+- **Clean-text FPR corpus** for false positive rate measurement.
+- Pragmatics golden tests for register validation.
+- Externalized NER data: YAML consolidation + SQLite schema.
+- Expanded benchmark from 489 to 719 sentences.
+- `importorskip` guards for optional dependencies (duckdb, torch) in tests.
+
+### Changed
+
+- Tuned dangling_word detector and expanded false_compounds list.
+- Shared false_compound suppression with text-level compound detector.
+- Semantic MLM suggestions sorted by edit distance before logit score.
+- CI coverage threshold lowered 75% → 70% (new modules without full test coverage).
+- Removed mypy from CI lint (82 pre-existing type errors tracked in issue #29).
+- CI path filters to skip non-code changes.
+- GitHub Actions bumped to actions/checkout v6 and actions/setup-python v6.
+
+### Fixed
+
+- Reduced FPR: disabled G04, fixed confusable logit_diff, added terminal SFP guard.
+- Surfaced semantic model load failures when paths are explicitly configured.
+- Stacking error suppression improvements.
+- Critical bugs, config wiring, and security hardening from code review.
+- Publish workflow: use release tag for pypi-publish.
+
+## [1.0.0] - 2026-03-28
 
 ### Added
 
