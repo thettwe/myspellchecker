@@ -20,31 +20,11 @@ from .config import runtime_flags as _flags
 
 __all__ = [
     "SegmentationRepair",
-    "set_allow_extended_myanmar",
 ]
 
 # ---------------------------------------------------------------------------
 # Shared runtime flags (replaces per-module globals)
 # ---------------------------------------------------------------------------
-
-
-def set_allow_extended_myanmar(allow: bool) -> None:
-    """Set whether to allow extended Myanmar characters in validation.
-
-    .. deprecated::
-        Set ``PipelineConfig.allow_extended_myanmar`` instead and pass the
-        config to ``Pipeline``.  This function will be removed in a future
-        release.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_allow_extended_myanmar() is deprecated. "
-        "Use PipelineConfig.allow_extended_myanmar instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.allow_extended_myanmar = allow
 
 
 class SegmentationRepair:

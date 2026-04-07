@@ -173,77 +173,6 @@ _allow_extended_myanmar = _flags.allow_extended_myanmar
 _auto_detect_pre_segmented = _flags.auto_detect_pre_segmented
 
 
-def set_allow_extended_myanmar(allow: bool) -> None:
-    """Configure Extended Myanmar character handling for segmentation pipeline.
-
-    .. deprecated::
-        Set ``PipelineConfig.allow_extended_myanmar`` instead and pass the
-        config to ``Pipeline``.  This function will be removed in a future
-        release.
-
-    Also propagates the flag to batch_processor for scope-aware filtering
-    and to repair modules for scope-aware validation.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_allow_extended_myanmar() is deprecated. "
-        "Use PipelineConfig.allow_extended_myanmar instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.allow_extended_myanmar = allow
-
-    # Keep legacy module-level alias in sync for fork()-ed workers
-    global _allow_extended_myanmar
-    _allow_extended_myanmar = allow
-
-    # Propagate to batch_processor for scope-aware filtering
-    if _CAPABILITIES.has_batch_processor:
-        bp_set_allow_extended_myanmar(allow)
-
-    # Propagate to repair modules for scope-aware validation
-    from myspellchecker.data_pipeline.repair import (
-        set_allow_extended_myanmar as repair_set_allow_extended_myanmar,
-    )
-
-    repair_set_allow_extended_myanmar(allow)
-
-    # Also propagate to Cython repair if available
-    if _CAPABILITIES.has_cython_repair:
-        from myspellchecker.data_pipeline.repair_c import (
-            set_allow_extended_myanmar as repair_c_set_allow_extended_myanmar,
-        )
-
-        repair_c_set_allow_extended_myanmar(allow)
-
-
-def set_auto_detect_pre_segmented(enabled: bool) -> None:
-    """Configure auto-detection of pre-segmented input for the segmentation pipeline.
-
-    .. deprecated::
-        This function will be removed in a future release.
-
-    Also propagates the flag to batch_processor for Cython-level detection.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_auto_detect_pre_segmented() is deprecated.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.auto_detect_pre_segmented = enabled
-
-    # Keep legacy module-level alias in sync for fork()-ed workers
-    global _auto_detect_pre_segmented
-    _auto_detect_pre_segmented = enabled
-
-    # Propagate to batch_processor for Cython-level detection
-    if _CAPABILITIES.has_batch_processor and bp_set_auto_detect_pre_segmented is not None:
-        bp_set_auto_detect_pre_segmented(enabled)
-
-
 # =============================================================================
 # LAZY IMPORTS FOR CYTHON MODULES
 # =============================================================================
@@ -258,25 +187,12 @@ if _CAPABILITIES.has_batch_processor:
         process_batch,
         process_batch_parallel,
     )
-    from myspellchecker.data_pipeline.batch_processor import (
-        set_allow_extended_myanmar as bp_set_allow_extended_myanmar,
-    )
     from myspellchecker.data_pipeline.batch_processor import (  # noqa: F401
         set_crf_engine as bp_set_crf_engine,
     )
     from myspellchecker.data_pipeline.batch_processor import (  # noqa: F401
         set_crf_tagger as bp_set_crf_tagger,
     )
-
-    # Import pre-segmented detection setter (added in batch_processor.pyx update).
-    # Wrapped in try/except for graceful degradation when the compiled .so
-    # has not been rebuilt yet after the .pyx change.
-    try:
-        from myspellchecker.data_pipeline.batch_processor import (
-            set_auto_detect_pre_segmented as bp_set_auto_detect_pre_segmented,
-        )
-    except ImportError:
-        bp_set_auto_detect_pre_segmented = None  # type: ignore[assignment]
 
 if _CAPABILITIES.has_cython_repair:
     from myspellchecker.data_pipeline.repair_c import (  # noqa: F401

@@ -2389,7 +2389,7 @@ class ConfusableSemanticConfig(BaseModel):
     # --- Error budget and adjacency dampening ---
 
     error_budget_threshold: int = Field(
-        default=1,
+        default=5,
         ge=0,
         description="Skip proactive scanning when existing errors reach this count.",
     )
@@ -2781,7 +2781,7 @@ class SemanticStrategyConfig(BaseModel):
         description="Divisor for best_diff in proactive confidence formula.",
     )
     error_budget_threshold: int = Field(
-        default=1,
+        default=5,
         ge=0,
         description="Skip proactive scanning when existing errors reach this count.",
     )

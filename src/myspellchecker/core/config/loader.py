@@ -20,7 +20,7 @@ Environment Variable Mapping:
 
     POS Tagger Settings:
         MYSPELL_POS_TAGGER_TYPE: POS tagger type (rule_based, transformer, viterbi)
-        MYSPELL_POS_TAGGER_BEAM_WIDTH: Beam width for Viterbi tagger (integer)
+        MYSPELL_POS_TAGGER_BEAM_WIDTH: Viterbi beam width (integer)
         MYSPELL_POS_TAGGER_MODEL_NAME: Transformer model name (string)
 
     SymSpell Settings:
@@ -489,8 +489,8 @@ class ConfigLoader:
             # POS tagger settings
             "POS_TAGGER_TYPE": ("pos_tagger.tagger_type", str),
             "POS_TAGGER_BEAM_WIDTH": (
-                "pos_tagger.beam_width",
-                lambda v: self._parse_int_min(v, 1, "beam_width"),
+                "pos_tagger.viterbi_beam_width",
+                lambda v: self._parse_int_min(v, 1, "viterbi_beam_width"),
             ),
             "POS_TAGGER_MODEL_NAME": ("pos_tagger.model_name", str),
             # SymSpell settings

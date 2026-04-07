@@ -121,9 +121,30 @@ class Error:
     source_strategy: str = ""
 
     @property
+    def end(self) -> int:
+        """End position (exclusive) of the error span in the normalized input."""
+        return self.position + len(self.text)
+
+    @property
     def action(self) -> ActionType:
         """Recommended consumer action: auto_fix, suggest, or inform."""
         return classify_action(self.error_type, self.confidence)
+
+    @property
+    def severity(self) -> str:
+        """Severity level derived from the recommended action.
+
+        Returns:
+            ``"error"`` when action is AUTO_FIX (high-confidence correction),
+            ``"warning"`` when action is SUGGEST (uncertain correction),
+            ``"info"`` when action is INFORM (advisory only).
+        """
+        _ACTION_TO_SEVERITY = {
+            ActionType.AUTO_FIX: "error",
+            ActionType.SUGGEST: "warning",
+            ActionType.INFORM: "info",
+        }
+        return _ACTION_TO_SEVERITY.get(self.action, "warning")
 
     @property
     def message(self) -> str:
@@ -148,19 +169,25 @@ class Error:
                 'error_type': 'invalid_syllable',
                 'suggestions': ['မြန်', 'မျန်း'],
                 'confidence': 1.0,
+                'end': 4,
                 'action': 'auto_fix',
+                'severity': 'error',
                 'message': 'Invalid syllable'
             }
         """
         d = asdict(self)
+        d["end"] = self.end
         d["action"] = self.action.value
+        d["severity"] = self.severity
         d["message"] = self.message
         return d
 
     @staticmethod
     def _add_action(d: dict[str, Any], error: "Error") -> dict[str, Any]:
-        """Add action and message fields to an asdict() result. Used by subclasses."""
+        """Add computed fields to an asdict() result. Used by subclasses."""
+        d["end"] = error.end
         d["action"] = error.action.value
+        d["severity"] = error.severity
         d["message"] = error.message
         return d
 

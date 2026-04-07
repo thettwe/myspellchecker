@@ -92,6 +92,7 @@ def get_development_profile() -> SpellCheckerConfig:
             strict_validation=False,
             use_zawgyi_detection=True,
             use_zawgyi_conversion=True,
+            use_candidate_fusion=False,  # Disable for speed
         ),
         # Small provider cache
         provider_config=ProviderConfig(
@@ -151,7 +152,7 @@ def get_production_profile() -> SpellCheckerConfig:
         # Viterbi POS tagger for better accuracy
         pos_tagger=POSTaggerConfig(
             tagger_type="viterbi",
-            beam_width=10,
+            viterbi_beam_width=10,
             cache_size=10000,
         ),
         # Standard validation
@@ -349,7 +350,7 @@ def get_accurate_profile() -> SpellCheckerConfig:
         # Viterbi POS with large beam
         pos_tagger=POSTaggerConfig(
             tagger_type="viterbi",  # Transformer requires separate opt-in via POSTaggerConfig
-            beam_width=15,  # Larger beam
+            viterbi_beam_width=15,  # Larger beam
             cache_size=20000,  # Large cache
         ),
         # Strict validation with candidate fusion

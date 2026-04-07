@@ -779,9 +779,9 @@ class Pipeline:
                 # P_* particle subtags (P_REL, P_NOM, etc.) that pollute the HMM
                 # tag set. OOV words get UNK, which is cleaner for transition tables.
                 kwargs["use_morphology_fallback"] = False
-                kwargs["beam_width"] = active_pos_config.beam_width
-                kwargs["emission_weight"] = active_pos_config.emission_weight
-                kwargs["min_prob"] = active_pos_config.min_prob
+                kwargs["beam_width"] = active_pos_config.viterbi_beam_width
+                kwargs["emission_weight"] = active_pos_config.viterbi_emission_weight
+                kwargs["min_prob"] = active_pos_config.viterbi_min_prob
                 kwargs["unknown_tag"] = active_pos_config.unknown_tag
 
             pos_tagger = POSTaggerFactory.create(**kwargs)

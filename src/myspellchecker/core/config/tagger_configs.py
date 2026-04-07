@@ -44,11 +44,6 @@ class POSTaggerConfig(BaseModel):
         use_morphology_fallback: Use MorphologyAnalyzer for OOV words (default: True).
         cache_size: LRU cache size for rule-based tagger (default: 10000).
 
-        # Viterbi-specific settings
-        beam_width: Beam width for Viterbi decoding (default: 10).
-        emission_weight: Weight for emission probabilities (default: 1.2).
-        min_prob: Minimum probability threshold (default: 1e-10).
-
         # Common settings
         unknown_tag: Tag to return for completely unknown words (default: "UNK").
 
@@ -67,8 +62,8 @@ class POSTaggerConfig(BaseModel):
         >>> # Viterbi tagger with custom settings
         >>> config = POSTaggerConfig(
         ...     tagger_type="viterbi",
-        ...     beam_width=15,
-        ...     emission_weight=1.5
+        ...     viterbi_beam_width=15,
+        ...     viterbi_emission_weight=1.5
         ... )
     """
 
@@ -115,29 +110,6 @@ class POSTaggerConfig(BaseModel):
     )
 
     # Viterbi-specific settings
-    # DEPRECATED: These top-level fields duplicate the viterbi_* prefixed fields
-    # below (viterbi_beam_width, viterbi_emission_weight, viterbi_min_prob).
-    # They are kept for backward compatibility with component_factory and
-    # data_pipeline, which read pos_config.beam_width etc.
-    # Prefer the viterbi_* prefixed fields for new code. These will be removed
-    # in a future version once all consumers are migrated.
-    beam_width: int = Field(
-        default=DEFAULT_ALGORITHM_THRESHOLDS.beam_width_minimal,
-        ge=1,
-        description="Beam width for Viterbi decoding (deprecated: use viterbi_beam_width)",
-    )
-    emission_weight: float = Field(
-        default=1.2,
-        gt=0.0,
-        description=(
-            "Weight for emission probabilities in HMM (deprecated: use viterbi_emission_weight)"
-        ),
-    )
-    min_prob: float = Field(
-        default=1e-10,
-        gt=0.0,
-        description="Minimum probability threshold (deprecated: use viterbi_min_prob)",
-    )
     hmm_params_path: str | None = Field(
         default=None,
         description="Path to precomputed HMM params JSON (for viterbi tagger bootstrap). "

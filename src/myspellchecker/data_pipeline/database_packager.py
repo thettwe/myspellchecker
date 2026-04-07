@@ -37,7 +37,6 @@ from .schema_manager import SchemaManager
 
 __all__ = [
     "DatabasePackager",
-    "set_allow_extended_myanmar",
 ]
 
 # Try import Cython TSV reader
@@ -51,25 +50,6 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Shared runtime flags (replaces per-module globals)
 # ---------------------------------------------------------------------------
-
-
-def set_allow_extended_myanmar(allow: bool) -> None:
-    """Configure Extended Myanmar character handling for database packager.
-
-    .. deprecated::
-        Set ``PipelineConfig.allow_extended_myanmar`` instead and pass the
-        config to ``Pipeline``.  This function will be removed in a future
-        release.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_allow_extended_myanmar() is deprecated. "
-        "Use PipelineConfig.allow_extended_myanmar instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.allow_extended_myanmar = allow
 
 
 def _parse_multi_pos(raw_pos: str) -> str:

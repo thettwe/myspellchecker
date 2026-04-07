@@ -398,9 +398,9 @@ class ComponentFactory:
             trigram_probs or {},
             pos_unigram_probs=unigram_probs,
             unknown_word_tag=pos_config.unknown_tag,
-            beam_width=pos_config.beam_width,
-            emission_weight=pos_config.emission_weight,
-            min_prob=pos_config.min_prob,
+            beam_width=pos_config.viterbi_beam_width,
+            emission_weight=pos_config.viterbi_emission_weight,
+            min_prob=pos_config.viterbi_min_prob,
             config=pos_config,
         )
 
