@@ -393,10 +393,23 @@ class ValidationConfig(BaseModel):
     # and are suppressed by default; lower the threshold to surface them.
     output_confidence_thresholds: dict[str, float] = Field(
         default={
+            # --- Core error types ---
             "confusable_error": 0.75,
             "colloquial_info": 0.35,
             "homophone_error": 0.72,
             "question_structure": 0.68,
+            # --- Top FP producers (conservative gates) ---
+            "invalid_word": 0.60,
+            "dangling_word": 0.65,
+            "context_probability": 0.68,
+            "broken_compound": 0.70,
+            "tone_ambiguity": 0.72,
+            "collocation_error": 0.70,
+            "particle_confusion": 0.70,
+            "tense_mismatch": 0.72,
+            "register_mixing": 0.72,
+            "aspect_error": 0.72,
+            "negation_error": 0.72,
         },
         description=(
             "Per-error-type minimum confidence for the output filter. "
@@ -409,6 +422,10 @@ class ValidationConfig(BaseModel):
             "semantic_error": 0.85,
             "pos_sequence_error": 0.70,
             "syntax_error": 0.75,
+            # --- Cascade suppression for noisy detectors ---
+            "context_probability": 0.75,
+            "broken_compound": 0.78,
+            "dangling_word": 0.72,
         },
         description=(
             "Cascade guard: suppress error types when the sentence already "
