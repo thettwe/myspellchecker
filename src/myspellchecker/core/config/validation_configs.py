@@ -654,6 +654,26 @@ class ValidationConfig(BaseModel):
         description="Confidence score for broken compound errors.",
     )
 
+    # MLM post-filter for invalid_word / dangling_word FP suppression
+    mlm_plausibility_threshold: float = Field(
+        default=0.15,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Minimum MLM probability for the original word to suppress an "
+            "invalid_word/dangling_word error. Higher values are more "
+            "aggressive at suppressing FPs but risk suppressing real errors."
+        ),
+    )
+    mlm_plausibility_top_k: int = Field(
+        default=10,
+        ge=1,
+        description=(
+            "Number of top MLM predictions to check when evaluating "
+            "contextual plausibility for invalid_word/dangling_word errors."
+        ),
+    )
+
 
 class ProviderConfig(BaseModel):
     """

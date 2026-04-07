@@ -2,8 +2,6 @@
 Unit tests for per-request CheckOptions.
 """
 
-import asyncio
-
 import pytest
 
 from myspellchecker import CheckOptions, SpellChecker

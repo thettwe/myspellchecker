@@ -19,6 +19,7 @@ from myspellchecker.core.constants import (
     ET_COLLOQUIAL_CONTRACTION,
     ET_CONFUSABLE_ERROR,
     ET_CONTEXT_PROBABILITY,
+    ET_DANGLING_WORD,
     ET_DUPLICATE_PUNCTUATION,
     ET_HA_HTOE_CONFUSION,
     ET_HOMOPHONE_ERROR,
@@ -170,6 +171,7 @@ class ErrorSuppressionMixin:
     config: "SpellCheckerConfig"
     logger: Any
     _ner_model: Any
+    _semantic_checker: Any  # SemanticChecker | None
     _KEEP_ATTACHED_SUFFIXES: Any  # defined in PostNormalizationDetectorsMixin
     _MISSING_ASAT_PARTICLES: Any  # defined in PostNormalizationDetectorsMixin
     _MISSING_VISARGA_SUFFIXES: Any  # defined in PostNormalizationDetectorsMixin
@@ -645,6 +647,71 @@ class ErrorSuppressionMixin:
             filtered.append(e)
 
         errors[:] = filtered
+
+    def _suppress_invalid_word_via_mlm(
+        self,
+        errors: list[Error],
+        text: str,
+    ) -> None:
+        """Suppress invalid_word/dangling_word errors when MLM confirms context.
+
+        For each error of type ``invalid_word`` or ``dangling_word``, mask the
+        flagged word in the sentence and run the semantic model's
+        ``predict_mask``.  If the original word appears among the top-K
+        predictions (or as a prefix of a top-K prediction) with a probability
+        above the configured threshold, the error is suppressed as a likely
+        false positive.
+
+        The threshold and top-K are controlled by
+        ``ValidationConfig.mlm_plausibility_threshold`` and
+        ``ValidationConfig.mlm_plausibility_top_k``.
+        """
+        semantic = getattr(self, "_semantic_checker", None)
+        if semantic is None:
+            return
+
+        _MLM_TARGET_TYPES = frozenset({ET_WORD, ET_DANGLING_WORD})
+        candidates = [
+            (i, e) for i, e in enumerate(errors) if e.error_type in _MLM_TARGET_TYPES and e.text
+        ]
+        if not candidates:
+            return
+
+        threshold = self.config.validation.mlm_plausibility_threshold
+        top_k = self.config.validation.mlm_plausibility_top_k
+
+        to_remove: set[int] = set()
+        for idx, err in candidates:
+            word = normalize(err.text)
+            if not word:
+                continue
+
+            try:
+                predictions = semantic.predict_mask(
+                    text,
+                    word,
+                    top_k=top_k,
+                )
+            except Exception:  # noqa: BLE001
+                # Graceful degradation: if inference fails, keep the error.
+                continue
+
+            if not predictions:
+                continue
+
+            # Check if the original word (or a compound starting with it)
+            # appears in the predictions above the threshold.
+            for pred_word, score in predictions:
+                if score < threshold:
+                    # Predictions are sorted best-first; once we drop
+                    # below the threshold we can stop.
+                    break
+                if pred_word == word or pred_word.startswith(word):
+                    to_remove.add(idx)
+                    break
+
+        if to_remove:
+            errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
 
     def _suppress_low_value_semantic_errors(
         self,

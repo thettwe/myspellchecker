@@ -979,6 +979,11 @@ class SpellChecker(
                 )
             ]
 
+        # MLM post-filter: suppress invalid_word/dangling_word FPs when the
+        # semantic model confirms the word is contextually plausible.
+        if self._semantic_checker is not None:
+            self._suppress_invalid_word_via_mlm(errors, normalized_text)
+
         return errors, rerank_telemetry
 
     def _build_check_response(
