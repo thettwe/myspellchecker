@@ -37,6 +37,7 @@ class SpanMatch:
     system_position: int
     system_suggestions: list[str]
     system_error_type: str
+    system_source_strategy: str
     matched: bool  # Did system detect this error?
     top1_correct: bool  # Is suggestions[0] the gold correction?
     top3_correct: bool  # Is gold correction in suggestions[:3]?
@@ -227,6 +228,7 @@ def match_errors(
                     system_position=sys_err.get("position", -1),
                     system_suggestions=suggestions[:5],
                     system_error_type=sys_err.get("error_type", ""),
+                    system_source_strategy=sys_err.get("source_strategy", ""),
                     matched=True,
                     top1_correct=top1,
                     top3_correct=top3,
@@ -244,6 +246,7 @@ def match_errors(
                     system_position=-1,
                     system_suggestions=[],
                     system_error_type="",
+                    system_source_strategy="",
                     matched=False,
                     top1_correct=False,
                     top3_correct=False,
@@ -501,6 +504,9 @@ def run_benchmark(
     reranker_path: Optional[Path] = None,
     confidence_gap: float | None = None,
     scope: str = "spelling",
+    enable_fusion: bool = False,
+    fusion_threshold: float = 0.5,
+    calibration_path: Path | None = None,
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -599,6 +605,17 @@ def run_benchmark(
     config.validation.enable_strategy_debug = enable_strategy_debug
     if enable_strategy_debug:
         print("  Strategy gate debug: enabled")
+
+    if enable_fusion:
+        config.validation.use_candidate_fusion = True
+        config.validation.fusion_confidence_threshold = fusion_threshold
+        if calibration_path and calibration_path.exists():
+            config.validation.calibration_path = str(calibration_path)
+            print(f"  Candidate fusion: enabled (threshold={fusion_threshold})")
+            print(f"  Calibration: {calibration_path}")
+        else:
+            print(f"  Candidate fusion: enabled (threshold={fusion_threshold})")
+            print("  Calibration: bootstrap (no calibration file)")
 
     # Confusable semantic detection: only enable when explicitly NOT disabled.
     # Default matches production config (use_confusable_semantic=False).
@@ -1448,6 +1465,30 @@ def main():
         ),
     )
     parser.add_argument(
+        "--fusion",
+        action="store_true",
+        default=False,
+        help=(
+            "Enable calibrated Noisy-OR candidate fusion (voting architecture). "
+            "When set, all strategies fire at every position and the arbiter uses "
+            "calibrated confidence fusion across independence clusters."
+        ),
+    )
+    parser.add_argument(
+        "--fusion-threshold",
+        type=float,
+        default=0.5,
+        metavar="FLOAT",
+        help="Fusion confidence threshold (default: 0.5). Only used with --fusion.",
+    )
+    parser.add_argument(
+        "--calibration",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="Path to calibration YAML from train_calibrators.py. Only used with --fusion.",
+    )
+    parser.add_argument(
         "--scope",
         type=str,
         default="spelling",
@@ -1491,6 +1532,9 @@ def main():
         reranker_path=args.reranker,
         confidence_gap=args.confidence_gap,
         scope=args.scope,
+        enable_fusion=args.fusion,
+        fusion_threshold=args.fusion_threshold,
+        calibration_path=args.calibration,
     )
 
     # Print summary

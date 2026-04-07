@@ -600,6 +600,52 @@ class ErrorSuppressionMixin:
 
         errors[:] = filtered
 
+    def _suppress_low_value_word_errors(
+        self,
+        errors: list[Error],
+        text: str | None = None,
+    ) -> None:
+        """Suppress low-value invalid_word errors with high FP risk.
+
+        Removes word errors where:
+        - The word is actually valid in the dictionary (fallback check)
+        - The word has high corpus frequency and no useful suggestions
+        - The top suggestion is the word itself (ambiguous)
+        """
+        if not errors or not self.provider:
+            return
+
+        filtered: list[Error] = []
+        for e in errors:
+            if e.error_type != ET_WORD:
+                filtered.append(e)
+                continue
+
+            token = normalize(e.text or "")
+            if not token:
+                filtered.append(e)
+                continue
+
+            # Suppress if word is actually valid (segmenter/SymSpell disagreement)
+            if hasattr(self.provider, "is_valid_word") and self.provider.is_valid_word(token):
+                continue
+
+            # Suppress high-frequency words with no suggestions
+            if not e.suggestions and hasattr(self.provider, "get_word_frequency"):
+                freq = self.provider.get_word_frequency(token)
+                if isinstance(freq, (int, float)) and freq >= 1000:
+                    continue
+
+            # Suppress if top suggestion IS the word itself
+            if e.suggestions:
+                norm_sugs = [normalize(s) for s in e.suggestions if isinstance(s, str)]
+                if norm_sugs and norm_sugs[0] == token:
+                    continue
+
+            filtered.append(e)
+
+        errors[:] = filtered
+
     def _suppress_low_value_semantic_errors(
         self,
         errors: list[Error],

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "myspellchecker"
-version = "1.2.1"
+version = "1.3.0"
 description = "Myanmar (Burmese) text intelligence library — spell checking, grammar validation, dictionary building, and AI model training"
 readme = "README.md"
 # NOTE: Codebase uses Python 3.10+ syntax (PEP 604 unions like `str | None`).
@@ -37,7 +37,7 @@ dependencies = [
     "pydantic>=2.0.0,<3.0.0",  # Type-safe configuration with rich validation
     # Zawgyi detection and conversion (required for Myanmar language support)
     "myanmartools>=1.2.1",  # Google's statistical Zawgyi detector (~95% accuracy)
-    "python-myanmar>=1.0.0",  # Zawgyi-to-Unicode conversion
+    "python-myanmar>=1.0.0,<2.0.0",  # Zawgyi-to-Unicode conversion
 ]
 
 [project.scripts]

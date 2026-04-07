@@ -636,7 +636,14 @@ def mine_register_tags(
     word_informal: dict[int, int] = {}
 
     # Right context: word → marker (word appears before a marker)
-    cursor.execute("SELECT word1_id, word2_id, count FROM bigrams WHERE count > 0")
+    all_marker_ids = formal_ids | informal_ids
+    placeholders = ",".join("?" for _ in all_marker_ids)
+    marker_list = list(all_marker_ids)
+    cursor.execute(
+        f"SELECT word1_id, word2_id, count FROM bigrams "
+        f"WHERE count > 0 AND (word1_id IN ({placeholders}) OR word2_id IN ({placeholders}))",
+        marker_list + marker_list,
+    )
     for w1_id, w2_id, count in cursor:
         if w2_id in formal_ids:
             word_formal[w1_id] = word_formal.get(w1_id, 0) + count
@@ -820,6 +827,11 @@ def run_enrichment(
     logger.info("Starting enrichment pipeline on %s", db_path)
 
     conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = OFF")
+    conn.execute("PRAGMA cache_size = -524288")
+    conn.execute("PRAGMA temp_store = MEMORY")
+    conn.execute("PRAGMA mmap_size = 2147483648")
     try:
         # Ensure enrichment tables exist (idempotent)
         _ensure_enrichment_tables(conn)

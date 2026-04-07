@@ -60,7 +60,7 @@ _TOKEN_BOUNDARY_PUNCT = frozenset("၊။,.!?;:\"'()[]{}")
 _DEFAULT_HA_HTOE_COMPOUNDS: dict[str, tuple[str, str]] = _norm_dict_tuple(
     {
         "နာခောင်း": ("နာ", "နှာ"),
-        "နူနာ": ("နူ", "နှူ"),
+        # Removed: "နူနာ" — MLC dictionary lists နူနာ as standard form
         "ငက်ကို": ("ငက်", "ငှက်"),
         "လျာက်": ("လျာက်", "လျှောက်"),
         "ပိုးမွား": ("မွား", "မွှား"),
@@ -95,7 +95,7 @@ _DEFAULT_CONSONANT_CONFUSION_COMPOUNDS: dict[str, tuple[str, str]] = _norm_dict_
         "သတ်မတ်": ("မတ်", "မှတ်"),  # missing ha-htoe
         "လာကို ကိုက်": ("လာ", "လှာ"),  # ha-htoe on la
         "ဖမ်တီး": ("ဖမ်", "ဖန်"),  # ma→na
-        "ကုမ်ပဏီ": ("ကုမ်", "ကုန်"),  # ma→na
+        # Removed: "ကုမ်ပဏီ" — correct form is ကုမ္ပဏီ (virama stacking)
         "ခွမ်း": ("ခွမ်း", "ခွန်း"),  # ma→na
         "ဆမ်းစစ်": ("ဆမ်း", "ဆန်း"),  # ma→na
         "ဒါတ်": ("ဒါ", "ဓာ"),  # da→dha aspiration
@@ -108,7 +108,7 @@ _DEFAULT_CONSONANT_CONFUSION_COMPOUNDS: dict[str, tuple[str, str]] = _norm_dict_
         "ဖွဖြိုး": ("ဖွ", "ဖွံ့"),  # missing diacritics
         "ချွဲခြမ်း": ("ချွဲ", "ခွဲ"),
         "ထင်သွင်း": ("ထင်", "တင်"),
-        "ထင်ရှား": ("ထင်", "တင်"),
+        # Removed: "ထင်ရှား" — valid standard compound (prominent/outstanding)
         "သပ်မှတ်": ("သပ်", "သတ်"),
         "ဂိုးသင်း": ("သင်း", "သွင်း"),
         "ခေါင်ယူ": ("ခေါင်", "ခေါ်"),

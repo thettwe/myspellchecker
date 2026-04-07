@@ -15,6 +15,7 @@ from myspellchecker.core.config.algorithm_configs import SemanticStrategyConfig
 from myspellchecker.core.constants import ET_SEMANTIC_ERROR
 from myspellchecker.core.response import ContextError, Error
 from myspellchecker.core.validation_strategies.base import ValidationContext, ValidationStrategy
+from myspellchecker.core.validation_strategies.conflict_rules import should_skip_position
 from myspellchecker.core.validation_strategies.semantic_helpers import (
     build_contrast_candidate_pool,
     build_escalation_candidate_pool,
@@ -167,6 +168,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                     word_positions=context.word_positions,
                     is_name_mask=context.is_name_mask,
                     existing_error_positions=context.existing_errors,
+                    fusion_mode=context.fusion_mode,
                 )
                 errors.extend(semantic_errors)
 
@@ -180,6 +182,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                 word_positions=context.word_positions,
                 is_name_mask=context.is_name_mask,
                 existing_error_positions=context.existing_errors,
+                fusion_mode=context.fusion_mode,
             )
             errors.extend(animacy_errors)
 
@@ -194,6 +197,7 @@ class SemanticValidationStrategy(ValidationStrategy):
                     word_positions=context.word_positions,
                     is_name_mask=context.is_name_mask,
                     existing_error_positions=context.existing_errors,
+                    fusion_mode=context.fusion_mode,
                 )
                 errors.extend(contrast_errors)
 
@@ -244,6 +248,7 @@ class SemanticValidationStrategy(ValidationStrategy):
         word_positions: list[int],
         is_name_mask: list[bool],
         existing_error_positions: dict,
+        fusion_mode: bool = False,
     ) -> list[ContextError]:
         """
         Semantic contrast fallback for unresolved tokens.
@@ -264,7 +269,12 @@ class SemanticValidationStrategy(ValidationStrategy):
                     continue
 
                 position = word_positions[i]
-                if position in existing_error_positions:
+                if should_skip_position(
+                    "SemanticValidationStrategy",
+                    position,
+                    existing_error_positions,
+                    fusion_mode=fusion_mode,
+                ):
                     continue
                 if is_name_mask[i]:
                     continue
@@ -608,6 +618,7 @@ class SemanticValidationStrategy(ValidationStrategy):
         word_positions: list[int],
         is_name_mask: list[bool],
         existing_error_positions: dict,
+        fusion_mode: bool = False,
     ) -> list[ContextError]:
         """
         Broad proactive semantic scan using scan_sentence().
@@ -639,8 +650,13 @@ class SemanticValidationStrategy(ValidationStrategy):
 
                 abs_pos = word_positions[word_idx]
 
-                # Skip if already flagged by an earlier strategy
-                if abs_pos in existing_error_positions:
+                # Skip if already flagged (unless overridable)
+                if should_skip_position(
+                    "SemanticValidationStrategy",
+                    abs_pos,
+                    existing_error_positions,
+                    fusion_mode=fusion_mode,
+                ):
                     continue
 
                 # Skip named entities
@@ -682,6 +698,7 @@ class SemanticValidationStrategy(ValidationStrategy):
         word_positions: list[int],
         is_name_mask: list[bool],
         existing_error_positions: dict,
+        fusion_mode: bool = False,
     ) -> list[ContextError]:
         """
         Detect animacy mismatches in subject position.
@@ -701,8 +718,13 @@ class SemanticValidationStrategy(ValidationStrategy):
 
         try:
             for i in range(len(words) - 1):
-                # Skip already-flagged positions and named entities
-                if word_positions[i] in existing_error_positions:
+                # Skip already-flagged positions (unless overridable) and named entities
+                if should_skip_position(
+                    "SemanticValidationStrategy",
+                    word_positions[i],
+                    existing_error_positions,
+                    fusion_mode=fusion_mode,
+                ):
                     continue
                 if is_name_mask[i]:
                     continue

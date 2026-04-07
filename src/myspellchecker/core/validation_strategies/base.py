@@ -13,6 +13,22 @@ from myspellchecker.core.response import Error
 
 
 @dataclass
+class ErrorCandidate:
+    """A candidate error emitted by a validation strategy.
+
+    Multiple strategies may produce candidates for the same position.
+    The arbiter selects the best candidate when conflicts exist.
+    """
+
+    strategy_name: str
+    error_type: str
+    confidence: float
+    suggestion: str | None = None
+    evidence: str = ""
+    word_indices: tuple[int, ...] = ()
+
+
+@dataclass
 class ValidationContext:
     """
     Shared context for validation strategies.
@@ -47,6 +63,8 @@ class ValidationContext:
     pos_tags: list[str] = field(default_factory=list)
     full_text: str = ""
     global_error_count: int = 0
+    error_candidates: dict[int, list[ErrorCandidate]] = field(default_factory=dict)
+    fusion_mode: bool = False
 
     def __post_init__(self) -> None:
         """Validate consistency of parallel lists."""
@@ -117,10 +135,12 @@ class ValidationStrategy(ABC):
         - 10: ToneValidation (tone mark disambiguation)
         - 15: Orthography (medial order and compatibility)
         - 20: SyntacticRule (grammar rule checking)
+        - 24: StatisticalConfusable (bigram-based confusable detection)
         - 25: BrokenCompound (broken compound detection)
         - 30: POSSequence (POS sequence validation)
         - 40: Question (question structure validation)
         - 45: Homophone (sound-alike detection)
+        - 47: ConfusableCompoundClassifier (MLP-based compound detection)
         - 48: ConfusableSemantic (MLM-enhanced confusable detection)
         - 50: NgramContext (bigram/trigram probability)
         - 70: Semantic (AI-powered MLM validation, expensive, run last)

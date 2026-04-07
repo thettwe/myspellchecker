@@ -15,10 +15,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
+
       - name: Install dependencies
         run: |
-          pip install pip-audit
-          pip install -e "."
+          uv pip install --system pip-audit
+          uv pip install --system -e "."
 
       - name: Run pip-audit
         run: pip-audit

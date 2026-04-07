@@ -35,7 +35,7 @@ from myspellchecker.core.config.validation_configs import ProviderConfig, Valida
 from myspellchecker.core.exceptions import InvalidConfigError
 from myspellchecker.providers import DictionaryProvider
 from myspellchecker.segmenters import Segmenter
-from myspellchecker.text.ner_model import NERConfig
+from myspellchecker.text.ner_config import NERConfig
 
 
 class SpellCheckerConfig(BaseModel):

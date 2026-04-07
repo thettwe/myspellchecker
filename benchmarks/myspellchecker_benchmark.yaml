@@ -56,7 +56,7 @@ metadata:
     'False': 316
     'True': 216
   cleanup:
-    source_file: /Users/thettwe/Works/my-spellchecker/benchmarks/myanmar_spellchecker_bench_final.yaml
+    source_file: benchmarks/myanmar_spellchecker_bench_final.yaml
     duplicate_sentences_removed: 36
     overlapping_errors_removed: 7
     duplicate_sentence_pairs:

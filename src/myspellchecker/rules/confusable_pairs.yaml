@@ -3,15 +3,16 @@ category: confusable_pairs
 description: Curated confusable word pairs for MLM-based real-word error detection
 metadata:
   created_date: '2026-03-18'
-  last_updated: '2026-04-04'
-  total_entries: 37
+  last_updated: '2026-04-05'
+  total_entries: 87
   source: Curated near-synonym and phonetic confusion patterns
 pairs:
 - word: ပျံ
   correction: ပြန်
   confusion_type: medial_nasal_compound
   bidirectional: true
-  notes: fly vs return — ျ↔ြ medial swap + ံ↔န် nasal swap. Very common typo in 'go home' context.
+  notes: fly vs return — ျ↔ြ medial swap + ံ↔န် nasal swap. Very common typo in 'go
+    home' context.
 - word: အဖော်
   correction: အဖွဲ့
   confusion_type: vowel_compound
@@ -61,34 +62,38 @@ pairs:
   correction: မြင်
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'look/watch (deliberate visual attention) vs see/perceive (involuntary perception). ကြည့် selects for intentional
-    objects: TV, movie, scenery. မြင် selects for stimuli: effects, changes, scenes noticed passively. E.g., ''ရလဒ်ကို မြင်နိုင်''
-    (can see the result) not ''ရလဒ်ကို ကြည့်နိုင်''.
+  notes: 'look/watch (deliberate visual attention) vs see/perceive (involuntary perception).
+    ကြည့် selects for intentional objects: TV, movie, scenery. မြင် selects for stimuli:
+    effects, changes, scenes noticed passively. E.g., ''ရလဒ်ကို မြင်နိုင်'' (can see
+    the result) not ''ရလဒ်ကို ကြည့်နိုင်''.
 
     '
 - word: နားထောင်
   correction: ကြား
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'listen (deliberate auditory attention) vs hear (involuntary perception). နားထောင် selects for intentional objects:
-    music, lecture, radio. ကြား selects for stimuli: news, sounds, rumors perceived passively. E.g., ''သတင်းကြားရတယ်'' (heard
-    the news) not ''သတင်းနားထောင်ရတယ်''.
+  notes: 'listen (deliberate auditory attention) vs hear (involuntary perception).
+    နားထောင် selects for intentional objects: music, lecture, radio. ကြား selects
+    for stimuli: news, sounds, rumors perceived passively. E.g., ''သတင်းကြားရတယ်''
+    (heard the news) not ''သတင်းနားထောင်ရတယ်''.
 
     '
 - word: ရှာ
   correction: တွေ့
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'search/look for (deliberate process) vs find/discover (result). ရှာ implies ongoing effort; တွေ့ implies the result
-    of finding. E.g., ''အဖြေတွေ့ပြီ'' (found the answer) not ''အဖြေရှာပြီ''.
+  notes: 'search/look for (deliberate process) vs find/discover (result). ရှာ implies
+    ongoing effort; တွေ့ implies the result of finding. E.g., ''အဖြေတွေ့ပြီ'' (found
+    the answer) not ''အဖြေရှာပြီ''.
 
     '
 - word: ပြော
   correction: ဖော်ပြ
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'say/tell (casual speech) vs express/present (formal reporting). ပြော is for direct speech/conversation; ဖော်ပြ is
-    for formal presentation of data, findings, opinions. E.g., ''အစီရင်ခံစာတွင် ဖော်ပြခဲ့သည်'' (presented in the report) not
+  notes: 'say/tell (casual speech) vs express/present (formal reporting). ပြော is
+    for direct speech/conversation; ဖော်ပြ is for formal presentation of data, findings,
+    opinions. E.g., ''အစီရင်ခံစာတွင် ဖော်ပြခဲ့သည်'' (presented in the report) not
     ''ပြောခဲ့သည်''.
 
     '
@@ -96,24 +101,27 @@ pairs:
   correction: ဆို
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'say/tell (casual) vs say/recite (literary/formal). ပြော is conversational; ဆို is used in formal quotation, literature,
-    proverbs, and religious contexts. E.g., ''စကားပုံတွင် ဆိုထားသည်'' (as the proverb says) not ''ပြောထားသည်''.
+  notes: 'say/tell (casual) vs say/recite (literary/formal). ပြော is conversational;
+    ဆို is used in formal quotation, literature, proverbs, and religious contexts.
+    E.g., ''စကားပုံတွင် ဆိုထားသည်'' (as the proverb says) not ''ပြောထားသည်''.
 
     '
 - word: သိ
   correction: နားလည်
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'know (a fact/information) vs understand (comprehend deeply). သိ is for factual awareness; နားလည် is for comprehension.
-    E.g., ''အကြောင်းအရာကို နားလည်'' (understand the subject matter) not ''အကြောင်းအရာကို သိ'' when deep comprehension is meant.
+  notes: 'know (a fact/information) vs understand (comprehend deeply). သိ is for factual
+    awareness; နားလည် is for comprehension. E.g., ''အကြောင်းအရာကို နားလည်'' (understand
+    the subject matter) not ''အကြောင်းအရာကို သိ'' when deep comprehension is meant.
 
     '
 - word: ဆိုက်
   correction: ရောက်
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'arrive (for storms, vehicles, boats — manner-specific) vs arrive (general). ဆိုက် is restricted to natural forces
-    (storms arriving), vehicles (boats docking), and metaphorical impact. ရောက် is the general verb for arriving at a destination.
+  notes: 'arrive (for storms, vehicles, boats — manner-specific) vs arrive (general).
+    ဆိုက် is restricted to natural forces (storms arriving), vehicles (boats docking),
+    and metaphorical impact. ရောက် is the general verb for arriving at a destination.
     E.g., ''ညစာချိန် ရောက်တာနဲ့'' (when dinner time arrived) not ''ဆိုက်တာနဲ့''.
 
     '
@@ -121,43 +129,48 @@ pairs:
   correction: ရောက်ရှိ
   confusion_type: near_synonym
   bidirectional: false
-  notes: 'arrive (manner-specific) vs arrive (formal/general). ရောက်ရှိ is the formal compound form of ရောက်. Used in news,
-    official reports. One-directional: ရောက်ရှိ→ဆိုက် replacement is rare in practice.
+  notes: 'arrive (manner-specific) vs arrive (formal/general). ရောက်ရှိ is the formal
+    compound form of ရောက်. Used in news, official reports. One-directional: ရောက်ရှိ→ဆိုက်
+    replacement is rare in practice.
 
     '
 - word: ယူ
   correction: ရ
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'take (deliberate, volitional) vs get/receive (non-volitional outcome). ယူ implies the agent intentionally takes
-    something; ရ implies obtaining as a result or receiving. E.g., ''ဆုရခဲ့တယ်'' (received a prize) not ''ဆုယူခဲ့တယ်'' when
-    the receipt was not a deliberate taking.
+  notes: 'take (deliberate, volitional) vs get/receive (non-volitional outcome). ယူ
+    implies the agent intentionally takes something; ရ implies obtaining as a result
+    or receiving. E.g., ''ဆုရခဲ့တယ်'' (received a prize) not ''ဆုယူခဲ့တယ်'' when the
+    receipt was not a deliberate taking.
 
     '
 - word: သင်
   correction: လေ့လာ
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'teach vs study/learn. သင် primarily means ''teach'' (teacher as agent) but is sometimes confused with ''learn''
-    (student as agent). လေ့လာ specifically means ''study/investigate/learn''. E.g., ''ကျောင်းသားများ လေ့လာ'' (students study)
-    not ''ကျောင်းသားများ သင်''.
+  notes: 'teach vs study/learn. သင် primarily means ''teach'' (teacher as agent) but
+    is sometimes confused with ''learn'' (student as agent). လေ့လာ specifically means
+    ''study/investigate/learn''. E.g., ''ကျောင်းသားများ လေ့လာ'' (students study) not
+    ''ကျောင်းသားများ သင်''.
 
     '
 - word: တောင်း
   correction: မေး
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'request/ask for (something tangible) vs ask (a question). တောင်း is for requesting objects, help, permission; မေး
-    is for asking questions, inquiring. E.g., ''မေးခွန်းမေး'' (ask a question) not ''မေးခွန်းတောင်း''.
+  notes: 'request/ask for (something tangible) vs ask (a question). တောင်း is for
+    requesting objects, help, permission; မေး is for asking questions, inquiring.
+    E.g., ''မေးခွန်းမေး'' (ask a question) not ''မေးခွန်းတောင်း''.
 
     '
 - word: လာ
   correction: ရောက်
   confusion_type: near_synonym
   bidirectional: true
-  notes: 'come (movement toward speaker) vs arrive (reaching destination). လာ emphasizes direction of travel; ရောက် emphasizes
-    completion of journey. E.g., ''ရန်ကုန်ရောက်ပြီ'' (arrived in Yangon) vs ''ရန်ကုန်လာပြီ'' (came to Yangon). Distinction
-    matters in formal contexts where arrival at destination is the focus.
+  notes: 'come (movement toward speaker) vs arrive (reaching destination). လာ emphasizes
+    direction of travel; ရောက် emphasizes completion of journey. E.g., ''ရန်ကုန်ရောက်ပြီ''
+    (arrived in Yangon) vs ''ရန်ကုန်လာပြီ'' (came to Yangon). Distinction matters
+    in formal contexts where arrival at destination is the focus.
 
     '
 - word: ကာ
@@ -235,6 +248,256 @@ pairs:
   confusion_type: consonant_aspiration
   bidirectional: true
   notes: salt vs eat — aspiration confusion ဆ↔စ.
+- word: မြုပ်နှံ
+  correction: မြှုပ်နှံ
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=1.000, freq မြုပ်နှံ=2926, freq မြှုပ်နှံ=13026'
+- word: အုန်း
+  correction: အုံး
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.988, freq အုန်း=6741, freq အုံး=16615'
+- word: လက်လွှတ်
+  correction: လက်လွတ်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.976, freq လက်လွှတ်=2494, freq လက်လွတ်=2746'
+- word: ပတ်သတ်တဲ့
+  correction: ပတ်သက်တဲ့
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.974, freq ပတ်သတ်တဲ့=4419, freq ပတ်သက်တဲ့=49463'
+- word: ပတ်သတ်ပြီး
+  correction: ပတ်သက်ပြီး
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.956, freq ပတ်သတ်ပြီး=19681, freq ပတ်သက်ပြီး=237571'
+- word: ပတ်သတ်၍
+  correction: ပတ်သက်၍
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.954, freq ပတ်သတ်၍=4132, freq ပတ်သက်၍=135239'
+- word: ပက်သက်ပြီး
+  correction: ပတ်သက်ပြီး
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.950, freq ပက်သက်ပြီး=8985, freq ပတ်သက်ပြီး=237571'
+- word: အလူမီနီယံ
+  correction: အလူမီနီယမ်
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.943, freq အလူမီနီယံ=4171, freq အလူမီနီယမ်=5304'
+- word: ပက်သက်၍
+  correction: ပတ်သက်၍
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.934, freq ပက်သက်၍=2026, freq ပတ်သက်၍=135239'
+- word: ရှူ
+  correction: ရှု
+  confusion_type: vowel_length
+  bidirectional: true
+  notes: 'Mined: overlap=0.933, freq ရှူ=4346, freq ရှု=13255'
+- word: တုန့်ပြန်
+  correction: တုံ့ပြန်
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.932, freq တုန့်ပြန်=9953, freq တုံ့ပြန်=24774'
+- word: ပက်သက်
+  correction: ပတ်သက်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.926, freq ပက်သက်=3631, freq ပတ်သက်=99481'
+- word: အချိန်မှီ
+  correction: အချိန်မီ
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.920, freq အချိန်မှီ=3993, freq အချိန်မီ=19160'
+- word: ရုတ်သိမ်း
+  correction: ရုပ်သိမ်း
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.920, freq ရုတ်သိမ်း=2176, freq ရုပ်သိမ်း=6614'
+- word: လျော့
+  correction: လျှော့
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.913, freq လျော့=14057, freq လျှော့=15287'
+- word: မိန်းခလေး
+  correction: မိန်းကလေး
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.906, freq မိန်းခလေး=2912, freq မိန်းကလေး=60186'
+- word: နှစ်ဘက်
+  correction: နှစ်ဖက်
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.905, freq နှစ်ဘက်=9870, freq နှစ်ဖက်=18463'
+- word: အခြေအတင်
+  correction: အချေအတင်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.896, freq အခြေအတင်=2304, freq အချေအတင်=2635'
+- word: လျှင်မြန်
+  correction: လျင်မြန်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.896, freq လျှင်မြန်=2858, freq လျင်မြန်=16813'
+- word: ကွန်ပြူတာ
+  correction: ကွန်ပျူတာ
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.891, freq ကွန်ပြူတာ=15610, freq ကွန်ပျူတာ=75867'
+- word: ပတ်သတ်လို့
+  correction: ပတ်သက်လို့
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.874, freq ပတ်သတ်လို့=3397, freq ပတ်သက်လို့=88874'
+- word: ခေတ်မှီ
+  correction: ခေတ်မီ
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.873, freq ခေတ်မှီ=3612, freq ခေတ်မီ=17559'
+- word: နှုတ်ထွက်
+  correction: နုတ်ထွက်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.873, freq နှုတ်ထွက်=3610, freq နုတ်ထွက်=6064'
+- word: နိူင်
+  correction: နိုင်
+  confusion_type: vowel_length
+  bidirectional: true
+  notes: 'Mined: overlap=0.872, freq နိူင်=3167, freq နိုင်=1459738'
+- word: တကယ်တန်း
+  correction: တကယ်တမ်း
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.870, freq တကယ်တန်း=2830, freq တကယ်တမ်း=29421'
+- word: ပြိုင်ဖက်
+  correction: ပြိုင်ဘက်
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.860, freq ပြိုင်ဖက်=5773, freq ပြိုင်ဘက်=22118'
+- word: အဘိုး
+  correction: အဖိုး
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.859, freq အဘိုး=5993, freq အဖိုး=6275'
+- word: လွင့်
+  correction: လွှင့်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.857, freq လွင့်=4168, freq လွှင့်=15663'
+- word: ပလပ်ဖောင်း
+  correction: ပလက်ဖောင်း
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.857, freq ပလပ်ဖောင်း=2913, freq ပလက်ဖောင်း=26816'
+- word: အမီ
+  correction: အမှီ
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.856, freq အမီ=2071, freq အမှီ=2631'
+- word: အကြပ်အတည်း
+  correction: အကျပ်အတည်း
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.856, freq အကြပ်အတည်း=2541, freq အကျပ်အတည်း=9200'
+- word: ရှေး
+  correction: ရွေး
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.851, freq ရှေး=13693, freq ရွေး=58768'
+- word: တီဗွီ
+  correction: တီဗီ
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.839, freq တီဗွီ=6413, freq တီဗီ=13717'
+- word: စာတမ်းပါ
+  correction: စာတန်းပါ
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.838, freq စာတမ်းပါ=2293, freq စာတန်းပါ=2844'
+- word: ပတ်သတ်
+  correction: ပတ်သက်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.838, freq ပတ်သတ်=10451, freq ပတ်သက်=99481'
+- word: လျင်
+  correction: လျှင်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.836, freq လျင်=6178, freq လျှင်=145991'
+- word: ဖြန့်ချီ
+  correction: ဖြန့်ချိ
+  confusion_type: vowel_length
+  bidirectional: true
+  notes: 'Mined: overlap=0.835, freq ဖြန့်ချီ=3024, freq ဖြန့်ချိ=26365'
+- word: ခုတင်
+  correction: ကုတင်
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.834, freq ခုတင်=4776, freq ကုတင်=7540'
+- word: တင်းကြပ်
+  correction: တင်းကျပ်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.834, freq တင်းကြပ်=3549, freq တင်းကျပ်=7618'
+- word: အတင်းအကြပ်
+  correction: အတင်းအကျပ်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.829, freq အတင်းအကြပ်=4888, freq အတင်းအကျပ်=8606'
+- word: ချက်ခြင်း
+  correction: ချက်ချင်း
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.828, freq ချက်ခြင်း=9201, freq ချက်ချင်း=72913'
+- word: ပလပ်စတစ်
+  correction: ပလတ်စတစ်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: 'Mined: overlap=0.815, freq ပလပ်စတစ်=12836, freq ပလတ်စတစ်=15443'
+- word: ခနဲ
+  correction: ကနဲ
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.814, freq ခနဲ=3734, freq ကနဲ=3938'
+- word: အခုကျတော့
+  correction: အခုကတော့
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.812, freq အခုကျတော့=5698, freq အခုကတော့=12135'
+- word: တန်ဘိုး
+  correction: တန်ဖိုး
+  confusion_type: aspiration
+  bidirectional: true
+  notes: 'Mined: overlap=0.812, freq တန်ဘိုး=3261, freq တန်ဖိုး=69685'
+- word: မှုး
+  correction: မှူး
+  confusion_type: vowel_length
+  bidirectional: true
+  notes: 'Mined: overlap=0.812, freq မှုး=3599, freq မှူး=13581'
+- word: လျှက်
+  correction: လျက်
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.798, freq လျှက်=11844, freq လျက်=57403'
+- word: ရံပုံငွေ
+  correction: ရန်ပုံငွေ
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.791, freq ရံပုံငွေ=3396, freq ရန်ပုံငွေ=25566'
+- word: ဂါလန်
+  correction: ဂါလံ
+  confusion_type: nasal
+  bidirectional: true
+  notes: 'Mined: overlap=0.789, freq ဂါလန်=2033, freq ဂါလံ=2425'
+- word: ပီး
+  correction: ပြီး
+  confusion_type: medial
+  bidirectional: true
+  notes: 'Mined: overlap=0.784, freq ပီး=23733, freq ပြီး=1931804'
 exempt_pairs:
 - word: ဖေး
   variant: ဘေး
@@ -326,7 +589,8 @@ exempt_pairs:
 exempt_suffix_pairs:
 - suffix_a: သည်
   suffix_b: သည့်
-  reason: Syntactic distinction (sentence-final declarative vs attributive/relative clause)
+  reason: Syntactic distinction (sentence-final declarative vs attributive/relative
+    clause)
 - suffix_a: သည့်
   suffix_b: သည်
   reason: Reverse direction of above

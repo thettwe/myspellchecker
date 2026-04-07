@@ -49,9 +49,8 @@ ha_htoe_compounds:
   "နာခောင်း":           # pain -> nose (ha-htoe on na)
     wrong: "နာ"
     correct: "နှာ"
-  "နူနာ":               # leprosy (missing ha-htoe)
-    wrong: "နူ"
-    correct: "နှူ"
+  # Removed: "နူနာ" — MLC dictionary lists နူနာ (without ha-htoe) as standard.
+  # The correction နူ→နှူ is disputed across sources.
   "ငက်ကို":            # bird + object marker: missing ha-htoe
     wrong: "ငက်"
     correct: "ငှက်"
@@ -150,9 +149,8 @@ consonant_confusion_compounds:
   "ဖမ်တီး":            # create (ma -> na)
     wrong: "ဖမ်"
     correct: "ဖန်"
-  "ကုမ်ပဏီ":           # company (ma -> na)
-    wrong: "ကုမ်"
-    correct: "ကုန်"
+  # Removed: "ကုမ်ပဏီ" — correct form is ကုမ္ပဏီ (virama stacking),
+  # not ကုန်ပဏီ. SymSpell handles this via edit distance.
   "ခွမ်း":              # question (ma -> na)
     wrong: "ခွမ်း"
     correct: "ခွန်း"
@@ -203,9 +201,8 @@ consonant_confusion_compounds:
   "ထင်သွင်း":           # submit (aspiration confusion)
     wrong: "ထင်"
     correct: "တင်"
-  "ထင်ရှား":            # aspiration confusion variant
-    wrong: "ထင်"
-    correct: "တင်"
+  # Removed: "ထင်ရှား" — ထင်ရှား is a valid standard compound
+  # meaning "prominent/outstanding". Not an aspiration error.
   "သပ်မှတ်":            # define (final consonant confusion)
     wrong: "သပ်"
     correct: "သတ်"

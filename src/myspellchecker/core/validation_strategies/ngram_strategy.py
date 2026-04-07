@@ -137,7 +137,13 @@ class NgramContextValidationStrategy(ValidationStrategy):
                     if i > 0
                     else None
                 )
-                word_at_ip2 = filtered_words[i + 2][0] if i + 2 < len(filtered_words) else None
+                word_at_ip2 = (
+                    self._get_effective_word(
+                        filtered_words[i + 2][0], filtered_words[i + 2][1], context
+                    )
+                    if i + 2 < len(filtered_words)
+                    else None
+                )
 
                 if next_pos in context.existing_errors:
                     # Position already flagged by higher-priority strategy —
@@ -193,6 +199,15 @@ class NgramContextValidationStrategy(ValidationStrategy):
 
                 if not verdict.is_error:
                     continue
+
+                # Minimum context evidence: skip when the context word
+                # (previous word) has very low frequency. Bigram P(next|prev)
+                # is unreliable when prev itself is rare in the corpus.
+                _ctx_freq_fn = getattr(self.provider, "get_word_frequency", None)
+                if _ctx_freq_fn is not None:
+                    ctx_freq = _ctx_freq_fn(effective_current)
+                    if isinstance(ctx_freq, (int, float)) and ctx_freq < 50:
+                        continue
 
                 # Generate context-aware suggestions
                 suggestions = self._generate_suggestions(

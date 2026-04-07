@@ -1197,8 +1197,13 @@ def _find_nasal_positions(word: str) -> list[tuple[int, str]]:
     while i < word_len:
         char = word[i]
 
-        # Check for nasal + asat
-        if char in NASAL_CONSONANTS and i + 1 < word_len and word[i + 1] == ASAT:
+        # Check for nasal + asat (but not Kinzi: nasal + asat + virama)
+        if (
+            char in NASAL_CONSONANTS
+            and i + 1 < word_len
+            and word[i + 1] == ASAT
+            and (i + 2 >= word_len or word[i + 2] != "\u1039")
+        ):
             positions.append((i, "consonant"))
             i += 2
             continue

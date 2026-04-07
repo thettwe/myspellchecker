@@ -292,9 +292,9 @@ class ViterbiTagger:
                 word_tag_probs=self.word_tag_probs,
                 emission_weight=emission_weight,
                 beam_width=beam_width,
-                lambda_unigram=lambda_unigram,
-                lambda_bigram=lambda_bigram,
-                lambda_trigram=lambda_trigram,
+                lambda_unigram=self.lambda_unigram,
+                lambda_bigram=self.lambda_bigram,
+                lambda_trigram=self.lambda_trigram,
             )
         else:
             self._cython_tagger = None  # Use Python implementation
@@ -777,6 +777,12 @@ class ViterbiTagger:
 
                 for p_tag, scores in prev_tag_scores.items():
                     current_step[(p_tag, curr_tag)] = self._log_sum_exp(scores)
+
+            # Apply beam pruning (matching tag_sequence behavior)
+            effective_beam = self._get_adaptive_beam_width(len(words))
+            if len(current_step) > effective_beam:
+                top_states = nlargest(effective_beam, current_step.items(), key=lambda x: x[1])
+                current_step = dict(top_states)
 
             viterbi_table.append(current_step)
 

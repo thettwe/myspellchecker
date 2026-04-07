@@ -401,13 +401,22 @@ class SyllableValidator(Validator):
         virama = "\u1039"
         if virama not in syllable:
             return None
-        idx = syllable.index(virama)
-        if idx + 1 < len(syllable):
-            next_char = syllable[idx + 1]
-            # Vowel signs: U+102B-U+1032, plus e-vowel U+1031
-            if ("\u102b" <= next_char <= "\u1032") or next_char == "\u1031":
-                return syllable[:idx] + syllable[idx + 1 :]
-        return None
+        result = syllable
+        changed = False
+        idx = 0
+        while idx < len(result):
+            idx = result.find(virama, idx)
+            if idx == -1:
+                break
+            if idx + 1 < len(result):
+                next_char = result[idx + 1]
+                # Vowel signs: U+102B-U+1032, plus e-vowel U+1031
+                if ("\u102b" <= next_char <= "\u1032") or next_char == "\u1031":
+                    result = result[:idx] + result[idx + 1 :]
+                    changed = True
+                    continue
+            idx += 1
+        return result if changed else None
 
     def _check_known_patterns(self, syllable: str, position: int) -> SyllableError | None:
         """Check for particle typos, digit-letter confusion, and medial confusion."""

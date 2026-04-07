@@ -1377,8 +1377,8 @@ class SuggestionPipelineMixin:
                     self.logger.debug(
                         f"Semantic candidate: '{error.text}' → injected '{error.suggestions[0]}'"
                     )
-            except Exception as e:
-                self.logger.debug(f"Semantic rerank failed for '{error.text}': {e}")
+            except (RuntimeError, ValueError, TypeError, KeyError, IndexError) as e:
+                self.logger.warning("Semantic rerank failed for '%s': %s", error.text, e)
 
     def _build_semantic_neighbor_candidates(
         self, word: str, error_type: str, max_candidates: int = 8
@@ -1407,8 +1407,8 @@ class SuggestionPipelineMixin:
                     include_known=False,
                     use_phonetic=True,
                 )
-            except Exception as e:
-                self.logger.debug("symspell.lookup failed at level %s: %s", level, e, exc_info=True)
+            except (RuntimeError, ValueError, TypeError, KeyError, IndexError) as e:
+                self.logger.warning("symspell.lookup failed at level %s: %s", level, e)
                 continue
             for suggestion in suggestions:
                 term = suggestion.term

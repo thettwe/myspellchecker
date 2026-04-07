@@ -1046,7 +1046,8 @@ class Pipeline:
         except (sqlite3.Error, OSError, ValueError, PackagingError) as e:
             # Rollback transaction on any database/IO/data failure
             self.reporter.report_error(f"Database packaging failed: {e}")
-            packager.rollback_transaction()
+            if packager._in_transaction:
+                packager.rollback_transaction()
             raise
 
         finally:

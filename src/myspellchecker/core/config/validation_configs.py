@@ -169,13 +169,13 @@ class ValidationConfig(BaseModel):
         description="Confidence threshold for tone validation strategy",
     )
     syntactic_validation_confidence: float = Field(
-        default=0.9,
+        default=0.78,
         ge=0.0,
         le=1.0,
         description="Confidence for syntactic (rule-based) validation strategy",
     )
     pos_sequence_confidence: float = Field(
-        default=0.85,
+        default=0.68,
         ge=0.0,
         le=1.0,
         description="Confidence for POS sequence validation strategy",
@@ -187,7 +187,7 @@ class ValidationConfig(BaseModel):
         description="Confidence for question structure validation strategy",
     )
     homophone_confidence: float = Field(
-        default=0.8,
+        default=0.68,
         ge=0.0,
         le=1.0,
         description="Confidence for homophone validation strategy",
@@ -240,7 +240,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     statistical_confusable_threshold: float = Field(
-        default=50.0,
+        default=5.0,
         ge=1.0,
         description=(
             "Bigram ratio threshold for the statistical confusable gate. "
@@ -392,20 +392,59 @@ class ValidationConfig(BaseModel):
     # colloquial_info notes use confidence 0.3 (informational, not errors)
     # and are suppressed by default; lower the threshold to surface them.
     output_confidence_thresholds: dict[str, float] = Field(
-        default={"confusable_error": 0.75, "colloquial_info": 0.35},
+        default={
+            "confusable_error": 0.75,
+            "colloquial_info": 0.35,
+            "homophone_error": 0.72,
+            "question_structure": 0.68,
+        },
         description=(
             "Per-error-type minimum confidence for the output filter. "
             "Errors whose confidence is below the threshold for their type "
             "are suppressed."
         ),
     )
-    # Calibration: typical cascade FP has conf=0.80, gold TPs are 0.85+.
     secondary_confidence_thresholds: dict[str, float] = Field(
-        default={"semantic_error": 0.85},
+        default={
+            "semantic_error": 0.85,
+            "pos_sequence_error": 0.70,
+            "syntax_error": 0.75,
+        },
         description=(
             "Cascade guard: suppress error types when the sentence already "
             "has a higher-confidence error of a different type. Prevents "
-            "cascade false positives from the semantic model."
+            "cascade false positives from context strategies."
+        ),
+    )
+
+    # -- Candidate fusion (voting architecture) --
+    use_candidate_fusion: bool = Field(
+        default=False,
+        description=(
+            "Enable calibrated Noisy-OR candidate fusion instead of mutex-based "
+            "winner selection. When True, all strategies may fire at every position "
+            "(mutex bypass), fast-path exit is automatically disabled, and the "
+            "arbiter uses calibrated confidence fusion "
+            "across independence clusters to determine which errors to emit. "
+            "When False (default), the v1.2 mutex-and-shadow-mode behaviour is used."
+        ),
+    )
+    fusion_confidence_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Minimum fused confidence (after calibrated Noisy-OR) to emit an error "
+            "in candidate-fusion mode. Lower values increase recall but risk FPR."
+        ),
+    )
+    calibration_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to a YAML file with per-strategy calibration breakpoints "
+            "and reliability weights, as produced by train_calibrators.py. "
+            "When set and use_candidate_fusion=True, the fusion pipeline "
+            "uses data-driven calibration instead of bootstrap weights."
         ),
     )
 
@@ -415,7 +454,8 @@ class ValidationConfig(BaseModel):
             "Enable fast-path exit in context validation. When True, if structural "
             "strategies (Tone, Orthography, Syntactic, BrokenCompound) find no errors, "
             "contextual strategies are skipped. Reduces FPR on clean text but may miss "
-            "context-only errors. Set to False for maximum recall."
+            "context-only errors. Set to False for maximum recall. "
+            "Note: automatically disabled when use_candidate_fusion=True."
         ),
     )
 
@@ -523,7 +563,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     compound_min_morpheme_frequency: int = Field(
-        default=10,
+        default=50,
         ge=0,
         description=(
             "Minimum corpus frequency for each morpheme in compound validation. "
@@ -573,7 +613,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     broken_compound_rare_threshold: int = Field(
-        default=2000,
+        default=500,
         ge=0,
         description=(
             "Maximum word frequency for a word to be considered 'rare'. "
@@ -581,12 +621,12 @@ class ValidationConfig(BaseModel):
         ),
     )
     broken_compound_min_frequency: int = Field(
-        default=5000,
+        default=10000,
         ge=0,
         description="Minimum compound frequency required to flag a broken compound.",
     )
     broken_compound_ratio: float = Field(
-        default=5.0,
+        default=25.0,
         ge=1.0,
         description="Minimum ratio of compound_freq / rare_word_freq to flag.",
     )

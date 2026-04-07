@@ -13,10 +13,19 @@ import threading
 import time
 from typing import TYPE_CHECKING, Any
 
+from myspellchecker.core.calibration import StrategyCalibrator
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.response import Error
 from myspellchecker.core.token_refinement import build_validation_token_paths
-from myspellchecker.core.validation_strategies import ValidationContext, ValidationStrategy
+from myspellchecker.core.validation_strategies import (
+    ErrorCandidate,
+    ValidationContext,
+    ValidationStrategy,
+)
+from myspellchecker.core.validation_strategies.arbiter import (
+    arbitrate_candidates,
+    fuse_all_candidates,
+)
 from myspellchecker.core.validators import Validator
 from myspellchecker.segmenters.base import Segmenter
 from myspellchecker.text.ner import NameHeuristic
@@ -118,6 +127,16 @@ class ContextValidator(Validator):
         # Sort strategies by priority (lower values run first)
         # Use sorted() to avoid modifying caller's list
         self.strategies = sorted(strategies or [], key=lambda s: s.priority())
+        self._fusion_enabled = config.validation.use_candidate_fusion
+        self._fusion_threshold = config.validation.fusion_confidence_threshold
+        if self._fusion_enabled:
+            cal_path = config.validation.calibration_path
+            if cal_path and isinstance(cal_path, str):
+                self._calibrator = StrategyCalibrator.from_yaml(cal_path)
+            else:
+                self._calibrator = StrategyCalibrator()
+        else:
+            self._calibrator = None
         self._refine_is_valid_word = self._resolve_word_validator_callback("is_valid_word")
         self._refine_get_word_frequency = self._resolve_word_validator_callback(
             "get_word_frequency"
@@ -260,6 +279,7 @@ class ContextValidator(Validator):
         path_existing_errors: dict[int, str] = {}
         path_existing_suggestions: dict[int, list[str]] = {}
         path_existing_confidences: dict[int, float] = {}
+        path_error_candidates: dict[int, list[ErrorCandidate]] = {}
 
         path_iteration = token_paths[1:] + token_paths[:1] if len(token_paths) > 1 else token_paths
         for path_words in path_iteration:
@@ -280,6 +300,8 @@ class ContextValidator(Validator):
             context.existing_errors.update(path_existing_errors)
             context.existing_suggestions.update(path_existing_suggestions)
             context.existing_confidences.update(path_existing_confidences)
+            for pos, candidates in path_error_candidates.items():
+                context.error_candidates.setdefault(pos, []).extend(candidates)
 
             strategy_errors = self._execute_strategies(
                 context=context,
@@ -296,6 +318,8 @@ class ContextValidator(Validator):
             path_existing_errors.update(context.existing_errors)
             path_existing_suggestions.update(context.existing_suggestions)
             path_existing_confidences.update(context.existing_confidences)
+            for pos, candidates in context.error_candidates.items():
+                path_error_candidates.setdefault(pos, []).extend(candidates)
 
         if path_existing_suggestions:
             merged_context = ValidationContext(
@@ -306,6 +330,34 @@ class ContextValidator(Validator):
             )
             merged_context.existing_suggestions = path_existing_suggestions
             self._merge_appended_suggestions(errors, merged_context)
+
+        # Arbiter: for positions with multiple candidates, let the
+        # higher-tier strategy win.  Replace the mutex-selected error
+        # with the arbiter's choice when they disagree.
+        if path_error_candidates:
+            if self._fusion_enabled and self._calibrator is not None:
+                # Full fusion mode: calibrate + cluster + Noisy-OR merge
+                fused = fuse_all_candidates(
+                    path_error_candidates,
+                    self._calibrator,
+                    threshold=self._fusion_threshold,
+                )
+                self._apply_fusion_winners(errors, fused)
+                # Suppress context-strategy errors whose fused confidence fell
+                # below the threshold.  Only suppress errors with a source_strategy
+                # (context-level); word/syllable errors (empty source_strategy)
+                # must survive even if a context candidate at the same position
+                # was rejected.
+                rejected = {pos for pos in path_error_candidates if pos not in fused}
+                if rejected:
+                    errors[:] = [
+                        e for e in errors if e.position not in rejected or not e.source_strategy
+                    ]
+            else:
+                # Shadow mode: tier-based arbiter, log-only divergence
+                winners = arbitrate_candidates(path_error_candidates)
+                if winners:
+                    self._apply_arbiter_winners(errors, winners)
 
         return errors
 
@@ -369,6 +421,7 @@ class ContextValidator(Validator):
             word_positions=filtered_positions,
             is_name_mask=filtered_is_name,
             full_text=full_text,
+            fusion_mode=self._fusion_enabled,
         )
 
         if self._viterbi_tagger and len(filtered_words) >= 2:
@@ -419,6 +472,7 @@ class ContextValidator(Validator):
                 structural_phase_done = True
                 if (
                     self.config.validation.enable_fast_path
+                    and not self._fusion_enabled
                     and structural_phase_ran
                     and not errors
                     and not context.existing_errors
@@ -447,7 +501,22 @@ class ContextValidator(Validator):
                     t0 = time.perf_counter()
 
                 strategy_errors = strategy.validate(context)
+                for error in strategy_errors:
+                    error.source_strategy = strategy_name
                 errors.extend(strategy_errors)
+
+                # Collect error candidates for arbiter (Phase 2 infrastructure).
+                # Candidates are emitted alongside the mutex -- both systems
+                # active, mutex still determines output.
+                for error in strategy_errors:
+                    candidate = ErrorCandidate(
+                        strategy_name=strategy_name,
+                        error_type=error.error_type,
+                        confidence=getattr(error, "confidence", 0.0),
+                        suggestion=error.suggestions[0] if error.suggestions else None,
+                        evidence=strategy_name,
+                    )
+                    context.error_candidates.setdefault(error.position, []).append(candidate)
 
                 if strategy_debug_telemetry is not None:
                     self._update_strategy_debug_telemetry(
@@ -510,6 +579,101 @@ class ContextValidator(Validator):
             for suggestion in all_suggestions:
                 if suggestion not in error.suggestions:
                     error.suggestions.append(suggestion)
+
+    @staticmethod
+    def _build_error_by_pos(errors: list[Error]) -> dict[int, Error]:
+        """Build position -> first Error lookup from an error list."""
+        by_pos: dict[int, Error] = {}
+        for error in errors:
+            if error.position not in by_pos:
+                by_pos[error.position] = error
+        return by_pos
+
+    @staticmethod
+    def _dedup_errors_at_positions(errors: list[Error], positions: set[int]) -> None:
+        """Remove duplicate errors at given positions (keep first per position)."""
+        if not positions:
+            return
+        seen: set[int] = set()
+        deduped: list[Error] = []
+        for e in errors:
+            if e.position in positions:
+                if e.position in seen:
+                    continue
+                seen.add(e.position)
+            deduped.append(e)
+        errors[:] = deduped
+
+    @staticmethod
+    def _apply_arbiter_winners(
+        errors: list[Error],
+        winners: dict[int, ErrorCandidate],
+    ) -> None:
+        """Log arbiter divergence from mutex-selected errors.
+
+        v1.3.0 shadow mode: the arbiter does NOT mutate live Error
+        objects.  It only logs positions where the arbiter disagrees
+        with the mutex, to collect divergence data.
+        """
+        error_by_pos = ContextValidator._build_error_by_pos(errors)
+
+        for position, winner in winners.items():
+            error = error_by_pos.get(position)
+            if error is None:
+                continue
+
+            if error.error_type != winner.error_type:
+                logger.debug(
+                    "arbiter divergence: pos=%d mutex=%s arbiter=%s (conf=%.2f)",
+                    position,
+                    error.error_type,
+                    winner.error_type,
+                    winner.confidence,
+                )
+
+    @staticmethod
+    def _apply_fusion_winners(
+        errors: list[Error],
+        fused: dict[int, tuple[float, ErrorCandidate]],
+    ) -> None:
+        """Apply fusion results: update error details from winning candidates.
+
+        For positions where the fusion winner disagrees with the mutex-selected
+        error, the first error at that position is updated in-place and any
+        duplicate errors at the same position are removed.
+        """
+        error_by_pos = ContextValidator._build_error_by_pos(errors)
+        fused_positions = set(fused.keys())
+
+        for position, (fused_conf, winner) in fused.items():
+            error = error_by_pos.get(position)
+            if error is None:
+                continue
+
+            if error.error_type != winner.error_type:
+                logger.debug(
+                    "fusion override: pos=%d mutex=%s winner=%s (fused=%.3f)",
+                    position,
+                    error.error_type,
+                    winner.error_type,
+                    fused_conf,
+                )
+                error.error_type = winner.error_type
+                if winner.suggestion:
+                    error.suggestions = [winner.suggestion] + [
+                        s for s in error.suggestions if s != winner.suggestion
+                    ]
+            error.confidence = fused_conf
+
+        # Find positions with duplicate errors and dedup.
+        dup_positions: set[int] = set()
+        seen_count: dict[int, int] = {}
+        for e in errors:
+            if e.position in fused_positions:
+                seen_count[e.position] = seen_count.get(e.position, 0) + 1
+                if seen_count[e.position] > 1:
+                    dup_positions.add(e.position)
+        ContextValidator._dedup_errors_at_positions(errors, dup_positions)
 
     @staticmethod
     def _init_strategy_debug_entry() -> dict[str, Any]:

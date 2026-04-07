@@ -802,16 +802,16 @@ class LineByLineIterableDataset(torch.utils.data.IterableDataset if torch else o
             for path in self.file_paths:
                 with open(path, encoding="utf-8") as f:
                     for line in f:
-                        # Read POS line in sync (even if we skip this corpus line)
+                        line = line.strip()
+                        if not line:
+                            continue
+
+                        # Read POS line in sync only for non-empty corpus lines
                         pos_line = None
                         if pos_iter is not None:
                             pos_raw = pos_iter.readline()
                             if pos_raw.strip():
                                 pos_line = pos_raw
-
-                        line = line.strip()
-                        if not line:
-                            continue
                         # Round-robin across DDP ranks * DataLoader workers
                         if line_idx % total_shards != shard_id:
                             line_idx += 1

@@ -312,6 +312,7 @@ def get_accurate_profile() -> SpellCheckerConfig:
     - Semantic proactive scanning
     - Large caches
     - Viterbi POS tagging with large beam
+    - Candidate fusion (calibrated Noisy-OR)
 
     Returns:
         SpellCheckerConfig optimized for accuracy.
@@ -351,11 +352,12 @@ def get_accurate_profile() -> SpellCheckerConfig:
             beam_width=15,  # Larger beam
             cache_size=20000,  # Large cache
         ),
-        # Strict validation
+        # Strict validation with candidate fusion
         validation=ValidationConfig(
             strict_validation=True,
             use_zawgyi_detection=True,
             use_zawgyi_conversion=True,
+            use_candidate_fusion=True,
         ),
         # Large caches
         provider_config=ProviderConfig(

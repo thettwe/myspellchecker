@@ -630,11 +630,15 @@ class WordValidator(Validator):
 
             # Use tracked index instead of .index() to handle duplicate words correctly
             prev_word = myanmar_words[myanmar_word_idx - 1] if myanmar_word_idx > 0 else None
+            if prev_word:
+                prev_word = _BOUNDARY_PUNCT_RE.sub("", prev_word) or prev_word
             next_word = (
                 myanmar_words[myanmar_word_idx + 1]
                 if myanmar_word_idx < len(myanmar_words) - 1
                 else None
             )
+            if next_word:
+                next_word = _BOUNDARY_PUNCT_RE.sub("", next_word) or next_word
 
             # Build extended context word lists for higher-order n-gram reranking
             prev_words: list[str] = []

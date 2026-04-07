@@ -516,11 +516,7 @@ class StreamingChecker:
                 )
 
             # Adjust positions if we used context
-            if (
-                self.config.enable_cross_sentence_context
-                and self._previous_context
-                and response.errors
-            ):
+            if self.config.enable_cross_sentence_context and self._previous_context:
                 context_offset = len(self._previous_context) + 1
                 adjusted_errors = []
                 for error in response.errors:
