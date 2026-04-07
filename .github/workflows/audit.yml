@@ -1,14 +1,8 @@
 name: Dependency Audit
 
 on:
-  push:
-    branches: [develop]
-    paths:
-      - ".github/workflows/audit.yml"
-      - "src/**"
-      - "tests/**"
-      - "setup.py"
-      - "pyproject.toml"
+  schedule:
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 jobs:
