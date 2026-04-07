@@ -10,7 +10,6 @@ from myspellchecker.tokenizers.syllable import SyllableTokenizer
 
 
 class TestSyllableTokenizerTokenize:
-
     @pytest.fixture
     def t(self):
         return SyllableTokenizer()
@@ -67,9 +66,9 @@ class TestSyllableTokenizerTokenize:
 
     def test_stacking_consonant_stays_attached(self, t):
         # virama (္) glues the stacked consonant to its base — no break inside the cluster
-        assert t.tokenize("သတ္တဝါ") == ["သတ္တ", "ဝါ"]   # creature
-        assert t.tokenize("ပစ္စည်း") == ["ပစ္စည်း"]       # item/equipment
-        assert t.tokenize("သဒ္ဒါ") == ["သဒ္ဒါ"]           # grammar
+        assert t.tokenize("သတ္တဝါ") == ["သတ္တ", "ဝါ"]  # creature
+        assert t.tokenize("ပစ္စည်း") == ["ပစ္စည်း"]  # item/equipment
+        assert t.tokenize("သဒ္ဒါ") == ["သဒ္ဒါ"]  # grammar
 
     # --- Myanmar numeral grouping ---
 
