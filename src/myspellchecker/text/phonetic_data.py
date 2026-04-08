@@ -302,7 +302,7 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     "နင်": {"သင်", "ခင်ဗျား"},  # Second person (rude informal -> formal)
     "သူ့": {"သူ၏"},  # His/her possessive (colloquial -> formal)
     "ခင်ဗျ": {"ခင်ဗျား"},  # Sir (shortened honorific)
-    "ရှင်": {"ခင်ဗျား"},  # You-female polite (colloquial female -> formal)
+    # "ရှင်" removed: standard polite female-register pronoun, not colloquial
     "ရှင့်": {"ခင်ဗျား၏"},  # Your-female polite possessive (colloquial)
     "ငါ့": {"ကျွန်တော့်", "ကျွန်မ၏"},  # My (very informal possessive)
     "မင်းတို့": {"သင်တို့"},  # Second person plural (informal -> formal)
@@ -360,6 +360,44 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     "ဟိုတုန်းက": {"ထိုအခါက"},  # Back then (colloquial -> formal)
     "ဟိုတစ်ခေါက်": {"ထိုအကြိမ်"},  # That other time (colloquial -> formal)
     "ဟိုနေ့က": {"ထိုနေ့က"},  # That day (colloquial -> formal)
+    # --- Verb aspect contractions (past/progressive dropping ပါ) ---
+    "သွားခဲ့တယ်": {"သွားခဲ့ပါတယ်"},  # Past: went (dropping ပါ)
+    "လုပ်ခဲ့တယ်": {"လုပ်ခဲ့ပါတယ်"},  # Past: did (dropping ပါ)
+    "စားခဲ့တယ်": {"စားခဲ့ပါတယ်"},  # Past: ate (dropping ပါ)
+    "ပြောနေတယ်": {"ပြောနေပါတယ်"},  # Progressive: is saying (dropping ပါ)
+    "လုပ်နေတယ်": {"လုပ်နေပါတယ်"},  # Progressive: is doing (dropping ပါ)
+    "သွားနေတယ်": {"သွားနေပါတယ်"},  # Progressive: is going (dropping ပါ)
+    # --- Modal/auxiliary colloquial forms (dropping ပါ from modals) ---
+    "လုပ်နိုင်တယ်": {"လုပ်နိုင်ပါတယ်"},  # Modal: can do (ability)
+    "သွားရမယ်": {"သွားရပါမယ်"},  # Modal: must go (obligation)
+    "စားချင်တယ်": {"စားချင်ပါတယ်"},  # Modal: want to eat (desire)
+    "ပြောလို့ရတယ်": {"ပြောလို့ရပါတယ်"},  # Modal: can say (permission)
+    "လာခဲ့ရမယ်": {"လာခဲ့ရပါမယ်"},  # Modal: had to come (past obligation)
+    # --- Reduplication extensions (adjective reduplication -> formal adverb) ---
+    "နည်းနည်း": {"အနည်းငယ်"},  # Reduplication: a little
+    "ရှည်ရှည်": {"ရှည်လျားစွာ"},  # Reduplication: at length
+    "ဖြေးဖြေး": {"ဖြေးညှင်းစွာ"},  # Reduplication: gently/slowly
+    "လေးလေး": {"လေးနက်စွာ"},  # Reduplication: heavily/seriously
+    # --- Register-marked casual particles ---
+    # "ဟုတ်ဘူးလား" removed: meaning-reversing (adds negation prefix မ)
+    "တယ်နော်": {"ပါတယ်"},  # Casual tag: sentence-final confirmation
+    "ပဲလေ": {"ပါ"},  # Casual: emphatic assertion (double casual marker)
+    # --- Colloquial negation extensions (dropping ပါ) ---
+    "မဖြစ်ဘူး": {"မဖြစ်ပါဘူး"},  # Negation: won't happen
+    "မကြိုက်ဘူး": {"မကြိုက်ပါဘူး"},  # Negation: don't like
+    "မရှိဘူး": {"မရှိပါဘူး"},  # Negation: doesn't exist
+    # --- Colloquial existence/copula (dropping ပါ) ---
+    "ရှိတယ်": {"ရှိပါတယ်"},  # Existence: there is
+    "ဖြစ်မယ်": {"ဖြစ်ပါမယ်"},  # Copula: will be (future)
+    "ဟုတ်တယ်": {"ဟုတ်ပါတယ်"},  # Copula: that's right
+    # --- Discourse connectors (colloquial -> formal) ---
+    "ဒါပေမယ့်": {"သို့သော်"},  # Connector: but/however
+    "ပြီးတော့": {"ထို့နောက်"},  # Connector: and then
+    "ဒါကြောင့်": {"ထို့ကြောင့်"},  # Connector: therefore
+    # --- Additional verb contractions (dropping ပါ) ---
+    "ကြည့်တယ်": {"ကြည့်ပါတယ်"},  # Verb: look/watch
+    "နေတယ်": {"နေပါတယ်"},  # Verb: stay/live
+    "ပေးတယ်": {"ပေးပါတယ်"},  # Verb: give
 }
 
 # Reverse mapping: standard form -> set of colloquial variants
