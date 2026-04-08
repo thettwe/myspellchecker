@@ -713,6 +713,70 @@ class ErrorSuppressionMixin:
         if to_remove:
             errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
 
+    def _suppress_compound_split_valid_words(
+        self,
+        errors: list[Error],
+    ) -> None:
+        """Suppress invalid_word errors that split into all-valid dictionary words.
+
+        For each ``invalid_word`` error, segment the token into syllables and
+        attempt greedy dictionary-guided reassembly (longest valid word first,
+        left-to-right with up to 4-syllable lookahead).  If every resulting
+        segment is a valid dictionary word, the original token is a segmenter
+        merge of valid parts — not a real spelling error — so suppress it.
+        """
+        provider = getattr(self, "provider", None)
+        segmenter = getattr(self, "segmenter", None)
+        if provider is None or segmenter is None:
+            return
+
+        to_remove: set[int] = set()
+        for idx, err in enumerate(errors):
+            if err.error_type != ET_WORD:
+                continue
+            word = normalize(err.text)
+            if not word or len(word) < 4:
+                continue
+
+            # Segment into syllables
+            try:
+                syllables = segmenter.segment_syllables(word)
+            except Exception:  # noqa: BLE001
+                continue
+            if len(syllables) < 2:
+                continue
+
+            # Greedy reassembly: longest valid dictionary word first
+            parts: list[str] = []
+            i = 0
+            n = len(syllables)
+            all_valid = True
+            while i < n:
+                best_len = 0
+                upper = min(4, n - i)
+                for k in range(upper, 0, -1):
+                    candidate = "".join(syllables[i : i + k])
+                    if provider.is_valid_word(candidate):
+                        best_len = k
+                        break
+                if best_len > 0:
+                    parts.append("".join(syllables[i : i + best_len]))
+                    i += best_len
+                else:
+                    all_valid = False
+                    break
+
+            # If ALL parts are valid words AND the token has 3+ syllables,
+            # this is very likely a segmenter merge of valid words — not a
+            # real spelling error.  Require 3+ syllables because 2-syllable
+            # tokens have higher overlap with genuine compound typos where
+            # both syllables happen to be valid words individually.
+            if all_valid and len(parts) >= 2 and len(syllables) >= 4:
+                to_remove.add(idx)
+
+        if to_remove:
+            errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
+
     def _suppress_low_value_semantic_errors(
         self,
         errors: list[Error],

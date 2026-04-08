@@ -984,6 +984,10 @@ class SpellChecker(
         if self._semantic_checker is not None:
             self._suppress_invalid_word_via_mlm(errors, normalized_text)
 
+        # Post-validation compound splitting: suppress invalid_word errors
+        # that greedily split into all-valid dictionary words.
+        self._suppress_compound_split_valid_words(errors)
+
         return errors, rerank_telemetry
 
     def _build_check_response(
