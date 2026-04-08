@@ -160,6 +160,13 @@ class SyntacticValidationStrategy(ValidationStrategy):
                 ):
                     continue
 
+                # In fusion mode, low-confidence syntax rules (< 0.80) are
+                # FP-prone because the mutex no longer blocks them. Discount
+                # their confidence so the fusion arbiter filters them out.
+                effective_confidence = rule_confidence
+                if context.fusion_mode and rule_confidence < 0.80:
+                    effective_confidence = rule_confidence * 0.6
+
                 # Create syntax error
                 errors.append(
                     ContextError(
@@ -167,7 +174,7 @@ class SyntacticValidationStrategy(ValidationStrategy):
                         position=context.word_positions[idx],
                         error_type=ET_SYNTAX_ERROR,
                         suggestions=[suggestion],
-                        confidence=rule_confidence,
+                        confidence=effective_confidence,
                         probability=0.0,  # Rule-based doesn't use n-gram probability
                         prev_word=context.words[idx - 1] if idx > 0 else "",
                     )
@@ -177,7 +184,7 @@ class SyntacticValidationStrategy(ValidationStrategy):
                 pos = context.word_positions[idx]
                 context.existing_errors[pos] = ET_SYNTAX_ERROR
                 context.existing_suggestions[pos] = [suggestion]
-                context.existing_confidences[pos] = rule_confidence
+                context.existing_confidences[pos] = effective_confidence
 
         except (RuntimeError, ValueError, KeyError, IndexError, AttributeError) as e:
             self.logger.error(f"Error in syntactic validation: {e}", exc_info=True)
