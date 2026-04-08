@@ -394,22 +394,25 @@ class ValidationConfig(BaseModel):
     output_confidence_thresholds: dict[str, float] = Field(
         default={
             # --- Core error types ---
-            "confusable_error": 0.75,
+            "confusable_error": 0.78,
             "colloquial_info": 0.35,
-            "homophone_error": 0.72,
-            "question_structure": 0.68,
-            # --- Top FP producers (conservative gates) ---
-            "invalid_word": 0.60,
-            "dangling_word": 0.65,
-            "context_probability": 0.68,
-            "broken_compound": 0.70,
-            "tone_ambiguity": 0.72,
-            "collocation_error": 0.70,
-            "particle_confusion": 0.70,
-            "tense_mismatch": 0.72,
-            "register_mixing": 0.72,
-            "aspect_error": 0.72,
-            "negation_error": 0.72,
+            "homophone_error": 0.75,
+            "question_structure": 0.72,
+            # --- Top FP producers (aggressive gates) ---
+            "invalid_word": 0.75,
+            "dangling_word": 0.78,
+            "context_probability": 0.78,
+            "broken_compound": 0.80,
+            "tone_ambiguity": 0.80,
+            "collocation_error": 0.78,
+            "particle_confusion": 0.78,
+            "tense_mismatch": 0.80,
+            "register_mixing": 0.80,
+            "aspect_error": 0.80,
+            "negation_error": 0.80,
+            # --- Fusion-unblocked types (were mutex-suppressed in v1.3.0) ---
+            "syntax_error": 0.80,
+            "medial_compatibility_error": 0.82,
         },
         description=(
             "Per-error-type minimum confidence for the output filter. "
@@ -420,12 +423,15 @@ class ValidationConfig(BaseModel):
     secondary_confidence_thresholds: dict[str, float] = Field(
         default={
             "semantic_error": 0.85,
-            "pos_sequence_error": 0.70,
-            "syntax_error": 0.75,
+            "pos_sequence_error": 0.75,
+            "syntax_error": 0.78,
             # --- Cascade suppression for noisy detectors ---
-            "context_probability": 0.75,
-            "broken_compound": 0.78,
-            "dangling_word": 0.72,
+            "context_probability": 0.80,
+            "broken_compound": 0.82,
+            "dangling_word": 0.78,
+            "invalid_word": 0.80,
+            "syntax_error": 0.82,
+            "medial_compatibility_error": 0.85,
         },
         description=(
             "Cascade guard: suppress error types when the sentence already "
