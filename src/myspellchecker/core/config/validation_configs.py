@@ -398,20 +398,25 @@ class ValidationConfig(BaseModel):
             "colloquial_info": 0.35,
             "homophone_error": 0.75,
             "question_structure": 0.72,
-            # --- Top FP producers (aggressive gates) ---
+            # --- Top FP producers ---
             "invalid_word": 0.75,
-            "dangling_word": 0.78,
             "context_probability": 0.78,
             "broken_compound": 0.80,
             "tone_ambiguity": 0.80,
-            "collocation_error": 0.78,
             "particle_confusion": 0.78,
-            "tense_mismatch": 0.80,
             "register_mixing": 0.80,
             "aspect_error": 0.80,
             "negation_error": 0.80,
-            # --- Fusion-unblocked type (was mutex-suppressed in v1.3.0) ---
             "medial_compatibility_error": 0.82,
+            # --- Zero-TP detectors: disabled (precision=0.00 on benchmark) ---
+            "missing_conjunction": 1.0,
+            "dangling_word": 1.0,
+            "tense_mismatch": 1.0,
+            "syntax_error": 1.0,
+            # --- Weak detectors: heavily gated (precision<0.50) ---
+            "merged_sfp_conjunction": 0.95,
+            "collocation_error": 0.90,
+            "missing_asat": 0.90,
         },
         description=(
             "Per-error-type minimum confidence for the output filter. "
@@ -423,11 +428,8 @@ class ValidationConfig(BaseModel):
         default={
             "semantic_error": 0.85,
             "pos_sequence_error": 0.75,
-            # --- Cascade suppression for noisy detectors ---
-            "syntax_error": 0.78,
             "context_probability": 0.80,
             "broken_compound": 0.82,
-            "dangling_word": 0.78,
             "invalid_word": 0.80,
             "medial_compatibility_error": 0.85,
         },

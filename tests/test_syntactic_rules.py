@@ -1,4 +1,5 @@
 from myspellchecker.core.config import SpellCheckerConfig
+from myspellchecker.core.config.validation_configs import ValidationConfig
 from myspellchecker.core.constants import ValidationLevel
 from myspellchecker.core.spellchecker import SpellChecker
 from myspellchecker.grammar.engine import SyntacticRuleChecker
@@ -123,7 +124,18 @@ def test_spellchecker_integration():
     provider.set_pos("သွား", "V")
     provider.set_pos("ကျောင်း", "N")
 
-    config = SpellCheckerConfig(provider=provider, use_context_checker=True)
+    # Lower the syntax_error gate for this test (default is 1.0 = disabled
+    # because syntax_error has zero TPs on the production benchmark).
+    thresholds = ValidationConfig().output_confidence_thresholds.copy()
+    thresholds["syntax_error"] = 0.0
+    config = SpellCheckerConfig(
+        provider=provider,
+        use_context_checker=True,
+        validation=ValidationConfig(
+            output_confidence_thresholds=thresholds,
+            use_candidate_fusion=False,
+        ),
+    )
     checker = SpellChecker(config=config)
 
     # Mock segmenter to ensure consistent word segmentation for this test
