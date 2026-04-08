@@ -160,13 +160,12 @@ class SyntacticValidationStrategy(ValidationStrategy):
                 ):
                     continue
 
-                # In fusion mode, low-to-medium confidence syntax rules are
-                # FP-prone because the mutex no longer blocks them. Discount
-                # their confidence so the output gate filters them out.
+                # Low-to-medium confidence syntax rules are FP-prone.
+                # Discount their confidence so the output gate filters them.
                 # Reliable rules (medial confusion 0.90+, particle typo 0.85+)
                 # are above the 0.85 cutoff and pass through undiscounted.
                 effective_confidence = rule_confidence
-                if context.fusion_mode and rule_confidence <= 0.85:
+                if rule_confidence <= 0.85:
                     effective_confidence = rule_confidence * 0.6
 
                 # Create syntax error

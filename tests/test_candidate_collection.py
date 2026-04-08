@@ -57,7 +57,7 @@ class _ConfusableLikeStrategy(_ClaimingStrategy):
         if not context.words:
             return []
         pos = context.word_positions[0]
-        # Simulate the skip check (in real code, should_skip_position is used)
+        # Simulate the skip check (position already claimed by earlier strategy)
         if pos in context.existing_errors:
             return []
         return super().validate(context)

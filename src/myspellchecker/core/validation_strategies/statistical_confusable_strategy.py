@@ -20,7 +20,6 @@ from myspellchecker.core.validation_strategies.base import (
     ValidationContext,
     ValidationStrategy,
 )
-from myspellchecker.core.validation_strategies.conflict_rules import should_skip_position
 from myspellchecker.utils.logging_utils import get_logger
 
 if TYPE_CHECKING:
@@ -81,15 +80,7 @@ class StatisticalConfusableStrategy(ValidationStrategy):
         for i, word in enumerate(context.words):
             pos_i = context.word_positions[i]
 
-            # Skip already flagged — UNLESS the override matrix allows
-            # this strategy to re-diagnose the position (e.g., POS
-            # sequence errors that might actually be confusables).
-            if should_skip_position(
-                "StatisticalConfusableStrategy",
-                pos_i,
-                context.existing_errors,
-                fusion_mode=context.fusion_mode,
-            ):
+            if pos_i in context.existing_errors:
                 continue
             if context.is_name_mask[i]:
                 continue

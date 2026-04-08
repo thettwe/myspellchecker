@@ -421,7 +421,6 @@ class ContextValidator(Validator):
             word_positions=filtered_positions,
             is_name_mask=filtered_is_name,
             full_text=full_text,
-            fusion_mode=self._fusion_enabled,
         )
 
         if self._viterbi_tagger and len(filtered_words) >= 2:
