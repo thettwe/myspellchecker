@@ -1,13 +1,12 @@
 # mySpellChecker Benchmark
 
 Benchmark suite for evaluating the myspellchecker error detection and suggestion pipeline.
-1,138 hand-annotated Myanmar sentences covering syllable errors, word errors, grammar errors,
-register violations, and adversarial near-misses across 6 domains.
+1,146 hand-annotated Myanmar sentences covering syllable errors, word errors, grammar errors,
+confusable pairs, register violations, and adversarial near-misses across 7 domains.
 
 ## Benchmark Suite
 
-- **Version**: 1.0.0
-- **Total sentences**: 1,138 (444 clean, 694 with errors, 564 total error spans)
+- **Total sentences**: 1,146 (425 clean, 721 with errors, 743 error spans)
 - **Definition**: [`myspellchecker_benchmark.yaml`](myspellchecker_benchmark.yaml)
 - **Runner**: [`run_benchmark.py`](run_benchmark.py)
 
@@ -15,10 +14,22 @@ register violations, and adversarial near-misses across 6 domains.
 
 | Tier | Sentences | What It Tests |
 |------|----------:|---------------|
-| Tier 1 (Easy) | 182 | Invalid syllable structure |
-| Tier 2 (Medium) | 379 | Valid syllable, wrong word |
-| Tier 3 (Hard) | 133 | Valid word, wrong in context |
-| Clean | 444 | False positive resistance |
+| Tier 1 (Easy) | 185 | Invalid syllable structure |
+| Tier 2 (Medium) | 381 | Valid syllable, wrong word |
+| Tier 3 (Hard) | 136 | Valid word, wrong in context |
+| Clean | 425 | False positive resistance |
+
+### Domain Coverage
+
+| Domain | Sentences |
+|--------|----------:|
+| Conversational | 303 |
+| News | 218 |
+| Technical | 215 |
+| Academic | 198 |
+| Religious | 77 |
+| Literary | 72 |
+| General | 63 |
 
 ### Composite Score Formula
 
@@ -32,51 +43,27 @@ composite = 0.30 * F1
 
 Where `latency_normalized = min(p95 / 500ms, 1.0)`.
 
-## Current Results
+## Current Results (v1.4.0)
 
 ### Run Configuration
 
 - **Database**: `mySpellChecker_production.db` (565 MB, 601K words, full POS + enrichment tables)
+- **Semantic model**: v2.3-final (ONNX, MLM-based)
 - **Validation level**: word
 - **Platform**: macOS (Apple Silicon)
 
-> **Note:** The dictionary database and semantic model (v2.3) used in these benchmarks are **not included** in the library. They were built from our own proprietary corpus using the [data pipeline](https://docs.myspellchecker.com/data-pipeline/index) and [training pipeline](https://docs.myspellchecker.com/guides/training) respectively. Your results will vary depending on the dictionary database you build and the semantic model you train.
-
-### Overall Metrics (no semantic)
-
-| Metric | Value |
-|--------|------:|
-| **F1** | 96.2% |
-| **Precision** | 97.8% |
-| **Recall** | 94.7% |
-| True Positives | 445 |
-| False Positives | 10 |
-| False Negatives | 25 |
-| FPR (clean sentences) | 0.0% |
-| Top-1 Suggestion Acc | 85.2% |
-| MRR | 0.8731 |
+> **Note:** The dictionary database and semantic model used in these benchmarks are **not included** in the library. They were built from a proprietary corpus using the [data pipeline](https://docs.myspellchecker.com/data-pipeline/index) and [training pipeline](https://docs.myspellchecker.com/guides/training) respectively. Your results will vary depending on the dictionary database you build and the semantic model you train.
 
 ### Overall Metrics (with semantic v2.3)
 
 | Metric | Value |
 |--------|------:|
-| **F1** | 98.3% |
-| **Precision** | 97.1% |
-| **Recall** | 99.6% |
-| True Positives | 468 |
-| False Positives | 14 |
-| False Negatives | 2 |
-| FPR (clean sentences) | 0.0% |
-| Top-1 Suggestion Acc | 81.2% |
-| MRR | 0.8395 |
-
-### Per-Tier Breakdown (no semantic)
-
-| Tier | Errors | TP | FP | FN | Prec | Rec | F1 | Top-1 | MRR |
-|------|-------:|---:|---:|---:|-----:|----:|---:|------:|----:|
-| Tier 1 (Easy) | 160 | 152 | 3 | 8 | 98.1% | 95.0% | 96.5% | 85.5% | 0.876 |
-| Tier 2 (Medium) | 164 | 157 | 1 | 7 | 99.4% | 95.7% | 97.5% | 86.0% | 0.883 |
-| Tier 3 (Hard) | 146 | 136 | 6 | 10 | 95.8% | 93.2% | 94.4% | 83.8% | 0.859 |
+| **F1** | 71.1% |
+| **Precision** | 74.1% |
+| **Recall** | 68.2% |
+| FPR (clean sentences) | 18.6% |
+| Top-1 Suggestion Acc | 69.7% |
+| MRR | 0.7468 |
 
 ## How to Run
 
@@ -103,24 +90,14 @@ python benchmarks/run_benchmark.py \
   --db data/mySpellChecker_production.db \
   --ner
 
+# Enable candidate fusion (calibrated Noisy-OR voting)
+python benchmarks/run_benchmark.py \
+  --db data/mySpellChecker_production.db \
+  --fusion --fusion-threshold 0.5
+
 # JSON-only output (for automation)
 python benchmarks/run_benchmark.py \
   --db data/mySpellChecker_production.db \
-  --json-only
-
-# Gate/layer debug telemetry (per-strategy overlap + semantic blocking)
-python benchmarks/run_benchmark.py \
-  --db data/mySpellChecker_production.db \
-  --semantic /path/to/semantic-model/ \
-  --debug-strategy-gates \
-  --json-only
-
-# Ablation toggles (disable targeted rule groups without code edits)
-python benchmarks/run_benchmark.py \
-  --db data/mySpellChecker_production.db \
-  --disable-targeted-rerank-hints \
-  --disable-targeted-candidate-injections \
-  --disable-targeted-grammar-completion-templates \
   --json-only
 ```
 
@@ -134,6 +111,10 @@ python benchmarks/run_benchmark.py \
 | `--semantic` | Path to ONNX semantic model directory |
 | `--reranker` | Path to neural MLP reranker directory |
 | `--ner` | Enable NER-based FP suppression |
+| `--fusion` | Enable calibrated Noisy-OR candidate fusion |
+| `--fusion-threshold` | Fusion confidence threshold (default: 0.5) |
+| `--calibration` | Path to calibration YAML (used with `--fusion`) |
+| `--scope` | Comma-separated scopes to evaluate (default: `spelling`) |
 | `--json-only` | Output JSON only, no human-readable summary |
 | `--output` | Custom output directory for results JSON |
 | `--warmup` | Number of warmup runs (default: 3) |
@@ -198,8 +179,11 @@ python benchmarks/profile_db_queries.py \
   --output profile_report.json
 ```
 
-## Known Limitations
+### Audit Compound Redundancy
 
-1. **10 residual FPs** — false positives on edge-case constructions, documented and accepted.
-2. **25 FNs without semantic** — context-dependent errors requiring MLM; semantic model rescues 23 of 25.
-3. **Suggestion quality plateau** — remaining rank>1 cases are inherent morpheme/compound ambiguity where the same error pattern has conflicting gold corrections.
+Test which overlap-tagged compound confusion entries are truly redundant:
+
+```bash
+python benchmarks/test_redundancy_audit.py \
+  --db data/mySpellChecker_production.db
+```
