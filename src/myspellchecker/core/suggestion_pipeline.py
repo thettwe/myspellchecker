@@ -1791,9 +1791,7 @@ class SuggestionPipelineMixin:
         if not raw_candidates:
             return []
         # Normalize Suggestion objects to plain strings for distance/frequency ops
-        candidates = [
-            c.text if hasattr(c, "text") else str(c) for c in raw_candidates
-        ]
+        candidates = [c.text if hasattr(c, "text") else str(c) for c in raw_candidates]
 
         provider = self.provider
         ngram_checker = self.context_checker

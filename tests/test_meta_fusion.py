@@ -99,11 +99,14 @@ class TestMetaClassifierFusion:
     def test_filter_errors_removes_low_score(self, bundled_model):
         """filter_errors removes errors scoring below threshold."""
         errors = [
-            _make_error(confidence=0.95, suggestions=["fix"],
-                       source_strategy="StatisticalConfusableStrategy"),
+            _make_error(
+                confidence=0.95,
+                suggestions=["fix"],
+                source_strategy="StatisticalConfusableStrategy",
+            ),
             _make_error(confidence=0.1, suggestions=[]),
         ]
-        # Use model's configured threshold (0.2) — without provider,
+        # Use model's configured threshold (0.4) — without provider,
         # scores are lower but the gap between good/bad errors is real
         filtered = bundled_model.filter_errors(errors)
         # Should filter at least the worst error

@@ -368,8 +368,12 @@ class SpellChecker(
                     self._meta_classifier = MetaClassifierFusion.from_yaml(mc_path)
                 else:
                     self._meta_classifier = MetaClassifierFusion.from_bundled()
-            except Exception:
-                pass  # graceful degradation — no meta-classifier
+            except Exception as exc:
+                self.logger.warning(
+                    "Meta-classifier failed to load (%s); FP suppression disabled. "
+                    "Set use_meta_classifier=False to silence this warning.",
+                    exc,
+                )
 
     def _init_validators(
         self,
