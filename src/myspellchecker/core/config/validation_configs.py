@@ -394,51 +394,22 @@ class ValidationConfig(BaseModel):
     # colloquial_info notes use confidence 0.3 (informational, not errors)
     # and are suppressed by default; lower the threshold to surface them.
     output_confidence_thresholds: dict[str, float] = Field(
-        default={
-            # --- Core error types ---
-            "confusable_error": 0.78,
-            "colloquial_info": 0.35,
-            "homophone_error": 0.75,
-            "question_structure": 0.72,
-            # --- Top FP producers ---
-            "invalid_word": 0.75,
-            "context_probability": 0.78,
-            "broken_compound": 0.80,
-            "tone_ambiguity": 0.80,
-            "particle_confusion": 0.78,
-            "register_mixing": 0.80,
-            "aspect_error": 0.80,
-            "negation_error": 0.80,
-            "medial_compatibility_error": 0.82,
-            # --- Zero-TP detectors: disabled (precision=0.00 on benchmark) ---
-            "missing_conjunction": 1.0,
-            "dangling_word": 1.0,
-            "tense_mismatch": 1.0,
-            "syntax_error": 1.0,
-            # --- Weak detectors: heavily gated (precision<0.50) ---
-            "merged_sfp_conjunction": 0.95,
-            "collocation_error": 0.90,
-            "missing_asat": 0.90,
-        },
+        default={},
         description=(
             "Per-error-type minimum confidence for the output filter. "
             "Errors whose confidence is below the threshold for their type "
-            "are suppressed."
+            "are suppressed. Empty by default — the meta-classifier handles "
+            "FP suppression with learned per-type boundaries. Set explicit "
+            "thresholds here only if use_meta_classifier=False."
         ),
     )
     secondary_confidence_thresholds: dict[str, float] = Field(
-        default={
-            "semantic_error": 0.85,
-            "pos_sequence_error": 0.75,
-            "context_probability": 0.80,
-            "broken_compound": 0.82,
-            "invalid_word": 0.80,
-            "medial_compatibility_error": 0.85,
-        },
+        default={},
         description=(
             "Cascade guard: suppress error types when the sentence already "
-            "has a higher-confidence error of a different type. Prevents "
-            "cascade false positives from context strategies."
+            "has a higher-confidence error of a different type. Empty by "
+            "default — the meta-classifier's context features handle this. "
+            "Set explicit thresholds here only if use_meta_classifier=False."
         ),
     )
 
@@ -474,13 +445,13 @@ class ValidationConfig(BaseModel):
     )
 
     use_meta_classifier: bool = Field(
-        default=False,
+        default=True,
         description=(
-            "Use a learned meta-classifier for fusion instead of Noisy-OR. "
-            "When True (and meta_classifier_path is set or bundled model exists), "
-            "replaces the calibrated Noisy-OR pipeline with a logistic regression "
-            "model trained on benchmark data. Falls back to Noisy-OR if model "
-            "is unavailable."
+            "Use a learned meta-classifier as post-validation error filter. "
+            "When True, a logistic regression model scores every error and "
+            "suppresses likely false positives. Replaces hand-tuned "
+            "output_confidence_thresholds with learned per-type boundaries. "
+            "Falls back to manual thresholds if model is unavailable."
         ),
     )
     meta_classifier_path: str | None = Field(
