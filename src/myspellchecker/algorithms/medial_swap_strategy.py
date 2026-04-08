@@ -15,7 +15,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from pathlib import Path
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from myspellchecker.algorithms.ranker import SuggestionData
 from myspellchecker.algorithms.suggestion_strategy import (

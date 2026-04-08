@@ -25,9 +25,12 @@ from myspellchecker.core.constants import (
     PARTICLE_CONFUSABLES,
     VARIANT_BLOCKLIST,
 )
+from myspellchecker.core.loan_word_variants import (
+    get_loan_word_standard,
+    get_loan_word_variants,
+)
 from myspellchecker.core.response import ContextError, Error
 from myspellchecker.core.validation_strategies.base import ValidationContext, ValidationStrategy
-from myspellchecker.core.validation_strategies.conflict_rules import should_skip_position
 from myspellchecker.core.validation_strategies.confusable_helpers import (
     cap_threshold,
     is_db_suppressed,
@@ -219,12 +222,7 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if context.is_name_mask[i]:
                 occurrence_counts[word] = occurrence_counts.get(word, 0) + 1
                 continue
-            if should_skip_position(
-                "ConfusableSemanticStrategy",
-                position,
-                context.existing_errors,
-                fusion_mode=context.fusion_mode,
-            ):
+            if position in context.existing_errors:
                 occurrence_counts[word] = occurrence_counts.get(word, 0) + 1
                 continue
 
@@ -256,11 +254,6 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 raw_variants.update(self._near_synonym_pairs[word])
 
             # Loan word transliteration variants
-            from myspellchecker.core.loan_word_variants import (
-                get_loan_word_standard,
-                get_loan_word_variants,
-            )
-
             loan_variants = get_loan_word_variants(word)
             if loan_variants:
                 raw_variants.update(loan_variants)
@@ -316,15 +309,10 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 word = context.words[i]
                 position = context.word_positions[i]
 
-                # Skip names, existing errors (unless overridable), short words
+                # Skip names, existing errors, short words
                 if context.is_name_mask[i]:
                     continue
-                if should_skip_position(
-                    "ConfusableSemanticStrategy",
-                    position,
-                    context.existing_errors,
-                    fusion_mode=context.fusion_mode,
-                ):
+                if position in context.existing_errors:
                     continue
                 is_particle_confusable_flag = word in PARTICLE_CONFUSABLES
                 is_curated = word in self._curated_pairs
@@ -589,7 +577,7 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 # Apply sentence-final penalty -- near-synonyms at sentence
                 # boundary have less right context for MLM to differentiate.
                 if is_sentence_final:
-                    threshold += self._config.sentence_final_penalty
+                    threshold += self.sentence_final_penalty
                 threshold = cap_threshold(threshold, self.max_threshold)
 
                 logger.debug(

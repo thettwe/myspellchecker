@@ -80,6 +80,8 @@ _DEFAULT_SUFFIX_SAFE: frozenset[str] = _norm_set(
         "မယ်",
         "တယ",
         "မယ",  # asat-stripped
+        "ဘူး",
+        "ပါဘူး",  # negative endings
         "ပြီ",  # completive aspect (always sentence-final as suffix)
         "ပါပြီ",  # polite completive
     }
@@ -124,7 +126,7 @@ def _load_structure_data() -> tuple[frozenset[str], frozenset[str], tuple[str, .
         return _DEFAULT_CONJUNCTIONS, _DEFAULT_SUFFIX_SAFE, _DEFAULT_WORD_ORDER_VERB_ENDINGS
 
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)
@@ -327,9 +329,10 @@ class StructureDetectionMixin:
         # after a sentence-final particle without conjunction.
         # G02: Dangling word — content word after last sentence-final particle
         # Find the last sentence-final token that is NOT the last overall token
+        _MAX_DANGLING_SCAN = 5
         for i in range(len(tokens) - 2, -1, -1):
             if is_sent_final[i]:
-                for j in range(i + 1, len(tokens)):
+                for j in range(i + 1, min(len(tokens), i + 1 + _MAX_DANGLING_SCAN)):
                     next_token = tokens[j]
                     next_pos = token_positions[j]
                     # Strip trailing punctuation for frozenset lookups so
@@ -349,8 +352,14 @@ class StructureDetectionMixin:
                     # Multi-clause parataxis: if there's a subsequent SFP,
                     # this word starts a new clause, not dangling.
                     # e.g., "ခေါင်းကိုက်တယ် ဆေးရုံမှာ သွားခဲ့တယ်"
-                    has_later_sfp = any(is_sent_final[k] for k in range(j + 1, len(tokens)))
+                    has_later_sfp = any(
+                        is_sent_final[k] or "။" in tokens[k] for k in range(j + 1, len(tokens))
+                    )
                     if has_later_sfp:
+                        continue
+                    # Skip pure ASCII tokens (English/foreign words are not
+                    # dangling Myanmar content words).
+                    if next_stripped.isascii() and next_stripped.isalpha():
                         continue
                     # Suppress dangling-word FPs for known dictionary words
                     # and high-frequency particles/markers.

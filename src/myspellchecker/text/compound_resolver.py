@@ -42,7 +42,7 @@ DEFAULT_MORPHOTACTICS_PATH = Path(__file__).parent.parent / "rules" / "morphotac
 def _load_morphotactics_yaml() -> dict | None:
     """Load morphotactics.yaml if available."""
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         if DEFAULT_MORPHOTACTICS_PATH.exists():
             with open(DEFAULT_MORPHOTACTICS_PATH, encoding="utf-8") as f:

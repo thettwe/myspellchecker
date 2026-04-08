@@ -160,6 +160,14 @@ class SyntacticValidationStrategy(ValidationStrategy):
                 ):
                     continue
 
+                # Low-to-medium confidence syntax rules are FP-prone.
+                # Discount their confidence so the output gate filters them.
+                # Reliable rules (medial confusion 0.90+, particle typo 0.85+)
+                # are above the 0.85 cutoff and pass through undiscounted.
+                effective_confidence = rule_confidence
+                if rule_confidence <= 0.85:
+                    effective_confidence = rule_confidence * 0.6
+
                 # Create syntax error
                 errors.append(
                     ContextError(
@@ -167,7 +175,7 @@ class SyntacticValidationStrategy(ValidationStrategy):
                         position=context.word_positions[idx],
                         error_type=ET_SYNTAX_ERROR,
                         suggestions=[suggestion],
-                        confidence=rule_confidence,
+                        confidence=effective_confidence,
                         probability=0.0,  # Rule-based doesn't use n-gram probability
                         prev_word=context.words[idx - 1] if idx > 0 else "",
                     )
@@ -177,7 +185,7 @@ class SyntacticValidationStrategy(ValidationStrategy):
                 pos = context.word_positions[idx]
                 context.existing_errors[pos] = ET_SYNTAX_ERROR
                 context.existing_suggestions[pos] = [suggestion]
-                context.existing_confidences[pos] = rule_confidence
+                context.existing_confidences[pos] = effective_confidence
 
         except (RuntimeError, ValueError, KeyError, IndexError, AttributeError) as e:
             self.logger.error(f"Error in syntactic validation: {e}", exc_info=True)

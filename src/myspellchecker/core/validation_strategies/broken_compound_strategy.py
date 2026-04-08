@@ -22,7 +22,7 @@ import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from myspellchecker.core.config.algorithm_configs import BrokenCompoundStrategyConfig
 from myspellchecker.core.constants import ET_BROKEN_COMPOUND

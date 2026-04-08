@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-04-08
+
+### Added
+
+- **Meta-classifier post-filter**: Logistic regression model (41 features including one-hot error type, word frequency, context signals) replaces manual per-strategy confidence thresholds. FPR dropped from 34.5% to 18.6%.
+- **ConfusableSemanticStrategy** (priority 48): MLM-enhanced confusable detection using masked language model logit comparison with asymmetric thresholds.
+- **Kinzi and stacking variant support**: Confusable candidate generation now handles Kinzi (င်္) and consonant stacking patterns.
+- **Rich Suggestion objects**: `Suggestion` class with `confidence` and `source` metadata, backward-compatible (inherits from `str`). Errors serialize both `suggestions` (plain text) and `suggestions_detail` (with metadata).
+- **Per-request CheckOptions**: `CheckOptions` dataclass for runtime overrides (`context_checking`, `grammar_checking`, `max_suggestions`, `use_semantic`).
+- **Error.severity property**: Computed severity (error/warning/info) based on action type classification.
+- **MLM post-filter**: Suppress invalid_word and dangling_word false positives using semantic model logit validation.
+- **Expanded confusable pairs**: 87 to 124+ curated pairs with 9 linguistics-audit additions.
+- **Expanded colloquial variants**: 83 to 91 entries covering verb aspect contractions, modal forms, reduplication extensions, negation extensions, and copula forms. Removed 20 standard modern Burmese words (demonstratives, question words, discourse connectors) that were incorrectly classified as colloquial.
+- **Homophone morphological guard**: Expanded from negation prefix "မ" only to 2 prefixes (မ, အ) plus 4 right-context compound suffixes (ရေး, ရာ, သား, သူ) for better homophone disambiguation.
+- **Candidate fusion enabled by default**: Calibrated Noisy-OR voting pipeline is now the default detection mode.
+
+### Changed
+
+- **Config split**: `algorithm_configs.py` (3,002 lines) split into 4 focused modules — `algorithm_configs.py` (core), `text_configs.py`, `strategy_configs.py`, `infra_configs.py`. All existing imports continue to work via re-exports.
+- **Benchmark consolidated**: Merged expanded benchmark into main file (1,138 → 1,146 sentences), fixed 18 duplicate IDs, deleted orphaned `myspellchecker_benchmark_expanded.yaml` and `clean_corpus.yaml`.
+- Confidence gates expanded to 15 error types for FPR reduction.
+- Zero-TP detectors disabled, weak detectors heavily gated.
+- Syntax fusion discount widened to rules with confidence ≤0.85.
+- Mutex/override infrastructure fully removed (`conflict_rules.py`, `fusion_mode` flag, `should_skip_position()`).
+- 19 mislabeled benchmark sentences re-labeled as not-clean.
+
+### Fixed
+
+- MLM threshold comparison now operates in logit space (was incorrectly using probability space).
+- `context_checking=False` in CheckOptions now preserves word validation instead of skipping all validation.
+- Suggestion objects properly converted to strings in reranker feature extraction.
+- Loan word variants import hoisted to module level to avoid repeated lazy loading.
+- Sentence-final penalty bypass fixed for edge cases.
+- Long verb chains reassembled correctly, dangling particle scan capped.
+- 4-syllable all-valid tokens skipped in word validation (segmenter merge artifacts).
+- Invalid_word and dangling_word FPs reduced via post-validation compound splitting.
+
 ## [1.3.0] - 2026-04-06
 
 ### Added

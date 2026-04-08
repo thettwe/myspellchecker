@@ -374,7 +374,7 @@ class TestGetThreshold:
         return ConfusableSemanticStrategy(**defaults)
 
     def test_default_threshold(self):
-        """Default base threshold is 3.0."""
+        """Explicit logit_diff_threshold=3.0 is respected."""
         strategy = self._make_strategy(logit_diff_threshold=3.0)
         threshold, _ = strategy._get_threshold(
             "word",
@@ -385,7 +385,7 @@ class TestGetThreshold:
         assert threshold == 3.0
 
     def test_high_freq_threshold(self):
-        """High-frequency words get threshold 6.0."""
+        """Explicit high_freq_logit_diff=6.0 is respected."""
         strategy = self._make_strategy(high_freq_logit_diff=6.0)
         threshold, _ = strategy._get_threshold(
             "word",
@@ -537,7 +537,7 @@ class TestGetThreshold:
         )
         # Hard block disabled: high but finite threshold
         assert threshold < float("inf")
-        assert threshold >= 5.0  # base (3.0) + visarga_penalty (2.0)
+        assert threshold >= 4.5  # base (2.5) + visarga_penalty (2.0)
 
     def test_high_freq_visarga_pair_hard_block_when_enabled(self):
         """High-freq visarga pair returns inf when hard block is enabled."""
@@ -722,10 +722,10 @@ class TestFindBestVariant:
         )
 
         pred_map = {word: 19.0, variant: 10.0}
-        # logit_diff = 5.0 sits between base threshold (4.5) and
-        # base + non_boundary_penalty (5.5), so boundary passes but
+        # logit_diff = 4.0 sits between base threshold (3.5) and
+        # base + non_boundary_penalty (4.5), so boundary passes but
         # non-boundary does not.
-        explicit_scores = {word: 1.0, variant: 6.0}
+        explicit_scores = {word: 1.0, variant: 5.0}
 
         boundary_variant = strategy._find_best_variant(
             word=word,

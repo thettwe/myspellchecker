@@ -42,7 +42,6 @@ from .pipeline_config_unified import DuckDBResourceConfig
 __all__ = [
     "DuckDBNgramStore",
     "FrequencyBuilder",
-    "set_allow_extended_myanmar",
 ]
 
 # Module-level logger for standalone functions
@@ -70,25 +69,6 @@ _SYLLABLE_REJECT_PATTERNS = [
     _REJECT_REPEATED,
     _REJECT_SINGLE_CONSONANT,
 ]
-
-
-def set_allow_extended_myanmar(allow: bool) -> None:
-    """Configure Extended Myanmar character handling for frequency builder.
-
-    .. deprecated::
-        Set ``PipelineConfig.allow_extended_myanmar`` instead and pass the
-        config to ``Pipeline``.  This function will be removed in a future
-        release.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_allow_extended_myanmar() is deprecated. "
-        "Use PipelineConfig.allow_extended_myanmar instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.allow_extended_myanmar = allow
 
 
 # SQL injection prevention for DuckDB queries

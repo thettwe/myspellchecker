@@ -59,6 +59,12 @@ _CONSONANT_END = 0x1021
 _VIRAMA = "\u1039"  # ္ (stacker, creates consonant clusters)
 _ASAT = "\u103a"  # ် (killed consonant, visible in standalone form)
 
+# Nga consonant (U+1004) for Kinzi detection
+_NGA = "\u1004"  # င
+
+# Kinzi sequence: nga + asat + virama (င်္)
+_KINZI_SEQ = _NGA + _ASAT + _VIRAMA
+
 # ---------------------------------------------------------------------------
 # Confusion pair definitions (single source of truth)
 # ---------------------------------------------------------------------------
@@ -398,6 +404,60 @@ def _get_stacking_variants(word: str) -> set[str]:
     return variants
 
 
+def _get_kinzi_variants(word: str) -> set[str]:
+    """
+    Generate variants by adding or removing Kinzi (င်္).
+
+    Kinzi is a Myanmar orthographic prefix where nga (င) stacks above
+    the following consonant via virama.  It is encoded as:
+        nga(U+1004) + asat(U+103A) + virama(U+1039) + consonant
+
+    The most common Myanmar spelling error is omitting the Kinzi
+    (dropping the virama), writing e.g. အင်ဂလိပ် instead of အင်္ဂလိပ်.
+
+    Handles two patterns per-position:
+    - Kinzi removal: nga+asat+virama+C → nga+asat+C  (correct → error)
+    - Kinzi insertion: nga+asat+C → nga+asat+virama+C  (error → correct)
+    """
+    variants: set[str] = set()
+    normalized = unicodedata.normalize("NFC", word)
+    n = len(normalized)
+
+    for i in range(n):
+        if normalized[i] != _NGA:
+            continue
+
+        # Pattern 1: Kinzi removal — find nga+asat+virama+consonant,
+        # replace with nga+asat+consonant (drop the virama).
+        if (
+            i + 3 < n
+            and normalized[i + 1] == _ASAT
+            and normalized[i + 2] == _VIRAMA
+            and _CONSONANT_START <= ord(normalized[i + 3]) <= _CONSONANT_END
+        ):
+            variant = normalized[: i + 2] + normalized[i + 3 :]
+            variants.add(variant)
+
+        # Pattern 2: Kinzi insertion — find nga+asat+consonant (not
+        # already a Kinzi).  Pattern 1 requires virama at i+2; here we
+        # require a consonant at i+2, so the two patterns are mutually
+        # exclusive.  Insert virama to create Kinzi.
+        if (
+            i + 2 < n
+            and normalized[i + 1] == _ASAT
+            and _CONSONANT_START <= ord(normalized[i + 2]) <= _CONSONANT_END
+        ):
+            # Skip if the consonant at i+2 already stacks with something
+            # (i.e., i+3 is virama) — that's a stacking pattern, not a
+            # Kinzi insertion candidate.
+            if i + 3 < n and normalized[i + 3] == _VIRAMA:
+                continue
+            variant = normalized[: i + 2] + _VIRAMA + normalized[i + 2 :]
+            variants.add(variant)
+
+    return variants
+
+
 def generate_myanmar_variants(word: str) -> set[str]:
     """
     Generate Myanmar-specific variant candidates without requiring a PhoneticHasher.
@@ -441,6 +501,9 @@ def generate_myanmar_variants(word: str) -> set[str]:
 
     # 7. Stacking repair (asat ↔ virama)
     variants.update(_get_stacking_variants(word))
+
+    # 8. Kinzi variants (င်္ add/remove)
+    variants.update(_get_kinzi_variants(word))
 
     # Normalize all variants to canonical form
     variants = {normalize(v) for v in variants}
@@ -490,6 +553,9 @@ def generate_confusable_variants(word: str, hasher: PhoneticHasher) -> set[str]:
 
     # 6. Stacking repair (asat ↔ virama)
     variants.update(_get_stacking_variants(word))
+
+    # 7. Kinzi variants (င်္ add/remove)
+    variants.update(_get_kinzi_variants(word))
 
     # Normalize all variants -- medial/tone insertions can produce
     # non-canonical character sequences (e.g., dot-below before asat)

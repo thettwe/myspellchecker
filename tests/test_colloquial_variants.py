@@ -52,12 +52,9 @@ class TestColloquialDataStructures:
         assert "ကျမ" in COLLOQUIAL_SUBSTITUTIONS
         assert "ကျွန်မ" in COLLOQUIAL_SUBSTITUTIONS["ကျမ"]
 
-        # Common word colloquialisms
-        assert "အဲ" in COLLOQUIAL_SUBSTITUTIONS
-        assert "ထို" in COLLOQUIAL_SUBSTITUTIONS["အဲ"]
-
-        assert "ဘယ်လို" in COLLOQUIAL_SUBSTITUTIONS
-        assert "မည်သို့" in COLLOQUIAL_SUBSTITUTIONS["ဘယ်လို"]
+        # Verb contractions (ပါ-dropping)
+        assert "လုပ်တယ်" in COLLOQUIAL_SUBSTITUTIONS
+        assert "လုပ်ပါတယ်" in COLLOQUIAL_SUBSTITUTIONS["လုပ်တယ်"]
 
 
 class TestIsColloquialVariant:
@@ -68,8 +65,8 @@ class TestIsColloquialVariant:
         assert is_colloquial_variant("ကျနော်") is True
         assert is_colloquial_variant("ကျမ") is True
         assert is_colloquial_variant("မင်း") is True
-        assert is_colloquial_variant("အဲ") is True
-        assert is_colloquial_variant("ဘယ်လို") is True
+        assert is_colloquial_variant("လုပ်တယ်") is True
+        assert is_colloquial_variant("အရမ်း") is True
 
     def test_standard_words_return_false(self):
         """Test standard (non-colloquial) words return False."""
@@ -100,8 +97,8 @@ class TestGetStandardForms:
         standards = get_standard_forms("ကျမ")
         assert "ကျွန်မ" in standards
 
-        standards = get_standard_forms("အဲ")
-        assert "ထို" in standards
+        standards = get_standard_forms("လုပ်တယ်")
+        assert "လုပ်ပါတယ်" in standards
 
     def test_informal_pronouns_map_to_multiple_standards(self):
         """Test very informal pronouns can map to multiple standards."""
@@ -314,15 +311,15 @@ class TestWordValidatorColloquialCheck:
 
     def test_word_validator_strict_returns_error(self, word_validator_strict):
         """Test WordValidator strict mode returns error for colloquial words."""
-        result = word_validator_strict._check_colloquial_variant("အဲ", 0)
+        result = word_validator_strict._check_colloquial_variant("ကျနော်", 0)
 
         assert result is not None
         assert result.error_type == ErrorType.COLLOQUIAL_VARIANT.value
-        assert "ထို" in result.suggestions
+        assert "ကျွန်တော်" in result.suggestions
 
     def test_word_validator_lenient_returns_info(self, word_validator_lenient):
         """Test WordValidator lenient mode returns info for colloquial words."""
-        result = word_validator_lenient._check_colloquial_variant("အဲ", 0)
+        result = word_validator_lenient._check_colloquial_variant("ကျနော်", 0)
 
         assert result is not None
         assert result.error_type == ErrorType.COLLOQUIAL_INFO.value
@@ -345,25 +342,18 @@ class TestColloquialVariantExamples:
         assert is_colloquial_variant("မင်း") is True
         assert "သင်" in get_standard_forms("မင်း")
 
-    def test_demonstrative_colloquialisms(self):
-        """Test demonstrative colloquialisms are detected correctly."""
-        # That (colloquial -> formal)
-        assert is_colloquial_variant("အဲ") is True
-        assert "ထို" in get_standard_forms("အဲ")
+    def test_demonstratives_are_not_colloquial(self):
+        """Standard modern demonstratives should NOT be flagged as colloquial."""
+        # These are default, unmarked modern Burmese — not colloquial
+        assert is_colloquial_variant("ဒီ") is False
+        assert is_colloquial_variant("အဲ") is False
+        assert is_colloquial_variant("အဲဒါ") is False
 
-        # That thing (colloquial -> formal)
-        assert is_colloquial_variant("အဲဒါ") is True
-        assert "ထိုအရာ" in get_standard_forms("အဲဒါ")
-
-    def test_question_word_colloquialisms(self):
-        """Test question word colloquialisms are detected correctly."""
-        # How (colloquial -> formal)
-        assert is_colloquial_variant("ဘယ်လို") is True
-        assert "မည်သို့" in get_standard_forms("ဘယ်လို")
-
-        # Why (colloquial -> formal)
-        assert is_colloquial_variant("ဘာကြောင့်") is True
-        assert "အဘယ်ကြောင့်" in get_standard_forms("ဘာကြောင့်")
+    def test_question_words_are_not_colloquial(self):
+        """Standard modern question words should NOT be flagged as colloquial."""
+        assert is_colloquial_variant("ဘယ်လို") is False
+        assert is_colloquial_variant("ဘာ") is False
+        assert is_colloquial_variant("ဘယ်") is False
 
     def test_adverb_colloquialisms(self):
         """Test adverb colloquialisms are detected correctly."""

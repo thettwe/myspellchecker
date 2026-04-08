@@ -91,7 +91,10 @@ class TestContextValidatorValidate:
         # Use real config instead of Mock to ensure proper attribute access
         config = SpellCheckerConfig(
             use_ner=False,
-            validation=ValidationConfig(raise_on_strategy_error=False),
+            validation=ValidationConfig(
+                raise_on_strategy_error=False,
+                use_candidate_fusion=False,
+            ),
         )
 
         mock_segmenter = Mock()
@@ -239,7 +242,10 @@ class TestContextValidatorValidateSentence:
         # Use real config instead of Mock to ensure proper attribute access
         config = SpellCheckerConfig(
             use_ner=False,
-            validation=ValidationConfig(raise_on_strategy_error=False),
+            validation=ValidationConfig(
+                raise_on_strategy_error=False,
+                use_candidate_fusion=False,
+            ),
         )
 
         mock_segmenter = Mock()
@@ -271,7 +277,10 @@ class TestContextValidatorValidateSentence:
         # Use real config instead of Mock to ensure proper attribute access
         config = SpellCheckerConfig(
             use_ner=False,
-            validation=ValidationConfig(raise_on_strategy_error=False),
+            validation=ValidationConfig(
+                raise_on_strategy_error=False,
+                use_candidate_fusion=False,
+            ),
         )
 
         mock_segmenter = Mock()
@@ -303,7 +312,10 @@ class TestContextValidatorValidateSentence:
         # Use real config instead of Mock to ensure proper attribute access
         config = SpellCheckerConfig(
             use_ner=False,
-            validation=ValidationConfig(raise_on_strategy_error=False),
+            validation=ValidationConfig(
+                raise_on_strategy_error=False,
+                use_candidate_fusion=False,
+            ),
         )
 
         mock_segmenter = Mock()
@@ -351,7 +363,10 @@ class TestContextValidatorValidateSentence:
         # Use real config instead of Mock to ensure proper attribute access
         config = SpellCheckerConfig(
             use_ner=False,
-            validation=ValidationConfig(raise_on_strategy_error=False),
+            validation=ValidationConfig(
+                raise_on_strategy_error=False,
+                use_candidate_fusion=False,
+            ),
         )
 
         mock_segmenter = Mock()

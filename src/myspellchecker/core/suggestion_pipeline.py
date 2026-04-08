@@ -1787,9 +1787,11 @@ class SuggestionPipelineMixin:
         if not error_word:
             return []
 
-        candidates = error.suggestions
-        if not candidates:
+        raw_candidates = error.suggestions
+        if not raw_candidates:
             return []
+        # Normalize Suggestion objects to plain strings for distance/frequency ops
+        candidates = [c.text if hasattr(c, "text") else str(c) for c in raw_candidates]
 
         provider = self.provider
         ngram_checker = self.context_checker

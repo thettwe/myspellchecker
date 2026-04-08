@@ -20,7 +20,7 @@ Environment Variable Mapping:
 
     POS Tagger Settings:
         MYSPELL_POS_TAGGER_TYPE: POS tagger type (rule_based, transformer, viterbi)
-        MYSPELL_POS_TAGGER_BEAM_WIDTH: Beam width for Viterbi tagger (integer)
+        MYSPELL_POS_TAGGER_BEAM_WIDTH: Viterbi beam width (integer)
         MYSPELL_POS_TAGGER_MODEL_NAME: Transformer model name (string)
 
     SymSpell Settings:
@@ -151,7 +151,7 @@ def load_config_from_file(path: str | Path) -> dict[str, Any]:
     if path.suffix in [".yaml", ".yml"]:
         if not is_yaml_available():
             raise ImportError("PyYAML is required to load YAML config files")
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
@@ -218,7 +218,7 @@ def init_config_file(path: str | Path | None = None, *, force: bool = False) -> 
     if config_path.suffix in [".yaml", ".yml"]:
         if not is_yaml_available():
             raise ImportError("PyYAML is required to create YAML config files")
-        import yaml  # type: ignore[import-untyped]
+        import yaml
 
         with open(config_path, "w", encoding="utf-8") as f:
             yaml.dump(default_config, f, default_flow_style=False)
@@ -405,7 +405,7 @@ class ConfigLoader:
             ValueError: If invalid YAML content
         """
         try:
-            import yaml  # type: ignore[import-untyped]
+            import yaml
         except ImportError as err:
             raise ImportError(
                 "PyYAML is required to load YAML configuration files. "
@@ -489,8 +489,8 @@ class ConfigLoader:
             # POS tagger settings
             "POS_TAGGER_TYPE": ("pos_tagger.tagger_type", str),
             "POS_TAGGER_BEAM_WIDTH": (
-                "pos_tagger.beam_width",
-                lambda v: self._parse_int_min(v, 1, "beam_width"),
+                "pos_tagger.viterbi_beam_width",
+                lambda v: self._parse_int_min(v, 1, "viterbi_beam_width"),
             ),
             "POS_TAGGER_MODEL_NAME": ("pos_tagger.model_name", str),
             # SymSpell settings

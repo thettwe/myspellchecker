@@ -43,8 +43,6 @@ from ._segmenter_config import (  # noqa: F401
     get_optimal_batch_size,
     get_optimal_worker_count,
     is_myanmar_token,
-    set_allow_extended_myanmar,
-    set_auto_detect_pre_segmented,
 )
 
 # Re-export everything from _segmenter_workers for backward compatibility

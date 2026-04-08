@@ -266,11 +266,11 @@ class ValidationConfig(BaseModel):
 
     # Confusable Semantic Detection (MLM-enhanced, priority 48)
     use_confusable_semantic: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable MLM-enhanced confusable detection (priority 48). "
             "Uses predict_mask() to detect valid-word confusables missed by n-gram. "
-            "Requires semantic model to be loaded. Opt-in due to inference cost."
+            "Requires semantic model to be loaded."
         ),
     )
     confusable_semantic_confidence: float = Field(
@@ -285,11 +285,12 @@ class ValidationConfig(BaseModel):
         description="Number of top predictions to request from predict_mask.",
     )
     confusable_semantic_logit_diff: float = Field(
-        default=3.0,
+        default=2.5,
         ge=0.0,
         description=(
-            "Default logit diff threshold (~20x probability ratio). "
-            "Variant must score this much higher than current word."
+            "Default logit diff threshold (~12x probability ratio). "
+            "Variant must score this much higher than current word. "
+            "Lowered from 3.0 to improve confusable recall."
         ),
     )
     confusable_semantic_logit_diff_medial: float = Field(
@@ -314,11 +315,12 @@ class ValidationConfig(BaseModel):
         description="Word frequency above which the high-freq logit diff applies.",
     )
     confusable_semantic_high_freq_logit_diff: float = Field(
-        default=6.0,
+        default=3.5,
         ge=0.0,
         description=(
-            "Logit diff threshold for high-frequency words (~403x ratio). "
-            "Protects common particles/words against false positives."
+            "Logit diff threshold for high-frequency words (~33x ratio). "
+            "Protects common particles/words against false positives. "
+            "Lowered from 6.0 to enable detection of Kinzi and stacking confusables."
         ),
     )
     confusable_semantic_freq_ratio_penalty_high: float = Field(
@@ -392,41 +394,35 @@ class ValidationConfig(BaseModel):
     # colloquial_info notes use confidence 0.3 (informational, not errors)
     # and are suppressed by default; lower the threshold to surface them.
     output_confidence_thresholds: dict[str, float] = Field(
-        default={
-            "confusable_error": 0.75,
-            "colloquial_info": 0.35,
-            "homophone_error": 0.72,
-            "question_structure": 0.68,
-        },
+        default={},
         description=(
             "Per-error-type minimum confidence for the output filter. "
             "Errors whose confidence is below the threshold for their type "
-            "are suppressed."
+            "are suppressed. Empty by default — the meta-classifier handles "
+            "FP suppression with learned per-type boundaries. Set explicit "
+            "thresholds here only if use_meta_classifier=False."
         ),
     )
     secondary_confidence_thresholds: dict[str, float] = Field(
-        default={
-            "semantic_error": 0.85,
-            "pos_sequence_error": 0.70,
-            "syntax_error": 0.75,
-        },
+        default={},
         description=(
             "Cascade guard: suppress error types when the sentence already "
-            "has a higher-confidence error of a different type. Prevents "
-            "cascade false positives from context strategies."
+            "has a higher-confidence error of a different type. Empty by "
+            "default — the meta-classifier's context features handle this. "
+            "Set explicit thresholds here only if use_meta_classifier=False."
         ),
     )
 
     # -- Candidate fusion (voting architecture) --
     use_candidate_fusion: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable calibrated Noisy-OR candidate fusion instead of mutex-based "
             "winner selection. When True, all strategies may fire at every position "
             "(mutex bypass), fast-path exit is automatically disabled, and the "
             "arbiter uses calibrated confidence fusion "
             "across independence clusters to determine which errors to emit. "
-            "When False (default), the v1.2 mutex-and-shadow-mode behaviour is used."
+            "When False, the v1.2 mutex-and-shadow-mode behaviour is used."
         ),
     )
     fusion_confidence_threshold: float = Field(
@@ -445,6 +441,26 @@ class ValidationConfig(BaseModel):
             "and reliability weights, as produced by train_calibrators.py. "
             "When set and use_candidate_fusion=True, the fusion pipeline "
             "uses data-driven calibration instead of bootstrap weights."
+        ),
+    )
+
+    use_meta_classifier: bool = Field(
+        default=True,
+        description=(
+            "Use a learned meta-classifier as post-validation error filter. "
+            "When True, a logistic regression model scores every error and "
+            "suppresses likely false positives. Replaces hand-tuned "
+            "output_confidence_thresholds with learned per-type boundaries. "
+            "Falls back to manual thresholds if model is unavailable."
+        ),
+    )
+    meta_classifier_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to a YAML file with meta-classifier coefficients, "
+            "as produced by train_meta_classifier.py. When None and "
+            "use_meta_classifier=True, attempts to load from bundled "
+            "rules/meta_classifier.yaml."
         ),
     )
 
@@ -635,6 +651,28 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence score for broken compound errors.",
+    )
+
+    # MLM post-filter for invalid_word / dangling_word FP suppression
+    mlm_plausibility_threshold: float = Field(
+        default=3.0,
+        ge=-20.0,
+        le=20.0,
+        description=(
+            "Minimum MLM logit score for the original word to suppress an "
+            "invalid_word/dangling_word error. predict_mask returns raw logits "
+            "(typical range 5-15 for top predictions). Higher values are more "
+            "conservative (fewer FPs suppressed). A value of 3.0 suppresses "
+            "only words the model is reasonably confident about."
+        ),
+    )
+    mlm_plausibility_top_k: int = Field(
+        default=10,
+        ge=1,
+        description=(
+            "Number of top MLM predictions to check when evaluating "
+            "contextual plausibility for invalid_word/dangling_word errors."
+        ),
     )
 
 

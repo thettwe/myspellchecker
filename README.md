@@ -5,8 +5,8 @@
 [![PyPI](https://img.shields.io/pypi/v/myspellchecker)](https://pypi.org/project/myspellchecker/)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Coverage](https://img.shields.io/badge/coverage-74%25-green)](tests/)
-[![Tests](https://img.shields.io/badge/tests-4%2C658_passed-brightgreen)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-75%25-green)](tests/)
+[![Tests](https://img.shields.io/badge/tests-4%2C785_passed-brightgreen)](tests/)
 
 ## Overview
 
@@ -403,43 +403,26 @@ See the [Validation Strategies Guide](https://docs.myspellchecker.com/features/v
 
 ## Benchmark Results
 
-Tested on a 1,138-sentence benchmark suite (444 clean, 694 with errors, 564 error spans) covering 3 difficulty tiers and 6 domains. The dictionary database and semantic model are **not bundled** with the library — users build or provide their own.
+Tested on a 1,146-sentence benchmark suite (425 clean, 721 with errors, 743 error spans) covering 3 difficulty tiers and 7 domains. The dictionary database and semantic model are **not bundled** with the library — users build or provide their own.
 
 **Test environment:**
 - Dictionary: Production SQLite database (565 MB, 601K words, 2.2M bigrams, enrichment tables)
 - Semantic model: Custom RoBERTa MLM (6L/768H, ONNX quantized, 71 MB)
 - Hardware: Apple Silicon, Python 3.14
-- Benchmark: [`benchmarks/myspellchecker_benchmark.yaml`](benchmarks/) (1,138 sentences)
+- Benchmark: [`benchmarks/myspellchecker_benchmark.yaml`](benchmarks/) (1,146 sentences)
 
-### With Semantic Model
-
-| Metric | Value |
-|--------|-------|
-| **F1 Score** | 98.3% |
-| **Precision** | 97.1% |
-| **Recall** | 99.6% |
-| **False Positives** | 14 (0% on clean sentences) |
-| **False Negatives** | 2 |
-| **Top-1 Suggestion Accuracy** | 81.2% |
-| **MRR** | 0.8395 |
-| **Mean Latency** | 35.2 ms/sentence |
-| **P50 Latency** | 32.1 ms |
-
-### Without Semantic Model
+### With Semantic Model (v2.3)
 
 | Metric | Value |
 |--------|-------|
-| **F1 Score** | 96.2% |
-| **Precision** | 97.8% |
-| **Recall** | 94.7% |
-| **False Positives** | 10 (0% on clean sentences) |
-| **False Negatives** | 25 |
-| **Top-1 Suggestion Accuracy** | 85.2% |
-| **MRR** | 0.8731 |
-| **Mean Latency** | ~12 ms/sentence |
-| **P50 Latency** | ~7 ms |
+| **F1 Score** | 71.1% |
+| **Precision** | 74.1% |
+| **Recall** | 68.2% |
+| **FPR** | 18.6% of clean sentences |
+| **Top-1 Suggestion Accuracy** | 69.7% |
+| **MRR** | 0.7468 |
 
-The semantic model adds ~23ms mean latency but boosts recall from 94.7% to 99.6% by catching 23 additional context-dependent errors that rule-based methods miss. Both modes maintain sub-35ms P50 latency suitable for interactive use.
+The benchmark covers 12 validation strategies across conversational, news, technical, academic, religious, literary, and general domains with sentences ranging from simple syllable errors to hard context-dependent confusables.
 
 ## Development
 
@@ -454,7 +437,7 @@ pip install -e ".[dev]"
 
 ### Testing
 
-The test suite has 4,658 tests across 213 files with 74% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
+The test suite has 4,785 tests with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
 
 ```bash
 # Run default test suite (~5 min, skips slow tests)

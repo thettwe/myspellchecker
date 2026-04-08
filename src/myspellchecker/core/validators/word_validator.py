@@ -32,8 +32,11 @@ from myspellchecker.utils.logging_utils import get_logger
 logger = get_logger(__name__)
 
 # Regex for stripping non-Myanmar punctuation attached to token boundaries.
-# Matches leading/trailing quotes, brackets, colons, etc.
-_BOUNDARY_PUNCT_RE = re.compile(r'^["\'"()\[\]{},;:\-–—/\\]+|["\'"()\[\]{},;:\-–—/\\]+$')
+# Matches leading/trailing quotes, brackets, colons, periods, etc.
+_BOUNDARY_PUNCT_RE = re.compile(
+    r'^["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+|'
+    r'["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+$'
+)
 
 # Informal pronouns that are register-critical -- colloquial_info should still
 # be emitted for these even when high-frequency, since they signal informal register.
@@ -578,6 +581,15 @@ class WordValidator(Validator):
             if stripped and stripped != word and self._is_myanmar_with_config(stripped):
                 word = stripped
 
+            # Skip mixed-script tokens where non-Myanmar characters dominate.
+            # Tokens like "။BYD" or "လက်ရှိ2" pass _is_myanmar_with_config because
+            # they contain some Myanmar chars, but are not real Myanmar words.
+            # Only applies when the token has BOTH Myanmar and non-Myanmar chars.
+            myanmar_chars = sum(1 for c in word if "\u1000" <= c <= "\u109f")
+            if myanmar_chars > 0 and myanmar_chars < len(word) * 0.5:
+                myanmar_word_idx += 1
+                continue
+
             syllables = self.segmenter.segment_syllables(word)
 
             # Skip segmenter artifacts: words starting with combining
@@ -606,6 +618,12 @@ class WordValidator(Validator):
             asat_freq_guard = self.config.validation.asat_freq_guard
             if len(syllables) >= 2:
                 valid_parts = sum(1 for s in syllables if self.word_repository.is_valid_word(s))
+                # For tokens with 4+ syllables where ALL are valid dictionary
+                # words, skip unconditionally — these are segmenter merges of
+                # valid words (verb chains, compound+particle), not real errors.
+                if valid_parts == len(syllables) and len(syllables) >= 4:
+                    myanmar_word_idx += 1
+                    continue
                 if valid_parts >= max(len(syllables) // 2, 1):
                     # Check whole word + asat
                     asat_form = word + "\u103a"

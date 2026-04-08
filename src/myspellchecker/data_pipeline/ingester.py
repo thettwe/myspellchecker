@@ -39,9 +39,6 @@ from .pipeline_config_unified import (
 
 __all__ = [
     "CorpusIngester",
-    "set_allow_extended_myanmar",
-    "set_deduplicate_lines",
-    "set_remove_segmentation_markers",
 ]
 
 # Lazy imports for heavy dependencies (pyarrow, rich)
@@ -101,78 +98,6 @@ INGESTER_MYANMAR_TEXT_THRESHOLD = 0.1
 
 # Module-level config for ingester's Myanmar text detection
 _ingester_zawgyi_config = ZawgyiConfig(myanmar_text_threshold=INGESTER_MYANMAR_TEXT_THRESHOLD)
-
-
-def set_allow_extended_myanmar(allow: bool) -> None:
-    """Configure Extended Myanmar character handling for data pipeline.
-
-    .. deprecated::
-        Set ``PipelineConfig.allow_extended_myanmar`` instead and pass the
-        config to ``Pipeline``.  This function will be removed in a future
-        release.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_allow_extended_myanmar() is deprecated. "
-        "Use PipelineConfig.allow_extended_myanmar instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.allow_extended_myanmar = allow
-
-    # Also sync with Cython module if available
-    try:
-        from myspellchecker.data_pipeline.ingester_c import set_allow_extended_myanmar_c
-
-        set_allow_extended_myanmar_c(allow)
-    except ImportError:
-        pass  # Cython module not available
-
-
-def set_remove_segmentation_markers(remove: bool) -> None:
-    """Configure word segmentation marker removal for data pipeline.
-
-    .. deprecated::
-        Set ``PipelineConfig.remove_segmentation_markers`` instead and pass
-        the config to ``Pipeline``.  This function will be removed in a
-        future release.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_remove_segmentation_markers() is deprecated. "
-        "Use PipelineConfig.remove_segmentation_markers instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.remove_segmentation_markers = remove
-
-    # Also sync with Cython module if available
-    try:
-        from myspellchecker.data_pipeline.ingester_c import set_remove_segmentation_markers_c
-
-        set_remove_segmentation_markers_c(remove)
-    except ImportError:
-        pass  # Cython module not available
-
-
-def set_deduplicate_lines(deduplicate: bool) -> None:
-    """Configure line-level deduplication for data pipeline.
-
-    .. deprecated::
-        Set ``PipelineConfig.deduplicate_lines`` instead and pass the
-        config to ``Pipeline``.  This function will be removed in a future
-        release.
-    """
-    import warnings
-
-    warnings.warn(
-        "set_deduplicate_lines() is deprecated. Use PipelineConfig.deduplicate_lines instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _flags.deduplicate_lines = deduplicate
 
 
 def _normalize_batch_py(batch: list[str]) -> list[tuple[str, bool]]:

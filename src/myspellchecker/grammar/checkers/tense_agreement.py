@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from myspellchecker.core.config.grammar_configs import TenseAgreementCheckerConfig
 from myspellchecker.core.constants import ET_TENSE_MISMATCH

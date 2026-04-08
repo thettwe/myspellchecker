@@ -478,7 +478,7 @@ class DefaultSegmenter(Segmenter):
             # segmenter merge of valid parts (e.g., compound with typo) and
             # the word validator handles it better as a single unit.
             has_oov_syllable = any(not self._word_repository.is_valid_word(s) for s in syllables)
-            if not has_oov_syllable:
+            if not has_oov_syllable and len(syllables) < 5:
                 result.append(token)
                 continue
 

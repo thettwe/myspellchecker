@@ -3,8 +3,8 @@ category: confusable_pairs
 description: Curated confusable word pairs for MLM-based real-word error detection
 metadata:
   created_date: '2026-03-18'
-  last_updated: '2026-04-05'
-  total_entries: 87
+  last_updated: '2026-04-08'
+  total_entries: 133
   source: Curated near-synonym and phonetic confusion patterns
 pairs:
 - word: ပျံ
@@ -498,19 +498,166 @@ pairs:
   confusion_type: medial
   bidirectional: true
   notes: 'Mined: overlap=0.784, freq ပီး=23733, freq ပြီး=1931804'
-exempt_pairs:
-- word: ဖေး
-  variant: ဘေး
-  reason: Loanword cafe (ကဖေး) -- aspiration swap produces valid but different word
-- word: ဘေး
-  variant: ဖေး
-  reason: Reverse direction of above
-- word: ထား
-  variant: တား
-  reason: Aspiration swap ထ↔တ -- both common verbs in similar syntactic slots
-- word: တား
-  variant: ထား
-  reason: Reverse direction of above
+# --- Kinzi omission pairs (kinzi dropped = common error) ---
+- word: အင်ဂလိပ်
+  correction: အင်္ဂလိပ်
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: English — Kinzi dropped. Correct freq=54168, error freq=0.
+- word: မင်ဂလာ
+  correction: မင်္ဂလာ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Auspiciousness/wedding — Kinzi dropped. Correct freq=37315, error freq=0.
+- word: ဘင်ဂလားဒေ့ရှ်
+  correction: ဘင်္ဂလားဒေ့ရှ်
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Bangladesh — Kinzi dropped. Correct freq=33322, error freq=0.
+- word: အင်ဂလန်
+  correction: အင်္ဂလန်
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: England — Kinzi dropped. Correct freq=29806, error freq=0.
+- word: သင်ဘော
+  correction: သင်္ဘော
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Ship — Kinzi dropped. Correct freq=29645, error freq=0.
+- word: အင်ဂါ
+  correction: အင်္ဂါ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Tuesday/Mars — Kinzi dropped. Correct freq=26814, error freq=77.
+- word: တနင်ဂနွေ
+  correction: တနင်္ဂနွေ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Sunday — Kinzi dropped. Correct freq=21746, error freq=0.
+- word: သင်ကြန်
+  correction: သင်္ကြန်
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Thingyan water festival — Kinzi dropped. Correct freq=18597, error freq=0.
+- word: အင်ကျီ
+  correction: အင်္ကျီ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Shirt — Kinzi dropped. Correct freq=16727, error freq=0.
+- word: သင်ကေတ
+  correction: သင်္ကေတ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Symbol/sign — Kinzi dropped. Correct freq=15700, error freq=0.
+- word: စင်ကာပူ
+  correction: စင်္ကာပူ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Singapore — Kinzi dropped. Note error form (29567) more frequent than correct
+    (15489).
+- word: သင်ချာ
+  correction: သင်္ချာ
+  confusion_type: kinzi_omission
+  bidirectional: true
+  notes: Mathematics — Kinzi dropped. Correct freq=9692, error freq=0.
+# --- Stacking error pairs (virama dropped to asat = common error) ---
+- word: ကုမ်ပဏီ
+  correction: ကုမ္ပဏီ
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Company — stacking dropped. Correct freq=210746, error freq=1984.
+- word: ပစ်စည်း
+  correction: ပစ္စည်း
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Goods/materials — stacking dropped. Correct freq=193812, error freq=69.
+- word: ကမ်ဘာ
+  correction: ကမ္ဘာ
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: World — stacking dropped. Correct freq=89717, error freq=1911.
+- word: တက်ကသိုလ်
+  correction: တက္ကသိုလ်
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: University — stacking dropped. Correct freq=99920, error freq=79.
+- word: မန်တလေး
+  correction: မန္တလေး
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Mandalay — stacking dropped. Correct freq=85996, error freq=1803.
+- word: မစ်စတာ
+  correction: မစ္စတာ
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Mr. — stacking dropped. Correct freq=74415, error freq=2212.
+- word: လက်ခဏာ
+  correction: လက္ခဏာ
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Characteristics — stacking dropped. Correct freq=39649, error freq=856.
+- word: ဗုဒ်ဓဘာသာ
+  correction: ဗုဒ္ဓဘာသာ
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Buddhism — stacking dropped. Correct freq=28375, error freq=665.
+- word: သတ်တု
+  correction: သတ္တု
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Metal/mineral — stacking dropped. Correct freq=25305, error freq=129.
+- word: အဓိပ်ပါယ်
+  correction: အဓိပ္ပါယ်
+  confusion_type: stacking_error
+  bidirectional: true
+  notes: Meaning — stacking dropped. Correct freq=24495, error freq=71.
+# --- High-frequency confusable pairs from linguistics audit ---
+- word: ပြော်
+  correction: ပျော်
+  confusion_type: medial
+  bidirectional: true
+  notes: say-variant vs happy — ya-yit↔ya-pin swap. Very high frequency.
+- word: ပြင်း
+  correction: ပြင်
+  confusion_type: visarga
+  bidirectional: true
+  notes: severe vs fix/repair — visarga difference.
+- word: ထိမ်း
+  correction: ထိန်း
+  confusion_type: nasal
+  bidirectional: true
+  notes: marry vs control — nasal confusion မ်↔န်. Culturally important vocabulary.
+- word: ချိမ်
+  correction: ချိန်
+  confusion_type: nasal
+  bidirectional: true
+  notes: silent vs time/weigh — nasal confusion မ်↔န်.
+- word: ကြိး
+  correction: ကြီး
+  confusion_type: vowel_length
+  bidirectional: true
+  notes: rope vs big — vowel length swap ိ↔ီ.
+- word: ကမ်း
+  correction: ကန်း
+  confusion_type: nasal
+  bidirectional: true
+  notes: shore/offer vs blind — nasal confusion မ်↔န်.
+- word: ဘုရာ
+  correction: ဘုရား
+  confusion_type: visarga
+  bidirectional: true
+  notes: pagoda/temple (missing visarga) — extremely common word.
+- word: ရွက်
+  correction: ရွတ်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: leaf vs recite — stop coda confusion က်↔တ်.
+- word: စိပ်
+  correction: စိတ်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: count beads vs mind — stop coda confusion ပ်↔တ်.
+# --- Homophone, medial swap, and aspiration confusable pairs ---
 - word: ကာ
   correction: ကား
   confusion_type: homophone_visarga
@@ -586,6 +733,19 @@ exempt_pairs:
   confusion_type: consonant_aspiration
   bidirectional: true
   notes: salt vs eat — aspiration confusion ဆ↔စ.
+exempt_pairs:
+- word: ဖေး
+  variant: ဘေး
+  reason: Loanword cafe (ကဖေး) -- aspiration swap produces valid but different word
+- word: ဘေး
+  variant: ဖေး
+  reason: Reverse direction of above
+- word: ထား
+  variant: တား
+  reason: Aspiration swap ထ↔တ -- both common verbs in similar syntactic slots
+- word: တား
+  variant: ထား
+  reason: Reverse direction of above
 exempt_suffix_pairs:
 - suffix_a: သည်
   suffix_b: သည့်
