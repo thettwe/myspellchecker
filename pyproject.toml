@@ -186,6 +186,7 @@ omit = [
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+extend-exclude = ["scripts", "plan"]
 
 [tool.ruff.lint]
 # Enable Pyflakes (F), pycodestyle (E, W), isort (I), and bugbear (B)
