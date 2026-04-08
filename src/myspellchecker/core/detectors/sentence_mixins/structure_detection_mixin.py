@@ -353,8 +353,7 @@ class StructureDetectionMixin:
                     # this word starts a new clause, not dangling.
                     # e.g., "ခေါင်းကိုက်တယ် ဆေးရုံမှာ သွားခဲ့တယ်"
                     has_later_sfp = any(
-                        is_sent_final[k] or "။" in tokens[k]
-                        for k in range(j + 1, len(tokens))
+                        is_sent_final[k] or "။" in tokens[k] for k in range(j + 1, len(tokens))
                     )
                     if has_later_sfp:
                         continue

@@ -677,7 +677,10 @@ class SpellChecker(
         # Phase 2: Run validation pipeline on normalized text.
         skip_context = options is not None and options.context_checking is False
         errors, layers_applied = self._run_validation(
-            normalized_text, level, use_semantic, prepared,
+            normalized_text,
+            level,
+            use_semantic,
+            prepared,
             skip_context=skip_context,
         )
 
@@ -828,7 +831,10 @@ class SpellChecker(
         """
         # Run validation layers on normalized text
         errors, layers_applied = self._run_validation_layers(
-            normalized_text, level, use_semantic, skip_context=skip_context,
+            normalized_text,
+            level,
+            use_semantic,
+            skip_context=skip_context,
         )
 
         # Remap pre-normalization error positions from original-text offsets

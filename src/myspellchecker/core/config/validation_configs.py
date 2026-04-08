@@ -266,11 +266,11 @@ class ValidationConfig(BaseModel):
 
     # Confusable Semantic Detection (MLM-enhanced, priority 48)
     use_confusable_semantic: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable MLM-enhanced confusable detection (priority 48). "
             "Uses predict_mask() to detect valid-word confusables missed by n-gram. "
-            "Requires semantic model to be loaded. Opt-in due to inference cost."
+            "Requires semantic model to be loaded."
         ),
     )
     confusable_semantic_confidence: float = Field(
@@ -285,11 +285,12 @@ class ValidationConfig(BaseModel):
         description="Number of top predictions to request from predict_mask.",
     )
     confusable_semantic_logit_diff: float = Field(
-        default=3.0,
+        default=2.5,
         ge=0.0,
         description=(
-            "Default logit diff threshold (~20x probability ratio). "
-            "Variant must score this much higher than current word."
+            "Default logit diff threshold (~12x probability ratio). "
+            "Variant must score this much higher than current word. "
+            "Lowered from 3.0 to improve confusable recall."
         ),
     )
     confusable_semantic_logit_diff_medial: float = Field(
@@ -314,11 +315,12 @@ class ValidationConfig(BaseModel):
         description="Word frequency above which the high-freq logit diff applies.",
     )
     confusable_semantic_high_freq_logit_diff: float = Field(
-        default=6.0,
+        default=3.5,
         ge=0.0,
         description=(
-            "Logit diff threshold for high-frequency words (~403x ratio). "
-            "Protects common particles/words against false positives."
+            "Logit diff threshold for high-frequency words (~33x ratio). "
+            "Protects common particles/words against false positives. "
+            "Lowered from 6.0 to enable detection of Kinzi and stacking confusables."
         ),
     )
     confusable_semantic_freq_ratio_penalty_high: float = Field(

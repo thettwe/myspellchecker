@@ -2198,10 +2198,10 @@ class ConfusableSemanticConfig(BaseModel):
     variant are legitimate dictionary words.
 
     Asymmetric thresholds protect against false positives:
-    - Default: logit_diff >= 3.0 (~20x probability ratio)
+    - Default: logit_diff >= 2.5 (~12x probability ratio)
     - Medial swap: logit_diff >= 2.0 (highest signal)
     - Current in top-K: logit_diff >= 5.0 (model already considers it)
-    - High-frequency: logit_diff >= 6.0 (protect common words)
+    - High-frequency: logit_diff >= 3.5 (~33x probability ratio)
     """
 
     model_config = ConfigDict(
@@ -2211,11 +2211,12 @@ class ConfusableSemanticConfig(BaseModel):
     )
 
     logit_diff_threshold: float = Field(
-        default=3.0,
+        default=2.5,
         ge=0.0,
         description=(
-            "Default logit diff threshold (~20x probability ratio). "
-            "Variant must score this much higher than current word."
+            "Default logit diff threshold (~12x probability ratio). "
+            "Variant must score this much higher than current word. "
+            "Lowered from 3.0 to improve confusable recall."
         ),
     )
     logit_diff_threshold_medial: float = Field(
@@ -2241,13 +2242,13 @@ class ConfusableSemanticConfig(BaseModel):
         description=("Word frequency above which the high-freq logit diff applies."),
     )
     high_freq_logit_diff: float = Field(
-        default=4.5,
+        default=3.5,
         ge=0.0,
         description=(
-            "Logit diff threshold for high-frequency words (~90x "
+            "Logit diff threshold for high-frequency words (~33x "
             "ratio). Protects common particles/words against FPs. "
-            "Lowered from 6.0 to catch medial ျ↔ြ confusion on "
-            "high-frequency pairs like ကျား/ကြား."
+            "Lowered from 4.5 to enable Kinzi and stacking confusable "
+            "detection on high-frequency Pali loanwords."
         ),
     )
     min_word_length: int = Field(
@@ -2389,9 +2390,10 @@ class ConfusableSemanticConfig(BaseModel):
     # --- Error budget and adjacency dampening ---
 
     error_budget_threshold: int = Field(
-        default=5,
+        default=10,
         ge=0,
-        description="Skip proactive scanning when existing errors reach this count.",
+        description="Skip proactive scanning when existing errors reach this count. "
+        "Raised from 5 to avoid premature semantic cutoff in error-rich text.",
     )
     adjacency_window: int = Field(
         default=3,
@@ -2495,12 +2497,13 @@ class ConfusableSemanticConfig(BaseModel):
 
     # Rate limiting
     max_semantic_checks_per_sentence: int = Field(
-        default=8,
+        default=15,
         ge=1,
         description=(
             "Maximum number of predict_mask calls per sentence. "
             "After this limit, remaining words are skipped. "
-            "The prewarm batch call does NOT count toward this limit."
+            "The prewarm batch call does NOT count toward this limit. "
+            "Raised from 8 to handle longer sentences."
         ),
     )
 

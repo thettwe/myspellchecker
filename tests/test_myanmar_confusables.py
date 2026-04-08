@@ -11,6 +11,7 @@ from myspellchecker.core.myanmar_confusables import (
     TONE_MARK_PAIRS,
     VOWEL_LENGTH_PAIRS,
     _get_aspiration_variants,
+    _get_kinzi_variants,
     _get_medial_variants,
     _get_nasal_variants,
     _get_stacking_variants,
@@ -218,3 +219,81 @@ class TestGenerateMyanmarVariants:
     def test_empty_word_returns_empty_set(self):
         variants = generate_myanmar_variants("")
         assert variants == set()
+
+    def test_generates_kinzi_variants(self):
+        # အင်္ဂလိပ် (English, with Kinzi) should have Kinzi-dropped variant
+        variants = generate_myanmar_variants("အင်္ဂလိပ်")
+        assert "အင်ဂလိပ်" in variants
+
+
+# ---------------------------------------------------------------------------
+# Kinzi variant generation
+# ---------------------------------------------------------------------------
+
+
+class TestKinziVariants:
+    """Tests for _get_kinzi_variants()."""
+
+    def test_kinzi_removal_english(self):
+        """အင်္ဂလိပ် (with Kinzi) → အင်ဂလိပ် (Kinzi dropped)."""
+        variants = _get_kinzi_variants("အင်္ဂလိပ်")
+        assert "အင်ဂလိပ်" in variants
+
+    def test_kinzi_insertion_english(self):
+        """အင်ဂလိပ် (without Kinzi) → အင်္ဂလိပ် (Kinzi added)."""
+        variants = _get_kinzi_variants("အင်ဂလိပ်")
+        assert "အင်္ဂလိပ်" in variants
+
+    def test_kinzi_removal_ship(self):
+        """သင်္ဘော (ship, with Kinzi) → သင်ဘော."""
+        variants = _get_kinzi_variants("သင်္ဘော")
+        assert "သင်ဘော" in variants
+
+    def test_kinzi_insertion_ship(self):
+        """သင်ဘော (ship, without Kinzi) → သင်္ဘော."""
+        variants = _get_kinzi_variants("သင်ဘော")
+        assert "သင်္ဘော" in variants
+
+    def test_kinzi_removal_auspiciousness(self):
+        """မင်္ဂလာ (with Kinzi) → မင်ဂလာ."""
+        variants = _get_kinzi_variants("မင်္ဂလာ")
+        assert "မင်ဂလာ" in variants
+
+    def test_kinzi_insertion_auspiciousness(self):
+        """မင်ဂလာ (without Kinzi) → မင်္ဂလာ."""
+        variants = _get_kinzi_variants("မင်ဂလာ")
+        assert "မင်္ဂလာ" in variants
+
+    def test_kinzi_singapore(self):
+        """စင်္ကာပူ (Singapore) ↔ စင်ကာပူ — bidirectional."""
+        assert "စင်ကာပူ" in _get_kinzi_variants("စင်္ကာပူ")
+        assert "စင်္ကာပူ" in _get_kinzi_variants("စင်ကာပူ")
+
+    def test_no_kinzi_in_plain_word(self):
+        """မြန်မာ (Myanmar) has no Kinzi potential — empty result."""
+        assert _get_kinzi_variants("မြန်မာ") == set()
+
+    def test_no_kinzi_in_good(self):
+        """ကောင်း (good) — ng+asat at end, no following consonant."""
+        assert _get_kinzi_variants("ကောင်း") == set()
+
+    def test_empty_word(self):
+        """Empty string produces no variants."""
+        assert _get_kinzi_variants("") == set()
+
+    def test_kinzi_thingyan(self):
+        """သင်္ကြန် (Thingyan) ↔ သင်ကြန်."""
+        assert "သင်ကြန်" in _get_kinzi_variants("သင်္ကြန်")
+        assert "သင်္ကြန်" in _get_kinzi_variants("သင်ကြန်")
+
+    def test_kinzi_shirt(self):
+        """အင်္ကျီ (shirt) ↔ အင်ကျီ."""
+        assert "အင်ကျီ" in _get_kinzi_variants("အင်္ကျီ")
+        assert "အင်္ကျီ" in _get_kinzi_variants("အင်ကျီ")
+
+    def test_removal_is_bidirectional_with_insertion(self):
+        """Removing Kinzi from X produces Y, inserting Kinzi into Y produces X."""
+        correct = "သင်္ဘော"
+        error = "သင်ဘော"
+        assert error in _get_kinzi_variants(correct)
+        assert correct in _get_kinzi_variants(error)
