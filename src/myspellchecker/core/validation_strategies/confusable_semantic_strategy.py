@@ -25,6 +25,10 @@ from myspellchecker.core.constants import (
     PARTICLE_CONFUSABLES,
     VARIANT_BLOCKLIST,
 )
+from myspellchecker.core.loan_word_variants import (
+    get_loan_word_standard,
+    get_loan_word_variants,
+)
 from myspellchecker.core.response import ContextError, Error
 from myspellchecker.core.validation_strategies.base import ValidationContext, ValidationStrategy
 from myspellchecker.core.validation_strategies.conflict_rules import should_skip_position
@@ -256,11 +260,6 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 raw_variants.update(self._near_synonym_pairs[word])
 
             # Loan word transliteration variants
-            from myspellchecker.core.loan_word_variants import (
-                get_loan_word_standard,
-                get_loan_word_variants,
-            )
-
             loan_variants = get_loan_word_variants(word)
             if loan_variants:
                 raw_variants.update(loan_variants)
@@ -589,7 +588,7 @@ class ConfusableSemanticStrategy(ValidationStrategy):
                 # Apply sentence-final penalty -- near-synonyms at sentence
                 # boundary have less right context for MLM to differentiate.
                 if is_sentence_final:
-                    threshold += self._config.sentence_final_penalty
+                    threshold += self.sentence_final_penalty
                 threshold = cap_threshold(threshold, self.max_threshold)
 
                 logger.debug(
