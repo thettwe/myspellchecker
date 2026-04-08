@@ -4,7 +4,7 @@ description: Curated confusable word pairs for MLM-based real-word error detecti
 metadata:
   created_date: '2026-03-18'
   last_updated: '2026-04-08'
-  total_entries: 124
+  total_entries: 133
   source: Curated near-synonym and phonetic confusion patterns
 pairs:
 - word: ပျံ
@@ -611,6 +611,52 @@ pairs:
   confusion_type: stacking_error
   bidirectional: true
   notes: Meaning — stacking dropped. Correct freq=24495, error freq=71.
+# --- High-frequency confusable pairs from linguistics audit ---
+- word: ပြော်
+  correction: ပျော်
+  confusion_type: medial
+  bidirectional: true
+  notes: say-variant vs happy — ya-yit↔ya-pin swap. Very high frequency.
+- word: ပြင်း
+  correction: ပြင်
+  confusion_type: visarga
+  bidirectional: true
+  notes: severe vs fix/repair — visarga difference.
+- word: ထိမ်း
+  correction: ထိန်း
+  confusion_type: nasal
+  bidirectional: true
+  notes: marry vs control — nasal confusion မ်↔န်. Culturally important vocabulary.
+- word: ချိမ်
+  correction: ချိန်
+  confusion_type: nasal
+  bidirectional: true
+  notes: silent vs time/weigh — nasal confusion မ်↔န်.
+- word: ကြိး
+  correction: ကြီး
+  confusion_type: vowel_length
+  bidirectional: true
+  notes: rope vs big — vowel length swap ိ↔ီ.
+- word: ကမ်း
+  correction: ကန်း
+  confusion_type: nasal
+  bidirectional: true
+  notes: shore/offer vs blind — nasal confusion မ်↔န်.
+- word: ဘုရာ
+  correction: ဘုရား
+  confusion_type: visarga
+  bidirectional: true
+  notes: pagoda/temple (missing visarga) — extremely common word.
+- word: ရွက်
+  correction: ရွတ်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: leaf vs recite — stop coda confusion က်↔တ်.
+- word: စိပ်
+  correction: စိတ်
+  confusion_type: stop_coda
+  bidirectional: true
+  notes: count beads vs mind — stop coda confusion ပ်↔တ်.
 # --- Homophone, medial swap, and aspiration confusable pairs ---
 - word: ကာ
   correction: ကား
