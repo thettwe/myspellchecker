@@ -355,6 +355,22 @@ class SpellChecker(
         self._neural_reranker = self._create_neural_reranker()
         self._neural_reranker_gap_threshold = self.config.neural_reranker.confidence_gap_threshold
 
+        # Initialize meta-classifier post-filter (graceful degradation)
+        self._meta_classifier = None
+        if self.config.validation.use_meta_classifier:
+            try:
+                from myspellchecker.core.validation_strategies.meta_fusion import (
+                    MetaClassifierFusion,
+                )
+
+                mc_path = self.config.validation.meta_classifier_path
+                if mc_path:
+                    self._meta_classifier = MetaClassifierFusion.from_yaml(mc_path)
+                else:
+                    self._meta_classifier = MetaClassifierFusion.from_bundled()
+            except Exception:
+                pass  # graceful degradation — no meta-classifier
+
     def _init_validators(
         self,
         syllable_validator: SyllableValidator | None,
@@ -993,6 +1009,11 @@ class SpellChecker(
         # Post-validation compound splitting: suppress invalid_word errors
         # that greedily split into all-valid dictionary words.
         self._suppress_compound_split_valid_words(errors)
+
+        # Post-validation meta-classifier filter: suppress likely FPs using
+        # a logistic regression model trained on per-error features.
+        if self._meta_classifier is not None:
+            errors[:] = self._meta_classifier.filter_errors(errors)
 
         return errors, rerank_telemetry
 

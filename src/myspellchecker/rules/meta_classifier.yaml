@@ -1,0 +1,33 @@
+version: 1
+generated: '2026-04-08T08:02:01.609486+00:00'
+description: 'Logistic regression meta-classifier for error detection fusion. Replaces
+  Noisy-OR with learned per-position TP/FP prediction. Runtime: sigmoid(dot(features,
+  coefficients) + intercept).'
+model_type: logistic_regression
+features:
+- confidence
+- error_type_encoded
+- has_suggestion
+- suggestion_count
+- has_source_strategy
+- text_char_length
+- is_high_confidence
+- source_strategy_encoded
+coefficients:
+- 1.647238
+- -0.004804
+- 2.521027
+- 0.113151
+- 2.830885
+- 0.009885
+- 0.208203
+- -0.352788
+intercept: -4.590533
+threshold: 0.1
+training_metrics:
+  f1: 0.6643
+  precision: 0.6455
+  recall: 0.6859
+  brier: 0.2321
+  accuracy: 0.6227
+  C: 100.0

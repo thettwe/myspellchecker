@@ -473,6 +473,26 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    use_meta_classifier: bool = Field(
+        default=False,
+        description=(
+            "Use a learned meta-classifier for fusion instead of Noisy-OR. "
+            "When True (and meta_classifier_path is set or bundled model exists), "
+            "replaces the calibrated Noisy-OR pipeline with a logistic regression "
+            "model trained on benchmark data. Falls back to Noisy-OR if model "
+            "is unavailable."
+        ),
+    )
+    meta_classifier_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to a YAML file with meta-classifier coefficients, "
+            "as produced by train_meta_classifier.py. When None and "
+            "use_meta_classifier=True, attempts to load from bundled "
+            "rules/meta_classifier.yaml."
+        ),
+    )
+
     enable_fast_path: bool = Field(
         default=True,
         description=(
