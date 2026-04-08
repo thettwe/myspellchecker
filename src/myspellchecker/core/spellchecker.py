@@ -1014,7 +1014,9 @@ class SpellChecker(
         # a learned model trained on per-error features.
         if self._meta_classifier is not None:
             errors[:] = self._meta_classifier.filter_errors(
-                errors, provider=self.provider
+                errors,
+                provider=self.provider,
+                normalized_text=normalized_text,
             )
 
         return errors, rerank_telemetry

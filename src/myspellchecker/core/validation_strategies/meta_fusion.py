@@ -213,23 +213,29 @@ class MetaClassifierFusion:
             logit += self._coefficients[i] * f
         return _sigmoid(logit)
 
-    def score_error(self, error: object, provider: object | None = None) -> float:
+    def score_error(
+        self,
+        error: object,
+        provider: object | None = None,
+        all_errors: list | None = None,
+        error_index: int = 0,
+        normalized_text: str = "",
+    ) -> float:
         """Score a single Error object. Returns P(true_error).
 
-        Works with Error objects from the validation pipeline (not ErrorCandidate).
-        Extracts features from the error's attributes. When a provider is given,
-        enriches with word frequency data.
+        Supports both 13-feature (legacy) and 41-feature (one-hot + context)
+        models. Feature vector is matched to model expectations at runtime.
         """
         confidence = getattr(error, "confidence", 0.0)
         error_type = getattr(error, "error_type", "")
         suggestions = getattr(error, "suggestions", []) or []
         source_strategy = getattr(error, "source_strategy", "") or ""
         text = getattr(error, "text", "") or ""
+        position = getattr(error, "position", 0)
 
-        # Base 8 features (always available)
-        base_features = [
+        # --- Base features (7) ---
+        features: list[float] = [
             round(confidence, 4),
-            float(_ERROR_TYPE_ENCODING.get(error_type, 0)),
             1.0 if suggestions else 0.0,
             float(min(len(suggestions), 10)),
             1.0 if source_strategy else 0.0,
@@ -238,11 +244,11 @@ class MetaClassifierFusion:
             float(_STRATEGY_ENCODING.get(source_strategy, 0)),
         ]
 
-        # Extended features (when model expects them)
-        if self._n_features > 8:
-            word_freq = 0
-            top_suggestion_freq = 0
-            try:
+        # --- Frequency features (5) ---
+        word_freq = 0
+        top_sug_freq = 0
+        try:
+            if provider is not None:
                 word_freq = provider.get_word_frequency(text) or 0
                 if suggestions:
                     sug_text = (
@@ -250,37 +256,54 @@ class MetaClassifierFusion:
                         if hasattr(suggestions[0], "text")
                         else str(suggestions[0])
                     )
-                    top_suggestion_freq = provider.get_word_frequency(sug_text) or 0
-            except Exception:
-                pass
+                    top_sug_freq = provider.get_word_frequency(sug_text) or 0
+        except Exception:
+            pass
 
-            import math
+        log_wf = math.log1p(word_freq)
+        log_sf = math.log1p(top_sug_freq)
+        features.extend(
+            [
+                log_wf,
+                log_sf,
+                min(log_sf / log_wf if log_wf > 0 else 0.0, 10.0),
+                1.0 if word_freq > 0 else 0.0,
+                1.0 if word_freq >= 5000 else 0.0,
+            ]
+        )
 
-            log_word_freq = math.log1p(word_freq)
-            log_sug_freq = math.log1p(top_suggestion_freq)
-            freq_ratio = log_sug_freq / log_word_freq if log_word_freq > 0 else 0.0
-            is_in_dict = 1.0 if word_freq > 0 else 0.0
-            is_high_freq = 1.0 if word_freq >= 5000 else 0.0
+        # --- One-hot error type (23) ---
+        if self._n_features > 12:
+            etype_id = _ERROR_TYPE_ENCODING.get(error_type, 0)
+            for i in range(1, 24):
+                features.append(1.0 if etype_id == i else 0.0)
 
-            base_features.extend(
-                [
-                    log_word_freq,
-                    log_sug_freq,
-                    min(freq_ratio, 10.0),
-                    is_in_dict,
-                    is_high_freq,
-                ]
+        # --- Context features (6) ---
+        if self._n_features > 35:
+            errors = all_errors or []
+            n_errors = len(errors)
+            features.append(float(n_errors))
+            features.append(
+                float(sum(1 for e in errors if getattr(e, "error_type", "") == error_type))
             )
+            other_confs = [
+                getattr(e, "confidence", 0.0)
+                for e in errors
+                if getattr(e, "error_type", "") != error_type
+            ]
+            features.append(round(max(other_confs), 4) if other_confs else 0.0)
+            prev_pos = [
+                getattr(e, "position", 0) for e in errors if getattr(e, "position", 0) < position
+            ]
+            features.append(float(position - max(prev_pos)) if prev_pos else -1.0)
+            features.append(round(position / len(normalized_text), 4) if normalized_text else 0.5)
+            features.append(round(error_index / n_errors, 4) if n_errors > 0 else 0.5)
 
-        if len(base_features) != self._n_features:
-            # Feature count mismatch — use only what we can
-            if len(base_features) > self._n_features:
-                base_features = base_features[: self._n_features]
-            else:
-                return 0.5  # fallback
+        if len(features) != self._n_features:
+            return 0.5
 
         logit = self._intercept
-        for i, f in enumerate(base_features):
+        for i, f in enumerate(features):
             logit += self._coefficients[i] * f
         return _sigmoid(logit)
 
@@ -289,6 +312,7 @@ class MetaClassifierFusion:
         errors: list,
         threshold: float | None = None,
         provider: object | None = None,
+        normalized_text: str = "",
     ) -> list:
         """Filter errors by meta-classifier score.
 
@@ -306,8 +330,14 @@ class MetaClassifierFusion:
             threshold = self._threshold
 
         kept = []
-        for error in errors:
-            prob = self.score_error(error, provider=provider)
+        for idx, error in enumerate(errors):
+            prob = self.score_error(
+                error,
+                provider=provider,
+                all_errors=errors,
+                error_index=idx,
+                normalized_text=normalized_text,
+            )
             if prob >= threshold:
                 kept.append(error)
             else:
