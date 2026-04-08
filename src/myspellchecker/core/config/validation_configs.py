@@ -410,8 +410,7 @@ class ValidationConfig(BaseModel):
             "register_mixing": 0.80,
             "aspect_error": 0.80,
             "negation_error": 0.80,
-            # --- Fusion-unblocked types (were mutex-suppressed in v1.3.0) ---
-            "syntax_error": 0.80,
+            # --- Fusion-unblocked type (was mutex-suppressed in v1.3.0) ---
             "medial_compatibility_error": 0.82,
         },
         description=(
@@ -424,13 +423,12 @@ class ValidationConfig(BaseModel):
         default={
             "semantic_error": 0.85,
             "pos_sequence_error": 0.75,
-            "syntax_error": 0.78,
             # --- Cascade suppression for noisy detectors ---
+            "syntax_error": 0.78,
             "context_probability": 0.80,
             "broken_compound": 0.82,
             "dangling_word": 0.78,
             "invalid_word": 0.80,
-            "syntax_error": 0.82,
             "medial_compatibility_error": 0.85,
         },
         description=(

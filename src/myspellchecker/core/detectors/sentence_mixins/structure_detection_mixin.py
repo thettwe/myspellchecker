@@ -80,6 +80,8 @@ _DEFAULT_SUFFIX_SAFE: frozenset[str] = _norm_set(
         "မယ်",
         "တယ",
         "မယ",  # asat-stripped
+        "ဘူး",
+        "ပါဘူး",  # negative endings
         "ပြီ",  # completive aspect (always sentence-final as suffix)
         "ပါပြီ",  # polite completive
     }
@@ -351,6 +353,10 @@ class StructureDetectionMixin:
                     # e.g., "ခေါင်းကိုက်တယ် ဆေးရုံမှာ သွားခဲ့တယ်"
                     has_later_sfp = any(is_sent_final[k] for k in range(j + 1, len(tokens)))
                     if has_later_sfp:
+                        continue
+                    # Skip pure ASCII tokens (English/foreign words are not
+                    # dangling Myanmar content words).
+                    if next_stripped.isascii() and next_stripped.isalpha():
                         continue
                     # Suppress dangling-word FPs for known dictionary words
                     # and high-frequency particles/markers.
