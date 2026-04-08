@@ -32,7 +32,7 @@ from myspellchecker.utils.logging_utils import get_logger
 logger = get_logger(__name__)
 
 # Regex for stripping non-Myanmar punctuation attached to token boundaries.
-# Matches leading/trailing quotes, brackets, colons, etc.
+# Matches leading/trailing quotes, brackets, colons, periods, etc.
 _BOUNDARY_PUNCT_RE = re.compile(
     r'^["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+|'
     r'["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+$'
@@ -618,6 +618,12 @@ class WordValidator(Validator):
             asat_freq_guard = self.config.validation.asat_freq_guard
             if len(syllables) >= 2:
                 valid_parts = sum(1 for s in syllables if self.word_repository.is_valid_word(s))
+                # For tokens with 4+ syllables where ALL are valid dictionary
+                # words, skip unconditionally — these are segmenter merges of
+                # valid words (verb chains, compound+particle), not real errors.
+                if valid_parts == len(syllables) and len(syllables) >= 4:
+                    myanmar_word_idx += 1
+                    continue
                 if valid_parts >= max(len(syllables) // 2, 1):
                     # Check whole word + asat
                     asat_form = word + "\u103a"
