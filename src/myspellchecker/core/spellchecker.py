@@ -674,15 +674,11 @@ class SpellChecker(
 
         normalized_text = prepared["normalized_text"]
 
-        # If context_checking is explicitly disabled via options, skip context
-        # validation by forcing syllable-level for the validation pipeline.
-        effective_level = level
-        if options is not None and options.context_checking is False:
-            effective_level = ValidationLevel.SYLLABLE
-
         # Phase 2: Run validation pipeline on normalized text.
+        skip_context = options is not None and options.context_checking is False
         errors, layers_applied = self._run_validation(
-            normalized_text, effective_level, use_semantic, prepared
+            normalized_text, level, use_semantic, prepared,
+            skip_context=skip_context,
         )
 
         # Apply per-request grammar filtering.
@@ -819,6 +815,8 @@ class SpellChecker(
         level: ValidationLevel,
         use_semantic: bool | None,
         prepared: dict[str, Any],
+        *,
+        skip_context: bool = False,
     ) -> tuple[list[Error], list[str]]:
         """Run validation pipeline and merge pre-normalization errors.
 
@@ -829,7 +827,9 @@ class SpellChecker(
             Tuple of (errors, layers_applied).
         """
         # Run validation layers on normalized text
-        errors, layers_applied = self._run_validation_layers(normalized_text, level, use_semantic)
+        errors, layers_applied = self._run_validation_layers(
+            normalized_text, level, use_semantic, skip_context=skip_context,
+        )
 
         # Remap pre-normalization error positions from original-text offsets
         # to normalized-text offsets so they align with generate_corrected_text.
@@ -1051,6 +1051,8 @@ class SpellChecker(
         normalized_text: str,
         level: ValidationLevel,
         use_semantic: bool | None,
+        *,
+        skip_context: bool = False,
     ) -> tuple[list[Error], list[str]]:
         """Run all validation layers and return errors and applied layers.
 
@@ -1100,8 +1102,9 @@ class SpellChecker(
             words = self.segmenter.segment_words(normalized_text)
             self._validate_words(normalized_text, errors, layers_applied)
             self._filter_syllable_errors_in_valid_words(normalized_text, errors, words)
-            self._validate_context(normalized_text, errors, layers_applied, use_semantic)
-            self._suppress_generic_pos_sequence_errors(errors)
+            if not skip_context:
+                self._validate_context(normalized_text, errors, layers_applied, use_semantic)
+                self._suppress_generic_pos_sequence_errors(errors)
 
         # Suggestion reconstruction + dedup pipeline
         self._reconstruct_compound_suggestions(normalized_text, errors)

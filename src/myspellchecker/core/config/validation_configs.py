@@ -656,13 +656,15 @@ class ValidationConfig(BaseModel):
 
     # MLM post-filter for invalid_word / dangling_word FP suppression
     mlm_plausibility_threshold: float = Field(
-        default=0.15,
-        ge=0.0,
-        le=1.0,
+        default=3.0,
+        ge=-20.0,
+        le=20.0,
         description=(
-            "Minimum MLM probability for the original word to suppress an "
-            "invalid_word/dangling_word error. Higher values are more "
-            "aggressive at suppressing FPs but risk suppressing real errors."
+            "Minimum MLM logit score for the original word to suppress an "
+            "invalid_word/dangling_word error. predict_mask returns raw logits "
+            "(typical range 5-15 for top predictions). Higher values are more "
+            "conservative (fewer FPs suppressed). A value of 3.0 suppresses "
+            "only words the model is reasonably confident about."
         ),
     )
     mlm_plausibility_top_k: int = Field(
