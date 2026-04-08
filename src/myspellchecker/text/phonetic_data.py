@@ -275,10 +275,9 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     # Common word colloquialisms
     "ဟုတ်": {"ဟုတ်ကဲ့"},  # Yes (shortened)
     "အို": {"အိုး"},  # Pot/exclamation (without visarga)
-    "အဲ": {"ထို"},  # That (colloquial -> formal)
-    "အဲဒါ": {"ထိုအရာ"},  # That thing (colloquial -> formal)
-    "ဘယ်လို": {"မည်သို့"},  # How (colloquial -> formal)
-    "ဘာကြောင့်": {"အဘယ်ကြောင့်"},  # Why (colloquial -> formal)
+    # "အဲ", "အဲဒါ", "ဘယ်လို", "ဘာကြောင့်" removed: standard modern Burmese
+    # demonstratives/question words, not colloquial variants (their literary
+    # counterparts ထို, မည်သို့, etc. are the marked forms)
     # Adverb colloquialisms
     "တော်တော်": {"အလွန်"},  # Very (colloquial -> formal)
     "သိပ်": {"အလွန်"},  # Very (colloquial -> formal)
@@ -331,26 +330,21 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     "လေ": {"ပါ"},  # Emphasis particle (casual -> polite register)
     "ကွ": {"ကွာ"},  # Sentence-final particle (shortened)
     # --- Demonstrative and question word variants ---
-    "အဲဒီ": {"ထို"},  # That (demonstrative, colloquial -> formal)
-    "ဒီ": {"ဤ"},  # This (colloquial -> formal)
-    "ဒီမှာ": {"ဤနေရာတွင်"},  # Here (colloquial -> formal)
-    "အဲဒီမှာ": {"ထိုနေရာတွင်"},  # There (colloquial -> formal)
-    "ဘယ်": {"မည်သည့်"},  # Which/where (colloquial -> formal)
-    "ဘယ်မှာ": {"မည်သည့်နေရာတွင်"},  # Where (colloquial -> formal)
-    "ဘာ": {"အဘယ်အရာ"},  # What (colloquial -> formal)
-    "ဘယ်တော့": {"မည်သည့်အချိန်"},  # When (colloquial -> formal)
-    "ဘယ်သူ": {"မည်သူ"},  # Who (colloquial -> formal)
-    "ဘယ်နှစ်": {"မည်မျှ"},  # How many (colloquial -> formal)
+    # Removed 16 entries: ဒီ, ဒီမှာ, အဲဒီ, အဲဒီမှာ, ဘယ်, ဘယ်မှာ, ဘာ,
+    # ဘယ်တော့, ဘယ်သူ, ဘယ်နှစ်, ဒီလောက်, အဲလောက်.
+    # These are standard modern Burmese (default, unmarked forms), not
+    # colloquial variants. Their literary counterparts (ဤ, ထို, မည်သည့်,
+    # etc.) are the stylistically marked forms. The POS disambiguator
+    # already recognizes ဒီ/အဲဒီ as valid determiners.
     # --- Adverb and intensifier colloquialisms ---
     "အရမ်း": {"အလွန်"},  # Very (colloquial -> formal)
-    "ဒီလောက်": {"ဤမျှ"},  # This much (colloquial -> formal)
-    "အဲလောက်": {"ထိုမျှ"},  # That much (colloquial -> formal)
     "အပြင်": {"အပြင်ဘက်"},  # Outside (shortened)
     "အထဲ": {"အတွင်း"},  # Inside (colloquial -> formal)
     # --- Greeting and polite phrase variants ---
     "ဗျ": {"ခင်ဗျား"},  # Casual address (very shortened honorific)
     "ဗျာ": {"ခင်ဗျား"},  # Casual address (shortened honorific variant)
-    "ကြာ": {"ခဏ"},  # A while/moment (colloquial)
+    # "ကြာ" removed: not a colloquial form of ခဏ (different meaning:
+    # ကြာ = long duration, ခဏ = short moment)
     "ကိုယ်": {"မိမိ"},  # Self (colloquial -> formal reflexive)
     "ကိုယ့်": {"မိမိ၏"},  # Self's (colloquial possessive -> formal)
     # --- Common noun colloquialisms ---
@@ -390,10 +384,10 @@ COLLOQUIAL_SUBSTITUTIONS: dict[str, set[str]] = {
     "ရှိတယ်": {"ရှိပါတယ်"},  # Existence: there is
     "ဖြစ်မယ်": {"ဖြစ်ပါမယ်"},  # Copula: will be (future)
     "ဟုတ်တယ်": {"ဟုတ်ပါတယ်"},  # Copula: that's right
-    # --- Discourse connectors (colloquial -> formal) ---
-    "ဒါပေမယ့်": {"သို့သော်"},  # Connector: but/however
-    "ပြီးတော့": {"ထို့နောက်"},  # Connector: and then
-    "ဒါကြောင့်": {"ထို့ကြောင့်"},  # Connector: therefore
+    # --- Discourse connectors ---
+    # "ဒါပေမယ့်", "ပြီးတော့", "ဒါကြောင့်" removed: standard modern Burmese
+    # connectors, not colloquial (their literary counterparts သို့သော်,
+    # ထို့နောက်, ထို့ကြောင့် are the marked forms)
     # --- Additional verb contractions (dropping ပါ) ---
     "ကြည့်တယ်": {"ကြည့်ပါတယ်"},  # Verb: look/watch
     "နေတယ်": {"နေပါတယ်"},  # Verb: stay/live
