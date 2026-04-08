@@ -43,31 +43,50 @@ _STRATEGY_NAMES = [
 ]
 
 _STRATEGY_SHORT_NAMES = [
-    s.replace("ValidationStrategy", "").replace("Strategy", "")
-    for s in _STRATEGY_NAMES
+    s.replace("ValidationStrategy", "").replace("Strategy", "") for s in _STRATEGY_NAMES
 ]
 
 
 _ERROR_TYPE_ENCODING = {
-    "invalid_word": 1, "invalid_syllable": 2, "confusable_error": 3,
-    "medial_confusion": 4, "pos_sequence_error": 5, "context_probability": 6,
-    "broken_compound": 7, "tone_ambiguity": 8, "homophone_error": 9,
-    "semantic_error": 10, "particle_confusion": 11, "syntax_error": 12,
-    "register_mixing": 13, "question_structure": 14, "missing_asat": 15,
-    "collocation_error": 16, "ha_htoe_confusion": 17, "medial_order_error": 18,
-    "aspect_adverb_conflict": 19, "dangling_word": 20,
-    "merged_sfp_conjunction": 21, "tense_mismatch": 22,
+    "invalid_word": 1,
+    "invalid_syllable": 2,
+    "confusable_error": 3,
+    "medial_confusion": 4,
+    "pos_sequence_error": 5,
+    "context_probability": 6,
+    "broken_compound": 7,
+    "tone_ambiguity": 8,
+    "homophone_error": 9,
+    "semantic_error": 10,
+    "particle_confusion": 11,
+    "syntax_error": 12,
+    "register_mixing": 13,
+    "question_structure": 14,
+    "missing_asat": 15,
+    "collocation_error": 16,
+    "ha_htoe_confusion": 17,
+    "medial_order_error": 18,
+    "aspect_adverb_conflict": 19,
+    "dangling_word": 20,
+    "merged_sfp_conjunction": 21,
+    "tense_mismatch": 22,
     "missing_conjunction": 23,
 }
 
 _STRATEGY_ENCODING = {
-    "": 0, "ToneValidationStrategy": 1, "OrthographyValidationStrategy": 2,
-    "SyntacticValidationStrategy": 3, "StatisticalConfusableStrategy": 4,
-    "BrokenCompoundStrategy": 5, "POSSequenceValidationStrategy": 6,
-    "QuestionStructureValidationStrategy": 7, "HomophoneValidationStrategy": 8,
+    "": 0,
+    "ToneValidationStrategy": 1,
+    "OrthographyValidationStrategy": 2,
+    "SyntacticValidationStrategy": 3,
+    "StatisticalConfusableStrategy": 4,
+    "BrokenCompoundStrategy": 5,
+    "POSSequenceValidationStrategy": 6,
+    "QuestionStructureValidationStrategy": 7,
+    "HomophoneValidationStrategy": 8,
     "NgramContextValidationStrategy": 9,
     "ConfusableCompoundClassifierStrategy": 10,
-    "ConfusableSemanticStrategy": 11, "SemanticValidationStrategy": 12,
+    "ConfusableSemanticStrategy": 11,
+    "SemanticValidationStrategy": 12,
 }
 
 
@@ -130,9 +149,7 @@ class MetaClassifierFusion:
         bundled = Path(__file__).resolve().parents[2] / "rules" / "meta_classifier.yaml"
         return cls.from_yaml(bundled)
 
-    def _extract_features(
-        self, candidates: list[ErrorCandidate]
-    ) -> list[float]:
+    def _extract_features(self, candidates: list[ErrorCandidate]) -> list[float]:
         """Extract feature vector from candidates at a single position."""
         # Strategy binary + confidence features
         fired = {s: 0.0 for s in _STRATEGY_NAMES}
@@ -167,14 +184,16 @@ class MetaClassifierFusion:
             features.append(fired[s])
         for s in _STRATEGY_NAMES:
             features.append(conf[s])
-        features.extend([
-            float(agreement_count),
-            max_confidence,
-            float(max_tier),
-            float(error_type_count),
-            has_suggestion,
-            dominant_encoded,
-        ])
+        features.extend(
+            [
+                float(agreement_count),
+                max_confidence,
+                float(max_tier),
+                float(error_type_count),
+                has_suggestion,
+                dominant_encoded,
+            ]
+        )
 
         return features
 
@@ -226,25 +245,32 @@ class MetaClassifierFusion:
             try:
                 word_freq = provider.get_word_frequency(text) or 0
                 if suggestions:
-                    sug_text = suggestions[0].text if hasattr(suggestions[0], "text") else str(suggestions[0])
+                    sug_text = (
+                        suggestions[0].text
+                        if hasattr(suggestions[0], "text")
+                        else str(suggestions[0])
+                    )
                     top_suggestion_freq = provider.get_word_frequency(sug_text) or 0
             except Exception:
                 pass
 
             import math
+
             log_word_freq = math.log1p(word_freq)
             log_sug_freq = math.log1p(top_suggestion_freq)
             freq_ratio = log_sug_freq / log_word_freq if log_word_freq > 0 else 0.0
             is_in_dict = 1.0 if word_freq > 0 else 0.0
             is_high_freq = 1.0 if word_freq >= 5000 else 0.0
 
-            base_features.extend([
-                log_word_freq,
-                log_sug_freq,
-                min(freq_ratio, 10.0),
-                is_in_dict,
-                is_high_freq,
-            ])
+            base_features.extend(
+                [
+                    log_word_freq,
+                    log_sug_freq,
+                    min(freq_ratio, 10.0),
+                    is_in_dict,
+                    is_high_freq,
+                ]
+            )
 
         if len(base_features) != self._n_features:
             # Feature count mismatch — use only what we can

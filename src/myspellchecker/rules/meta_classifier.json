@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-04-08T08:26:53.949955+00:00",
+  "generated": "2026-04-08T08:49:07.405475+00:00",
   "description": "Logistic regression meta-classifier for error detection fusion. Replaces Noisy-OR with learned per-position TP/FP prediction. Runtime: sigmoid(dot(features, coefficients) + intercept).",
   "model_type": "logistic_regression",
   "features": [
