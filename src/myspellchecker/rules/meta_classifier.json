@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-04-08T08:02:01.609486+00:00",
+  "generated": "2026-04-08T08:26:53.949955+00:00",
   "description": "Logistic regression meta-classifier for error detection fusion. Replaces Noisy-OR with learned per-position TP/FP prediction. Runtime: sigmoid(dot(features, coefficients) + intercept).",
   "model_type": "logistic_regression",
   "features": [
@@ -11,26 +11,36 @@
     "has_source_strategy",
     "text_char_length",
     "is_high_confidence",
-    "source_strategy_encoded"
+    "source_strategy_encoded",
+    "log_word_freq",
+    "log_sug_freq",
+    "freq_ratio",
+    "is_in_dict",
+    "is_high_freq_word"
   ],
   "coefficients": [
-    1.647238,
-    -0.004804,
-    2.521027,
-    0.113151,
-    2.830885,
-    0.009885,
-    0.208203,
-    -0.352788
+    2.96676,
+    -0.039295,
+    0.46974,
+    0.14555,
+    1.336912,
+    0.04995,
+    0.027974,
+    -0.250943,
+    -0.481547,
+    0.181495,
+    -1.790253,
+    6.869398,
+    1.134764
   ],
-  "intercept": -4.590533,
+  "intercept": -5.705471,
   "threshold": 0.5,
   "training_metrics": {
-    "f1": 0.6643,
-    "precision": 0.6455,
-    "recall": 0.6859,
-    "brier": 0.2321,
-    "accuracy": 0.6227,
-    "C": 100.0
+    "f1": 0.7137,
+    "precision": 0.6985,
+    "recall": 0.7325,
+    "brier": 0.2114,
+    "accuracy": 0.6827,
+    "C": 10.0
   }
 }

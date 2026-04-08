@@ -48,6 +48,29 @@ _STRATEGY_SHORT_NAMES = [
 ]
 
 
+_ERROR_TYPE_ENCODING = {
+    "invalid_word": 1, "invalid_syllable": 2, "confusable_error": 3,
+    "medial_confusion": 4, "pos_sequence_error": 5, "context_probability": 6,
+    "broken_compound": 7, "tone_ambiguity": 8, "homophone_error": 9,
+    "semantic_error": 10, "particle_confusion": 11, "syntax_error": 12,
+    "register_mixing": 13, "question_structure": 14, "missing_asat": 15,
+    "collocation_error": 16, "ha_htoe_confusion": 17, "medial_order_error": 18,
+    "aspect_adverb_conflict": 19, "dangling_word": 20,
+    "merged_sfp_conjunction": 21, "tense_mismatch": 22,
+    "missing_conjunction": 23,
+}
+
+_STRATEGY_ENCODING = {
+    "": 0, "ToneValidationStrategy": 1, "OrthographyValidationStrategy": 2,
+    "SyntacticValidationStrategy": 3, "StatisticalConfusableStrategy": 4,
+    "BrokenCompoundStrategy": 5, "POSSequenceValidationStrategy": 6,
+    "QuestionStructureValidationStrategy": 7, "HomophoneValidationStrategy": 8,
+    "NgramContextValidationStrategy": 9,
+    "ConfusableCompoundClassifierStrategy": 10,
+    "ConfusableSemanticStrategy": 11, "SemanticValidationStrategy": 12,
+}
+
+
 def _sigmoid(x: float) -> float:
     """Numerically stable sigmoid."""
     if x >= 0:
@@ -132,15 +155,6 @@ class MetaClassifierFusion:
         error_type_count = len(error_types)
         has_suggestion = 1.0 if any(c.suggestion for c in candidates) else 0.0
 
-        # Dominant error type encoding (same mapping as training)
-        _ERROR_TYPE_ENCODING = {
-            "invalid_word": 1, "invalid_syllable": 2, "confusable_error": 3,
-            "medial_confusion": 4, "pos_sequence_error": 5, "context_probability": 6,
-            "broken_compound": 7, "tone_ambiguity": 8, "homophone_error": 9,
-            "semantic_error": 10, "particle_confusion": 11, "syntax_error": 12,
-            "register_mixing": 13, "question_structure": 14, "missing_asat": 15,
-            "collocation_error": 16, "ha_htoe_confusion": 17, "medial_order_error": 18,
-        }
         from collections import Counter
 
         et_counts = Counter(c.error_type for c in candidates)
@@ -180,41 +194,21 @@ class MetaClassifierFusion:
             logit += self._coefficients[i] * f
         return _sigmoid(logit)
 
-    def score_error(self, error: object) -> float:
+    def score_error(self, error: object, provider: object | None = None) -> float:
         """Score a single Error object. Returns P(true_error).
 
         Works with Error objects from the validation pipeline (not ErrorCandidate).
-        Extracts features from the error's dict representation.
+        Extracts features from the error's attributes. When a provider is given,
+        enriches with word frequency data.
         """
-        # Build feature dict from Error attributes
         confidence = getattr(error, "confidence", 0.0)
         error_type = getattr(error, "error_type", "")
         suggestions = getattr(error, "suggestions", []) or []
         source_strategy = getattr(error, "source_strategy", "") or ""
         text = getattr(error, "text", "") or ""
 
-        _ERROR_TYPE_ENCODING = {
-            "invalid_word": 1, "invalid_syllable": 2, "confusable_error": 3,
-            "medial_confusion": 4, "pos_sequence_error": 5, "context_probability": 6,
-            "broken_compound": 7, "tone_ambiguity": 8, "homophone_error": 9,
-            "semantic_error": 10, "particle_confusion": 11, "syntax_error": 12,
-            "register_mixing": 13, "question_structure": 14, "missing_asat": 15,
-            "collocation_error": 16, "ha_htoe_confusion": 17, "medial_order_error": 18,
-            "aspect_adverb_conflict": 19, "dangling_word": 20,
-            "merged_sfp_conjunction": 21, "tense_mismatch": 22,
-            "missing_conjunction": 23,
-        }
-        _STRATEGY_ENCODING = {
-            "": 0, "ToneValidationStrategy": 1, "OrthographyValidationStrategy": 2,
-            "SyntacticValidationStrategy": 3, "StatisticalConfusableStrategy": 4,
-            "BrokenCompoundStrategy": 5, "POSSequenceValidationStrategy": 6,
-            "QuestionStructureValidationStrategy": 7, "HomophoneValidationStrategy": 8,
-            "NgramContextValidationStrategy": 9,
-            "ConfusableCompoundClassifierStrategy": 10,
-            "ConfusableSemanticStrategy": 11, "SemanticValidationStrategy": 12,
-        }
-
-        features = [
+        # Base 8 features (always available)
+        base_features = [
             round(confidence, 4),
             float(_ERROR_TYPE_ENCODING.get(error_type, 0)),
             1.0 if suggestions else 0.0,
@@ -225,16 +219,50 @@ class MetaClassifierFusion:
             float(_STRATEGY_ENCODING.get(source_strategy, 0)),
         ]
 
-        if len(features) != self._n_features:
-            return 0.5  # fallback
+        # Extended features (when model expects them)
+        if self._n_features > 8:
+            word_freq = 0
+            top_suggestion_freq = 0
+            try:
+                word_freq = provider.get_word_frequency(text) or 0
+                if suggestions:
+                    sug_text = suggestions[0].text if hasattr(suggestions[0], "text") else str(suggestions[0])
+                    top_suggestion_freq = provider.get_word_frequency(sug_text) or 0
+            except Exception:
+                pass
+
+            import math
+            log_word_freq = math.log1p(word_freq)
+            log_sug_freq = math.log1p(top_suggestion_freq)
+            freq_ratio = log_sug_freq / log_word_freq if log_word_freq > 0 else 0.0
+            is_in_dict = 1.0 if word_freq > 0 else 0.0
+            is_high_freq = 1.0 if word_freq >= 5000 else 0.0
+
+            base_features.extend([
+                log_word_freq,
+                log_sug_freq,
+                min(freq_ratio, 10.0),
+                is_in_dict,
+                is_high_freq,
+            ])
+
+        if len(base_features) != self._n_features:
+            # Feature count mismatch — use only what we can
+            if len(base_features) > self._n_features:
+                base_features = base_features[: self._n_features]
+            else:
+                return 0.5  # fallback
 
         logit = self._intercept
-        for i, f in enumerate(features):
+        for i, f in enumerate(base_features):
             logit += self._coefficients[i] * f
         return _sigmoid(logit)
 
     def filter_errors(
-        self, errors: list, threshold: float | None = None
+        self,
+        errors: list,
+        threshold: float | None = None,
+        provider: object | None = None,
     ) -> list:
         """Filter errors by meta-classifier score.
 
@@ -243,6 +271,7 @@ class MetaClassifierFusion:
         Args:
             errors: List of Error objects from the validation pipeline.
             threshold: Minimum P(true_error) to keep. Defaults to model threshold.
+            provider: Optional DictionaryProvider for word frequency features.
 
         Returns:
             Filtered list of errors (same type as input).
@@ -252,7 +281,7 @@ class MetaClassifierFusion:
 
         kept = []
         for error in errors:
-            prob = self.score_error(error)
+            prob = self.score_error(error, provider=provider)
             if prob >= threshold:
                 kept.append(error)
             else:

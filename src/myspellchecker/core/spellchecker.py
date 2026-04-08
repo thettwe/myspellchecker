@@ -1011,9 +1011,11 @@ class SpellChecker(
         self._suppress_compound_split_valid_words(errors)
 
         # Post-validation meta-classifier filter: suppress likely FPs using
-        # a logistic regression model trained on per-error features.
+        # a learned model trained on per-error features.
         if self._meta_classifier is not None:
-            errors[:] = self._meta_classifier.filter_errors(errors)
+            errors[:] = self._meta_classifier.filter_errors(
+                errors, provider=self.provider
+            )
 
         return errors, rerank_telemetry
 
