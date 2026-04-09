@@ -291,7 +291,8 @@ class StreamingChecker:
                 response = self.checker.check(line_text, level=level)
             # Catch all to prevent single-sentence failures from crashing the stream
             except Exception as e:
-                logger.warning("Sentence check failed, continuing stream: %s", e, exc_info=True)
+                logger.warning("Sentence check failed, continuing stream: %s", e)
+                logger.debug("Sentence check exception details:", exc_info=True)
                 response = Response(
                     text=line_text,
                     corrected_text=line_text,
@@ -411,7 +412,8 @@ class StreamingChecker:
                 )
             # Catch all to prevent single-sentence failures from crashing the stream
             except Exception as e:
-                logger.warning("Sentence check failed, continuing stream: %s", e, exc_info=True)
+                logger.warning("Sentence check failed, continuing stream: %s", e)
+                logger.debug("Sentence check exception details:", exc_info=True)
                 response = Response(
                     text=line_text,
                     corrected_text=line_text,
@@ -505,7 +507,8 @@ class StreamingChecker:
             try:
                 response = self.checker.check(text_to_check, level=level)
             except Exception as e:
-                logger.warning("Sentence check failed, continuing stream: %s", e, exc_info=True)
+                logger.warning("Sentence check failed, continuing stream: %s", e)
+                logger.debug("Sentence check exception details:", exc_info=True)
                 response = Response(
                     text=text_to_check,
                     corrected_text=text_to_check,

@@ -203,10 +203,12 @@ class DefaultSegmenter(Segmenter):
                 )
             except (ValueError, ImportError, RuntimeError, OSError, TokenizationError) as e:
                 self._transformer_segmenter = None
-                get_logger(__name__).warning(
+                self._word_tokenizer_initialized = False
+                get_logger(__name__).error(
                     f"Failed to initialize TransformerWordSegmenter: {e}. "
                     f"Word segmentation will not be available."
                 )
+                raise
         else:
             # CRF/myword engines use WordTokenizer
             engine_map = {
@@ -222,10 +224,12 @@ class DefaultSegmenter(Segmenter):
                 )
             except (ValueError, ImportError, RuntimeError, OSError, TokenizationError) as e:
                 self.word_tokenizer = None
-                get_logger(__name__).warning(
+                self._word_tokenizer_initialized = False
+                get_logger(__name__).error(
                     f"Failed to initialize WordTokenizer engine '{self.word_engine}': {e}. "
                     f"Word segmentation will not be available."
                 )
+                raise
 
     def set_word_repository(self, word_repository: "WordRepository") -> None:
         """Inject a word repository for syllable-reassembly fallback.
@@ -550,9 +554,10 @@ class DefaultSegmenter(Segmenter):
             self._cache_word_seg(text, result)
             return result
         else:
-            # Word segmenter unavailable (e.g. offline mode, missing resource).
-            # Return empty list so callers degrade gracefully.
-            return []
+            raise MissingDependencyError(
+                "Word segmentation is not available. "
+                "The WordTokenizer failed to initialize. Check logs for details."
+            )
 
     def _cache_word_seg(self, text: str, result: list[str]) -> None:
         """Store a word segmentation result in the thread-safe LRU cache."""
