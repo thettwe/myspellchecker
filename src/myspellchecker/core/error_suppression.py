@@ -583,6 +583,27 @@ class ErrorSuppressionMixin:
                 ):
                     continue
 
+            # Suppress confusable errors where word and top suggestion differ
+            # only by a dot-below (့, U+1037).  This catches syntactic pairs
+            # like သည် ↔ သည့် (declarative vs attributive) that text-level
+            # detectors flag but are not actionable spelling errors.
+            if e.suggestions:
+                sug_str = str(e.suggestions[0])
+                _DOT_BELOW = "\u1037"
+                if (
+                    sug_str == token + _DOT_BELOW
+                    or token == sug_str + _DOT_BELOW
+                    or (
+                        len(sug_str) == len(token) + 1
+                        and sug_str.replace(_DOT_BELOW, "", 1) == token
+                    )
+                    or (
+                        len(token) == len(sug_str) + 1
+                        and token.replace(_DOT_BELOW, "", 1) == sug_str
+                    )
+                ):
+                    continue
+
             # One-character high-frequency particle swaps (e.g., က↔မ) are
             # highly ambiguous and generate many FPs in real-world prose.
             if len(token) == 1 and e.suggestions and hasattr(self.provider, "get_word_frequency"):
