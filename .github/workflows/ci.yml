@@ -69,6 +69,8 @@ jobs:
           uv pip install --system -e ".[dev]"
 
       - name: Run tests with coverage
+        env:
+          MYSPELL_OFFLINE: "true"
         run: |
           pytest tests/ \
             -n auto \

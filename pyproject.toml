@@ -98,7 +98,7 @@ dev = [
 
     # Type checking and linting
     "mypy>=1.0.0",
-    "types-PyYAML>=2024.1.1.20240311",
+    "types-PyYAML>=6.0.12",
     "ruff>=0.3.0",
 
     # AI Training (Only needed for model development, not usage)

@@ -537,7 +537,10 @@ class PostNormalizationDetectorsMixin(
         provider = self.provider
         symspell = getattr(self, "symspell", None)
 
-        words = segmenter.segment_words(text)
+        try:
+            words = segmenter.segment_words(text)
+        except Exception:
+            return
         cursor = 0
 
         for word in words:

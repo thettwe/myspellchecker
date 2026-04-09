@@ -217,9 +217,16 @@ def get_resource_path(
 
         # Download
         logger.info(f"Downloading {name} resource...")
-        with urllib.request.urlopen(url, timeout=60) as response:
-            with open(simple_cached_path, "wb") as out_file:
-                shutil.copyfileobj(response, out_file)
+        try:
+            with urllib.request.urlopen(url, timeout=60) as response:
+                with open(simple_cached_path, "wb") as out_file:
+                    shutil.copyfileobj(response, out_file)
+        except (TimeoutError, OSError) as exc:
+            raise TokenizationError(
+                f"Failed to download '{name}' resource: {exc}\n"
+                f"Set MYSPELL_OFFLINE=true to skip downloads,\n"
+                f"or pre-cache the resource manually."
+            ) from None
 
         logger.info(f"Download complete: {simple_cached_path}")
         return simple_cached_path

@@ -702,7 +702,10 @@ class CompoundDetectionMixin:
         seg = self._get_compound_segmenter()
         if seg is None:
             return None
-        parts = seg.segment_words(token)
+        try:
+            parts = seg.segment_words(token)
+        except Exception:
+            return None
         if len(parts) < 2:
             return None
         if not all(self.provider.is_valid_word(p) for p in parts):
@@ -1511,11 +1514,14 @@ class CompoundDetectionMixin:
         # the segmenter incorrectly splits the rare form.
         tokenized = get_tokenized(self, text)
         _segmenter = getattr(self, "segmenter", None)
-        segmented = (
-            _segmenter.segment_words(text)
-            if _segmenter is not None and hasattr(_segmenter, "segment_words")
-            else []
-        )
+        try:
+            segmented = (
+                _segmenter.segment_words(text)
+                if _segmenter is not None and hasattr(_segmenter, "segment_words")
+                else []
+            )
+        except Exception:
+            segmented = []
 
         # Merge space-split tokens (from tokenized) and segmenter output,
         # deduplicate by position
