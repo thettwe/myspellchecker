@@ -479,6 +479,14 @@ class DefaultSegmenter(Segmenter):
             # the word validator handles it better as a single unit.
             has_oov_syllable = any(not self._word_repository.is_valid_word(s) for s in syllables)
             if not has_oov_syllable and len(syllables) < 5:
+                # Try suffix-aware split: if the token ends with a known
+                # grammatical suffix and the stem is a valid word, split it.
+                # E.g., "အားလပ်ရင်" → ["အားလပ်", "ရင်"] (word + conditional).
+                suffix_split = self._try_suffix_split(token, syllables)
+                if suffix_split is not None:
+                    result.extend(suffix_split)
+                    changed = True
+                    continue
                 result.append(token)
                 continue
 
@@ -490,6 +498,58 @@ class DefaultSegmenter(Segmenter):
                 result.append(token)
 
         return result if changed else tokens
+
+    # Known grammatical suffixes for suffix-aware re-segmentation.
+    # Only used for OOV tokens where Viterbi merged word+suffix.
+    _GRAMMATICAL_SUFFIXES: tuple[str, ...] = (
+        # Sorted longest-first to prefer longer matches.
+        "ကြောင့်",  # causal
+        "ခြင်း",    # nominalization (formal)
+        "လျှင်",    # conditional (formal)
+        "များ",     # plural
+        "ဆုံး",    # superlative
+        "ရင်",     # conditional
+        "ရန်",     # purpose infinitive
+        "တာ",      # nominalizer (colloquial)
+    )
+    _NEGATION_PREFIX = "မ"
+
+    def _try_suffix_split(
+        self, token: str, syllables: list[str]
+    ) -> list[str] | None:
+        """Try splitting an OOV token at a known grammatical suffix boundary.
+
+        For tokens like "အားလပ်ရင်" (OOV) that end with a known suffix
+        ("ရင်" = conditional), check if the stem ("အားလပ်") is a valid word.
+        If so, return the split.  Also tries negation prefix "မ" + stem.
+
+        Only called for OOV tokens with all-valid syllables — safe because
+        valid dictionary words are already preserved by the caller.
+
+        Returns:
+            Split token list, or None if no valid split found.
+        """
+        if self._word_repository is None:
+            return None
+
+        # Try suffix detach (longest suffix first)
+        for suffix in self._GRAMMATICAL_SUFFIXES:
+            if not token.endswith(suffix) or len(token) <= len(suffix):
+                continue
+            stem = token[: -len(suffix)]
+            if self._word_repository.is_valid_word(stem):
+                return [stem, suffix]
+
+        # Try negation prefix: မ + verb
+        if (
+            token.startswith(self._NEGATION_PREFIX)
+            and len(token) > len(self._NEGATION_PREFIX)
+        ):
+            rest = token[len(self._NEGATION_PREFIX) :]
+            if self._word_repository.is_valid_word(rest):
+                return [self._NEGATION_PREFIX, rest]
+
+        return None
 
     def load_custom_dictionary(self, words: list[str]) -> None:
         """
