@@ -653,6 +653,18 @@ class ErrorSuppressionMixin:
             if hasattr(self.provider, "is_valid_word") and self.provider.is_valid_word(token):
                 continue
 
+            # Suppress if word has attached boundary punctuation (quotes, brackets)
+            # and the stripped form is a valid word.  Corpus text often has
+            # "word" or (word) where the punctuation causes invalid_word FPs.
+            stripped = token.strip('"\'\u201c\u201d\u2018\u2019()[]{}')
+            if (
+                stripped
+                and stripped != token
+                and hasattr(self.provider, "is_valid_word")
+                and self.provider.is_valid_word(stripped)
+            ):
+                continue
+
             # Suppress high-frequency words with no suggestions
             if not e.suggestions and hasattr(self.provider, "get_word_frequency"):
                 freq = self.provider.get_word_frequency(token)
