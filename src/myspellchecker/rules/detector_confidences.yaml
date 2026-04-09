@@ -48,8 +48,10 @@ confidences:
   dangling_particle: 0.75
   dangling_word: 0.80
   missing_conjunction: 0.80
-  tense_mismatch_future: 0.90
-  tense_mismatch_past: 0.85
+  # Lowered from 0.90/0.85: 0% precision on curated benchmark (0 TP, 3 FP).
+  # Feeds into meta-classifier as feature to increase FP filtering.
+  tense_mismatch_future: 0.72
+  tense_mismatch_past: 0.70
   register_mixing: 0.85
   negation_sfp_mismatch: 0.95
   merged_sfp_conjunction: 0.90
