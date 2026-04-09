@@ -302,6 +302,9 @@ _PARTICLE_TOKENS: frozenset[str] = frozenset(
         "ပြီး",
         "ပါ",
         "ဘူး",
+        # Nominalization
+        "ခြင်း",
+        "မှု",
         # Quotative / causal / conditional
         "လို့",
         "ကြောင့်",
@@ -1126,6 +1129,11 @@ class CompoundDetectionMixin:
             # particles are intentionally space-separated and should not
             # be joined to the following word (e.g. "လို့ ပြောထားတယ်").
             if left in _STANDALONE_PARTICLE_TOKENS:
+                continue
+
+            # Skip reduplication patterns — same word repeated with space
+            # (e.g. "တိုင် တိုင်", "ဆင် ဆင်") is emphatic/adverbial, not broken.
+            if left == right:
                 continue
 
             left_pos = token_positions[i]

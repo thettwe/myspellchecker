@@ -670,7 +670,9 @@ class BrokenCompoundStrategyConfig(BaseModel):
     rare_threshold: int = Field(
         default=2000,
         ge=0,
-        description="Frequency below which a word is considered rare.",
+        description="Frequency below which a word is considered rare. "
+        "Logic: if min(freq1, freq2) >= threshold, skip detection. "
+        "Lower values = fewer candidates = fewer FPs.",
     )
     compound_min_frequency: int = Field(
         default=5000,

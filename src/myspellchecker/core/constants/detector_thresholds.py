@@ -67,13 +67,15 @@ class CompoundDetectionThresholds:
     # ── Broken compound (space-separated) ──
 
     # Both parts above this threshold = space is intentional, not broken compound.
+    # Logic: if min(freq1, freq2) >= threshold, skip (space is intentional).
+    # Lowering this reduces FPs by skipping more common-word pairs.
     rare_standalone_threshold: int = 2000
 
     # Compound frequency must exceed this to override standalone guard.
     dominant_compound_threshold: int = 50000
 
     # Minimum compound frequency for full-token joins (left+right→compound).
-    # Raised from 5000 to 15000 to suppress FPs on common word pairs that
+    # Raised from 5000 to 8000 to suppress FPs on common word pairs that
     # coincidentally form valid but infrequent compounds.
     broken_compound_full_min_freq: int = 8000
 
