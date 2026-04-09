@@ -1150,6 +1150,7 @@ class SpellChecker(
         self._reconstruct_particle_compound_suggestions(normalized_text, errors)
         self._inject_asat_visarga_candidates(normalized_text, errors)
         self._reconstruct_morpheme_in_compound(normalized_text, errors)
+        self._inject_compound_confusion_candidates(errors)
         self._dedup_errors_by_position(errors)
         self._dedup_errors_by_span(errors)
         self._suppress_tense_adjacent_syntax(errors)

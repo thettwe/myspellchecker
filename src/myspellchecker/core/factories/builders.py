@@ -311,10 +311,13 @@ def build_suggestion_strategy(
     ranker = UnifiedRanker(ranker_config=config.ranker)
 
     # Create base composite strategy
+    # Use a higher internal cap to give rerankers more candidates to work with.
+    # The final user-facing truncation happens later in the pipeline.
+    internal_max = max(config.max_suggestions, 8)
     base_strategy: SuggestionStrategy = CompositeSuggestionStrategy(
         strategies=strategies,
         ranker=ranker,
-        max_suggestions=config.max_suggestions,
+        max_suggestions=internal_max,
         deduplicate=True,
     )
 

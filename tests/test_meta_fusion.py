@@ -72,9 +72,9 @@ class TestSigmoid:
 class TestMetaClassifierFusion:
     def test_from_yaml(self, bundled_model):
         """Bundled model loads correctly."""
-        assert bundled_model._n_features == 41
-        assert len(bundled_model._coefficients) == 41
-        assert len(bundled_model._feature_names) == 41
+        assert bundled_model._n_features == 56
+        assert len(bundled_model._coefficients) == 56
+        assert len(bundled_model._feature_names) == 56
 
     def test_score_error_range(self, bundled_model):
         """Predictions are in [0, 1]."""

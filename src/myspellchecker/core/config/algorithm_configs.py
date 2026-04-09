@@ -179,7 +179,7 @@ class SymSpellConfig(BaseModel):
         ),
     )
     myanmar_variant_max_candidates: int = Field(
-        default=20,
+        default=40,
         ge=1,
         le=100,
         description=(
@@ -1387,12 +1387,12 @@ class RankerConfig(BaseModel):
         description="Weight for context-enhanced source (context-aware re-ranking)",
     )
     source_weight_compound: float = Field(
-        default=0.95,
+        default=1.10,
         gt=0.0,
         description="Weight for compound source (word splitting/joining)",
     )
     source_weight_morpheme: float = Field(
-        default=0.85,
+        default=0.95,
         gt=0.0,
         description="Weight for morpheme source (morpheme-level correction in compounds)",
     )

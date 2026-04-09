@@ -1574,6 +1574,85 @@ class SuggestionPipelineMixin:
                 # APPEND (not prepend) to preserve particle-only at rank 1.
                 e.suggestions.extend(compounds)
 
+    # --- Compound confusion candidate injection ----------------------------------
+
+    def _inject_compound_confusion_candidates(
+        self, errors: list[Error]
+    ) -> None:
+        """Inject candidates from compound confusion data for OOV errors.
+
+        When an OOV error text matches a known compound confusion pattern
+        (from compound_confusion.yaml), inject the corrected form as a
+        suggestion candidate.  This addresses the candidate generation gap
+        where gold corrections for compound errors are not reachable via
+        SymSpell edit distance alone.
+
+        Only modifies ``error.suggestions`` -- never adds/removes errors.
+        """
+        try:
+            from myspellchecker.core.detectors.post_norm_mixins.compound_detection_mixin import (
+                _LOADED_ASPIRATED_COMPOUNDS,
+                _LOADED_CONSONANT_CONFUSION_COMPOUNDS,
+                _LOADED_HA_HTOE_COMPOUNDS,
+            )
+        except ImportError:
+            return
+
+        from myspellchecker.core.response import Suggestion
+
+        # Build a unified lookup: wrong_compound -> corrected_compound
+        if not hasattr(self, "_compound_confusion_map"):
+            cc_map: dict[str, str] = {}
+            for compound_dicts in (
+                _LOADED_HA_HTOE_COMPOUNDS,
+                _LOADED_ASPIRATED_COMPOUNDS,
+                _LOADED_CONSONANT_CONFUSION_COMPOUNDS,
+            ):
+                for pattern, (wrong_part, correct_part) in compound_dicts.items():
+                    corrected = pattern.replace(wrong_part, correct_part, 1)
+                    if corrected != pattern:
+                        cc_map[pattern] = corrected
+            self._compound_confusion_map = cc_map
+
+        cc_map = self._compound_confusion_map
+        if not cc_map:
+            return
+
+        for e in errors:
+            if getattr(e, "error_type", "") != ET_WORD:
+                continue
+            error_text = e.text
+            if not error_text:
+                continue
+
+            # Direct match: error text IS a known wrong compound
+            if error_text in cc_map:
+                corrected = cc_map[error_text]
+                existing = set(e.suggestions)
+                if corrected not in existing:
+                    e.suggestions.append(
+                        Suggestion(text=corrected, confidence=0.85, source="compound")
+                    )
+                continue
+
+            # Substring match: error text contains a known wrong compound
+            for pattern, corrected_compound in cc_map.items():
+                if pattern in error_text and pattern != error_text:
+                    corrected = error_text.replace(pattern, corrected_compound, 1)
+                    existing = set(e.suggestions)
+                    if corrected not in existing:
+                        # Validate the corrected form exists in dictionary
+                        provider = getattr(self, "provider", None)
+                        if provider and provider.is_valid_word(corrected):
+                            e.suggestions.append(
+                                Suggestion(
+                                    text=corrected,
+                                    confidence=0.80,
+                                    source="compound",
+                                )
+                            )
+                    break  # Only inject one compound confusion match per error
+
     # --- Neural reranker methods -------------------------------------------------
 
     # Error types that are deterministic BUT may have multiple valid
@@ -1661,9 +1740,18 @@ class SuggestionPipelineMixin:
             # Allow promotion if the candidate is at most 1 character longer
             # (common for asat/visarga corrections), but block significantly
             # longer candidates (likely suffixed variants).
+            # Relaxed for compound/morpheme sources: allow up to +3 chars
+            # since legitimate compound corrections are naturally longer.
             model_pick = e.suggestions[model_top_idx]
             current_top = e.suggestions[0]
-            if len(model_pick) > len(current_top) + 1:
+            pick_source = getattr(model_pick, "source", "") or ""
+            error_source = getattr(e, "source_strategy", "") or ""
+            is_compound_source = any(
+                kw in pick_source or kw in error_source
+                for kw in ("morpheme", "compound")
+            )
+            length_allowance = 3 if is_compound_source else 1
+            if len(model_pick) > len(current_top) + length_allowance:
                 _g_length += 1
                 continue  # Don't promote much-longer candidates
 
