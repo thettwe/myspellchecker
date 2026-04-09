@@ -415,6 +415,10 @@ def normalize(
     if not text:
         return text
 
+    # Coerce str subclasses (e.g. Suggestion) to plain str for Cython compatibility
+    if type(text) is not str:
+        text = str(text)
+
     # Step 1: Unicode normalization
     normalized = unicodedata.normalize(form, text)
 
@@ -508,6 +512,10 @@ def normalize_for_lookup(
     """
     if not text:
         return text
+
+    # Coerce str subclasses (e.g. Suggestion) to plain str for Cython compatibility
+    if type(text) is not str:
+        text = str(text)
 
     cfg = config or _default_zawgyi_config
 

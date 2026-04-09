@@ -901,7 +901,7 @@ class SuggestionPipelineMixin:
 
             raw_error_text = error.text
             normalized_error = normalize(raw_error_text)
-            normalized_suggestions = [normalize(str(suggestion)) for suggestion in suggestions]
+            normalized_suggestions = [normalize(suggestion) for suggestion in suggestions]
             top1_before_hint = (
                 normalized_suggestions[0] if normalized_suggestions else self._NO_TOP1_SENTINEL
             )
