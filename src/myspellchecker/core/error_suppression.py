@@ -583,6 +583,22 @@ class ErrorSuppressionMixin:
                 ):
                     continue
 
+            # Suppress confusable errors on high-frequency valid words with
+            # attached Myanmar punctuation (၊ or ။).  The detector flags
+            # "ရှိ၊" but "ရှိ" is correct — the comma is tokenization noise.
+            _MY_PUNCT = "\u104a\u104b"  # ၊ and ။
+            stripped_punct = token.rstrip(_MY_PUNCT)
+            if (
+                stripped_punct
+                and stripped_punct != token
+                and hasattr(self.provider, "is_valid_word")
+                and self.provider.is_valid_word(stripped_punct)
+                and hasattr(self.provider, "get_word_frequency")
+            ):
+                freq = self.provider.get_word_frequency(stripped_punct)
+                if isinstance(freq, (int, float)) and freq >= 5000:
+                    continue
+
             # Suppress confusable errors where word and top suggestion differ
             # only by a dot-below (့, U+1037).  This catches syntactic pairs
             # like သည် ↔ သည့် (declarative vs attributive) that text-level
