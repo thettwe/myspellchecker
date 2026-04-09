@@ -212,8 +212,11 @@ class ParticleDetectionThresholds:
     # Minimum frequency for compound with visarga.
     visarga_compound_min_freq: int = 5000
 
-    # Skip compounds above this — lexicalized and correct as-is.
-    visarga_compound_skip_freq: int = 5000
+    # Skip syllables above this freq — established words that are correct
+    # without visarga.  E.g., ခောင် (roof, freq=3K) inside သန်းခောင်စာရင်း
+    # (census) is correct, despite ခောင်း (quantity, freq=51K) being more common.
+    # Lowered from 5000 to 2500 to protect established mid-frequency words.
+    visarga_compound_skip_freq: int = 2500
 
     # Minimum ratio of (with_visarga_freq / without_visarga_freq).
     visarga_compound_min_ratio: float = 10.0
