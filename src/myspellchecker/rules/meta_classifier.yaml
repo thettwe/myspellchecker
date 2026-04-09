@@ -89,7 +89,7 @@ coefficients:
 - -0.276502
 - -0.490389
 intercept: -2.758389
-threshold: 0.4
+threshold: 0.42
 training_metrics:
   f1: 0.7921
   precision: 0.8054

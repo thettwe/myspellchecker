@@ -5,7 +5,7 @@ Unit tests for SpellChecker core class.
 import pytest
 
 from myspellchecker import SpellChecker
-from myspellchecker.core.config import SpellCheckerConfig
+from myspellchecker.core.config import SpellCheckerConfig, ValidationConfig
 from myspellchecker.core.constants import ValidationLevel
 from myspellchecker.core.exceptions import ProcessingError, ValidationError
 from myspellchecker.core.response import ContextError, Response, SyllableError, WordError
@@ -255,7 +255,12 @@ class TestWordLevelValidation:
                     return ["မြန်", "မာ"]
                 return [text]
 
-        checker = SpellChecker(provider=provider, segmenter=SyllableSplitterSegmenter())
+        config = SpellCheckerConfig(
+            validation=ValidationConfig(use_meta_classifier=False),
+        )
+        checker = SpellChecker(
+            provider=provider, segmenter=SyllableSplitterSegmenter(), config=config
+        )
 
         result = checker.check("မြန်မာ", level=ValidationLevel.WORD)
 
