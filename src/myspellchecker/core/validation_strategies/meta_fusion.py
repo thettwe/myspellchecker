@@ -43,6 +43,10 @@ _ERROR_TYPE_ENCODING = {
     "merged_sfp_conjunction": 21,
     "tense_mismatch": 22,
     "missing_conjunction": 23,
+    # Note: hidden_compound_typo (id=24) is NOT in the 23-dim one-hot because
+    # the bundled meta-classifier coefficient vector was trained with 23 slots.
+    # Hidden compound errors are bypassed in filter_errors via a high-precision
+    # fast-path that trusts the strategy's own confidence gate (0.75).
 }
 
 _STRATEGY_NAMES = [
@@ -287,6 +291,15 @@ class MetaClassifierFusion:
 
         kept = []
         for idx, error in enumerate(errors):
+            error_type = getattr(error, "error_type", "")
+            # Fast-path bypass: error types NOT in the trained one-hot vector
+            # cannot be scored reliably. Trust the strategy's own confidence
+            # gate (which already ran upstream, and fusion has already applied
+            # its own threshold, so anything reaching here has earned its spot).
+            if error_type == "hidden_compound_typo":
+                kept.append(error)
+                continue
+
             prob = self.score_error(
                 error,
                 provider=provider,
@@ -299,7 +312,7 @@ class MetaClassifierFusion:
             else:
                 logger.debug(
                     "meta_filter: suppressed %s at pos=%s (prob=%.3f < %.3f)",
-                    getattr(error, "error_type", "?"),
+                    error_type or "?",
                     getattr(error, "position", "?"),
                     prob,
                     threshold,

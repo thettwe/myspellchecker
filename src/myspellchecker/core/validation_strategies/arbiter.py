@@ -144,7 +144,7 @@ INDEPENDENCE_CLUSTERS: dict[str, list[str]] = {
         "ConfusableSemanticStrategy",
         "SemanticValidationStrategy",
     ],
-    "compound": ["BrokenCompoundStrategy"],
+    "compound": ["BrokenCompoundStrategy", "HiddenCompoundStrategy"],
     "question": ["QuestionStructureValidationStrategy"],
 }
 

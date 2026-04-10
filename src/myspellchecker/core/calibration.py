@@ -23,6 +23,7 @@ STRATEGY_RELIABILITY: dict[str, float] = {
     # Tier 2: Structural -- moderate precision
     "SyntacticValidationStrategy": 0.70,
     "StatisticalConfusableStrategy": 0.75,
+    "HiddenCompoundStrategy": 0.80,  # structural, freq-verified compound detection
     "BrokenCompoundStrategy": 0.80,
     # Tier 3: Contextual -- precision varies with context quality
     "POSSequenceValidationStrategy": 0.60,
