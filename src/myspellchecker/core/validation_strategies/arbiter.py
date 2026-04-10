@@ -41,12 +41,19 @@ STRATEGY_TIER: dict[str, int] = {
     "SyntacticValidationStrategy": 2,
     "StatisticalConfusableStrategy": 2,
     "BrokenCompoundStrategy": 2,
-    "HiddenCompoundStrategy": 2,
     # Tier 3: Contextual (use context signals, medium cost)
     "POSSequenceValidationStrategy": 3,
     "QuestionStructureValidationStrategy": 3,
     "HomophoneValidationStrategy": 3,
     "NgramContextValidationStrategy": 3,
+    # Sprint G: HC bumped from Tier 2 to Tier 3 so fusion arbiter can
+    # select HC as winner against Homophone via confidence tiebreak. At
+    # Tier 2, HC always lost fusion winner selection to Homophone (Tier 3),
+    # causing HC's suggestion ordering to be overridden by
+    # _apply_fusion_winners. HC uses context (compound frequency lookup +
+    # trigram verification) to confirm its compound candidates, so
+    # treating it as a contextual strategy matches its actual behavior.
+    "HiddenCompoundStrategy": 3,
     # Tier 4: Neural (MLM/MLP-powered, highest accuracy, highest cost)
     "ConfusableCompoundClassifierStrategy": 4,
     "ConfusableSemanticStrategy": 4,
