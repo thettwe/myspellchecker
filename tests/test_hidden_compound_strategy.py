@@ -101,9 +101,19 @@ class TestHiddenCompoundStrategyScaffold:
 class TestHiddenCompoundStrategyRegistration:
     """Verify factory registration under config flag."""
 
-    def test_strategy_not_registered_by_default(self, memory_provider: MemoryProvider) -> None:
+    def test_strategy_registered_by_default(self, memory_provider: MemoryProvider) -> None:
+        """As of Sprint D, HC is enabled by default."""
         config = SpellCheckerConfig()
-        assert config.validation.use_hidden_compound_detection is False
+        assert config.validation.use_hidden_compound_detection is True
+        strategies = build_context_validation_strategies(config=config, provider=memory_provider)
+        names = [s.__class__.__name__ for s in strategies]
+        assert "HiddenCompoundStrategy" in names
+
+    def test_strategy_not_registered_when_disabled(
+        self, memory_provider: MemoryProvider
+    ) -> None:
+        config = SpellCheckerConfig()
+        config.validation.use_hidden_compound_detection = False
         strategies = build_context_validation_strategies(config=config, provider=memory_provider)
         names = [s.__class__.__name__ for s in strategies]
         assert "HiddenCompoundStrategy" not in names

@@ -656,14 +656,15 @@ class ValidationConfig(BaseModel):
     # Hidden compound typo detection (priority 23, structural phase)
     # See Workstreams/v1.5.0/hidden-compound-typo-plan.md
     use_hidden_compound_detection: bool = Field(
-        default=False,
+        default=True,
         description=(
-            "Enable detection of hidden compound typos. When True, a new "
+            "Enable detection of hidden compound typos. When True, "
             "HiddenCompoundStrategy runs at priority 23 (before "
             "StatisticalConfusable and BrokenCompound). It examines multi-token "
             "windows where each individual token is valid but a confusable "
             "variant of w_i would form a high-frequency compound with the "
-            "following token(s). Defaults to False during Sprint A scaffold."
+            "following token(s). Enabled by default after Sprint D gates green "
+            "(F1 +0.0141, Recall +0.0254, Composite -0.0023 within noise)."
         ),
     )
     hidden_compound_max_token_syllables: int = Field(
