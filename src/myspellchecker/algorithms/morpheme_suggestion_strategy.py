@@ -138,7 +138,15 @@ class MorphemeSuggestionStrategy(BaseSuggestionStrategy):
         return results
 
     def _suggest_compound_correction(self, term: str) -> list[SuggestionData]:
-        """Try to correct a compound word with one bad morpheme."""
+        """Try to correct a compound word with one bad morpheme.
+
+        Uses two strategies:
+        1. Binary splits: try all 2-way split points (original)
+        2. Ternary splits: try prefix + error_middle + suffix where
+           prefix and suffix are valid dictionary words and the middle
+           part gets corrected via SymSpell. This handles cases where
+           the error word is embedded inside a longer compound token.
+        """
         if self._compound_resolver is None:
             return []
 
@@ -151,7 +159,7 @@ class MorphemeSuggestionStrategy(BaseSuggestionStrategy):
 
         suggestions: list[SuggestionData] = []
 
-        # Try all binary split points
+        # Strategy 1: Binary splits (original)
         for i in range(1, n):
             left = "".join(syllables[:i])
             right = "".join(syllables[i:])
@@ -172,7 +180,68 @@ class MorphemeSuggestionStrategy(BaseSuggestionStrategy):
                     self._try_correct_part(right, left, is_left_invalid=True, word=term)
                 )
 
+        # Strategy 2: Ternary splits for longer compounds (3+ syllables)
+        # Try all (prefix, middle, suffix) splits where prefix and suffix
+        # are valid and middle gets corrected.
+        if n >= 3 and len(suggestions) < self._max_suggestions:
+            suggestions.extend(self._suggest_ternary_splits(syllables, term))
+
         return suggestions[: self._max_suggestions]
+
+    def _suggest_ternary_splits(
+        self, syllables: list[str], term: str
+    ) -> list[SuggestionData]:
+        """Try ternary (prefix + error + suffix) splits.
+
+        For compounds like "ခုန်ကျစရိတ်" where the error "ခုန်ကျ" is
+        sandwiched between valid prefix "" and suffix "စရိတ်", binary
+        splits won't find the correction because neither binary half is
+        fully valid. Ternary splits identify the invalid middle segment
+        and correct it.
+        """
+        n = len(syllables)
+        results: list[SuggestionData] = []
+        seen: set[str] = set()
+
+        for i in range(n):
+            for j in range(i + 1, min(i + 4, n)):  # middle up to 3 syllables
+                prefix = "".join(syllables[:i]) if i > 0 else ""
+                middle = "".join(syllables[i:j])
+                suffix = "".join(syllables[j:]) if j < n else ""
+
+                # Prefix must be valid (or empty)
+                if prefix and not self._dictionary_check(prefix):
+                    continue
+                # Suffix must be valid (or empty)
+                if suffix and not self._dictionary_check(suffix):
+                    continue
+                # Middle must be invalid (the error part)
+                if self._dictionary_check(middle):
+                    continue
+                # Skip if middle is the entire term (that's just the original)
+                if not prefix and not suffix:
+                    continue
+
+                corrections = self._correct_morpheme(middle)
+                for corrected, dist, freq in corrections:
+                    reconstructed = prefix + corrected + suffix
+                    if reconstructed in seen:
+                        continue
+                    if self._dictionary_check(reconstructed) or self._dictionary_check(corrected):
+                        seen.add(reconstructed)
+                        results.append(
+                            SuggestionData(
+                                term=reconstructed,
+                                edit_distance=dist,
+                                frequency=freq,
+                                source="morpheme",
+                                confidence=0.80,
+                            )
+                        )
+                        if len(results) >= self._max_suggestions:
+                            return results
+
+        return results
 
     def _suggest_reduplication_correction(self, term: str) -> list[SuggestionData]:
         """Try to correct a near-miss reduplication."""
