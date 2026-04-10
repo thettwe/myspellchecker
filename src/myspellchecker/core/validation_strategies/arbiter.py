@@ -41,6 +41,7 @@ STRATEGY_TIER: dict[str, int] = {
     "SyntacticValidationStrategy": 2,
     "StatisticalConfusableStrategy": 2,
     "BrokenCompoundStrategy": 2,
+    "HiddenCompoundStrategy": 2,
     # Tier 3: Contextual (use context signals, medium cost)
     "POSSequenceValidationStrategy": 3,
     "QuestionStructureValidationStrategy": 3,

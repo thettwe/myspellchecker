@@ -54,7 +54,10 @@ class TestStrategyTier:
         assert _get_tier("CustomStrategy") == 2
 
     def test_all_known_strategies_have_tiers(self):
-        assert len(STRATEGY_TIER) == 12
+        # 13 strategies: the 12 original + HiddenCompoundStrategy (Tier 2,
+        # added in Sprint E to restore STRATEGY_TIER / STRATEGY_RELIABILITY
+        # registry sync).
+        assert len(STRATEGY_TIER) == 13
 
 
 class TestSelectWinner:

@@ -14769,13 +14769,13 @@ sentences:
     error_subtype: aukmyit_confusion
     detection_layer: word
     span:
-      start: 273
-      end: 297
-    erroneous_text: လက်ရှိဥပမာအနေနဲ့ပြော့ရင်
-    gold_correction: လက်ရှိဥပမာအနေနဲ့ပြောရင်
+      start: 289
+      end: 294
+    erroneous_text: ပြော့
+    gold_correction: ပြော
     edit_distance: 1
     context_required: false
-    notes: Injected aukmyit_confusion error.
+    notes: Token-level aukmyit visarga removal (ပြော့→ပြော). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E013
   input: တောင်တွင်းကြီးမြို့နယ်မှာ စစ်တပ်က အာဏာသိမ်းပြီးနောက် စစ်ကောင်စီတပ်တွေရဲ့ ရိုက်နှက်ပစ်ခတ် သတ်ဖြတ်မှုကြောင့် ဒေသခံပြည်သူ ခုနစ်ဦးအထိ သေဆုံးခဲ့ရတယ်လို့ ဒေသခံတွေရဲ့ မတ်တမ်းတွေအရ သိရပါတယ်။
@@ -14790,12 +14790,12 @@ sentences:
     detection_layer: word
     span:
       start: 160
-      end: 172
-    erroneous_text: မတ်တမ်းတွေအရ
-    gold_correction: မှတ်တမ်းတွေအရ
+      end: 167
+    erroneous_text: မတ်တမ်း
+    gold_correction: မှတ်တမ်း
     edit_distance: 1
     context_required: false
-    notes: Injected compound_confusion error.
+    notes: Token-level stacking-ha insertion (မတ်တမ်း→မှတ်တမ်း). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E014
   input: ကိုဘုထန်ပိုင်က "မနေ့က ညကတည်းက အင်တာနက်လိုင်းတွေတော့ ပြန်ပွင့်တယ်။ ဒါပေမယ့် လိုင်းကတော့ သိပ် မကောင်းဘူး။ ကျနော့် ဖုန်းကြောင့် ဖြစ်တာလား။ ဘယ်လို ဖွင့်ပေးတာလည်း ဆိုတာတော့ မသိတော့ဘူး" ဟု ဧရာဝတီသို့
@@ -17111,12 +17111,12 @@ sentences:
     detection_layer: word
     span:
       start: 45
-      end: 59
-    erroneous_text: ပြော့လို့ရတယ်။
-    gold_correction: ပြောလို့ရတယ်။
+      end: 50
+    erroneous_text: ပြော့
+    gold_correction: ပြော
     edit_distance: 1
     context_required: false
-    notes: Injected aukmyit_confusion error.
+    notes: Token-level aukmyit visarga removal (ပြော့→ပြော). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E126
   input: ၁။ သောက၊ဒုက္ခ၊ဆင်းရဲမှု၊ ရောဂါ ဝေဒနာ လွတ် မြောက် ရန် ဤဂုဏ်တော်အား အစဉ်အမြဲ ဖတ်ရွတ် ရပါမည်။
@@ -17462,13 +17462,13 @@ sentences:
     error_subtype: aukmyit_confusion
     detection_layer: word
     span:
-      start: 85
-      end: 97
-    erroneous_text: ခော်ပြော့တယ်
-    gold_correction: ခော်ပြောတယ်
+      start: 89
+      end: 94
+    erroneous_text: ပြော့
+    gold_correction: ပြော
     edit_distance: 1
     context_required: false
-    notes: Injected aukmyit_confusion error.
+    notes: Token-level aukmyit visarga removal (ပြော့→ပြော). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E143
   input: ပထမဆုံး စပြောရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒော်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေ ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ကသိုလ် အပတ်စဉ်
