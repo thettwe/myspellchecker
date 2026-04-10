@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import re
 from functools import cached_property, lru_cache
+from types import MappingProxyType
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -428,6 +429,28 @@ class DefaultSegmenter(Segmenter):
 
         return merged
 
+    # Sprint F: explicit allowlist of colloquial-locative tokens where the
+    # merged form appears in the dictionary at very low frequency but the
+    # canonical reading is stem + colloquial locative particle. The merged
+    # form is technically a valid word, so the segmenter retains it as one
+    # token, but downstream homophone/word strategies then fire at the wrong
+    # span. The allowlist forces a correct split at segmentation time.
+    #
+    # Each entry is added only after runtime verification that the merged
+    # form has frequency < 1% of either constituent, preventing accidental
+    # over-splitting of legitimate compounds.
+    #
+    # Wrapped in MappingProxyType so the class attribute is read-only at
+    # runtime — prevents accidental mutation from other modules or tests.
+    _COLLOQUIAL_LOCATIVE_MERGES: MappingProxyType[str, tuple[str, ...]] = MappingProxyType(
+        {
+            # BM-EXT-E010: "ရန်ကုန်မာ" → ["ရန်", "ကုန်မာ"] (Viterbi split) →
+            # ["ရန်", "ကုန်", "မာ"] (Sprint F allowlist). "ကုန်မာ" freq=78 vs
+            # "ကုန်" freq=80914 + "မာ" freq=21530 (ratio >1000x).
+            "ကုန်မာ": ("ကုန်", "မာ"),
+        }
+    )
+
     def _maybe_reassemble(self, tokens: list[str]) -> list[str]:
         """Apply syllable-reassembly fallback to oversized tokens.
 
@@ -439,6 +462,10 @@ class DefaultSegmenter(Segmenter):
         This handles both single-token failures (Viterbi returns entire input
         unsplit) and partial failures (Viterbi splits into a few tokens but
         one chunk is still oversized, e.g. ``['ထွေ့ကယာရှောက်မဆား', 'နဲ့', 'လို့']``).
+
+        Sprint F: also processes tokens in ``_COLLOQUIAL_LOCATIVE_MERGES`` to
+        split colloquial-locative merges that were retained by Viterbi due
+        to their low-but-nonzero dictionary frequency.
 
         Args:
             tokens: Token list from the statistical segmenter.
@@ -452,6 +479,13 @@ class DefaultSegmenter(Segmenter):
         result: list[str] = []
         changed = False
         for token in tokens:
+            # Sprint F: explicit colloquial-locative allowlist split
+            allowlist_split = self._COLLOQUIAL_LOCATIVE_MERGES.get(token)
+            if allowlist_split is not None:
+                result.extend(allowlist_split)
+                changed = True
+                continue
+
             # Skip tokens that are already valid dictionary words
             if self._word_repository.is_valid_word(token):
                 result.append(token)
@@ -504,19 +538,17 @@ class DefaultSegmenter(Segmenter):
     _GRAMMATICAL_SUFFIXES: tuple[str, ...] = (
         # Sorted longest-first to prefer longer matches.
         "ကြောင့်",  # causal
-        "ခြင်း",    # nominalization (formal)
-        "လျှင်",    # conditional (formal)
-        "များ",     # plural
-        "ဆုံး",    # superlative
-        "ရင်",     # conditional
-        "ရန်",     # purpose infinitive
-        "တာ",      # nominalizer (colloquial)
+        "ခြင်း",  # nominalization (formal)
+        "လျှင်",  # conditional (formal)
+        "များ",  # plural
+        "ဆုံး",  # superlative
+        "ရင်",  # conditional
+        "ရန်",  # purpose infinitive
+        "တာ",  # nominalizer (colloquial)
     )
     _NEGATION_PREFIX = "မ"
 
-    def _try_suffix_split(
-        self, token: str, syllables: list[str]
-    ) -> list[str] | None:
+    def _try_suffix_split(self, token: str, syllables: list[str]) -> list[str] | None:
         """Try splitting an OOV token at a known grammatical suffix boundary.
 
         For tokens like "အားလပ်ရင်" (OOV) that end with a known suffix
@@ -541,10 +573,7 @@ class DefaultSegmenter(Segmenter):
                 return [stem, suffix]
 
         # Try negation prefix: မ + verb
-        if (
-            token.startswith(self._NEGATION_PREFIX)
-            and len(token) > len(self._NEGATION_PREFIX)
-        ):
+        if token.startswith(self._NEGATION_PREFIX) and len(token) > len(self._NEGATION_PREFIX):
             rest = token[len(self._NEGATION_PREFIX) :]
             if self._word_repository.is_valid_word(rest):
                 return [self._NEGATION_PREFIX, rest]
