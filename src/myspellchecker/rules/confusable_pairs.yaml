@@ -746,6 +746,17 @@ exempt_pairs:
 - word: တား
   variant: ထား
   reason: Reverse direction of above
+- word: ကယာ
+  correction: ကရာ
+  confusion_type: consonant_substitution
+  bidirectional: true
+  notes: ယ↔ရ consonant confusion. ကယာ (Kayah ethnic group) vs ကရာ (karate/action).
+    Context determines intended meaning.
+- word: ကရာ
+  correction: ကယာ
+  confusion_type: consonant_substitution
+  bidirectional: true
+  notes: Reverse direction of above.
 exempt_suffix_pairs:
 - suffix_a: သည်
   suffix_b: သည့်
