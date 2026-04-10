@@ -439,6 +439,46 @@ class DictionaryProvider(ABC):
         """
         return {w: self.is_valid_word(w) for w in words}
 
+    def is_valid_vocabulary(self, word: str) -> bool:
+        """
+        Check if word is part of curated vocabulary (stricter than is_valid_word).
+
+        A curated word is one that has been explicitly accepted into the
+        dictionary (e.g., has is_curated=1 in SQLite). Curated entries are
+        trusted as canonical forms, distinct from segmenter artifacts or
+        noise that may pass is_valid_word.
+
+        Args:
+            word: The word to check.
+
+        Returns:
+            True if word is curated vocabulary, False otherwise.
+
+        Notes:
+            - Default implementation falls back to is_valid_word for providers
+              that do not track a curation flag (Memory, JSON, CSV).
+            - SQLiteProvider overrides this to query is_curated=1.
+            - Strategies that need stricter lexicality guarantees should use
+              this method instead of is_valid_word.
+        """
+        return self.is_valid_word(word)
+
+    def is_valid_vocabulary_bulk(self, words: list[str]) -> dict[str, bool]:
+        """
+        Check curated-vocabulary membership for multiple words in one operation.
+
+        Args:
+            words: List of Myanmar words to validate.
+
+        Returns:
+            Dictionary mapping word to curated-membership (True/False).
+
+        Notes:
+            - Default implementation calls is_valid_vocabulary individually.
+            - SQLiteProvider overrides with a batched is_curated=1 query.
+        """
+        return {w: self.is_valid_vocabulary(w) for w in words}
+
     def get_syllable_frequencies_bulk(self, syllables: list[str]) -> dict[str, int]:
         """
         Get corpus frequencies for multiple syllables in a single operation.

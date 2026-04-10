@@ -653,6 +653,87 @@ class ValidationConfig(BaseModel):
         description="Confidence score for broken compound errors.",
     )
 
+    # Hidden compound typo detection (priority 23, structural phase)
+    # See Workstreams/v1.5.0/hidden-compound-typo-plan.md
+    use_hidden_compound_detection: bool = Field(
+        default=False,
+        description=(
+            "Enable detection of hidden compound typos. When True, a new "
+            "HiddenCompoundStrategy runs at priority 23 (before "
+            "StatisticalConfusable and BrokenCompound). It examines multi-token "
+            "windows where each individual token is valid but a confusable "
+            "variant of w_i would form a high-frequency compound with the "
+            "following token(s). Defaults to False during Sprint A scaffold."
+        ),
+    )
+    hidden_compound_max_token_syllables: int = Field(
+        default=3,
+        ge=1,
+        le=6,
+        description=(
+            "Maximum syllable count for a token to be considered as a typo "
+            "source. Longer tokens are skipped for performance."
+        ),
+    )
+    hidden_compound_max_variants_per_token: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+        description=(
+            "Maximum confusable variants to generate per candidate token. "
+            "Caps cost of dictionary lookups per sentence."
+        ),
+    )
+    hidden_compound_min_frequency: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum compound frequency required to flag a hidden compound "
+            "typo. Mirrors broken_compound_min_frequency but lower because "
+            "we also permit freq=0 subsumed compounds via trigram lookahead."
+        ),
+    )
+    hidden_compound_confidence_floor: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Minimum confidence to emit a hidden compound typo error. "
+            "Higher floor suppresses marginal corrections."
+        ),
+    )
+    hidden_compound_enable_trigram_lookahead: bool = Field(
+        default=True,
+        description=(
+            "When the bigram variant lookup returns a freq=0 valid dictionary "
+            "entry (subsumed compound case), try the trigram variant (v + "
+            "w_next + w_next2) as well."
+        ),
+    )
+    hidden_compound_variant_cache_size: int = Field(
+        default=8192,
+        ge=64,
+        description=(
+            "LRU cache size for generate_confusable_variants() results per "
+            "process. Larger cache reduces CPU cost at the expense of memory."
+        ),
+    )
+    hidden_compound_require_typo_prone_chars: bool = Field(
+        default=True,
+        description=(
+            "Only process tokens containing at least one typo-prone character "
+            "(e.g., ခ/က, ပ/ဖ, ြ/ျ). Pure-vowel or pure-suffix tokens are "
+            "never sources of confusable typos and can be skipped."
+        ),
+    )
+    hidden_compound_curated_only: bool = Field(
+        default=True,
+        description=(
+            "Require both w_i and w_next to satisfy is_valid_vocabulary() "
+            "(curated=1). Rejects segmenter artifacts with boundary drift."
+        ),
+    )
+
     # MLM post-filter for invalid_word / dangling_word FP suppression
     mlm_plausibility_threshold: float = Field(
         default=3.0,

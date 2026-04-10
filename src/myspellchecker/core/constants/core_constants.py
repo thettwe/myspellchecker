@@ -130,6 +130,10 @@ class ErrorType(str, Enum):
     # Broken compound (wrongly split compound word)
     BROKEN_COMPOUND = "broken_compound"
 
+    # Hidden compound typo (compound where one morpheme is a confusable typo
+    # but the segmenter already split it into individually-valid tokens)
+    HIDDEN_COMPOUND_TYPO = "hidden_compound_typo"
+
     # Leading vowel-e (Zawgyi-style ေ before consonant)
     LEADING_VOWEL_E = "leading_vowel_e"
 
@@ -214,6 +218,7 @@ ET_BROKEN_VIRAMA: str = ErrorType.BROKEN_VIRAMA.value
 ET_CONFUSABLE_ERROR: str = ErrorType.CONFUSABLE_ERROR.value
 ET_BROKEN_STACKING: str = ErrorType.BROKEN_STACKING.value
 ET_BROKEN_COMPOUND: str = ErrorType.BROKEN_COMPOUND.value
+ET_HIDDEN_COMPOUND_TYPO: str = ErrorType.HIDDEN_COMPOUND_TYPO.value
 ET_LEADING_VOWEL_E: str = ErrorType.LEADING_VOWEL_E.value
 ET_INCOMPLETE_STACKING: str = ErrorType.INCOMPLETE_STACKING.value
 ET_NEGATION_SFP_MISMATCH: str = ErrorType.NEGATION_SFP_MISMATCH.value

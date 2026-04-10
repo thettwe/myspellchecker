@@ -67,6 +67,7 @@ MESSAGES: dict[str, dict[str, str]] = {
         ErrorType.BROKEN_VIRAMA.value: "Broken virama stacking",
         ErrorType.BROKEN_STACKING.value: "Broken stacking",
         ErrorType.BROKEN_COMPOUND.value: "Broken compound",
+        ErrorType.HIDDEN_COMPOUND_TYPO.value: "Hidden compound typo",
         # Grammar checker specific error types
         ErrorType.ASPECT_TYPO.value: "Aspect marker typo",
         ErrorType.INVALID_SEQUENCE.value: "Invalid POS sequence",
@@ -150,6 +151,7 @@ MESSAGES: dict[str, dict[str, str]] = {
         ErrorType.BROKEN_VIRAMA.value: "ပါဋ်ဆင့် ပျက်စီးနေပါသည်",
         ErrorType.BROKEN_STACKING.value: "ပါဋ်ဆင့် ပျက်စီးနေပါသည်",
         ErrorType.BROKEN_COMPOUND.value: "ပေါင်းစပ်စကားလုံး ပျက်စီးနေပါသည်",
+        ErrorType.HIDDEN_COMPOUND_TYPO.value: "ပေါင်းစပ်စကားလုံးအတွင်း ဖုံးကွယ်နေသော စာလုံးပေါင်းအမှား",
         # Grammar checker specific error types
         ErrorType.ASPECT_TYPO.value: "ကြိယာသရုပ်ပြ စာလုံးပေါင်းအမှား",
         ErrorType.INVALID_SEQUENCE.value: "ဝေါဟာရ အစီအစဉ် မမှန်ကန်ပါ",
