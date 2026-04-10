@@ -373,14 +373,13 @@ class HiddenCompoundStrategy(ValidationStrategy):
         if confidence < self.confidence_floor:
             return None
 
-        # Emit at the typo token's position with single-token span.
-        # Suggestion ordering:
-        # - subsumed=True  → compound first (gold annotates the full bigram)
-        # - subsumed=False → variant first (gold annotates the minimal edit)
-        if subsumed:
-            primary, secondary = compound, variant
-        else:
-            primary, secondary = variant, compound
+        # Format S — canonical single-token gold format
+        # (decided via /octo:debate Round 3, 2-1 vote):
+        # Always emit the minimal-edit single-token variant as the primary
+        # suggestion. The full compound is kept as the secondary for users
+        # who want to see the context, but benchmark Top1 and user-facing
+        # auto-fix target the single-token correction.
+        primary, secondary = variant, compound
 
         return self._build_typo_error(
             context=context,

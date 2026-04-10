@@ -255,13 +255,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-006
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည် ဟု သတင်းရင်းမြစ်များက ဆိုသည်။
@@ -420,13 +419,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-014
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည် ဟု အစီရင်ခံစာတွင် ပါရှိသည်။
@@ -585,13 +583,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-022
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည်။
@@ -750,13 +747,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-030
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည် ဟု သိရသည်။
