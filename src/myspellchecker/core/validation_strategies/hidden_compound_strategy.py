@@ -295,6 +295,7 @@ class HiddenCompoundStrategy(ValidationStrategy):
         typo), not adjacent to the typo.
         """
         words = context.words
+        n = len(words)
         w_typo = words[typo_idx]
         w_anchor = words[anchor_idx]
 
@@ -309,6 +310,37 @@ class HiddenCompoundStrategy(ValidationStrategy):
 
         # Determine direction (forward means anchor on the right).
         forward = anchor_idx > typo_idx
+
+        # Subsumed-token check: if w_typo is already part of a valid
+        # compound with its OPPOSITE-SIDE neighbor (the one NOT included in
+        # our bigram window), we must skip. E.g., for "ကဖေးမှာ" split as
+        # ['က','ဖေး','မှာ'], trying (typo='ဖေး', anchor='မှာ') forward
+        # should not fire because 'က'+'ဖေး' = 'ကဖေး' is a valid dict
+        # compound ("cafe"). The typo-token is already covered by an
+        # existing compound and is not a standalone typo source.
+        if forward:
+            # Anchor is on the right, so check the LEFT neighbor of w_typo.
+            neighbor_idx = typo_idx - 1
+            if neighbor_idx >= 0:
+                neighbor = words[neighbor_idx]
+                # Only count if the two are adjacent in source (no gap).
+                expected_next = (
+                    context.word_positions[neighbor_idx] + len(neighbor)
+                )
+                if expected_next == pos_typo:
+                    subsumed_left = neighbor + w_typo
+                    if self.provider.is_valid_word(subsumed_left):
+                        return None
+        else:
+            # Anchor is on the left, so check the RIGHT neighbor of w_typo.
+            neighbor_idx = typo_idx + 1
+            if neighbor_idx < n:
+                neighbor = words[neighbor_idx]
+                expected_next = pos_typo + len(w_typo)
+                if context.word_positions[neighbor_idx] == expected_next:
+                    subsumed_right = w_typo + neighbor
+                    if self.provider.is_valid_word(subsumed_right):
+                        return None
 
         variants_list = sorted(self._cached_variants(w_typo))
         if not variants_list:
