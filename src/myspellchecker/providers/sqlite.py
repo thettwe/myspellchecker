@@ -12,7 +12,7 @@ import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -827,6 +827,48 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         self._word_id_cache.set(word, None)
         return None
 
+    def _lookup_ngram_prob(
+        self,
+        cache: Any,
+        cache_key: tuple,
+        word_ids: tuple[int | None, ...],
+        sql: str,
+        *,
+        tolerate_missing_table: bool = False,
+        missing_table_label: str = "",
+    ) -> float:
+        """Shared cached n-gram probability lookup.
+
+        Used by ``get_{bi,tri,four,five}gram_probability`` to centralise the
+        cache → word-id-guard → SQL → cache-set sequence. Returns 0.0 (and
+        caches it) when any word id is unknown. When
+        ``tolerate_missing_table`` is True, an OperationalError caused by a
+        missing table is logged at DEBUG and treated as 0.0; other operational
+        errors propagate.
+        """
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cast(float, cached)
+
+        if any(wid is None for wid in word_ids):
+            cache.set(cache_key, 0.0)
+            return 0.0
+
+        with self._execute_query() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql, word_ids)
+                result = cursor.fetchone()
+                prob = float(result["probability"]) if result else 0.0
+            except sqlite3.OperationalError as e:
+                if not tolerate_missing_table or not _is_missing_table_error(e):
+                    raise
+                self.logger.debug("%s table not found. Returning 0.0.", missing_table_label)
+                prob = 0.0
+
+        cache.set(cache_key, prob)
+        return prob
+
     def get_bigram_probability(self, prev_word: str, current_word: str) -> float:
         """
         Get conditional probability P(current_word | prev_word).
@@ -868,31 +910,12 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         if self._bigram_map is not None:
             return self._bigram_map.get((prev_word, current_word), 0.0)
 
-        cache_key = (prev_word, current_word)
-        cached = self._bigram_prob_cache.get(cache_key)
-        if cached is not None:
-            return cast(float, cached)
-
-        # Get word IDs (with caching)
-        word1_id = self.get_word_id(prev_word)
-        word2_id = self.get_word_id(current_word)
-
-        if word1_id is None or word2_id is None:
-            self._bigram_prob_cache.set(cache_key, 0.0)
-            return 0.0
-
-        # Query bigram probability
-        with self._execute_query() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT probability FROM bigrams WHERE word1_id = ? AND word2_id = ?",
-                (word1_id, word2_id),
-            )
-            result = cursor.fetchone()
-            prob = float(result["probability"]) if result else 0.0
-
-        self._bigram_prob_cache.set(cache_key, prob)
-        return prob
+        return self._lookup_ngram_prob(
+            self._bigram_prob_cache,
+            (prev_word, current_word),
+            (self.get_word_id(prev_word), self.get_word_id(current_word)),
+            "SELECT probability FROM bigrams WHERE word1_id = ? AND word2_id = ?",
+        )
 
     def get_trigram_probability(self, w1: str, w2: str, w3: str) -> float:
         """
@@ -914,32 +937,13 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         if self._trigram_map is not None:
             return self._trigram_map.get((w1, w2, w3), 0.0)
 
-        cache_key = (w1, w2, w3)
-        cached = self._trigram_prob_cache.get(cache_key)
-        if cached is not None:
-            return cast(float, cached)
-
-        # Get word IDs (with caching)
-        id1 = self.get_word_id(w1)
-        id2 = self.get_word_id(w2)
-        id3 = self.get_word_id(w3)
-
-        if id1 is None or id2 is None or id3 is None:
-            self._trigram_prob_cache.set(cache_key, 0.0)
-            return 0.0
-
-        with self._execute_query() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT probability FROM trigrams "
-                "WHERE word1_id = ? AND word2_id = ? AND word3_id = ?",
-                (id1, id2, id3),
-            )
-            result = cursor.fetchone()
-            prob = float(result["probability"]) if result else 0.0
-
-        self._trigram_prob_cache.set(cache_key, prob)
-        return prob
+        return self._lookup_ngram_prob(
+            self._trigram_prob_cache,
+            (w1, w2, w3),
+            (self.get_word_id(w1), self.get_word_id(w2), self.get_word_id(w3)),
+            "SELECT probability FROM trigrams "
+            "WHERE word1_id = ? AND word2_id = ? AND word3_id = ?",
+        )
 
     def get_fourgram_probability(self, word1: str, word2: str, word3: str, word4: str) -> float:
         """
@@ -958,41 +962,20 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         if not word1 or not word2 or not word3 or not word4:
             return 0.0
 
-        cache_key = (word1, word2, word3, word4)
-        cached = self._fourgram_prob_cache.get(cache_key)
-        if cached is not None:
-            return cast(float, cached)
-
-        # Get word IDs (with caching)
-        id1 = self.get_word_id(word1)
-        id2 = self.get_word_id(word2)
-        id3 = self.get_word_id(word3)
-        id4 = self.get_word_id(word4)
-
-        if id1 is None or id2 is None or id3 is None or id4 is None:
-            self._fourgram_prob_cache.set(cache_key, 0.0)
-            return 0.0
-
-        with self._execute_query() as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute(
-                    "SELECT probability FROM fourgrams "
-                    "WHERE word1_id = ? AND word2_id = ? AND word3_id = ? AND word4_id = ?",
-                    (id1, id2, id3, id4),
-                )
-                result = cursor.fetchone()
-                prob = float(result["probability"]) if result else 0.0
-            except sqlite3.OperationalError as e:
-                # Only handle missing table errors (schema compatibility)
-                # Re-raise critical errors (disk I/O, corruption, locks)
-                if not _is_missing_table_error(e):
-                    raise
-                self.logger.debug("fourgrams table not found. Returning 0.0.")
-                prob = 0.0
-
-        self._fourgram_prob_cache.set(cache_key, prob)
-        return prob
+        return self._lookup_ngram_prob(
+            self._fourgram_prob_cache,
+            (word1, word2, word3, word4),
+            (
+                self.get_word_id(word1),
+                self.get_word_id(word2),
+                self.get_word_id(word3),
+                self.get_word_id(word4),
+            ),
+            "SELECT probability FROM fourgrams "
+            "WHERE word1_id = ? AND word2_id = ? AND word3_id = ? AND word4_id = ?",
+            tolerate_missing_table=True,
+            missing_table_label="fourgrams",
+        )
 
     def get_fivegram_probability(
         self, word1: str, word2: str, word3: str, word4: str, word5: str
@@ -1014,43 +997,22 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         if not word1 or not word2 or not word3 or not word4 or not word5:
             return 0.0
 
-        cache_key = (word1, word2, word3, word4, word5)
-        cached = self._fivegram_prob_cache.get(cache_key)
-        if cached is not None:
-            return cast(float, cached)
-
-        # Get word IDs (with caching)
-        id1 = self.get_word_id(word1)
-        id2 = self.get_word_id(word2)
-        id3 = self.get_word_id(word3)
-        id4 = self.get_word_id(word4)
-        id5 = self.get_word_id(word5)
-
-        if id1 is None or id2 is None or id3 is None or id4 is None or id5 is None:
-            self._fivegram_prob_cache.set(cache_key, 0.0)
-            return 0.0
-
-        with self._execute_query() as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute(
-                    "SELECT probability FROM fivegrams "
-                    "WHERE word1_id = ? AND word2_id = ? AND word3_id = ? "
-                    "AND word4_id = ? AND word5_id = ?",
-                    (id1, id2, id3, id4, id5),
-                )
-                result = cursor.fetchone()
-                prob = float(result["probability"]) if result else 0.0
-            except sqlite3.OperationalError as e:
-                # Only handle missing table errors (schema compatibility)
-                # Re-raise critical errors (disk I/O, corruption, locks)
-                if not _is_missing_table_error(e):
-                    raise
-                self.logger.debug("fivegrams table not found. Returning 0.0.")
-                prob = 0.0
-
-        self._fivegram_prob_cache.set(cache_key, prob)
-        return prob
+        return self._lookup_ngram_prob(
+            self._fivegram_prob_cache,
+            (word1, word2, word3, word4, word5),
+            (
+                self.get_word_id(word1),
+                self.get_word_id(word2),
+                self.get_word_id(word3),
+                self.get_word_id(word4),
+                self.get_word_id(word5),
+            ),
+            "SELECT probability FROM fivegrams "
+            "WHERE word1_id = ? AND word2_id = ? AND word3_id = ? "
+            "AND word4_id = ? AND word5_id = ?",
+            tolerate_missing_table=True,
+            missing_table_label="fivegrams",
+        )
 
     def get_pos_unigram_probabilities(self) -> dict[str, float]:
         """

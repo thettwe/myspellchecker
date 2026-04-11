@@ -50,7 +50,7 @@ from myspellchecker.algorithms.inference_backends import (
     HFTokenizerWrapper,
     PyTorchInferenceSession,
 )
-from myspellchecker.core.constants import CONFIDENCE_FLOOR, get_myanmar_char_set, is_myanmar_text
+from myspellchecker.core.constants import CONFIDENCE_FLOOR, contains_myanmar, get_myanmar_char_set
 from myspellchecker.core.exceptions import InferenceError, ModelLoadError
 from myspellchecker.utils.cache import LRUCache
 from myspellchecker.utils.logging_utils import get_logger
@@ -708,10 +708,10 @@ class SemanticChecker:
     def _is_myanmar_text(self, text: str) -> bool:
         """Check if text contains Myanmar characters, respecting config.
 
-        Uses the shared is_myanmar_text helper which respects the
+        Uses the shared contains_myanmar helper which respects the
         allow_extended_myanmar config flag.
         """
-        return is_myanmar_text(text, allow_extended=self.allow_extended_myanmar)
+        return contains_myanmar(text, allow_extended=self.allow_extended_myanmar)
 
     def _cached_encode(self, text: str) -> EncodingResult:
         """

@@ -218,10 +218,10 @@ class TestValidatorIsMyanmarRemoved:
 
         assert not hasattr(Validator, "is_myanmar")
 
-    def test_is_myanmar_text_helper_works(self) -> None:
-        """is_myanmar_text() from constants is the replacement."""
-        from myspellchecker.core.constants import is_myanmar_text
+    def test_contains_myanmar_helper_works(self) -> None:
+        """contains_myanmar() from constants is the replacement."""
+        from myspellchecker.core.constants import contains_myanmar
 
-        assert is_myanmar_text("မြန်မာ") is True
-        assert is_myanmar_text("english") is False
-        assert is_myanmar_text("") is False
+        assert contains_myanmar("မြန်မာ") is True
+        assert contains_myanmar("english") is False
+        assert contains_myanmar("") is False

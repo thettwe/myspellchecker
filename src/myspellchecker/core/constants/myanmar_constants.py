@@ -134,12 +134,15 @@ def has_extended_myanmar_chars(text: str) -> bool:
     return False
 
 
-def is_myanmar_text(text: str, allow_extended: bool = False) -> bool:
+def contains_myanmar(text: str, allow_extended: bool = False) -> bool:
     """
-    Check if text contains any Myanmar characters.
+    Check whether *text* contains at least one Myanmar character.
 
-    This is a shared helper for consistent Myanmar text detection across
-    validators, semantic checkers, and suggestion strategies.
+    Distinct from :func:`myspellchecker.text.normalize.is_myanmar_text`,
+    which compares the Myanmar character ratio against a configurable
+    threshold. This helper returns True as soon as one Myanmar character
+    is found, with no thresholding — useful for "should we even try to
+    process this string" gates inside validators and semantic checkers.
 
     Args:
         text: Text to check.

@@ -292,73 +292,73 @@ class TestExtendedMyanmarPatternIntegration:
 
 
 class TestIsMyanmarTextHelper:
-    """Tests for is_myanmar_text() shared helper function."""
+    """Tests for contains_myanmar() shared helper function."""
 
-    def test_is_myanmar_text_imported(self) -> None:
-        """is_myanmar_text should be importable from constants."""
-        from myspellchecker.core.constants import is_myanmar_text
+    def test_contains_myanmar_imported(self) -> None:
+        """contains_myanmar should be importable from constants."""
+        from myspellchecker.core.constants import contains_myanmar
 
-        assert callable(is_myanmar_text)
+        assert callable(contains_myanmar)
 
     def test_empty_string_returns_false(self) -> None:
         """Empty string should return False."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
-        assert is_myanmar_text("") is False
+        assert contains_myanmar("") is False
 
     def test_core_myanmar_text_returns_true(self) -> None:
         """Text with core Myanmar chars should return True."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
         text = "မြန်မာ"  # Myanmar
-        assert is_myanmar_text(text) is True
+        assert contains_myanmar(text) is True
 
     def test_english_only_returns_false(self) -> None:
         """English-only text should return False."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
-        assert is_myanmar_text("hello world") is False
+        assert contains_myanmar("hello world") is False
 
     def test_extended_a_default_returns_false(self) -> None:
         """Extended-A chars should return False by default (not Myanmar)."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
         # Only Extended-A char, no core Myanmar
         text = "\uaa60"  # Shan letter
-        assert is_myanmar_text(text) is False
+        assert contains_myanmar(text) is False
 
     def test_extended_a_allow_extended_returns_true(self) -> None:
         """Extended-A chars should return True when allow_extended=True."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
         text = "\uaa60"  # Shan letter
-        assert is_myanmar_text(text, allow_extended=True) is True
+        assert contains_myanmar(text, allow_extended=True) is True
 
     def test_extended_b_default_returns_false(self) -> None:
         """Extended-B chars should return False by default (not Myanmar)."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
         # Only Extended-B char, no core Myanmar
         text = "\ua9e0"
-        assert is_myanmar_text(text) is False
+        assert contains_myanmar(text) is False
 
     def test_extended_b_allow_extended_returns_true(self) -> None:
         """Extended-B chars should return True when allow_extended=True."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
         text = "\ua9e0"
-        assert is_myanmar_text(text, allow_extended=True) is True
+        assert contains_myanmar(text, allow_extended=True) is True
 
     def test_mixed_core_and_extended_default(self) -> None:
         """Mixed text with core Myanmar should return True (core is detected)."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
         text = "မြန်\uaa60မာ"  # Core Myanmar with Extended-A inserted
         # Core Myanmar chars are present, so should return True
-        assert is_myanmar_text(text) is True
+        assert contains_myanmar(text) is True
 
     def test_numbers_only_returns_false(self) -> None:
         """Number-only text should return False."""
-        from myspellchecker.core.constants import is_myanmar_text
+        from myspellchecker.core.constants import contains_myanmar
 
-        assert is_myanmar_text("12345") is False
+        assert contains_myanmar("12345") is False

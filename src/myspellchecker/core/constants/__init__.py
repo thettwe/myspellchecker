@@ -221,9 +221,9 @@ from myspellchecker.core.constants.myanmar_constants import (
     VOWEL_UU,
     WET_MAPPING,
     ZERO_WIDTH_CHARS,
+    contains_myanmar,
     get_myanmar_char_set,
     has_extended_myanmar_chars,
-    is_myanmar_text,
 )
 
 # Pipeline constants
@@ -371,9 +371,9 @@ __all__ = [
     "MYANMAR_CORE_CHARS",
     "MYANMAR_EXTENDED_CORE_BLOCK",
     "EXTENDED_MYANMAR_CHARS",
+    "contains_myanmar",
     "get_myanmar_char_set",
     "has_extended_myanmar_chars",
-    "is_myanmar_text",
     "CONSONANTS",
     "CORE_RESPECTFUL_TITLES",
     "INDEPENDENT_VOWELS",

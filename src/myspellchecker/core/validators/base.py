@@ -8,7 +8,7 @@ from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.constants import (
     COMMON_PUNCTUATION,
     MYANMAR_PUNCTUATION,
-    is_myanmar_text,
+    contains_myanmar,
 )
 from myspellchecker.core.response import Error
 from myspellchecker.text.validator import validate_word
@@ -130,7 +130,7 @@ class Validator(ABC):
         if not text:
             return False
         allow_extended = self.config.validation.allow_extended_myanmar
-        return is_myanmar_text(text, allow_extended=allow_extended)
+        return contains_myanmar(text, allow_extended=allow_extended)
 
     @staticmethod
     def _find_token_position(text: str, token: str, start: int) -> tuple[int | None, int]:
