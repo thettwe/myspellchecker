@@ -43,11 +43,27 @@ _ERROR_TYPE_ENCODING = {
     "merged_sfp_conjunction": 21,
     "tense_mismatch": 22,
     "missing_conjunction": 23,
-    # Note: hidden_compound_typo (id=24) is NOT in the 23-dim one-hot because
-    # the bundled meta-classifier coefficient vector was trained with 23 slots.
-    # Hidden compound errors are bypassed in filter_errors via a high-precision
-    # fast-path that trusts the strategy's own confidence gate (0.75).
+    # Note: hidden_compound_typo (id=24) and syllable_window_oov are NOT in
+    # the 23-dim one-hot because the bundled meta-classifier coefficient
+    # vector was trained with 23 slots. Errors with these types are bypassed
+    # in filter_errors via a high-precision fast-path that trusts the
+    # strategy's own confidence gate, AND they are excluded from the
+    # context-feature computation for other (trained) errors so their
+    # presence does not corrupt n_errors / max_other_conf features.
 }
+
+# Error types that are NOT in the trained 23-dim one-hot vector. Their errors
+# are bypassed in filter_errors (trusted via strategy confidence), AND they
+# are stripped from the context-features passed to score_error for other
+# errors — otherwise the extra candidate count / confidence distorts features
+# like n_errors and max_other_conf that the classifier was trained on using
+# only the trained-type distribution.
+_UNTRAINED_ERROR_TYPES: frozenset[str] = frozenset(
+    {
+        "hidden_compound_typo",
+        "syllable_window_oov",
+    }
+)
 
 _STRATEGY_NAMES = [
     "ToneValidationStrategy",
@@ -278,10 +294,21 @@ class MetaClassifierFusion:
 
         Removes errors that the classifier predicts are likely false positives.
 
+        Untrained error types (``_UNTRAINED_ERROR_TYPES``) are bypassed — the
+        strategies that emit them (HiddenCompound, SyllableWindowOOV) have
+        their own high-precision confidence gates, and the bundled classifier
+        coefficient vector does not include slots for their types. In
+        addition, when scoring trained errors, the ``all_errors`` context
+        passed to :meth:`score_error` is filtered to only trained-type
+        errors — untrained errors should not corrupt context features like
+        ``n_errors`` / ``max_other_conf`` that were learned on a
+        trained-only distribution.
+
         Args:
             errors: List of Error objects from the validation pipeline.
             threshold: Minimum P(true_error) to keep. Defaults to model threshold.
             provider: Optional DictionaryProvider for word frequency features.
+            normalized_text: Optional sentence text for position features.
 
         Returns:
             Filtered list of errors (same type as input).
@@ -289,24 +316,39 @@ class MetaClassifierFusion:
         if threshold is None:
             threshold = self._threshold
 
+        # Context errors passed to score_error must only include trained
+        # error types — otherwise untrained types (HC / SW) inflate
+        # n_errors and max_other_conf and corrupt predictions for trained
+        # types. The full errors list is still iterated below so untrained
+        # errors can be bypassed and kept.
+        trained_errors = [
+            e
+            for e in errors
+            if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
+        ]
+        trained_count = len(trained_errors)
+
         kept = []
-        for idx, error in enumerate(errors):
+        trained_idx = 0
+        for error in errors:
             error_type = getattr(error, "error_type", "")
             # Fast-path bypass: error types NOT in the trained one-hot vector
             # cannot be scored reliably. Trust the strategy's own confidence
-            # gate (which already ran upstream, and fusion has already applied
-            # its own threshold, so anything reaching here has earned its spot).
-            if error_type == "hidden_compound_typo":
+            # gate (HiddenCompound uses 0.75; SyllableWindowOOV uses 0.70),
+            # which already ran upstream.
+            if error_type in _UNTRAINED_ERROR_TYPES:
                 kept.append(error)
                 continue
 
             prob = self.score_error(
                 error,
                 provider=provider,
-                all_errors=errors,
-                error_index=idx,
+                all_errors=trained_errors,
+                error_index=trained_idx if trained_count else 0,
                 normalized_text=normalized_text,
             )
+            trained_idx += 1
+
             if prob >= threshold:
                 kept.append(error)
             else:
