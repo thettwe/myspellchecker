@@ -11,15 +11,15 @@
 #
 # Schema: https://myspellchecker.dev/schemas/homophones/v1.0
 
-version: "1.4.3"
+version: "1.4.4"
 category: "homophones"
 description: "Myanmar homophones for real-word error correction"
 
 metadata:
   created_date: "2025-12-30"
   last_updated: "2026-04-11"
-  total_entries: 224
-  source: "v1.4.3 — Sprint I-2: 7 new unidirectional pairs for homophone_confusion FNs"
+  total_entries: 225
+  source: "v1.4.4 — Sprint I-2: +ခဲ→ခဲ့ particle tone pair"
 
 # ============================================================
 # HOMOPHONE MAP
@@ -333,6 +333,9 @@ homophones:
   # omits the medial; the correct form has it. Unidirectional.
   "ပီ": ["ပြီ"]              # (dialectal/typo) vs completion particle (BM-EXT-E003)
   "မန်": ["မြန်"]            # (rare) vs fast/quick (BM-EXT-E005)
+  # Sprint I-2 additions — missing tone marks on grammatical particles.
+  # Unidirectional to protect valid standalone uses (hail, vote).
+  "ခဲ": ["ခဲ့"]              # (hail/ice) vs past particle (BM-528)
 
   # ============================================================
   # Particle confusion pairs (similar-looking particles)

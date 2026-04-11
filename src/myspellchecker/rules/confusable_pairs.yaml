@@ -1,11 +1,11 @@
-version: 1.1.0
+version: 1.1.1
 category: confusable_pairs
 description: Curated confusable word pairs for MLM-based real-word error detection
 metadata:
   created_date: '2026-03-18'
-  last_updated: '2026-04-08'
-  total_entries: 133
-  source: Curated near-synonym and phonetic confusion patterns
+  last_updated: '2026-04-11'
+  total_entries: 135
+  source: v1.1.1 Sprint I-2 — particle tone pairs (ခဲ→ခဲ့, မဲ→မယ်)
 pairs:
 - word: ပျံ
   correction: ပြန်
@@ -733,6 +733,26 @@ pairs:
   confusion_type: consonant_aspiration
   bidirectional: true
   notes: salt vs eat — aspiration confusion ဆ↔စ.
+# Sprint I-2 additions — particle tone/mark typos. Unidirectional to protect
+# valid standalone uses of ``ခဲ`` (hail/ice, freq 16K) and ``မဲ`` (vote/dark,
+# freq 31K). These are commonly-typed missing tone marks on high-frequency
+# grammatical particles. The curated-pair promotion path in
+# StatisticalConfusableStrategy lets the high bigram ratio (compound freq
+# ~100x head freq) clear the downstream output filter.
+- word: ခဲ
+  correction: ခဲ့
+  confusion_type: particle_tone
+  bidirectional: false
+  notes: missing dot below on past-tense particle — ``ခဲ့`` vs ``ခဲ`` (hail).
+    Already present in aspects.yaml::typos[15] but that detection path emits
+    word-index positions which get lost in downstream processing.
+- word: မဲ
+  correction: မယ်
+  confusion_type: particle_tone
+  bidirectional: false
+  notes: missing asat on future particle — ``မယ်`` vs ``မဲ`` (vote/dark).
+    Already present in typo_corrections.yaml::missing_asat[3] with a
+    different error model.
 exempt_pairs:
 - word: ဖေး
   variant: ဘေး
