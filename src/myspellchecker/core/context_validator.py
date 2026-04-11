@@ -396,7 +396,7 @@ class ContextValidator(Validator):
 
             w_idx = sentence.find(word, word_cursor)
             if w_idx == -1:
-                logger.debug(f"Word not found in sentence from cursor {word_cursor}: {word}")
+                logger.debug("Word not found in sentence from cursor %d: %s", word_cursor, word)
                 continue
 
             abs_position = sentence_offset + w_idx
@@ -533,10 +533,13 @@ class ContextValidator(Validator):
                         self.strategy_timings[strategy_name] = (
                             self.strategy_timings.get(strategy_name, 0.0) + elapsed
                         )
-                    logger.debug(f"{strategy_name} took {elapsed:.4f}s")
+                    logger.debug("%s took %.4fs", strategy_name, elapsed)
 
                 logger.debug(
-                    f"{strategy_name} found {len(strategy_errors)} errors (total: {len(errors)})"
+                    "%s found %d errors (total: %d)",
+                    strategy_name,
+                    len(strategy_errors),
+                    len(errors),
                 )
 
             except (RuntimeError, ValueError, TypeError, KeyError, IndexError, AttributeError) as e:

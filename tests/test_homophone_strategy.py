@@ -244,23 +244,11 @@ def test_homophone_passes_prev_prev_context():
 
 
 def test_config_tunables_passthrough():
-    """Test that config tunables are correctly defined (they're used by
-    NgramContextChecker.compute_required_ratio now, not by the strategy)."""
+    """Verify the surviving homophone tunable is correctly defined on the config."""
     from myspellchecker.core.config.validation_configs import ValidationConfig
 
-    config = ValidationConfig(
-        homophone_confidence=0.75,
-        homophone_improvement_ratio=8.0,
-        homophone_min_probability=0.002,
-        homophone_high_freq_threshold=2000,
-        homophone_high_freq_improvement_ratio=100.0,
-    )
-
+    config = ValidationConfig(homophone_confidence=0.75)
     assert config.homophone_confidence == 0.75
-    assert config.homophone_improvement_ratio == 8.0
-    assert config.homophone_min_probability == 0.002
-    assert config.homophone_high_freq_threshold == 2000
-    assert config.homophone_high_freq_improvement_ratio == 100.0
 
 
 def test_legacy_kwargs_accepted():

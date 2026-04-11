@@ -755,7 +755,7 @@ class SpellChecker(
         if _symspell is not None and hasattr(_symspell, "clear_session_cache"):
             _symspell.clear_session_cache()
 
-        self.logger.debug(f"Checking text (len={len(text)}) at level {level.value}")
+        self.logger.debug("Checking text (len=%d) at level %s", len(text), level.value)
 
         # Detect Zawgyi-encoded words BEFORE normalization (which may convert them)
         zawgyi_config, zawgyi_warning = self._detect_zawgyi(text)

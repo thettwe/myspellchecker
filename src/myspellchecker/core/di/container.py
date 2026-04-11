@@ -120,7 +120,7 @@ class ServiceContainer:
         if singleton:
             self._singletons.add(service_name)
 
-        logger.debug(f"Registered factory for '{service_name}' (singleton={singleton})")
+        logger.debug("Registered factory for %r (singleton=%s)", service_name, singleton)
 
     # Type-safe overloads for common service types
     @overload
@@ -176,7 +176,7 @@ class ServiceContainer:
                     f"Service '{service_name}' expected type {service_type.__name__}, "
                     f"got {type(instance).__name__}"
                 )
-            logger.debug(f"Retrieved cached service '{service_name}'")
+            logger.debug("Retrieved cached service %r", service_name)
             return instance
 
         # Thread-safe singleton creation
@@ -196,15 +196,15 @@ class ServiceContainer:
                         f"Service '{service_name}' expected type {service_type.__name__}, "
                         f"got {type(instance).__name__}"
                     )
-                logger.debug(f"Retrieved cached service '{service_name}' (after lock)")
+                logger.debug("Retrieved cached service %r (after lock)", service_name)
                 return instance
 
             # Create new instance
-            logger.debug(f"Creating service '{service_name}'")
+            logger.debug("Creating service %r", service_name)
             try:
                 instance = self._factories[service_name](self)
-            except Exception as e:
-                logger.error(f"Failed to create service '{service_name}': {e}")
+            except Exception:
+                logger.exception("Failed to create service %r", service_name)
                 raise
 
             if service_type is not None and not isinstance(instance, service_type):
@@ -216,7 +216,7 @@ class ServiceContainer:
             # Cache if singleton
             if service_name in self._singletons:
                 self._services[service_name] = instance
-                logger.debug(f"Cached singleton service '{service_name}'")
+                logger.debug("Cached singleton service %r", service_name)
 
         return instance
 

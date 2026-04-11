@@ -26,7 +26,6 @@ class ValidationConfig(BaseModel):
         context_error_confidence_low: Low confidence for context errors (default: 0.6).
         max_syllable_length: Maximum valid syllable length (default: 12).
         syllable_corruption_threshold: Threshold for syllable corruption (default: 3).
-        is_myanmar_text_threshold: Threshold for Myanmar text detection (default: 0.5).
         use_zawgyi_detection: Enable Zawgyi encoding detection (default: True).
         use_zawgyi_conversion: Enable automatic Zawgyi to Unicode conversion (default: True).
         zawgyi_confidence_threshold: Confidence threshold for Zawgyi detection (default: 0.95).
@@ -73,12 +72,6 @@ class ValidationConfig(BaseModel):
         ge=1,
         description="Threshold for detecting corrupted syllables",
     )
-    is_myanmar_text_threshold: float = Field(
-        default=0.5,
-        ge=0.0,
-        le=1.0,
-        description="Minimum ratio of Myanmar characters to classify text as Myanmar",
-    )
     use_zawgyi_detection: bool = Field(
         default=True,
         description="Enable detection of legacy Zawgyi encoding",
@@ -102,12 +95,6 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence score for medial confusion corrections (ျ vs ြ)",
-    )
-    orthography_confidence: float = Field(
-        default=0.9,
-        ge=0.0,
-        le=1.0,
-        description="Confidence score for orthography validation errors",
     )
     raise_on_strategy_error: bool = Field(
         default=False,
@@ -191,41 +178,6 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence for homophone validation strategy",
-    )
-    homophone_improvement_ratio: float = Field(
-        default=5.0,
-        ge=1.0,
-        description="Minimum probability improvement ratio for homophone suggestions",
-    )
-    homophone_min_probability: float = Field(
-        default=0.001,
-        ge=0.0,
-        le=1.0,
-        description=(
-            "Minimum n-gram probability threshold for homophone suggestions. "
-            "Prevents false positives from infrequent n-gram occurrences."
-        ),
-    )
-    homophone_high_freq_threshold: int = Field(
-        default=1000,
-        ge=0,
-        description=(
-            "Word frequency above which a stricter improvement ratio is required. "
-            "Prevents false positives on common, correct words."
-        ),
-    )
-    homophone_high_freq_improvement_ratio: float = Field(
-        default=50.0,
-        ge=1.0,
-        description=(
-            "Improvement ratio required for high-frequency words. "
-            "Much stricter than the default ratio to avoid flagging common words."
-        ),
-    )
-    semantic_min_word_length: int = Field(
-        default=2,
-        ge=1,
-        description="Minimum word length for semantic validation",
     )
     use_homophone_detection: bool = Field(
         default=True,
@@ -385,10 +337,6 @@ class ValidationConfig(BaseModel):
         ),
     )
 
-    use_orthography_validation: bool = Field(
-        default=True,
-        description="Enable orthography validation in validation pipeline",
-    )
     # Output confidence filter thresholds
     # Calibration: confusable_error FPs cluster at 0.72, TPs at 0.88+.
     # colloquial_info notes use confidence 0.3 (informational, not errors)
@@ -608,15 +556,6 @@ class ValidationConfig(BaseModel):
         default=1000,
         ge=0,
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
-    )
-
-    truncation_frequency_ratio: int = Field(
-        default=100,
-        ge=1,
-        description=(
-            "Minimum frequency ratio of complete_freq / truncated_freq "
-            "for truncation detection. Higher values = stricter detection."
-        ),
     )
 
     # Broken compound detection (wrongly split compound words)
