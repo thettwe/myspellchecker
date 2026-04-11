@@ -134,6 +134,13 @@ class ErrorType(str, Enum):
     # but the segmenter already split it into individually-valid tokens)
     HIDDEN_COMPOUND_TYPO = "hidden_compound_typo"
 
+    # Syllable-window OOV (multi-syllable compound typo recovered by joining
+    # adjacent syllable windows, checking OOV status, and consulting SymSpell
+    # for a high-frequency near-match). Sprint I-1 — detection for FNs in
+    # zero-error ("clean") sentences where the segmenter over-splits a typo
+    # into individually-valid syllables.
+    SYLLABLE_WINDOW_OOV = "syllable_window_oov"
+
     # Leading vowel-e (Zawgyi-style ေ before consonant)
     LEADING_VOWEL_E = "leading_vowel_e"
 
@@ -219,6 +226,7 @@ ET_CONFUSABLE_ERROR: str = ErrorType.CONFUSABLE_ERROR.value
 ET_BROKEN_STACKING: str = ErrorType.BROKEN_STACKING.value
 ET_BROKEN_COMPOUND: str = ErrorType.BROKEN_COMPOUND.value
 ET_HIDDEN_COMPOUND_TYPO: str = ErrorType.HIDDEN_COMPOUND_TYPO.value
+ET_SYLLABLE_WINDOW_OOV: str = ErrorType.SYLLABLE_WINDOW_OOV.value
 ET_LEADING_VOWEL_E: str = ErrorType.LEADING_VOWEL_E.value
 ET_INCOMPLETE_STACKING: str = ErrorType.INCOMPLETE_STACKING.value
 ET_NEGATION_SFP_MISMATCH: str = ErrorType.NEGATION_SFP_MISMATCH.value
