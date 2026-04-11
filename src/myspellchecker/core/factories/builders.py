@@ -566,12 +566,22 @@ def build_context_validation_strategies(
             for word, variants in src.items():
                 merged_map.setdefault(word, set()).update(variants)
 
+        # Sprint I-2: share the curated homophone map with StatConfusable
+        # so it can apply a confidence boost when a detected pair is in
+        # rules/homophones.yaml. Pairs with both statistical AND dictionary
+        # evidence are stronger than pure-statistical detections and
+        # deserve to clear the downstream output filter.
+        homophone_pairs_map = (
+            homophone_checker.homophone_map if homophone_checker else None
+        )
+
         if merged_map:
             strategies.append(
                 StatisticalConfusableStrategy(
                     provider=provider,
                     confusable_map=merged_map,
                     threshold=validation_config.statistical_confusable_threshold,
+                    homophone_map=homophone_pairs_map,
                 )
             )
             logger.debug("Added StatisticalConfusableStrategy (priority 24)")
