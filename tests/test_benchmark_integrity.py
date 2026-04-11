@@ -1,9 +1,9 @@
-"""Benchmark annotation integrity checks (Sprint F).
+"""Benchmark annotation integrity checks.
 
-Sprint E had to manually fix 4 benchmark entries where single-token error
-subtypes (aukmyit_confusion, compound_confusion) had multi-token gold
-corrections. This test suite codifies the invariants so future annotation
-bugs are caught at CI time.
+Codifies invariants for benchmark entries so annotation bugs are caught at
+CI time. Specifically guards against single-token error subtypes
+(aukmyit_confusion, compound_confusion) being saddled with multi-token
+gold corrections.
 
 Two checks:
 
@@ -18,7 +18,7 @@ Two checks:
 The subtype list is deliberately narrow: only strict single-edit subtypes
 (aukmyit, consonant substitution, visarga, asat, tone, medial, kinzi,
 stacking). Homophone and compound confusions are EXCLUDED because they can
-legitimately span multiple tokens (per Sprint F debate gate finding R3).
+legitimately span multiple tokens.
 """
 
 from __future__ import annotations
@@ -68,8 +68,8 @@ def _load_benchmark() -> dict:
 def test_single_token_subtypes_have_single_token_spans() -> None:
     """Single-edit error subtypes must not span multiple whitespace-separated tokens.
 
-    Catches the Sprint E bug class: an error annotated as (e.g.) aukmyit_confusion
-    with a multi-token gold correction that the token-level homophone/word
+    Catches the bug class where an error annotated as (e.g.) aukmyit_confusion
+    has a multi-token gold correction that the token-level homophone/word
     strategy can never match at top-1.
     """
     benchmark = _load_benchmark()

@@ -504,9 +504,8 @@ class ContextValidator(Validator):
                     error.source_strategy = strategy_name
                 errors.extend(strategy_errors)
 
-                # Collect error candidates for arbiter (Phase 2 infrastructure).
-                # Candidates are emitted alongside the mutex -- both systems
-                # active, mutex still determines output.
+                # Collect error candidates for the arbiter alongside the
+                # mutex pipeline; the mutex still determines emitted output.
                 for error in strategy_errors:
                     candidate = ErrorCandidate(
                         strategy_name=strategy_name,
@@ -610,9 +609,9 @@ class ContextValidator(Validator):
     ) -> None:
         """Log arbiter divergence from mutex-selected errors.
 
-        v1.3.0 shadow mode: the arbiter does NOT mutate live Error
-        objects.  It only logs positions where the arbiter disagrees
-        with the mutex, to collect divergence data.
+        Shadow mode: the arbiter does NOT mutate live Error objects.
+        It only logs positions where the arbiter disagrees with the
+        mutex, to collect divergence data.
         """
         error_by_pos = ContextValidator._build_error_by_pos(errors)
 

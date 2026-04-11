@@ -7,10 +7,11 @@ visual/OCR errors, and question particle corrections.
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from myspellchecker.utils.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 __all__ = [
     "parse_typo_config",

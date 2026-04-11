@@ -66,16 +66,9 @@ class TestHonorificHeuristics:
         config = SpellCheckerConfig(segmenter=SpaceSegmenter(), provider=provider, use_ner=False)
         checker = SpellChecker(config=config)
 
-        # "Maung Ba" -> P(Ba|Maung) = 0 (unseen in our mock data)
-        # Bigram probability 0 < 0.001 -> Flagged!
-        # Wait, in current logic P=0 is ignored unless tonal variant found?
-        # Let's verify logic:
-        # "If trigram doesn't exist AND Bigram is very low (< 0.001)"
-        # P=0 is < 0.001.
-        # BUT we usually skip P=0 to avoid false positives on unseen valid pairs.
-        # Let's give it a low probability instead of 0 to force a flag.
-
-        provider.add_bigram("မောင်", "ဘ", 0.00005)  # Very low
+        # P=0 bigrams are ignored to avoid false positives on unseen valid
+        # pairs, so seed a non-zero but very-low probability to force a flag.
+        provider.add_bigram("မောင်", "ဘ", 0.00005)
 
         result = checker.check("မောင် ဘ", level="word")
 

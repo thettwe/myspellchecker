@@ -66,24 +66,16 @@ transformers = [
 ]
 
 # Complete AI stack (Semantic + Transformer POS)
-ai-full = [
-    "onnxruntime>=1.17.0",
-    "tokenizers>=0.13.0",
-    "transformers>=4.38.0",
-    "torch>=2.6.0",
-]
+ai-full = ["myspellchecker[ai,transformers]"]
 
 # Training dependencies (for custom model training)
 # Includes ONNX export dependencies since training pipeline exports to ONNX
 train = [
-    "transformers>=4.38.0",
+    "myspellchecker[ai,transformers]",
     "datasets>=2.14.0",
     "accelerate>=0.21.0",
-    "torch>=2.6.0",
     "onnx>=1.14.0",         # ONNX model format (required by onnxruntime.quantization)
-    "onnxruntime>=1.17.0",  # For ONNX export step
     "onnxscript>=0.1.0",    # Required by torch.onnx.export
-    "tokenizers>=0.13.0",   # For BPE tokenizer training
 ]
 
 dev = [
@@ -94,7 +86,6 @@ dev = [
     "pytest-xdist>=3.0.0",  # Parallel test execution
     "pytest-timeout>=2.2.0",  # Abort hanging tests
     "hypothesis>=6.0.0",    # Property-based testing
-    "freezegun>=1.2.0",     # Time mocking for TTL/sleep tests
 
     # Type checking and linting
     "mypy>=1.0.0",
@@ -102,19 +93,16 @@ dev = [
     "ruff>=0.3.0",
 
     # AI Training (Only needed for model development, not usage)
-    "transformers>=4.38.0",
-    "datasets>=2.14.0",
-    "accelerate>=0.21.0",
-    "torch>=2.6.0",
+    "myspellchecker[train]",
 ]
 
 # Note: pyyaml is now a core dependency (required for grammar rules)
 
 [project.urls]
-Homepage = "https://github.com/thettwe/my-spellchecker"
+Homepage = "https://github.com/thettwe/myspellchecker"
 Documentation = "https://docs.myspellchecker.com/"
-Repository = "https://github.com/thettwe/my-spellchecker"
-"Bug Tracker" = "https://github.com/thettwe/my-spellchecker/issues"
+Repository = "https://github.com/thettwe/myspellchecker"
+"Bug Tracker" = "https://github.com/thettwe/myspellchecker/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

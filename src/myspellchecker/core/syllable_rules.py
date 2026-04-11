@@ -62,8 +62,8 @@ The syllable validation system is designed with a clear separation of concerns:
     18. Anusvara compatibility
     19. Asat count
     20. Double diacritics
-    21. Tall A / Aa exclusivity (Phase 1)
-    22. Dot below position (Phase 2)
+    21. Tall A / Aa exclusivity
+    22. Dot below position
 
     Strict mode adds:
     - Virama count, Anusvara+Asat conflict, Asat before vowel

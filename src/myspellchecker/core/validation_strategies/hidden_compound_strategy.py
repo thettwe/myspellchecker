@@ -23,8 +23,7 @@ The strategy recovers these errors by:
 5. Emitting a multi-token-span :class:`WordError` via
    :data:`~myspellchecker.core.constants.ET_HIDDEN_COMPOUND_TYPO` without
    calling ``_mark_positions`` — downstream strategies keep running at the
-   same position; a post-processing suppression rule (to be added in
-   Sprint C) handles deduplication.
+   same position; deduplication is handled in post-processing.
 
 Priority: **23** (structural phase, before StatisticalConfusable 24 and
 BrokenCompound 25, surviving the fast-path cutoff at 25).
@@ -106,9 +105,9 @@ class HiddenCompoundStrategy(ValidationStrategy):
     """
     Detect hidden compound typos exposed by segmenter over-splitting.
 
-    See the module docstring for the full algorithm. Sprint B implements
-    bigram detection + trigram lookahead via cached variant generation
-    and bulk dictionary lookups. Error emission uses a multi-token span
+    See the module docstring for the full algorithm. Performs bigram
+    detection plus trigram lookahead via cached variant generation and
+    bulk dictionary lookups. Error emission uses a multi-token span
     with :data:`ET_HIDDEN_COMPOUND_TYPO` and does **not** pre-empt
     downstream strategies via ``_mark_positions``.
 
@@ -117,7 +116,7 @@ class HiddenCompoundStrategy(ValidationStrategy):
         hasher: PhoneticHasher instance (held by the strategy so the
             LRU-cached variant method can key on word-only without making
             the hasher a cache key — PhoneticHasher is not hashable).
-        enabled: Master on/off switch (default False during Sprint A rollout).
+        enabled: Master on/off switch.
         max_token_syllables: Maximum syllables in a candidate token.
         max_variants_per_token: Cap on variants per token after sorting.
         compound_min_frequency: Minimum dict frequency to flag a compound.

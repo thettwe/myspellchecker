@@ -54,9 +54,7 @@ class TestStrategyTier:
         assert _get_tier("CustomStrategy") == 2
 
     def test_all_known_strategies_have_tiers(self):
-        # 13 strategies: the 12 original + HiddenCompoundStrategy (Tier 2,
-        # added in Sprint E to restore STRATEGY_TIER / STRATEGY_RELIABILITY
-        # registry sync).
+        # 12 original strategies + HiddenCompoundStrategy.
         assert len(STRATEGY_TIER) == 13
 
 
@@ -111,7 +109,7 @@ class TestSelectWinner:
         winner = select_winner([b, a])
         assert winner.strategy_name == "SemanticValidationStrategy"
 
-    # -- v1.3.0 scope: POS vs ConfusableSemantic --
+    # -- POS vs ConfusableSemantic --
 
     def test_pos_vs_confusable_semantic(self):
         """Primary conflict pair from scope doc."""

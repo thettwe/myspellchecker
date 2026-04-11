@@ -1,9 +1,7 @@
-"""Tests for HiddenCompoundStrategy (Sprint A scaffold).
+"""Tests for HiddenCompoundStrategy.
 
-Sprint A verifies only the strategy loads, registers, and no-ops.
-Detection logic tests land in Sprint B.
-
-See Workstreams/v1.5.0/hidden-compound-typo-plan.md for the full plan.
+Covers strategy loading, registration, scaffold no-op behaviour, and
+bigram + trigram-lookahead detection logic.
 """
 
 from __future__ import annotations
@@ -34,7 +32,7 @@ def memory_provider() -> MemoryProvider:
 
 
 class TestHiddenCompoundStrategyScaffold:
-    """Sprint A: minimal scaffold. No detection logic yet."""
+    """Minimal scaffold checks: instantiation and disabled-mode no-op."""
 
     def test_error_type_constant_exists(self) -> None:
         assert ET_HIDDEN_COMPOUND_TYPO == "hidden_compound_typo"
@@ -73,10 +71,11 @@ class TestHiddenCompoundStrategyScaffold:
         )
         assert strategy.validate(ctx) == []
 
-    def test_validate_returns_empty_when_enabled_sprint_a_scaffold(
+    def test_validate_returns_empty_for_minimal_provider(
         self, memory_provider: MemoryProvider
     ) -> None:
-        """Sprint A scaffold: enabled strategy still no-ops (detection comes in Sprint B)."""
+        """Enabled strategy returns [] when the in-memory provider lacks
+        enough vocabulary to trigger compound detection."""
         strategy = HiddenCompoundStrategy(provider=memory_provider, hasher=None, enabled=True)
         ctx = ValidationContext(
             sentence="ခုန်ကျစရိတ်",
@@ -102,7 +101,7 @@ class TestHiddenCompoundStrategyRegistration:
     """Verify factory registration under config flag."""
 
     def test_strategy_registered_by_default(self, memory_provider: MemoryProvider) -> None:
-        """As of Sprint D, HC is enabled by default."""
+        """HiddenCompoundStrategy is registered when no overrides are set."""
         config = SpellCheckerConfig()
         assert config.validation.use_hidden_compound_detection is True
         strategies = build_context_validation_strategies(config=config, provider=memory_provider)
@@ -148,7 +147,7 @@ class TestHiddenCompoundStrategyRegistration:
 
 
 class TestProviderVocabularyDefault:
-    """Sprint A.2: verify the provider base default for is_valid_vocabulary."""
+    """Verify the provider base default for is_valid_vocabulary."""
 
     def test_memory_provider_inherits_default(self) -> None:
         provider = MemoryProvider()
@@ -165,7 +164,7 @@ class TestProviderVocabularyDefault:
         assert result == {"က": True, "ခ": True, "xyz": False}
 
 
-# ── Sprint B: bigram / trigram detection ──────────────────────────────
+# ── Bigram / trigram detection ────────────────────────────────────────
 
 
 @pytest.fixture
@@ -213,8 +212,8 @@ def _make_ctx(sentence: str, words: list[str]) -> ValidationContext:
     return ValidationContext(sentence=sentence, words=words, word_positions=positions)
 
 
-class TestHiddenCompoundSprintB:
-    """Sprint B: bigram + trigram lookahead detection."""
+class TestHiddenCompoundDetection:
+    """Bigram + trigram lookahead detection."""
 
     def test_bm005_trigram_lookahead(self, enabled_strategy) -> None:
         """BM-005: segmented 'ခုန်', 'ကျ', 'စရိတ်' → emit single-token span

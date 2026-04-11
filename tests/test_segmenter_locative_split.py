@@ -1,4 +1,4 @@
-"""Sprint F: colloquial-locative allowlist split regression tests.
+"""Colloquial-locative allowlist split regression tests.
 
 Verifies that the ``DefaultSegmenter._COLLOQUIAL_LOCATIVE_MERGES`` allowlist
 correctly splits known problematic tokens without affecting any other token.
@@ -41,11 +41,11 @@ def checker():
 
 
 def test_kun_ma_allowlist_split(checker):
-    """``ကုန်မာ`` must split to ``["ကုန်", "မာ"]`` per Sprint F allowlist."""
+    """``ကုန်မာ`` must split to ``["ကုန်", "မာ"]`` via the allowlist."""
     text = "သူငယ်ချင်းက ရန်ကုန်မာ နေတယ်။"
     tokens = checker.segmenter.segment_words(text)
     assert "ကုန်မာ" not in tokens, (
-        f"Expected ကုန်မာ to be split per Sprint F allowlist, got tokens={tokens}"
+        f"Expected ကုန်မာ to be split via allowlist, got tokens={tokens}"
     )
     assert "မာ" in tokens, f"Expected standalone မာ after allowlist split, got tokens={tokens}"
     assert "ကုန်" in tokens, f"Expected standalone ကုန် after allowlist split, got tokens={tokens}"
@@ -71,7 +71,7 @@ def test_allowlist_does_not_affect_non_allowlist_tokens():
 
 
 def test_allowlist_is_minimal():
-    """Pin the allowlist to exactly the Sprint F baseline entries.
+    """Pin the allowlist to exactly the baseline entries.
 
     Pure structural check — guards against accidental expansion. If a new
     entry is deliberately added, update this list explicitly.
@@ -81,4 +81,4 @@ def test_allowlist_is_minimal():
     allowlist = DefaultSegmenter._COLLOQUIAL_LOCATIVE_MERGES
     assert allowlist == {
         "ကုန်မာ": ("ကုန်", "မာ"),
-    }, f"Allowlist drifted from Sprint F baseline. Actual: {allowlist}"
+    }, f"Allowlist drifted from baseline. Actual: {allowlist}"

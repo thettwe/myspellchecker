@@ -85,5 +85,3 @@ if __name__ == "__main__":
     if HAS_CYTHON:
         test_cython_validator_correctness()
         test_cython_validator_benchmark()
-    else:
-        print("Cython module not available")

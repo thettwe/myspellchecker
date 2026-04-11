@@ -422,7 +422,7 @@ class ValidationConfig(BaseModel):
             "(mutex bypass), fast-path exit is automatically disabled, and the "
             "arbiter uses calibrated confidence fusion "
             "across independence clusters to determine which errors to emit. "
-            "When False, the v1.2 mutex-and-shadow-mode behaviour is used."
+            "When False, falls back to mutex-based winner selection with shadow mode."
         ),
     )
     fusion_confidence_threshold: float = Field(
@@ -662,8 +662,7 @@ class ValidationConfig(BaseModel):
             "StatisticalConfusable and BrokenCompound). It examines multi-token "
             "windows where each individual token is valid but a confusable "
             "variant of w_i would form a high-frequency compound with the "
-            "following token(s). Enabled by default after Sprint D gates green "
-            "(F1 +0.0141, Recall +0.0254, Composite -0.0023 within noise)."
+            "following token(s)."
         ),
     )
     hidden_compound_max_token_syllables: int = Field(

@@ -12,19 +12,19 @@ populates it once before fork; every module reads from the same object.
 
 from __future__ import annotations
 
-import logging
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ..core.constants import DEFAULT_BATCH_SIZE
+from ..utils.logging_utils import get_logger
 
 if TYPE_CHECKING:
     from ..utils.console import PipelineConsole
     from .reporter import PipelineReporter
 
-_logger = logging.getLogger(__name__)
+_logger = get_logger(__name__)
 
 __all__ = [
     "FrequencyBuilderConfig",
