@@ -954,7 +954,7 @@ def compute_report(
             "machine": platform.machine(),
         },
         "database": {
-            "path": str(db_path),
+            "name": db_path.name,
             "hash": compute_db_hash(db_path),
             "size_mb": round(db_path.stat().st_size / (1024 * 1024), 1),
         },

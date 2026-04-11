@@ -527,10 +527,9 @@ def get_normalization_service(
         Uses ThreadSafeSingleton for thread-safe singleton initialization.
     """
     if zawgyi_config is not None:
-        # Return a new instance with custom config (not cached)
+        # Custom config bypasses the singleton cache
         return NormalizationService(zawgyi_config=zawgyi_config)
 
-    # Return the thread-safe singleton
     return _singleton.get(NormalizationService)
 
 

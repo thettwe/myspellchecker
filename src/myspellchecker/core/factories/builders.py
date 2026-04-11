@@ -496,7 +496,6 @@ def build_context_validation_strategies(
     # Priority 23: Hidden Compound Typo Detection
     # Runs before StatisticalConfusable (24) and BrokenCompound (25) in the
     # structural phase (priority <= 25 survives the fast-path cutoff).
-    # See Workstreams/v1.5.0/hidden-compound-typo-plan.md
     if validation_config.use_hidden_compound_detection:
         from myspellchecker.core.validation_strategies.hidden_compound_strategy import (
             HiddenCompoundStrategy,

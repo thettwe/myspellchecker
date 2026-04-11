@@ -708,6 +708,7 @@ class CompoundDetectionMixin:
         try:
             parts = seg.segment_words(token)
         except Exception:
+            logger.debug("compound segmenter raised on %r", token, exc_info=True)
             return None
         if len(parts) < 2:
             return None
@@ -1529,6 +1530,7 @@ class CompoundDetectionMixin:
                 else []
             )
         except Exception:
+            logger.debug("segmenter raised during merged_word check", exc_info=True)
             segmented = []
 
         # Merge space-split tokens (from tokenized) and segmenter output,

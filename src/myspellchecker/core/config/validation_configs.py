@@ -654,7 +654,6 @@ class ValidationConfig(BaseModel):
     )
 
     # Hidden compound typo detection (priority 23, structural phase)
-    # See Workstreams/v1.5.0/hidden-compound-typo-plan.md
     use_hidden_compound_detection: bool = Field(
         default=True,
         description=(

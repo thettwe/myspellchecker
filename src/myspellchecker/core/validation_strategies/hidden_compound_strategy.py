@@ -28,9 +28,6 @@ The strategy recovers these errors by:
 
 Priority: **23** (structural phase, before StatisticalConfusable 24 and
 BrokenCompound 25, surviving the fast-path cutoff at 25).
-
-See ``~/Documents/myspellchecker/Workstreams/v1.5.0/hidden-compound-typo-plan.md``
-for the full plan.
 """
 
 from __future__ import annotations

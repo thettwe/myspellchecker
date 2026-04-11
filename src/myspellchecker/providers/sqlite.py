@@ -869,7 +869,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             return self._bigram_map.get((prev_word, current_word), 0.0)
 
         cache_key = (prev_word, current_word)
-        cached = self._bigram_prob_cache.get(cache_key)  # type: ignore[arg-type]
+        cached = self._bigram_prob_cache.get(cache_key)
         if cached is not None:
             return cast(float, cached)
 
@@ -878,7 +878,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         word2_id = self.get_word_id(current_word)
 
         if word1_id is None or word2_id is None:
-            self._bigram_prob_cache.set(cache_key, 0.0)  # type: ignore[arg-type]
+            self._bigram_prob_cache.set(cache_key, 0.0)
             return 0.0
 
         # Query bigram probability
@@ -891,7 +891,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             result = cursor.fetchone()
             prob = float(result["probability"]) if result else 0.0
 
-        self._bigram_prob_cache.set(cache_key, prob)  # type: ignore[arg-type]
+        self._bigram_prob_cache.set(cache_key, prob)
         return prob
 
     def get_trigram_probability(self, w1: str, w2: str, w3: str) -> float:
@@ -915,7 +915,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             return self._trigram_map.get((w1, w2, w3), 0.0)
 
         cache_key = (w1, w2, w3)
-        cached = self._trigram_prob_cache.get(cache_key)  # type: ignore[arg-type]
+        cached = self._trigram_prob_cache.get(cache_key)
         if cached is not None:
             return cast(float, cached)
 
@@ -925,7 +925,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         id3 = self.get_word_id(w3)
 
         if id1 is None or id2 is None or id3 is None:
-            self._trigram_prob_cache.set(cache_key, 0.0)  # type: ignore[arg-type]
+            self._trigram_prob_cache.set(cache_key, 0.0)
             return 0.0
 
         with self._execute_query() as conn:
@@ -938,7 +938,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             result = cursor.fetchone()
             prob = float(result["probability"]) if result else 0.0
 
-        self._trigram_prob_cache.set(cache_key, prob)  # type: ignore[arg-type]
+        self._trigram_prob_cache.set(cache_key, prob)
         return prob
 
     def get_fourgram_probability(self, word1: str, word2: str, word3: str, word4: str) -> float:
@@ -959,7 +959,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             return 0.0
 
         cache_key = (word1, word2, word3, word4)
-        cached = self._fourgram_prob_cache.get(cache_key)  # type: ignore[arg-type]
+        cached = self._fourgram_prob_cache.get(cache_key)
         if cached is not None:
             return cast(float, cached)
 
@@ -970,7 +970,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         id4 = self.get_word_id(word4)
 
         if id1 is None or id2 is None or id3 is None or id4 is None:
-            self._fourgram_prob_cache.set(cache_key, 0.0)  # type: ignore[arg-type]
+            self._fourgram_prob_cache.set(cache_key, 0.0)
             return 0.0
 
         with self._execute_query() as conn:
@@ -991,7 +991,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
                 self.logger.debug("fourgrams table not found. Returning 0.0.")
                 prob = 0.0
 
-        self._fourgram_prob_cache.set(cache_key, prob)  # type: ignore[arg-type]
+        self._fourgram_prob_cache.set(cache_key, prob)
         return prob
 
     def get_fivegram_probability(
@@ -1015,7 +1015,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             return 0.0
 
         cache_key = (word1, word2, word3, word4, word5)
-        cached = self._fivegram_prob_cache.get(cache_key)  # type: ignore[arg-type]
+        cached = self._fivegram_prob_cache.get(cache_key)
         if cached is not None:
             return cast(float, cached)
 
@@ -1027,7 +1027,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
         id5 = self.get_word_id(word5)
 
         if id1 is None or id2 is None or id3 is None or id4 is None or id5 is None:
-            self._fivegram_prob_cache.set(cache_key, 0.0)  # type: ignore[arg-type]
+            self._fivegram_prob_cache.set(cache_key, 0.0)
             return 0.0
 
         with self._execute_query() as conn:
@@ -1049,7 +1049,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
                 self.logger.debug("fivegrams table not found. Returning 0.0.")
                 prob = 0.0
 
-        self._fivegram_prob_cache.set(cache_key, prob)  # type: ignore[arg-type]
+        self._fivegram_prob_cache.set(cache_key, prob)
         return prob
 
     def get_pos_unigram_probabilities(self) -> dict[str, float]:

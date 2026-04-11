@@ -29,9 +29,14 @@ class WordRuleMixin:
     grammar_config: "GrammarEngineConfig"
 
     # --- Type stubs for methods provided by POSTagMixin (resolved via MRO) ---
-    def _has_tag(self, pos_string: str | None, target_tag: str) -> bool: ...  # type: ignore[empty-body]
-    def _get_all_tags(self, pos_string: str | None) -> set[str]: ...  # type: ignore[empty-body]
-    def _get_primary_tag(self, pos_string: str | None, word: str | None = None) -> str: ...  # type: ignore[empty-body]
+    def _has_tag(self, pos_string: str | None, target_tag: str) -> bool:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
+
+    def _get_all_tags(self, pos_string: str | None) -> set[str]:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
+
+    def _get_primary_tag(self, pos_string: str | None, word: str | None = None) -> str:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
 
     def _check_particle_typos(
         self, word: str, prev_pos: str | None

@@ -1317,12 +1317,9 @@ class _SyllableRuleValidatorPython:
             if col2 not in (3, 4):
                 return False
 
-        # Col 5 (Nasal) stacks under...?
-        # Actually, usually Col 5 is UPPER (Nga-Kinzi).
-        # If Col 5 is UPPER (e.g. Nya), it can stack on self (Nya+Nya = 100A+1039+100A).
-        # Or Nya+Ca.
-        # Let's allow Col 5 Upper to stack on anything in same row for now.
-
+        # Col 5 (Nasal) is typically UPPER (Nga-Kinzi). When upper (e.g. Nya),
+        # it can stack on self (Nya+Nya = 100A+1039+100A) or Nya+Ca.
+        # Permit Col 5 Upper to stack on anything in the same row.
         return True
 
     # =========================================================================

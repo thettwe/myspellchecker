@@ -215,8 +215,7 @@ def init_worker_fork(shared_counter=None):
 
     logger = get_logger(__name__)
 
-    # Simply reference the preloaded models
-    # On fork, these are already in memory via copy-on-write
+    # Reference the preloaded models — already in memory via fork copy-on-write
     _STATE.worker_segmenter = _STATE.preloaded_segmenter
     _STATE.worker_repair = _STATE.preloaded_repair
 
@@ -235,14 +234,14 @@ def init_worker_fork(shared_counter=None):
         return
 
     # For CRF engine, the tagger in batch_processor module survives fork via COW.
-    # Just verify with a quick sanity test.
+    # Verify via sanity tag call.
     if _STATE.worker_segmenter.word_engine == "crf":
         from myspellchecker.data_pipeline.batch_processor import get_crf_tagger
 
         tagger = get_crf_tagger()
         if tagger is not None:
             test_feats = [{"BOS": True, "EOS": True, "number": False}]
-            tagger.tag(test_feats)  # Quick verify
+            tagger.tag(test_feats)
         logger.debug("Worker: CRF engine - tagger intact (fork-safe via COW).")
         return
 

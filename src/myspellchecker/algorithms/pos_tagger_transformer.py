@@ -364,7 +364,6 @@ class TransformerPOSTagger(POSTaggerBase):
             if not result:
                 return "UNK"
 
-            # Return the entity_group (POS tag) mapped to internal convention
             hf_tag = result[0]["entity_group"]
             return self._map_tag(hf_tag)
 
