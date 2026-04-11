@@ -377,26 +377,31 @@ class NgramContextConfig(BaseModel):
     bigram_threshold: float = Field(
         default=0.0001,
         gt=0.0,
+        le=1.0,
         description="Minimum probability threshold for flagging bigram errors",
     )
     trigram_threshold: float = Field(
         default=0.0001,
         gt=0.0,
+        le=1.0,
         description="Minimum probability threshold for flagging trigram errors",
     )
     fourgram_threshold: float = Field(
         default=0.0001,
         gt=0.0,
+        le=1.0,
         description="Minimum probability threshold for flagging 4-gram context errors",
     )
     fivegram_threshold: float = Field(
         default=0.0001,
         gt=0.0,
+        le=1.0,
         description="Minimum probability threshold for flagging 5-gram context errors",
     )
     right_context_threshold: float = Field(
         default=0.001,
         gt=0.0,
+        le=1.0,
         description=(
             "Probability threshold for right context to rescue a word. "
             "When bidirectional context is used, a word is rescued (not flagged) "
@@ -537,6 +542,7 @@ class NgramContextConfig(BaseModel):
     min_meaningful_prob: float = Field(
         default=1e-7,
         ge=0.0,
+        le=1.0,
         description=(
             "Minimum combined probability threshold; skip comparison when "
             "both probs are below this."
