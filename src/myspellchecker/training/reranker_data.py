@@ -491,7 +491,9 @@ class RerankerDataGenerator:
             stats.no_error_detected += 1
             return None
 
-        candidates = matched_error.suggestions
+        candidates = [
+            c.text if hasattr(c, "text") else str(c) for c in matched_error.suggestions
+        ]
         if not candidates:
             stats.no_suggestions += 1
             return None
