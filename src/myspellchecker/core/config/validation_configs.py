@@ -672,99 +672,63 @@ class ValidationConfig(BaseModel):
         ),
     )
 
-    # Syllable-window OOV detection (Sprint I-1, priority 22, structural phase)
-    # See Workstreams/v1.5.0/sprint-i-1-syllable-window-detector.md and
-    # sprint-i-1-session-2026-04-11.md.
-    #
-    # DISABLED BY DEFAULT after Sprint I-1.5 benchmark. Even with aggressive
-    # gating (3-4 syl windows only, freq>=500, ed<=1, suggestion length >=
-    # joined length), the strategy did not reproduce its oracle-predicted
-    # recall and added ~90ms p95 latency from per-window SymSpell lookups.
-    # The meta-classifier fusion fix from Sprint I-1.5 (the
-    # ``_UNTRAINED_ERROR_TYPES`` set in meta_fusion.py) is kept regardless —
-    # it correctly isolates untrained error types from context features
-    # whether or not SW is enabled. Implementation preserved for a future
-    # sprint that either trains a dedicated SW classifier or finds a more
-    # selective emission criterion.
+    # Syllable-window OOV detection (priority 22, structural phase).
+    # Disabled by default: requires per-process SymSpell caching to amortise
+    # the per-window lookup cost before it is viable in production.
     use_syllable_window_oov: bool = Field(
         default=False,
         description=(
-            "Enable detection of multi-syllable OOV typos that the segmenter "
-            "decomposes into individually-valid syllables. When True, "
-            "SyllableWindowOOVStrategy runs at priority 22 (before "
-            "HiddenCompound 23, StatisticalConfusable 24, BrokenCompound 25). "
-            "DISABLED by default in v1.4.0 after Sprint I-1.5 benchmark "
-            "showed neutral recall + ~90ms p95 latency cost. The fusion-"
-            "layer integration that prevents SW errors from corrupting "
-            "trained-type context features (meta_fusion.py "
-            "``_UNTRAINED_ERROR_TYPES``) is kept active regardless. "
-            "Implementation kept for a future sprint."
+            "Enable SyllableWindowOOVStrategy: detect multi-syllable OOV typos "
+            "that the segmenter decomposes into individually-valid syllables. "
+            "Runs at priority 22 (before HiddenCompound, StatisticalConfusable, "
+            "BrokenCompound)."
         ),
     )
     syllable_window_sizes: tuple[int, ...] = Field(
         default=(3, 4),
         description=(
-            "Window sizes to enumerate (in syllables). Sprint I-1.5: dropped "
-            "size 2 because >99% of FPs on clean Burmese news text were "
-            "2-syllable cross-word concatenations where SymSpell deletes a "
-            "valid trailing particle (က/ကို/မှာ etc.). 3-4 syllable windows "
-            "concentrate on actual compound typos."
+            "Window sizes to enumerate (in syllables). 2-syllable windows are "
+            "excluded by default; on real text they are dominated by "
+            "particle-deletion false positives."
         ),
     )
     syllable_window_min_frequency: int = Field(
         default=500,
         ge=0,
-        description=(
-            "Minimum frequency for a SymSpell suggestion to be considered a "
-            "valid correction. Sprint I-1.5: raised from 50 → 500 to demand "
-            "high-confidence dictionary evidence and suppress marginal "
-            "matches."
-        ),
+        description="Minimum SymSpell suggestion frequency to emit a window error.",
     )
     syllable_window_confidence_floor: float = Field(
         default=0.85,
         ge=0.0,
         le=1.0,
-        description=(
-            "Minimum confidence to emit a syllable-window OOV error. Sprint "
-            "I-1.5: raised from 0.70 → 0.85 to require very strong evidence."
-        ),
+        description="Minimum confidence required to emit a syllable-window OOV error.",
     )
     syllable_window_require_typo_prone: bool = Field(
         default=True,
         description=(
-            "Only consider windows containing at least one typo-prone "
-            "character (aspirated/unaspirated pairs, medials, nasals, etc.). "
-            "Pure-vowel/suffix windows are never real typo sources."
+            "Only consider windows containing at least one typo-prone character "
+            "(aspirated/unaspirated pairs, medials, nasals, etc.)."
         ),
     )
     syllable_window_skip_names: bool = Field(
         default=True,
         description=(
             "Skip windows that span any word flagged as a proper name "
-            "(context.is_name_mask). Directly addresses the top FPR risk "
-            "from proper nouns / place names / loanwords flagged by codex+"
-            "gemini debate gate."
+            "(``context.is_name_mask``)."
         ),
     )
     syllable_window_require_valid_source_words: bool = Field(
         default=True,
         description=(
-            "Only emit if every word contributing syllables to the window is "
-            "individually valid in the dictionary. Ensures the strategy only "
-            "fires on segmenter-induced hidden typos, not on upstream "
-            "segmentation artifacts."
+            "Only emit when every word contributing syllables to the window "
+            "is individually a valid dictionary entry."
         ),
     )
     syllable_window_max_edit_distance: int = Field(
         default=1,
         ge=1,
         le=3,
-        description=(
-            "Maximum SymSpell edit distance accepted for the candidate. "
-            "Sprint I-1.5: tightened from 2 → 1 to exclude marginal "
-            "matches that contributed disproportionately to clean-text FPs."
-        ),
+        description="Maximum SymSpell edit distance accepted for the candidate.",
     )
 
     # MLM post-filter for invalid_word / dangling_word FP suppression

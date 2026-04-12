@@ -464,12 +464,11 @@ def build_context_validation_strategies(
         )
         logger.debug("Added BrokenCompoundStrategy (priority 25)")
 
-    # Priority 22: Syllable-Window OOV Detection (Sprint I-1)
-    # Runs FIRST in the structural phase to surface multi-syllable compound
+    # Priority 22: Syllable-Window OOV Detection
+    # Runs first in the structural phase to surface multi-syllable compound
     # typos that the segmenter over-split into individually valid syllables.
-    # The strategy does NOT populate existing_errors, so HiddenCompound (23)
-    # still fires at overlapping positions with its own error type.
-    # See Workstreams/v1.5.0/sprint-i-1-syllable-window-detector.md
+    # Does not populate existing_errors so HiddenCompound (23) can still
+    # fire at overlapping positions with its own error type.
     if validation_config.use_syllable_window_oov and symspell is not None:
         from myspellchecker.core.validation_strategies.syllable_window_oov_strategy import (
             SyllableWindowOOVStrategy,
@@ -565,11 +564,8 @@ def build_context_validation_strategies(
             for word, variants in src.items():
                 merged_map.setdefault(word, set()).update(variants)
 
-        # Sprint I-2: share the curated homophone map with StatConfusable
-        # so it can apply a confidence boost when a detected pair is in
-        # rules/homophones.yaml. Pairs with both statistical AND dictionary
-        # evidence are stronger than pure-statistical detections and
-        # deserve to clear the downstream output filter.
+        # Share the curated homophone map so StatisticalConfusableStrategy
+        # can promote detections that also appear there.
         homophone_pairs_map = (
             homophone_checker.homophone_map if homophone_checker else None
         )

@@ -19,7 +19,6 @@ metadata:
   created_date: "2025-12-30"
   last_updated: "2026-04-11"
   total_entries: 225
-  source: "v1.4.4 — Sprint I-2: +ခဲ→ခဲ့ particle tone pair"
 
 # ============================================================
 # HOMOPHONE MAP
@@ -60,9 +59,8 @@ homophones:
   "ကြက်": ["ကျက်"]          # chicken vs memorize
   "ကျက်": ["ကြက်"]
 
-  # Sprint I-2 additions — medial ya-pin/ya-yit confusions (unidirectional
-  # to avoid FPR on common forms)
-  "ကြွေး": ["ကျွေး"]        # debt/credit vs feed (BM-525)
+  # Unidirectional medial ya-pin/ya-yit confusions
+  "ကြွေး": ["ကျွေး"]        # debt/credit vs feed
 
   # ============================================================
   # Nasal Finals (ံ vs န် vs မ် vs င်) - Common confusions
@@ -166,10 +164,7 @@ homophones:
   "ဆိုး": ["စိုး"]           # bad/dye vs rule/worry
   "စိုး": ["ဆိုး"]
   "ဆား": ["စား"]            # salt vs eat (aspiration confusable)
-  # Sprint I-2: စရာ → ဆရာ (BM-CONF-010/012). Unidirectional — စရာ
-  # (errand/thing-to-do) is a valid word but contextually rare as a noun;
-  # ဆရာ (teacher) is the standard dictionary form. Reverse mapping is
-  # omitted to protect legitimate စရာ usage.
+  # errand vs teacher — unidirectional to protect legitimate စရာ usage
   "စရာ": ["ဆရာ"]
   # Aspirated/labial pairs
   "ဖူး": ["ဘူး"]            # flower/experience vs gourd/negation (pha↔ba)
@@ -249,7 +244,7 @@ homophones:
   # v1.3 additions — expanded ha-htoe real-word pairs
   "ရှာ": ["ရာ"]              # search vs hundred/count
   "ရာ": ["ရှာ"]
-  "ရှင်": ["ရင်", "ရှင်း"]   # alive/monk vs chest/if vs clean/explain (Sprint I-2: BM-EXT-E078)
+  "ရှင်": ["ရင်", "ရှင်း"]   # alive/monk vs chest/if vs clean/explain
   "ရင်": ["ရှင်"]
   "ရှုံး": ["ရုံး"]           # lose vs office
   "ရုံး": ["ရှုံး"]
@@ -323,19 +318,16 @@ homophones:
   "ရေ": ["ရေး"]
   "လေ": ["လေး"]            # air/wind vs four/heavy
   "လေး": ["လေ"]
-  # Sprint I-2 additions — visarga-missing near-homophones (unidirectional).
-  # The "wrong" form lacks the visarga ( း ) that is required for the
-  # intended word. Reverse direction is omitted to avoid flagging every
-  # valid occurrence of the "correct" form.
-  "ကောင်": ["ကောင်း"]       # crow/thing vs good/excellent (BM-EXT-E001)
-  "သာ": ["သား"]             # only/just vs son/meat (BM-EXT-E004, BM-CONF-028)
-  # Sprint I-2 additions — medial ြ (ya-yit) missing. The "wrong" form
-  # omits the medial; the correct form has it. Unidirectional.
-  "ပီ": ["ပြီ"]              # (dialectal/typo) vs completion particle (BM-EXT-E003)
-  "မန်": ["မြန်"]            # (rare) vs fast/quick (BM-EXT-E005)
-  # Sprint I-2 additions — missing tone marks on grammatical particles.
-  # Unidirectional to protect valid standalone uses (hail, vote).
-  "ခဲ": ["ခဲ့"]              # (hail/ice) vs past particle (BM-528)
+  # Visarga-missing near-homophones (unidirectional). The "wrong" form
+  # lacks the visarga ( း ); reverse direction is omitted to avoid
+  # flagging every valid occurrence of the "correct" form.
+  "ကောင်": ["ကောင်း"]       # crow/thing vs good/excellent
+  "သာ": ["သား"]             # only/just vs son/meat
+  # Medial ြ (ya-yit) missing on the "wrong" form (unidirectional).
+  "ပီ": ["ပြီ"]              # (dialectal/typo) vs completion particle
+  "မန်": ["မြန်"]            # (rare) vs fast/quick
+  # Missing tone marks on grammatical particles (unidirectional).
+  "ခဲ": ["ခဲ့"]              # hail/ice vs past particle
 
   # ============================================================
   # Particle confusion pairs (similar-looking particles)

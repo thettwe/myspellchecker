@@ -134,11 +134,8 @@ class ErrorType(str, Enum):
     # but the segmenter already split it into individually-valid tokens)
     HIDDEN_COMPOUND_TYPO = "hidden_compound_typo"
 
-    # Syllable-window OOV (multi-syllable compound typo recovered by joining
-    # adjacent syllable windows, checking OOV status, and consulting SymSpell
-    # for a high-frequency near-match). Sprint I-1 — detection for FNs in
-    # zero-error ("clean") sentences where the segmenter over-splits a typo
-    # into individually-valid syllables.
+    # Multi-syllable compound typo recovered by joining adjacent syllable
+    # windows and consulting SymSpell for a high-frequency near-match.
     SYLLABLE_WINDOW_OOV = "syllable_window_oov"
 
     # Leading vowel-e (Zawgyi-style ေ before consonant)

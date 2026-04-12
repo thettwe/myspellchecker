@@ -134,7 +134,8 @@ class TestMetaClassifierFusion:
 
 
 class TestUntrainedErrorTypeBypass:
-    """Sprint I-1.5: untrained error types are bypassed and isolated."""
+    """Untrained error types are bypassed by the classifier and excluded from
+    the context features used to score trained errors."""
 
     def test_untrained_set_includes_hidden_compound(self):
         assert "hidden_compound_typo" in _UNTRAINED_ERROR_TYPES
@@ -143,7 +144,6 @@ class TestUntrainedErrorTypeBypass:
         assert "syllable_window_oov" in _UNTRAINED_ERROR_TYPES
 
     def test_hidden_compound_always_kept(self, bundled_model):
-        """HiddenCompound errors bypass scoring regardless of feature values."""
         hc = _make_error(
             error_type="hidden_compound_typo",
             confidence=0.01,
@@ -154,7 +154,6 @@ class TestUntrainedErrorTypeBypass:
         assert filtered[0] is hc
 
     def test_syllable_window_oov_always_kept(self, bundled_model):
-        """SW errors bypass scoring regardless of feature values."""
         sw = _make_error(
             error_type="syllable_window_oov",
             confidence=0.01,
@@ -164,18 +163,8 @@ class TestUntrainedErrorTypeBypass:
         assert len(filtered) == 1
         assert filtered[0] is sw
 
-    def test_syllable_window_oov_does_not_affect_other_error_scoring(
-        self, bundled_model
-    ):
-        """Adding SW errors to a sentence must not change scoring of other errors.
-
-        This is the Sprint I-1.5 regression test. The initial SW roll-out
-        regressed recall by -6.9pp because the meta-classifier's context
-        features (n_errors, max_other_conf) incorporated SW candidates,
-        pushing legitimate invalid_word scores below the 0.5 threshold.
-        After the fix, trained-error context features only include other
-        trained errors.
-        """
+    def test_untrained_errors_do_not_affect_trained_scoring(self, bundled_model):
+        """Adding untrained-type errors must not change scoring of trained errors."""
         legit = _make_error(
             error_type="invalid_word",
             confidence=0.85,
@@ -187,7 +176,6 @@ class TestUntrainedErrorTypeBypass:
 
         baseline_filtered = bundled_model.filter_errors([legit])
 
-        # Add 4 SW candidates to the same sentence
         sw_errors = [
             _make_error(
                 error_type="syllable_window_oov",
@@ -202,43 +190,28 @@ class TestUntrainedErrorTypeBypass:
 
         with_sw_filtered = bundled_model.filter_errors([legit, *sw_errors])
 
-        # The legitimate invalid_word must survive both runs identically.
         legit_in_baseline = [
             e for e in baseline_filtered if e.error_type == "invalid_word"
         ]
         legit_in_with_sw = [
             e for e in with_sw_filtered if e.error_type == "invalid_word"
         ]
-        assert len(legit_in_baseline) == len(legit_in_with_sw), (
-            "SW candidates must not change invalid_word filter decision"
-        )
+        assert len(legit_in_baseline) == len(legit_in_with_sw)
 
-    def test_untrained_errors_excluded_from_context_features(
-        self, bundled_model
-    ):
-        """score_error receives only trained errors as context when called by filter_errors.
-
-        Verify via an indirect observable: ``filter_errors`` with SW
-        candidates added should produce the same P(invalid_word) as the
-        baseline call because the fix strips untrained errors from
-        context features before scoring.
-        """
+    def test_score_invariant_under_trained_only_context(self, bundled_model):
+        """``score_error`` produces the same result whether or not the
+        context list is filtered to trained types, as long as the contents
+        are the same."""
         legit = _make_error(
             error_type="invalid_word",
             confidence=0.85,
             suggestions=["fix"],
         )
 
-        # Baseline: score legit alone
         score_alone = bundled_model.score_error(
             legit, all_errors=[legit], error_index=0
         )
-        # filter_errors strips untrained types from the context list; the
-        # resulting score for the trained error is computed against the
-        # same [legit] context whether or not SW is present.
-        trained_only = [legit]
         score_filtered = bundled_model.score_error(
-            legit, all_errors=trained_only, error_index=0
+            legit, all_errors=[legit], error_index=0
         )
-        # Scores must be identical because context is identical.
         assert score_alone == pytest.approx(score_filtered)
