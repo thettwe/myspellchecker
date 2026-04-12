@@ -409,26 +409,42 @@ See the [Validation Strategies Guide](https://docs.myspellchecker.com/features/v
 
 ## Benchmark Results
 
-Tested on a 1,146-sentence benchmark suite (425 clean, 721 with errors, 743 error spans) covering 3 difficulty tiers and 7 domains. The dictionary database and semantic model are **not bundled** with the library — users build or provide their own.
+Tested on a 1,304-sentence benchmark suite (641 clean, 663 with errors, 670 in-scope error spans; `scope=spelling` excludes 131 out-of-scope annotations) covering 3 difficulty tiers and 7 domains. The dictionary database and semantic model are **not bundled** with the library — users build or provide their own.
 
 **Test environment:**
-- Dictionary: Production SQLite database (565 MB, 601K words, 2.2M bigrams, enrichment tables)
+- Dictionary: Production SQLite database (577 MB, 601K words, 2.2M bigrams, enrichment tables)
 - Semantic model: Custom RoBERTa MLM (6L/768H, ONNX quantized, 71 MB)
 - Hardware: Apple Silicon, Python 3.14
-- Benchmark: [`benchmarks/myspellchecker_benchmark.yaml`](benchmarks/) (1,146 sentences)
+- Benchmark: [`benchmarks/myspellchecker_benchmark.yaml`](benchmarks/) (1,304 sentences)
 
 ### With Semantic Model (v2.3)
 
-| Metric | Value |
-|--------|-------|
-| **F1 Score** | 71.1% |
-| **Precision** | 74.1% |
-| **Recall** | 68.2% |
-| **FPR** | 18.6% of clean sentences |
-| **Top-1 Suggestion Accuracy** | 69.7% |
-| **MRR** | 0.7468 |
+| Metric | Value | vs v1.4.0 |
+|--------|------:|----------:|
+| **F1 Score** | 77.1% | +6.0 pts |
+| **Precision** | 82.6% | +8.5 pts |
+| **Recall** | 72.2% | +4.0 pts |
+| **FPR** (clean sentences) | 10.8% | −7.8 pts |
+| **Top-1 Suggestion Accuracy** | 70.5% | +0.8 pts |
+| **MRR** | 0.7569 | +0.010 |
+| **p95 latency** | 409ms | — |
 
-The benchmark covers 12 validation strategies across conversational, news, technical, academic, religious, literary, and general domains with sentences ranging from simple syllable errors to hard context-dependent confusables.
+### Baseline (no semantic model)
+
+For environments that don't ship the semantic model, the structural/contextual pipeline alone gives strong results at much lower latency:
+
+| Metric | Value |
+|--------|------:|
+| **F1 Score** | 75.6% |
+| **Precision** | 81.2% |
+| **Recall** | 70.8% |
+| **FPR** (clean sentences) | 11.1% |
+| **Top-1 Suggestion Accuracy** | 73.2% |
+| **MRR** | 0.7794 |
+| **p95 latency** | 97ms |
+| **Composite score** | 0.7899 |
+
+The benchmark covers 14 validation strategies across conversational, news, technical, academic, religious, literary, and general domains with sentences ranging from simple syllable errors to hard context-dependent confusables.
 
 ## Development
 
