@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-04-12
+
+### Added
+
+- **HiddenCompoundStrategy** (priority 23): Detects multi-token compound typos that the segmenter over-splits into individually-valid syllables. Walks curated-vocabulary bigram/trigram windows and checks whether a phonetic/tonal/medial variant of the leading token forms a high-frequency dictionary compound with the following token(s). Enabled by default.
+- **SyllableWindowOOVStrategy** (priority 22): Detects multi-syllable OOV typos that the segmenter decomposes into individually-valid syllables. Disabled by default pending per-process SymSpell caching; kept available as a structural-phase option.
+- **Suffix-aware re-segmentation** in `DefaultSegmenter`: New post-processing pass that reassembles tokens where the segmenter left an oversized compound or split a colloquial-locative merge such as `ကုန်မာ` → `[ကုန်, မာ]`.
+- **Ternary compound splits** in `MorphemeSuggestionStrategy`: Correction suggestions can now span three morpheme components for compound typos.
+- **Formal register benchmark subset** for FPR regression testing on formal-register text.
+- **Particle-tone confusable pairs**: `ခဲ → ခဲ့` and `မဲ → မယ်` (unidirectional, protects standalone uses).
+- **Curated-pair promotion** in `StatisticalConfusableStrategy`: bigram-ratio detections that also match curated homophone/confusable maps receive a confidence boost to clear the output filter.
+- **7 unidirectional homophone pairs** for homophone-confusion false-negative recovery.
+- **Benchmark expansion** from 1,146 → 1,304 sentences with additional benchmark annotation corrections.
+- **New confusable pairs**: `ကယာ`/`ကရာ` consonant confusion and 5 `false_compound` entries from benchmark FP analysis.
+
+### Changed
+
+- **Meta-classifier v2** with compound-aware features; threshold retuned from `0.40` → `0.42` based on FP/TP sweep.
+- **Fusion arbiter**: `HiddenCompoundStrategy` promoted from Tier 2 to Tier 3 so the arbiter can select HC against Homophone via confidence tiebreak.
+- **Arbiter registry sync** and benchmark annotation corrections (Sprint E fixes).
+- **N-gram probability fields** (`bigram_threshold`, `trigram_threshold`, `fourgram_threshold`, `fivegram_threshold`, `right_context_threshold`, `min_meaningful_prob`) now enforce an `le=1.0` upper bound in Pydantic validation.
+- **SQLite n-gram lookups** deduplicated into a single `_lookup_ngram_prob` helper; the four public `get_{bi,tri,four,five}gram_probability` methods now share the same cache → word-id → query → cache-set path.
+- **Renamed** `core.constants.is_myanmar_text` (any-character semantics) → `contains_myanmar` to disambiguate from the ratio-based `text.normalize.is_myanmar_text`.
+- **`contains_myanmar` helper** is now the canonical any-character Myanmar detection function; existing ratio-based detection remains in `text.normalize`.
+- **Optional-dependency extras** in `pyproject.toml` consolidated via self-referencing: `ai-full`, `train`, and `dev` now reference `myspellchecker[ai,transformers]` instead of duplicating version pins.
+- **Training module** modernized: migrated from `typing.Dict/List/Optional` to lowercase generics with `from __future__ import annotations`, and converted `os.path` usage to `pathlib` across `training/trainer.py`, `training/exporter.py`, and `algorithms/semantic_checker.py`.
+- **Blanket `# type: ignore`** comments narrowed to specific error codes (`[assignment]`, `[import-untyped]`, `[name-defined]`) across 20 sites.
+
+### Fixed
+
+- **Fusion arbiter**: untrained error types (`hidden_compound_typo`, `syllable_window_oov`) are now isolated from the meta-classifier's context features so their presence does not corrupt `n_errors`/`max_other_conf` features for other errors.
+- **Confusable FPs on punctuation boundaries**: valid words with attached Myanmar punctuation no longer trigger confusable detection.
+- **Invalid-word FPs** from boundary punctuation attachment (e.g. trailing `။` / `၊`).
+- **`tense_mismatch` confidence** lowered for data-driven FP filtering.
+- **Dot-below confusable FPs** suppressed in error suppression pipeline.
+- **Visarga compound skip threshold** lowered to protect established words.
+- **Reduplication guard** added to `BrokenCompoundStrategy`, plus nominalizer particles excluded from broken-compound detection.
+- **HiddenCompound subsumed-token guard** and isolated fusion cluster.
+- **Logger f-string eager evaluation** replaced with `%`-style formatting on hot paths (`ContextValidator`, `DI container`, `SpellChecker.check()`) so format arguments are no longer evaluated when DEBUG is disabled.
+
+### Removed
+
+- **9 dead `ValidationConfig` fields** that had zero consumers in the validation pipeline: `is_myanmar_text_threshold`, `orthography_confidence`, `semantic_min_word_length`, `use_orthography_validation`, `truncation_frequency_ratio`, and 4 unused `homophone_*` tunables.
+- **Unused `freezegun` dev dependency** from `pyproject.toml` and `Dockerfile`.
+- **15 exact-duplicate entries** in `rules/confusable_pairs.yaml` (an accidentally copy-pasted block; parser was silently de-duping via `set.add`).
+- **Dead type annotations**: 12 unnecessary `# type: ignore[arg-type]` comments on SQLite cache method calls.
+
+### Internal
+
+- Seven focused cleanup commits across the codebase: stripped internal references (Obsidian vault paths, sprint identifiers, benchmark IDs), removed sprint-specific docstring breadcrumbs, consolidated duplicate documentation, and applied the bulk of the `ruff UP035/UP015/RUF100/PIE790` autofixes.
+- `pyproject.toml` repository URLs corrected from `github.com/thettwe/my-spellchecker` → `github.com/thettwe/myspellchecker`.
+
 ## [1.4.0] - 2026-04-08
 
 ### Added

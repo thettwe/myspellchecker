@@ -16,8 +16,8 @@ import math
 import sqlite3
 import time
 import unicodedata
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Iterator
 
 from ..core.myanmar_confusables import (
     _MEDIALS_INSERT_DELETE,

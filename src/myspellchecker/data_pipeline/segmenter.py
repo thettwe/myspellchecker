@@ -15,10 +15,11 @@ from __future__ import annotations
 import errno
 import multiprocessing
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, cast
+from typing import Any, cast
 
-import pyarrow as pa  # type: ignore
+import pyarrow as pa  # type: ignore[import-untyped]
 from rich.console import Console
 
 from ..core.constants import SEGMENTER_ENGINE_MYWORD

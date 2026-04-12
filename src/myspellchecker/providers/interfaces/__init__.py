@@ -85,6 +85,30 @@ class WordRepository(Protocol):
         """
         ...
 
+    def is_valid_words_bulk(self, words: list[str]) -> dict[str, bool]:
+        """
+        Check validity of multiple words in a single operation.
+
+        Args:
+            words: List of words to validate.
+
+        Returns:
+            Dictionary mapping word to validity.
+        """
+        ...
+
+    def is_valid_vocabulary(self, word: str) -> bool:
+        """
+        Check if word is curated vocabulary (stricter than is_valid_word).
+
+        Args:
+            word: Word to check.
+
+        Returns:
+            True if curated vocabulary, False otherwise.
+        """
+        ...
+
     def get_word_frequency(self, word: str) -> int:
         """
         Get frequency count for word.

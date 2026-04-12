@@ -13947,3 +13947,23 @@ false_compounds:
   - ကျောင်း
   - တွင်
   reason: noun + formal locative postposition
+- parts:
+  - ငါ
+  - အခု
+  reason: pronoun + time adverb
+- parts:
+  - နေ
+  - ခြင်း
+  reason: verb + nominalizer
+- parts:
+  - လူ
+  - တွေ
+  reason: noun + plural marker
+- parts:
+  - တိုင်
+  - တိုင်
+  reason: reduplication
+- parts:
+  - လမ်းတွေ
+  - မှာ
+  reason: noun+plural + postposition

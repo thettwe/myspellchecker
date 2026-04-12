@@ -3,9 +3,9 @@
 Maps raw strategy confidence scores to calibrated probabilities so that
 scores from different strategies are comparable on a common scale.
 
-v1.3.0: bootstrapped with strategy-specific reliability weights and
-identity calibration.  Future versions will use labeled benchmark data
-to train per-strategy isotonic regression calibrators.
+Currently bootstrapped with strategy-specific reliability weights and
+identity calibration; the API supports per-strategy isotonic calibrators
+once labeled benchmark data is available.
 """
 
 from __future__ import annotations
@@ -13,9 +13,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 # Per-strategy reliability weights (lambda_i).
-# Estimated precision of each strategy based on tier hierarchy and
-# observed accuracy characteristics.  These bootstrap values will be
-# refined with labeled benchmark data in future versions.
+# Estimated precision of each strategy based on tier hierarchy and observed
+# accuracy characteristics. Bootstrap values that can be refined with
+# labeled benchmark data.
 STRATEGY_RELIABILITY: dict[str, float] = {
     # Tier 1: Deterministic -- high precision on valid inputs
     "ToneValidationStrategy": 0.85,
@@ -23,6 +23,7 @@ STRATEGY_RELIABILITY: dict[str, float] = {
     # Tier 2: Structural -- moderate precision
     "SyntacticValidationStrategy": 0.70,
     "StatisticalConfusableStrategy": 0.75,
+    "HiddenCompoundStrategy": 0.80,  # contextual, freq-verified compound detection
     "BrokenCompoundStrategy": 0.80,
     # Tier 3: Contextual -- precision varies with context quality
     "POSSequenceValidationStrategy": 0.60,
@@ -151,7 +152,7 @@ class StrategyCalibrator:
         Falls back to bootstrap defaults on missing file, empty YAML, or
         malformed entries.
         """
-        import yaml  # noqa: PLC0415
+        import yaml
 
         from myspellchecker.utils.logging_utils import get_logger
 

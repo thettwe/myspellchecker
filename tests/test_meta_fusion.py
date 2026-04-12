@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from myspellchecker.core.validation_strategies.meta_fusion import (
+    _UNTRAINED_ERROR_TYPES,
     MetaClassifierFusion,
     _sigmoid,
 )
@@ -72,9 +73,9 @@ class TestSigmoid:
 class TestMetaClassifierFusion:
     def test_from_yaml(self, bundled_model):
         """Bundled model loads correctly."""
-        assert bundled_model._n_features == 41
-        assert len(bundled_model._coefficients) == 41
-        assert len(bundled_model._feature_names) == 41
+        assert bundled_model._n_features == 56
+        assert len(bundled_model._coefficients) == 56
+        assert len(bundled_model._feature_names) == 56
 
     def test_score_error_range(self, bundled_model):
         """Predictions are in [0, 1]."""
@@ -130,3 +131,79 @@ class TestMetaClassifierFusion:
                 intercept=0.0,
                 feature_names=["a"],
             )
+
+
+class TestUntrainedErrorTypeBypass:
+    """Untrained error types are bypassed by the classifier and excluded from
+    the context features used to score trained errors."""
+
+    def test_untrained_set_includes_hidden_compound(self):
+        assert "hidden_compound_typo" in _UNTRAINED_ERROR_TYPES
+
+    def test_untrained_set_includes_syllable_window_oov(self):
+        assert "syllable_window_oov" in _UNTRAINED_ERROR_TYPES
+
+    def test_hidden_compound_always_kept(self, bundled_model):
+        hc = _make_error(
+            error_type="hidden_compound_typo",
+            confidence=0.01,
+            suggestions=[],
+        )
+        filtered = bundled_model.filter_errors([hc])
+        assert len(filtered) == 1
+        assert filtered[0] is hc
+
+    def test_syllable_window_oov_always_kept(self, bundled_model):
+        sw = _make_error(
+            error_type="syllable_window_oov",
+            confidence=0.01,
+            suggestions=[],
+        )
+        filtered = bundled_model.filter_errors([sw])
+        assert len(filtered) == 1
+        assert filtered[0] is sw
+
+    def test_untrained_errors_do_not_affect_trained_scoring(self, bundled_model):
+        """Adding untrained-type errors must not change scoring of trained errors."""
+        legit = _make_error(
+            error_type="invalid_word",
+            confidence=0.85,
+            suggestions=["fix"],
+            source_strategy="WordValidator",
+            text="ခစားကွင်း",
+            position=18,
+        )
+
+        baseline_filtered = bundled_model.filter_errors([legit])
+
+        sw_errors = [
+            _make_error(
+                error_type="syllable_window_oov",
+                confidence=0.80,
+                suggestions=["fix1"],
+                source_strategy="SyllableWindowOOVStrategy",
+                text="တွေက",
+                position=pos,
+            )
+            for pos in (0, 5, 12, 25)
+        ]
+
+        with_sw_filtered = bundled_model.filter_errors([legit, *sw_errors])
+
+        legit_in_baseline = [e for e in baseline_filtered if e.error_type == "invalid_word"]
+        legit_in_with_sw = [e for e in with_sw_filtered if e.error_type == "invalid_word"]
+        assert len(legit_in_baseline) == len(legit_in_with_sw)
+
+    def test_score_invariant_under_trained_only_context(self, bundled_model):
+        """``score_error`` produces the same result whether or not the
+        context list is filtered to trained types, as long as the contents
+        are the same."""
+        legit = _make_error(
+            error_type="invalid_word",
+            confidence=0.85,
+            suggestions=["fix"],
+        )
+
+        score_alone = bundled_model.score_error(legit, all_errors=[legit], error_index=0)
+        score_filtered = bundled_model.score_error(legit, all_errors=[legit], error_index=0)
+        assert score_alone == pytest.approx(score_filtered)

@@ -15,7 +15,8 @@ The dependencies MUST be resolved in order: provider → symspell → context_ch
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.di.service_names import (
     SERVICE_CONTEXT_CHECKER,

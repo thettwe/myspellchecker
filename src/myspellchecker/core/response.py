@@ -118,7 +118,7 @@ class Suggestion(str):
         return instance
 
     @property
-    def text(self) -> str:  # noqa: D401
+    def text(self) -> str:
         """The suggestion string (identical to ``str(self)``)."""
         return str.__str__(self)
 

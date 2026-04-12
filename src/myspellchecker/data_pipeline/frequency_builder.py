@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from rich.console import Console
 
-import pyarrow as pa  # type: ignore
+import pyarrow as pa  # type: ignore[import-untyped]
 
 from ..core.constants import (
     INVALID_WORDS,
@@ -330,7 +330,7 @@ class FrequencyBuilder(CheckpointMixin, POSProcessorMixin, FrequencyIOMixin):
         min_word_frequency: int | None = None,
         min_bigram_frequency: int | None = None,
         min_trigram_frequency: int | None = None,
-        pos_tagger: POSTaggerBase | None = None,  # type: ignore  # noqa: F821
+        pos_tagger: POSTaggerBase | None = None,  # type: ignore[name-defined]  # noqa: F821
         incremental: bool = False,
         word_engine: str = "myword",
         pos_checkpoint_interval: int = 250_000,

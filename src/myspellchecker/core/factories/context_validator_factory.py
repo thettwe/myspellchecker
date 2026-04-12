@@ -7,7 +7,8 @@ the power of the Strategy pattern and Dependency Injection.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.context_validator import ContextValidator
 from myspellchecker.core.di.service_names import (
@@ -17,6 +18,7 @@ from myspellchecker.core.di.service_names import (
     SERVICE_PROVIDER,
     SERVICE_SEGMENTER,
     SERVICE_SEMANTIC_CHECKER,
+    SERVICE_SYMSPELL,
     SERVICE_SYNTACTIC_RULE_CHECKER,
     SERVICE_TONE_DISAMBIGUATOR,
     SERVICE_VITERBI_TAGGER,
@@ -133,6 +135,7 @@ def create_context_validator(container: "ServiceContainer") -> ContextValidator:
         if container.has_service(SERVICE_NAME_HEURISTIC)
         else None
     )
+    symspell = container.get(SERVICE_SYMSPELL) if container.has_service(SERVICE_SYMSPELL) else None
 
     # Build strategies using shared builder
     strategies = build_context_validation_strategies(
@@ -144,6 +147,7 @@ def create_context_validator(container: "ServiceContainer") -> ContextValidator:
         context_checker=context_checker,
         homophone_checker=homophone_checker,
         semantic_checker=semantic_checker,
+        symspell=symspell,
     )
 
     # Create validator with all strategies + shared POS tagger for pre-computation

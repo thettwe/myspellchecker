@@ -5,9 +5,9 @@ description: Myanmar spell checker benchmark with minimal gold spans and revised
 metadata:
   created_date: '2026-03-17'
   annotation_revision_date: '2026-03-17'
-  total_sentences: 1146
-  clean_count: 425
-  error_count: 721
+  total_sentences: 1304
+  clean_count: 525
+  error_count: 779
   observable_error_span_count: 564
   annotation_anomaly_count: 0
   difficulty_distribution:
@@ -15,12 +15,14 @@ metadata:
     tier_2: 379
     tier_3: 133
   domain_distribution:
-    conversational: 201
-    academic: 124
-    technical: 143
-    news: 140
-    religious: 26
-    literary: 20
+    academic: 214
+    conversational: 339
+    general: 78
+    literary: 87
+    news: 244
+    religious: 97
+    social_media: 9
+    technical: 236
   observed_error_subtype_distribution:
     stacking_error: 43
     tone_mark_error: 41
@@ -253,13 +255,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-006
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည် ဟု သတင်းရင်းမြစ်များက ဆိုသည်။
@@ -418,13 +419,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-014
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည် ဟု အစီရင်ခံစာတွင် ပါရှိသည်။
@@ -583,13 +583,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-022
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည်။
@@ -748,13 +747,12 @@ sentences:
     detection_layer: word
     span:
       start: 21
-      end: 27
-    erroneous_text: ခုန်ကျ
-    gold_correction: ကုန်ကျ
+      end: 25
+    erroneous_text: ခုန်
+    gold_correction: ကုန်
     edit_distance: 1
     context_required: false
-    notes: Word-level form error. The surface form "ခုန်ကျ" is made of normal-looking syllables, but the resulting lexical form is not the intended word. A consonant substitution should be corrected to
-      "ကုန်ကျ".
+    notes: Word-level form error. The single-token typo "ခုန်" (inside the compound "ခုန်ကျစရိတ်") should be corrected to "ကုန်" — consonant substitution ခ→က. Canonical Format S (single-token minimal edit) per Sprint C debate decision.
   notes: Annotated sentence with 1 localized error(s) under the revised word-vs-syllable policy.
 - id: BM-030
   input: စီးပွားရေးနှင့်ကူးသန်းရောင်းဝယ်ရေးဝန်ကြီးဌာနက ဆီးပွားရေးအတွက် အစီအစဉ်သစ် ကြေညာခဲ့သည် ဟု သိရသည်။
@@ -14771,13 +14769,13 @@ sentences:
     error_subtype: aukmyit_confusion
     detection_layer: word
     span:
-      start: 273
-      end: 297
-    erroneous_text: လက်ရှိဥပမာအနေနဲ့ပြော့ရင်
-    gold_correction: လက်ရှိဥပမာအနေနဲ့ပြောရင်
+      start: 289
+      end: 294
+    erroneous_text: ပြော့
+    gold_correction: ပြော
     edit_distance: 1
     context_required: false
-    notes: Injected aukmyit_confusion error.
+    notes: Token-level aukmyit visarga removal (ပြော့→ပြော). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E013
   input: တောင်တွင်းကြီးမြို့နယ်မှာ စစ်တပ်က အာဏာသိမ်းပြီးနောက် စစ်ကောင်စီတပ်တွေရဲ့ ရိုက်နှက်ပစ်ခတ် သတ်ဖြတ်မှုကြောင့် ဒေသခံပြည်သူ ခုနစ်ဦးအထိ သေဆုံးခဲ့ရတယ်လို့ ဒေသခံတွေရဲ့ မတ်တမ်းတွေအရ သိရပါတယ်။
@@ -14792,12 +14790,12 @@ sentences:
     detection_layer: word
     span:
       start: 160
-      end: 172
-    erroneous_text: မတ်တမ်းတွေအရ
-    gold_correction: မှတ်တမ်းတွေအရ
+      end: 167
+    erroneous_text: မတ်တမ်း
+    gold_correction: မှတ်တမ်း
     edit_distance: 1
     context_required: false
-    notes: Injected compound_confusion error.
+    notes: Token-level stacking-ha insertion (မတ်တမ်း→မှတ်တမ်း). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E014
   input: ကိုဘုထန်ပိုင်က "မနေ့က ညကတည်းက အင်တာနက်လိုင်းတွေတော့ ပြန်ပွင့်တယ်။ ဒါပေမယ့် လိုင်းကတော့ သိပ် မကောင်းဘူး။ ကျနော့် ဖုန်းကြောင့် ဖြစ်တာလား။ ဘယ်လို ဖွင့်ပေးတာလည်း ဆိုတာတော့ မသိတော့ဘူး" ဟု ဧရာဝတီသို့
@@ -17113,12 +17111,12 @@ sentences:
     detection_layer: word
     span:
       start: 45
-      end: 59
-    erroneous_text: ပြော့လို့ရတယ်။
-    gold_correction: ပြောလို့ရတယ်။
+      end: 50
+    erroneous_text: ပြော့
+    gold_correction: ပြော
     edit_distance: 1
     context_required: false
-    notes: Injected aukmyit_confusion error.
+    notes: Token-level aukmyit visarga removal (ပြော့→ပြော). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E126
   input: ၁။ သောက၊ဒုက္ခ၊ဆင်းရဲမှု၊ ရောဂါ ဝေဒနာ လွတ် မြောက် ရန် ဤဂုဏ်တော်အား အစဉ်အမြဲ ဖတ်ရွတ် ရပါမည်။
@@ -17464,13 +17462,13 @@ sentences:
     error_subtype: aukmyit_confusion
     detection_layer: word
     span:
-      start: 85
-      end: 97
-    erroneous_text: ခော်ပြော့တယ်
-    gold_correction: ခော်ပြောတယ်
+      start: 89
+      end: 94
+    erroneous_text: ပြော့
+    gold_correction: ပြော
     edit_distance: 1
     context_required: false
-    notes: Injected aukmyit_confusion error.
+    notes: Token-level aukmyit visarga removal (ပြော့→ပြော). Relabeled in Sprint E to match single-token detection semantics.
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E143
   input: ပထမဆုံး စပြောရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒော်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေ ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ကသိုလ် အပတ်စဉ်
@@ -18703,3 +18701,2179 @@ sentences:
     context_required: true
     notes: Word order error. The phrase "ပြန်လည်ထုတ်လုပ်ခဲ့သည် ချို့ယွင်းချက်ကို စမ်းသပ်ခန်းတွင်" should be reordered as "ချို့ယွင်းချက်ကို စမ်းသပ်ခန်းတွင် ပြန်လည်ထုတ်လုပ်ခဲ့သည်".
   notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+- id: BM-GEN-E001
+  input: ဆရာ ဝန် က လူနာကို စစ်ဆေးနေပါတယ်။
+  is_clean: false
+  domain: news
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''ဆရာဝန်'' (doctor) was incorrectly broken into two words ''ဆရာ ဝန်''.'
+  expected_errors:
+  - error_id: BM-GEN-E001-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: 'ဆရာ ဝန် '
+    gold_correction: ဆရာဝန်
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'ဆရာဝန်' (doctor) was incorrectly broken into two words 'ဆရာ ဝန်'.
+    scope: spelling
+- id: BM-GEN-E002
+  input: ရန်ကုန်မြို့မှာ ကား လမ်း ပိတ်ဆို့မှုတွေ မကြာခဏဖြစ်တတ်တယ်။
+  is_clean: false
+  domain: social_media
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''ကားလမ်း'' (road) was incorrectly broken into two words ''ကား လမ်း''.'
+  expected_errors:
+  - error_id: BM-GEN-E002-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 16
+      end: 25
+    erroneous_text: 'ကား လမ်း '
+    gold_correction: ကားလမ်း
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'ကားလမ်း' (road) was incorrectly broken into two words 'ကား လမ်း'.
+    scope: spelling
+- id: BM-GEN-E003
+  input: ပညာ ရေး ကဏ္ဍ တိုးတက်ဖို့ အရေးကြီးတယ်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''ပညာရေး'' (education) was incorrectly broken into two words ''ပညာ ရေး''.'
+  expected_errors:
+  - error_id: BM-GEN-E003-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: 'ပညာ ရေး '
+    gold_correction: ပညာရေး
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'ပညာရေး' (education) was incorrectly broken into two words 'ပညာ ရေး'.
+    scope: spelling
+- id: BM-GEN-E004
+  input: နေ့တိုင်း ရေ ချိုး ရင် ကိုယ်ကျန်းမာရေးအတွက် ကောင်းတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound verb ''ရေချိုး'' (to bathe) was incorrectly broken into two words ''ရေ ချိုး''.'
+  expected_errors:
+  - error_id: BM-GEN-E004-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 10
+      end: 19
+    erroneous_text: 'ရေ ချိုး '
+    gold_correction: ရေချိုး
+    edit_distance: 5
+    context_required: false
+    notes: The compound verb 'ရေချိုး' (to bathe) was incorrectly broken into two words 'ရေ ချိုး'.
+    scope: spelling
+- id: BM-GEN-E005
+  input: မြို့ နယ် အုပ်ချုပ်ရေးမှူးက အစည်းအဝေးတက်ရောက်ခဲ့ပါတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''မြို့နယ်'' (township) was incorrectly broken into two words ''မြို့ နယ်''.'
+  expected_errors:
+  - error_id: BM-GEN-E005-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 10
+    erroneous_text: 'မြို့ နယ် '
+    gold_correction: မြို့နယ်
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'မြို့နယ်' (township) was incorrectly broken into two words 'မြို့ နယ်'.
+    scope: spelling
+- id: BM-GEN-E006
+  input: လူ မှု ရေး လုပ်ငန်းတွေမှာ ပါဝင်ကူညီပေးသင့်ပါတယ်။
+  is_clean: false
+  domain: social_media
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''လူမှုရေး'' (social affairs) was incorrectly broken into three words ''လူ မှု ရေး''.'
+  expected_errors:
+  - error_id: BM-GEN-E006-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 11
+    erroneous_text: 'လူ မှု ရေး '
+    gold_correction: လူမှုရေး
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'လူမှုရေး' (social affairs) was incorrectly broken into three words 'လူ မှု ရေး'.
+    scope: spelling
+- id: BM-GEN-E007
+  input: ရုံး ခန်း မှာ စာရွက်စာတမ်းတွေ ပြင်ဆင်နေတယ်။
+  is_clean: false
+  domain: technical
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''ရုံးခန်း'' (office) was incorrectly broken into two words ''ရုံး ခန်း''.'
+  expected_errors:
+  - error_id: BM-GEN-E007-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 10
+    erroneous_text: 'ရုံး ခန်း '
+    gold_correction: ရုံးခန်း
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'ရုံးခန်း' (office) was incorrectly broken into two words 'ရုံး ခန်း'.
+    scope: spelling
+- id: BM-GEN-E008
+  input: အစိုး ရ ရဲ့ မူဝါဒအသစ်ကို ကြေညာခဲ့ပါတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''အစိုးရ'' (government) was incorrectly broken into two words ''အစိုး ရ''.'
+  expected_errors:
+  - error_id: BM-GEN-E008-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: 'အစိုး ရ '
+    gold_correction: အစိုးရ
+    edit_distance: 3
+    context_required: false
+    notes: The compound word 'အစိုးရ' (government) was incorrectly broken into two words 'အစိုး ရ'.
+    scope: spelling
+- id: BM-GEN-E009
+  input: အဖွဲ့ အစည်း တွေ ပူးပေါင်းဆောင်ရွက်ဖို့ လိုတယ်။
+  is_clean: false
+  domain: social_media
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''အဖွဲ့အစည်း'' (organization) was incorrectly broken into two words ''အဖွဲ့ အစည်း''.'
+  expected_errors:
+  - error_id: BM-GEN-E009-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 12
+    erroneous_text: 'အဖွဲ့ အစည်း '
+    gold_correction: အဖွဲ့အစည်း
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'အဖွဲ့အစည်း' (organization) was incorrectly broken into two words 'အဖွဲ့ အစည်း'.
+    scope: spelling
+- id: BM-GEN-E010
+  input: ဘာ သာ ရေး ဆိုင်ရာ အခမ်းအနားကို ကျင်းပခဲ့ပါတယ်။
+  is_clean: false
+  domain: religious
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''ဘာသာရေး'' (religious affairs) was incorrectly broken into three words ''ဘာ သာ ရေး''.'
+  expected_errors:
+  - error_id: BM-GEN-E010-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 10
+    erroneous_text: 'ဘာ သာ ရေး '
+    gold_correction: ဘာသာရေး
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'ဘာသာရေး' (religious affairs) was incorrectly broken into three words 'ဘာ သာ ရေး'.
+    scope: spelling
+- id: BM-GEN-E011
+  input: လက် မှတ် ရေးထိုးပြီး စာချုပ်ကို အတည်ပြုခဲ့တယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''လက်မှတ်'' (signature/ticket) was incorrectly broken into two words ''လက် မှတ်''.'
+  expected_errors:
+  - error_id: BM-GEN-E011-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 9
+    erroneous_text: 'လက် မှတ် '
+    gold_correction: လက်မှတ်
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'လက်မှတ်' (signature/ticket) was incorrectly broken into two words 'လက် မှတ်'.
+    scope: spelling
+- id: BM-GEN-E012
+  input: အိမ် ထောင် တစ်ခု တည်ဆောက်ဖို့ မလွယ်ဘူး။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''အိမ်ထောင်'' (family/household) was incorrectly broken into two words ''အိမ် ထောင်''.'
+  expected_errors:
+  - error_id: BM-GEN-E012-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 11
+    erroneous_text: 'အိမ် ထောင် '
+    gold_correction: အိမ်ထောင်
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'အိမ်ထောင်' (family/household) was incorrectly broken into two words 'အိမ် ထောင်'.
+    scope: spelling
+- id: BM-GEN-E013
+  input: သဘာ ဝ ပတ်ဝန်းကျင်ကို ထိန်းသိမ်းဖို့ လိုအပ်တယ်။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''သဘာဝ'' (nature) was incorrectly broken into two words ''သဘာ ဝ''.'
+  expected_errors:
+  - error_id: BM-GEN-E013-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 6
+    erroneous_text: 'သဘာ ဝ '
+    gold_correction: သဘာဝ
+    edit_distance: 3
+    context_required: false
+    notes: The compound word 'သဘာဝ' (nature) was incorrectly broken into two words 'သဘာ ဝ'.
+    scope: spelling
+- id: BM-GEN-E014
+  input: ဒီလုပ် ငန်း က အကျိုးအမြတ်များစွာ ရရှိခဲ့တယ်။
+  is_clean: false
+  domain: technical
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''လုပ်ငန်း'' (business/enterprise) was incorrectly broken into two words ''လုပ် ငန်း'''
+  expected_errors:
+  - error_id: BM-GEN-E014-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 2
+      end: 12
+    erroneous_text: 'လုပ် ငန်း '
+    gold_correction: လုပ်ငန်း
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'လုပ်ငန်း' (business/enterprise) was incorrectly broken into two words 'လုပ် ငန်း'.
+    scope: spelling
+- id: BM-GEN-E015
+  input: နေ့စဉ် သတင်း စာ များတွင် ပြည်တွင်းသတင်းများကို ဖော်ပြလေ့ရှိပါသည်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''သတင်းစာ'' (newspaper) was incorrectly split into ''သတင်း စာ''.'
+  expected_errors:
+  - error_id: BM-GEN-E015-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 7
+      end: 16
+    erroneous_text: 'သတင်း စာ '
+    gold_correction: သတင်းစာ
+    edit_distance: 4
+    context_required: false
+    notes: The compound word 'သတင်းစာ' (newspaper) was incorrectly split into 'သတင်း စာ'.
+    scope: spelling
+- id: BM-GEN-E016
+  input: ရဟန်း သံဃာ များအား ဆွမ်းလောင်းလှူခဲ့ပါတယ်။
+  is_clean: false
+  domain: religious
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''ရဟန်းသံဃာ'' (monks) was incorrectly split into ''ရဟန်း သံဃာ''.'
+  expected_errors:
+  - error_id: BM-GEN-E016-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 0
+      end: 11
+    erroneous_text: 'ရဟန်း သံဃာ '
+    gold_correction: ရဟန်းသံဃာ
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'ရဟန်းသံဃာ' (monks) was incorrectly split into 'ရဟန်း သံဃာ'.
+    scope: spelling
+- id: BM-GEN-E017
+  input: ပျော်ပွဲစားပွဲမှာ မီး ပုံးပျံ တွေ အများကြီး လွှတ်တင်ခဲ့ကြတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The compound word ''မီးပုံးပျံ'' (hot air balloon) was incorrectly split into ''မီး ပုံးပျံ''.'
+  expected_errors:
+  - error_id: BM-GEN-E017-E1
+    error_type: wrong_word
+    error_subtype: word_boundary
+    detection_layer: word
+    span:
+      start: 18
+      end: 30
+    erroneous_text: 'မီး ပုံးပျံ '
+    gold_correction: မီးပုံးပျံ
+    edit_distance: 5
+    context_required: false
+    notes: The compound word 'မီးပုံးပျံ' (hot air balloon) was incorrectly split into 'မီး ပုံးပျံ'.
+    scope: spelling
+- id: BM-GEN-E018
+  input: သူတို့ ရုပ်ရှင်ကြည့်ပြီးတော့ ပျော်ခဲ့ပါသည်၊ ဒါပေမဲ့ နောက်ကျသွားတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''တယ်''. Corrected to consistent colloquial register.'
+  expected_errors:
+  - error_id: BM-GEN-E018-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 29
+      end: 42
+    erroneous_text: ပျော်ခဲ့ပါသည်
+    gold_correction: ပျော်ခဲ့တယ်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'တယ်'. Corrected to consistent colloquial register.
+    scope: context_dependent
+- id: BM-GEN-E019
+  input: ကျွန်တော် ဒီစာအုပ်ကို ဖတ်ပြီးပါသည်၊ ဒါပေမဲ့ နားမလည်ဘူးဗျာ။
+  is_clean: false
+  domain: conversational
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''ဘူးဗျာ''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E019-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 44
+      end: 57
+    erroneous_text: နားမလည်ဘူးဗျာ
+    gold_correction: နားမလည်ပါ
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'ဘူးဗျာ'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E020
+  input: ဤပရောဂျက်ကို သေသေချာချာ စီစဉ်ခဲ့ပြီးပါသည်၊ ထို့ကြောင့် အောင်မြင်မှာပါ။
+  is_clean: false
+  domain: academic
+  register: formal
+  difficulty_tier: 3
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with polite/colloquial ''မှာပါ''. Corrected to a more formal and objective expre'
+  expected_errors:
+  - error_id: BM-GEN-E020-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 55
+      end: 70
+    erroneous_text: အောင်မြင်မှာပါ။
+    gold_correction: အောင်မြင်မည်ဟု ယူဆပါသည်။
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with polite/colloquial 'မှာပါ'. Corrected to a more formal and objective expression.
+    scope: context_dependent
+- id: BM-GEN-E021
+  input: ဒီမေးခွန်းကို ဖြေဆိုပေးပါလို့ တောင်းဆိုခဲ့ပါသည်၊ ဒါပေမဲ့ သူက မပြောခဲ့ဘူး။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''ဘူး''. Corrected to consistent polite/colloquial register.'
+  expected_errors:
+  - error_id: BM-GEN-E021-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 30
+      end: 47
+    erroneous_text: တောင်းဆိုခဲ့ပါသည်
+    gold_correction: တောင်းဆိုခဲ့ပါတယ်
+    edit_distance: 2
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'ဘူး'. Corrected to consistent polite/colloquial register.
+    scope: context_dependent
+- id: BM-GEN-E022
+  input: ဘုရားကျောင်းကို သွားရောက်ခဲ့ပါသည်၊ ပြီးတော့ ကောင်းမှုတွေ လုပ်ခဲ့တယ်။
+  is_clean: false
+  domain: religious
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''တွေ လုပ်ခဲ့တယ်''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E022-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 44
+      end: 67
+    erroneous_text: ကောင်းမှုတွေ လုပ်ခဲ့တယ်
+    gold_correction: ကောင်းမှုများ ပြုလုပ်ခဲ့ပါသည်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'တွေ လုပ်ခဲ့တယ်'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E023
+  input: အစိုးရက ထုတ်ပြန်ထားသည့် စည်းမျဉ်းများကို လိုက်နာကြပါ၊ မလိုက်နာရင် အရေးယူခံရမှာနော်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 3
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ကြပါ'' with colloquial ''ရင်'' and ''မှာနော်''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E023-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 54
+      end: 82
+    erroneous_text: မလိုက်နာရင် အရေးယူခံရမှာနော်
+    gold_correction: မလိုက်နာပါက အရေးယူခံရမည်ဖြစ်ပါသည်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ကြပါ' with colloquial 'ရင်' and 'မှာနော်'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E024
+  input: ဒီပစ္စည်းက နည်းပညာအသစ်တွေနဲ့ ပြုလုပ်ထားပါသည်၊ ဒါကြောင့် ဈေးကြီးတယ်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''တယ်''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E024-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 56
+      end: 66
+    erroneous_text: ဈေးကြီးတယ်
+    gold_correction: ဈေးကြီးပါသည်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'တယ်'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E025
+  input: ကျွန်တော်တို့ ဒီကိစ္စကို အလေးအနက်ထား ဆောင်ရွက်နေပါသည်၊ ပြီးရင် အကြောင်းပြန်မယ်။
+  is_clean: false
+  domain: conversational
+  register: formal
+  difficulty_tier: 3
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''ရင်'' and ''မယ်''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E025-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 55
+      end: 78
+    erroneous_text: ပြီးရင် အကြောင်းပြန်မယ်
+    gold_correction: ပြီးစီးပါက အကြောင်းပြန်ကြားပါမည်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'ရင်' and 'မယ်'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E026
+  input: ကျေးဇူးပြု၍ စည်းမျဉ်းစည်းကမ်းများကို လိုက်နာပေးကြပါ၊ မလိုက်နာရင် ဒုက္ခရောက်မယ်။
+  is_clean: false
+  domain: social_media
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Mixing polite ''ကြပါ'' with colloquial ''ရင်'' and ''မယ်''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E026-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 53
+      end: 78
+    erroneous_text: မလိုက်နာရင် ဒုက္ခရောက်မယ်
+    gold_correction: မလိုက်နာပါက ဒုက္ခရောက်နိုင်ပါသည်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing polite 'ကြပါ' with colloquial 'ရင်' and 'မယ်'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E027
+  input: ဆရာတော်က တရားတော်များ ဟောကြားခဲ့ပါသည်၊ တပည့်တော်တို့လည်း နာယူမှတ်သားခဲ့ကြတယ်။
+  is_clean: false
+  domain: religious
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''တယ်''. Corrected to consistent formal register.'
+  expected_errors:
+  - error_id: BM-GEN-E027-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 57
+      end: 76
+    erroneous_text: နာယူမှတ်သားခဲ့ကြတယ်
+    gold_correction: နာယူမှတ်သားခဲ့ကြပါသည်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'တယ်'. Corrected to consistent formal register.
+    scope: context_dependent
+- id: BM-GEN-E028
+  input: မနေ့က သူငယ်ချင်းတွေနဲ့ လည်ပတ်ခဲ့ပါသည်၊ အရမ်းပျော်ခဲ့ကြတယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Mixing formal ''ပါသည်'' with colloquial ''တယ်''. Corrected to consistent polite/colloquial register.'
+  expected_errors:
+  - error_id: BM-GEN-E028-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 23
+      end: 37
+    erroneous_text: လည်ပတ်ခဲ့ပါသည်
+    gold_correction: လည်ပတ်ခဲ့ပါတယ်
+    edit_distance: 2
+    context_required: true
+    notes: Mixing formal 'ပါသည်' with colloquial 'တယ်'. Corrected to consistent polite/colloquial register.
+    scope: context_dependent
+- id: BM-GEN-E029
+  input: ကျွန်တော် မနက်ဖြန် ရုံးကို သွားပါမယ်။ ပြီးရင် ဈေးဝယ်မယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Mixing a polite ending ''ပါမယ်'' with a colloquial ending ''မယ်'' in the same sentence.'
+  expected_errors:
+  - error_id: BM-GEN-E029-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 46
+      end: 55
+    erroneous_text: ဈေးဝယ်မယ်
+    gold_correction: ဈေးဝယ်ပါမယ်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing a polite ending 'ပါမယ်' with a colloquial ending 'မယ်' in the same sentence.
+    scope: context_dependent
+- id: BM-GEN-E030
+  input: ဒီနေ့ မိုး အရမ်းကောင်းတာကြောင့် အိမ်မှာပဲ နေပါမည်။
+  is_clean: false
+  domain: social_media
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Using a formal ''ပါမည်'' in a casual social media post where a colloquial ''မယ်'' is expected.'
+  expected_errors:
+  - error_id: BM-GEN-E030-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 42
+      end: 49
+    erroneous_text: နေပါမည်
+    gold_correction: နေမယ်
+    edit_distance: 5
+    context_required: true
+    notes: Using a formal 'ပါမည်' in a casual social media post where a colloquial 'မယ်' is expected.
+    scope: context_dependent
+- id: BM-GEN-E031
+  input: စနစ်သစ်ကို ထည့်သွင်းပြီးနောက် စွမ်းဆောင်ရည် သိသိသာသာ မြင့်တက်လာပါတယ်။
+  is_clean: false
+  domain: technical
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Mixing a formal technical sentence with a polite ''ပါတယ်။'' ending instead of a formal ''ခဲ့ပါသည်။''.'
+  expected_errors:
+  - error_id: BM-GEN-E031-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 53
+      end: 69
+    erroneous_text: မြင့်တက်လာပါတယ်။
+    gold_correction: မြင့်တက်လာခဲ့ပါသည်။
+    edit_distance: 5
+    context_required: true
+    notes: Mixing a formal technical sentence with a polite 'ပါတယ်။' ending instead of a formal 'ခဲ့ပါသည်။'.
+    scope: context_dependent
+- id: BM-GEN-E032
+  input: ဘုရားရှင်၏ တရားတော်များကို နာကြားပြီးနောက် စိတ်ချမ်းသာရတယ်ဗျာ။
+  is_clean: false
+  domain: religious
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Using a colloquial/slang ending ''ရတယ်ဗျာ'' in a formal religious context where ''ရပါသည်။'' is appropria'
+  expected_errors:
+  - error_id: BM-GEN-E032-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 54
+      end: 61
+    erroneous_text: ရတယ်ဗျာ
+    gold_correction: ရပါသည်
+    edit_distance: 5
+    context_required: true
+    notes: Using a colloquial/slang ending 'ရတယ်ဗျာ' in a formal religious context where 'ရပါသည်။' is appropriate.
+    scope: context_dependent
+- id: BM-GEN-E033
+  input: မနက်စာ စားပြီးပြီလား။ ကျွန်တော်တော့ စားပြီးပါပြီ။ ပြီးရင် ကော်ဖီသောက်မယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Mixing a polite ending ''ပါပြီ'' with a colloquial ending ''မယ်'' in the same conversational context.'
+  expected_errors:
+  - error_id: BM-GEN-E033-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 58
+      end: 72
+    erroneous_text: ကော်ဖီသောက်မယ်
+    gold_correction: ကော်ဖီသောက်ပါမယ်
+    edit_distance: 5
+    context_required: true
+    notes: Mixing a polite ending 'ပါပြီ' with a colloquial ending 'မယ်' in the same conversational context.
+    scope: context_dependent
+- id: BM-GEN-E034
+  input: အစည်းအဝေးကို တက်ရောက်ခဲ့ကြသူများက အနာဂတ်အစီအစဉ်များကို ဆွေးနွေးခဲ့ကြတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Using a colloquial ending ''တယ်'' in a formal news report where ''ပါသည်။'' is expected.'
+  expected_errors:
+  - error_id: BM-GEN-E034-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 55
+      end: 72
+    erroneous_text: ဆွေးနွေးခဲ့ကြတယ်။
+    gold_correction: ဆွေးနွေးခဲ့ကြပါသည်။
+    edit_distance: 5
+    context_required: true
+    notes: Using a colloquial ending 'တယ်' in a formal news report where 'ပါသည်။' is expected.
+    scope: context_dependent
+- id: BM-GEN-E035
+  input: ဒီခရီးစဉ်က တကယ်ပျော်စရာကောင်းပါသည်၊ နောက်တစ်ခါ ထပ်သွားဦးမယ်။
+  is_clean: false
+  domain: social_media
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: Using a formal ''ပါသည်'' in a casual social media post where a colloquial ''တယ်'' is appropriate.'
+  expected_errors:
+  - error_id: BM-GEN-E035-E1
+    error_type: register_error
+    error_subtype: register_mismatch
+    detection_layer: grammar
+    span:
+      start: 23
+      end: 34
+    erroneous_text: ကောင်းပါသည်
+    gold_correction: ကောင်းတယ်
+    edit_distance: 5
+    context_required: true
+    notes: Using a formal 'ပါသည်' in a casual social media post where a colloquial 'တယ်' is appropriate.
+    scope: context_dependent
+- id: BM-GEN-E036
+  input: ကျွန်တော် ကွန်ပ်ယူတာ အသစ်တစ်လုံး ဝယ်လိုက်တယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The ''ပ်'' (pa-talan) is mistakenly used instead of ''ပျ'' (pa-ya-yit) in the transliteration of ''comput'
+  expected_errors:
+  - error_id: BM-GEN-E036-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 10
+      end: 20
+    erroneous_text: ကွန်ပ်ယူတာ
+    gold_correction: ကွန်ပျူတာ
+    edit_distance: 5
+    context_required: false
+    notes: The 'ပ်' (pa-talan) is mistakenly used instead of 'ပျ' (pa-ya-yit) in the transliteration of 'computer'.
+    scope: spelling
+- id: BM-GEN-E037
+  input: သူ့ကို ဖုံးဆက်လိုက်ပါဦး။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The ''ဝစ္စပေါက်'' (asat) tone mark is missing, changing ''phone'' (ဖုန်း) to ''cover'' (ဖုံး).'
+  expected_errors:
+  - error_id: BM-GEN-E037-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 7
+      end: 11
+    erroneous_text: ဖုံး
+    gold_correction: ဖုန်း
+    edit_distance: 3
+    context_required: false
+    notes: The 'ဝစ္စပေါက်' (asat) tone mark is missing, changing 'phone' (ဖုန်း) to 'cover' (ဖုံး).
+    scope: spelling
+- id: BM-GEN-E038
+  input: ဒီမင်္ဂလာပွဲ ဗွီဒီယိုလေး ကြည့်ရအောင်။
+  is_clean: false
+  domain: social_media
+  register: colloquial
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: An unnecessary ''ဝ'' (wa-swe) is added, making ''video'' sound like ''vwa-dee-yo'' instead of ''vee-dee-yo'''
+  expected_errors:
+  - error_id: BM-GEN-E038-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 13
+      end: 21
+    erroneous_text: ဗွီဒီယို
+    gold_correction: ဗီဒီယို
+    edit_distance: 5
+    context_required: false
+    notes: An unnecessary 'ဝ' (wa-swe) is added, making 'video' sound like 'vwa-dee-yo' instead of 'vee-dee-yo'.
+    scope: spelling
+- id: BM-GEN-E039
+  input: အင်တာနတ် ကွန်နက်ရှင် မကောင်းဘူး။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The final syllable ''နက်'' is misspelled as ''နတ်'', which is a common transliteration error for ''intern'
+  expected_errors:
+  - error_id: BM-GEN-E039-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: အင်တာနတ်
+    gold_correction: အင်တာနက်
+    edit_distance: 1
+    context_required: false
+    notes: The final syllable 'နက်' is misspelled as 'နတ်', which is a common transliteration error for 'internet'.
+    scope: spelling
+- id: BM-GEN-E040
+  input: သူ့ဆီကို မက်ဆေ့ခ်ျ ပို့လိုက်ပြီ။
+  is_clean: false
+  domain: social_media
+  register: colloquial
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The final syllable ''ချ်'' is misspelled as ''ခ်ျ'', a common mistake in transliterating ''message''.'
+  expected_errors:
+  - error_id: BM-GEN-E040-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 9
+      end: 18
+    erroneous_text: မက်ဆေ့ခ်ျ
+    gold_correction: မက်ဆေ့ချ်
+    edit_distance: 2
+    context_required: false
+    notes: The final syllable 'ချ်' is misspelled as 'ခ်ျ', a common mistake in transliterating 'message'.
+    scope: spelling
+- id: BM-GEN-E041
+  input: ဘန်မှာ ငွေသွင်းဖို့ သွားရမယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The ''အောက်မြစ်'' (dot below) is missing from ''ဏ'', changing ''bank'' (ဘဏ်) to ''ဘန်'' (a different sound).'
+  expected_errors:
+  - error_id: BM-GEN-E041-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 3
+    erroneous_text: ဘန်
+    gold_correction: ဘဏ်
+    edit_distance: 1
+    context_required: false
+    notes: The 'အောက်မြစ်' (dot below) is missing from 'ဏ', changing 'bank' (ဘဏ်) to 'ဘန်' (a different sound).
+    scope: spelling
+- id: BM-GEN-E042
+  input: မနက်စာ ကော်ဖီးတစ်ခွက် သောက်ပြီးမှ အလုပ်သွားတယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: An incorrect ''း'' (myit-hkin) tone mark is added to ''ဖီ'', making ''coffee'' sound like ''kaw-fee-s''.'
+  expected_errors:
+  - error_id: BM-GEN-E042-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 7
+      end: 14
+    erroneous_text: ကော်ဖီး
+    gold_correction: ကော်ဖီ
+    edit_distance: 1
+    context_required: false
+    notes: An incorrect 'း' (myit-hkin) tone mark is added to 'ဖီ', making 'coffee' sound like 'kaw-fee-s'.
+    scope: spelling
+- id: BM-GEN-E043
+  input: နှစ်သစ်ကူး ဘောနတ်စ် ကောင်းကောင်းရခဲ့တယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The final syllable ''ပ်စ်'' is misspelled as ''တ်စ်'', a common transliteration error for ''bonus''.'
+  expected_errors:
+  - error_id: BM-GEN-E043-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 11
+      end: 19
+    erroneous_text: ဘောနတ်စ်
+    gold_correction: ဘောနပ်စ်
+    edit_distance: 1
+    context_required: false
+    notes: The final syllable 'ပ်စ်' is misspelled as 'တ်စ်', a common transliteration error for 'bonus'.
+    scope: spelling
+- id: BM-GEN-E044
+  input: ဒီဆော့ဝဲလ်က အလုပ်လုပ်ရတာ ပိုလွယ်တယ်။
+  is_clean: false
+  domain: technical
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The transliteration of ''software'' often confuses ''ဆော့ဖ်ဝဲ'' with ''ဆော့ဝဲလ်'', incorrectly placing the'
+  expected_errors:
+  - error_id: BM-GEN-E044-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 2
+      end: 10
+    erroneous_text: ဆော့ဝဲလ်
+    gold_correction: ဆော့ဖ်ဝဲ
+    edit_distance: 4
+    context_required: false
+    notes: The transliteration of 'software' often confuses 'ဆော့ဖ်ဝဲ' with 'ဆော့ဝဲလ်', incorrectly placing the 'လ်' at the end.
+    scope: spelling
+- id: BM-GEN-E045
+  input: အဲဒီပရိုဂမ်ကို ဘယ်လိုသုံးရလဲ။
+  is_clean: false
+  domain: technical
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The ''ရ'' (ra-yit) subscript is missing from ''ဂမ်'', making ''program'' sound like ''pro-gum''.'
+  expected_errors:
+  - error_id: BM-GEN-E045-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 4
+      end: 11
+    erroneous_text: ပရိုဂမ်
+    gold_correction: ပရိုဂရမ်
+    edit_distance: 3
+    context_required: false
+    notes: The 'ရ' (ra-yit) subscript is missing from 'ဂမ်', making 'program' sound like 'pro-gum'.
+    scope: spelling
+- id: BM-GEN-E046
+  input: ယာဉ်မောင်းလိုင်စင်း မရှိရင် မမောင်းရဘူး။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: An incorrect ''း'' (myit-hkin) tone mark is added to ''စင်'', making ''license'' sound like ''line-sin-s''.'
+  expected_errors:
+  - error_id: BM-GEN-E046-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 10
+      end: 19
+    erroneous_text: လိုင်စင်း
+    gold_correction: လိုင်စင်
+    edit_distance: 1
+    context_required: false
+    notes: An incorrect 'း' (myit-hkin) tone mark is added to 'စင်', making 'license' sound like 'line-sin-s'.
+    scope: spelling
+- id: BM-GEN-E047
+  input: အဝတ်အစား ဒီဇိုင်းနာတစ်ယောက် ဖြစ်ချင်တယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The ''ဇိုင်'' is misspelled as ''ဇိုင်း'', a common error in transliterating ''designer''.'
+  expected_errors:
+  - error_id: BM-GEN-E047-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 9
+      end: 19
+    erroneous_text: ဒီဇိုင်းနာ
+    gold_correction: ဒီဇိုင်နာ
+    edit_distance: 3
+    context_required: false
+    notes: The 'ဇိုင်' is misspelled as 'ဇိုင်း', a common error in transliterating 'designer'.
+    scope: spelling
+- id: BM-GEN-E048
+  input: အီမေးလ်ပို့လိုက်ပြီဆိုတာ သေချာလား။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: The short vowel ''အီ'' is used instead of the long vowel ''အီး'' for ''email''.'
+  expected_errors:
+  - error_id: BM-GEN-E048-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 7
+    erroneous_text: အီမေးလ်
+    gold_correction: အီးမေးလ်
+    edit_distance: 5
+    context_required: false
+    notes: The short vowel 'အီ' is used instead of the long vowel 'အီး' for 'email'.
+    scope: spelling
+- id: BM-GEN-E049
+  input: ဒီနှစ် ဘတ်ဂျတ်က အရင်နှစ်ထက် ပိုများတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The final consonant ''က်'' is misspelled as ''တ်'', a common mistake in transliterating ''budget''.'
+  expected_errors:
+  - error_id: BM-GEN-E049-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 7
+      end: 14
+    erroneous_text: ဘတ်ဂျတ်
+    gold_correction: ဘတ်ဂျက်
+    edit_distance: 1
+    context_required: false
+    notes: The final consonant 'က်' is misspelled as 'တ်', a common mistake in transliterating 'budget'.
+    scope: spelling
+- id: BM-GEN-E050
+  input: ဗိုက်ရပ်စ် အသစ်တစ်မျိုး ပျံ့နှံ့နေတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The vowel sound ''ိုင်း'' is misspelled as ''ိုက်'', a common error in transliterating ''virus''.'
+  expected_errors:
+  - error_id: BM-GEN-E050-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 10
+    erroneous_text: ဗိုက်ရပ်စ်
+    gold_correction: ဗိုင်းရပ်စ်
+    edit_distance: 5
+    context_required: false
+    notes: The vowel sound 'ိုင်း' is misspelled as 'ိုက်', a common error in transliterating 'virus'.
+    scope: spelling
+- id: BM-GEN-E051
+  input: ဒစ်ဂျစ်တယ် နာရီတစ်လုံး လိုအပ်တယ်။
+  is_clean: false
+  domain: technical
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The initial syllable ''ဒီ'' is misspelled as ''ဒစ်'', a common transliteration error for ''digital''.'
+  expected_errors:
+  - error_id: BM-GEN-E051-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 10
+    erroneous_text: ဒစ်ဂျစ်တယ်
+    gold_correction: ဒီဂျစ်တယ်
+    edit_distance: 5
+    context_required: false
+    notes: The initial syllable 'ဒီ' is misspelled as 'ဒစ်', a common transliteration error for 'digital'.
+    scope: spelling
+- id: BM-GEN-E052
+  input: ဘောပင်းနဲ့ စာရေးတာ ပိုအဆင်ပြေတယ်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 1
+  scope: spelling
+  notes: 'Generated error pair: An incorrect ''း'' (myit-hkin) tone mark is added to ''ပင်'', making ''ballpoint pen'' sound like ''baw-pin'
+  expected_errors:
+  - error_id: BM-GEN-E052-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 7
+    erroneous_text: ဘောပင်း
+    gold_correction: ဘောပင်
+    edit_distance: 1
+    context_required: false
+    notes: An incorrect 'း' (myit-hkin) tone mark is added to 'ပင်', making 'ballpoint pen' sound like 'baw-pin-s'.
+    scope: spelling
+- id: BM-GEN-E053
+  input: ဖုန်းဘတ်ထရီ အားကုန်နေပြီ။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The syllable ''ဘက်'' is misspelled as ''ဘတ်'', a common error in transliterating ''battery''.'
+  expected_errors:
+  - error_id: BM-GEN-E053-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 11
+    erroneous_text: ဖုန်းဘတ်ထရီ
+    gold_correction: ဖုန်းဘက်ထရီ
+    edit_distance: 1
+    context_required: false
+    notes: The syllable 'ဘက်' is misspelled as 'ဘတ်', a common error in transliterating 'battery'.
+    scope: spelling
+- id: BM-GEN-E054
+  input: စတူဒယို အသစ်ဖွင့်ဖို့ ပြင်ဆင်နေကြတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: The omission of the ''ီ'' (hkin-hpu) vowel mark changes ''ဒီယို'' to ''ဒယို'', a common error in translite'
+  expected_errors:
+  - error_id: BM-GEN-E054-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 7
+    erroneous_text: စတူဒယို
+    gold_correction: စတူဒီယို
+    edit_distance: 4
+    context_required: false
+    notes: The omission of the 'ီ' (hkin-hpu) vowel mark changes 'ဒီယို' to 'ဒယို', a common error in transliterating 'studio'.
+    scope: spelling
+- id: BM-GEN-E055
+  input: ကျွန်တော်တို့ မန်နေဂျားနဲ့ သွားတွေ့သင့်ပါတယ်။
+  is_clean: false
+  domain: conversational
+  register: polite
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Misspelling of ''manager'' by adding the ''း'' (sa) mark, which is incorrect for this loanword.'
+  expected_errors:
+  - error_id: BM-GEN-E055-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 14
+      end: 23
+    erroneous_text: မန်နေဂျား
+    gold_correction: မန်နေဂျာ
+    edit_distance: 1
+    context_required: false
+    notes: Misspelling of 'manager' by adding the 'း' (sa) mark, which is incorrect for this loanword.
+    scope: spelling
+- id: BM-GEN-E056
+  input: ဘတ်စ ကားမှတ်တိုင်ကို လမ်းလျှောက်သွားရအောင်။
+  is_clean: false
+  domain: conversational
+  register: colloquial
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Common misspelling of ''bus'' by omitting the ''◌်'' (sat) mark, which indicates a short, stopped ''s'' so'
+  expected_errors:
+  - error_id: BM-GEN-E056-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 4
+    erroneous_text: ဘတ်စ
+    gold_correction: ဘတ်စ်
+    edit_distance: 1
+    context_required: false
+    notes: Common misspelling of 'bus' by omitting the '◌်' (sat) mark, which indicates a short, stopped 's' sound.
+    scope: spelling
+- id: BM-GEN-E057
+  input: ဒေါက်တားကြီးက လူနာကို စစ်ဆေးနေပါတယ်။
+  is_clean: false
+  domain: news
+  register: formal
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Misspelling of ''doctor'' by adding the ''း'' (sa) mark, which is incorrect for this loanword.'
+  expected_errors:
+  - error_id: BM-GEN-E057-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 8
+    erroneous_text: ဒေါက်တား
+    gold_correction: ဒေါက်တာ
+    edit_distance: 1
+    context_required: false
+    notes: Misspelling of 'doctor' by adding the 'း' (sa) mark, which is incorrect for this loanword.
+    scope: spelling
+- id: BM-GEN-E058
+  input: ဂူးဂဲလ်မှာ ရှာကြည့်လိုက်တော့ ပေါ်လာတယ်။
+  is_clean: false
+  domain: social_media
+  register: colloquial
+  difficulty_tier: 2
+  scope: spelling
+  notes: 'Generated error pair: Misspelling of ''Google'' by using ''ဂူး'' (guu, long vowel) instead of ''ဂူ'' (gu, short vowel).'
+  expected_errors:
+  - error_id: BM-GEN-E058-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 0
+      end: 7
+    erroneous_text: ဂူးဂဲလ်
+    gold_correction: ဂူဂဲလ်
+    edit_distance: 5
+    context_required: false
+    notes: Misspelling of 'Google' by using 'ဂူး' (guu, long vowel) instead of 'ဂူ' (gu, short vowel).
+    scope: spelling
+- id: BM-GEN-C001
+  input: ဘာလို့လဲလို့ မမေးနဲ့တော့။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C002
+  input: မီနူးကြည့်တော့ ဗိုက်ဆာလာပြီ။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C003
+  input: မျက်လုံးတွေက ကြယ်လေးတွေလို လှတယ်။
+  is_clean: true
+  domain: general
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C004
+  input: ဘယ်မှာ ဝယ်နေတာလဲ။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C005
+  input: အိမ်မှာလား။
+  is_clean: true
+  domain: academic
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C006
+  input: ပင်ပန်းသွားစေရင် တောင်းပန်ပါတယ်။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C007
+  input: စောင့်ကြည့်ရမှာပဲ၊ အခုတော့ မသိဘူး။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C008
+  input: ဗိုက်ဆာလို့ အားမရှိသလိုပဲ။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C009
+  input: သွားစမ်းပါ၊ ဟိုမှာ။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C010
+  input: မမြင်ရတော့ဘူး၊ ကူညီပါဦး။
+  is_clean: true
+  domain: general
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C011
+  input: ဗိုက်ဆာတယ်ဟင်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C012
+  input: ဒီမှာ လာနားပါဦး။
+  is_clean: true
+  domain: academic
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C013
+  input: သွားပြီ၊ လိပ်စာ ပို့ထားလိုက်။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C014
+  input: နေပြန်ကောင်းလာတော့ ပိုလှသွားတယ်။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C015
+  input: ညီမလေးက အရမ်းလှတာပဲရှင်။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C016
+  input: အစည်းအဝေး ပြီးပါပြီ၊ သွားနိုင်ပါပြီ။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C017
+  input: ဧည့်ဝတ်ကျေပွန်မှုအတွက် ကျေးဇူးတင်ပါသည်။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C018
+  input: တောင်းပန်အပ်ပါကြောင်း။
+  is_clean: true
+  domain: conversational
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C019
+  input: ရုံးသို့ လာရောက်ရန် အကြောင်းကြားပါသည်။
+  is_clean: true
+  domain: academic
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C020
+  input: အခု ပြန်ဖို့ အချိန်တန်ပြီ ထင်ပါတယ်ခင်ဗျာ။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C021
+  input: ကုမ္ပဏီကိုယ်စား ကျေးဇူးတင်ရှိပါသည်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C022
+  input: တီထွင်ဉာဏ် ရှိလိုက်တာ။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C023
+  input: အလှူအတွက် သာဓု ခေါ်ပါတယ်။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C024
+  input: အကူအညီ ပေးသနားတော်မူပါရန်။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C025
+  input: မည်သည့်နေရာတွင် ရှိနေပါသလဲ။
+  is_clean: true
+  domain: conversational
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C026
+  input: အလှဆုံးသော သူ ဖြစ်ပါသည်။
+  is_clean: true
+  domain: academic
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C027
+  input: ကျန်းမာရေး အခြေအနေ ကောင်းမွန်ပါသလားရှင့်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C028
+  input: ကျိုးကြောင်းဆင်ခြင်ဉာဏ် ကောင်းလှပါတယ်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C029
+  input: မင်္ဂလာနံနက်ခင်းပါ။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C030
+  input: ကျန်းမာရေး အခြေအနေ ကောင်းမွန်ပါသလားခင်ဗျာ။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C031
+  input: ဖိတ်ကြားတာ ကျေးဇူးတင်ပါတယ်။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C032
+  input: မစောင့်ရင် ပြဿနာတက်မယ်၊ ခဏစောင့်။
+  is_clean: true
+  domain: conversational
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C033
+  input: အဆင်ပြေရင် အခု ပြန်လို့ရပါပြီ။
+  is_clean: true
+  domain: academic
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C034
+  input: အခု ပြန်သင့်ပြီ။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C035
+  input: အစည်းအဝေးအတွက် လာနေပါပြီ။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C036
+  input: အခု သွားလို့ရပါပြီ။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C037
+  input: မောပါတယ်ခင်ဗျာ။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C038
+  input: အစည်းအဝေးပြီးတဲ့အထိ ခဏစောင့်ပါ။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C039
+  input: နေဝင်မှ တွေ့မယ်။
+  is_clean: true
+  domain: conversational
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C040
+  input: နောက်ကျသွားလို့ တောင်းပန်ပါတယ်ရှင့်။
+  is_clean: true
+  domain: academic
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C041
+  input: ချစ်ပါတယ်ရှင့်။
+  is_clean: true
+  domain: news
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C042
+  input: သွားစစ်ဖို့ လိုအပ်ပါတယ်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C043
+  input: ကောင်းသောညပါရှင့်။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C044
+  input: ကျွန်တော့်ထက် အမျှော်အမြင် ရှိပါတယ် ဆရာ။
+  is_clean: true
+  domain: literary
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C045
+  input: အခု သွားရမယ်၊ ဒါ နောက်ဆုံးပဲ။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C046
+  input: ရှုပ်သွားရင် ဆောရီးပဲ။
+  is_clean: true
+  domain: conversational
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C047
+  input: အခု လစ်လို့ရပြီ။
+  is_clean: true
+  domain: academic
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C048
+  input: နိုးလာသေးသားပဲ၊ မင်္ဂလာပါ။
+  is_clean: true
+  domain: news
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C049
+  input: အခြေအနေတွေ ရှယ်ပဲလား။
+  is_clean: true
+  domain: technical
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C050
+  input: မော်တာရပ်လိုက်။
+  is_clean: true
+  domain: religious
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C051
+  input: မင်းကတော့ ဆရာပဲ။
+  is_clean: true
+  domain: literary
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C052
+  input: မင်းကတော့ ရှယ်ပဲကွာ။
+  is_clean: true
+  domain: general
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C053
+  input: ဝေါင်း... မိုက်လိုက်တာ။
+  is_clean: true
+  domain: conversational
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C054
+  input: လစ်တော့ကွာ။
+  is_clean: true
+  domain: academic
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C055
+  input: တောင်းပန်တယ်နော် အေ့။
+  is_clean: true
+  domain: news
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C056
+  input: အိပ်တော့ဟ။
+  is_clean: true
+  domain: technical
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C057
+  input: အူဟောင်းလောင်း ဖြစ်နေပြီ။
+  is_clean: true
+  domain: religious
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C058
+  input: ကူညီပါဦးနော် အေ့။
+  is_clean: true
+  domain: literary
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C059
+  input: အသက်ထက် ချစ်တယ်။
+  is_clean: true
+  domain: general
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C060
+  input: ချစ်တယ် ဘေဘီ။
+  is_clean: true
+  domain: conversational
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C061
+  input: အရမ်း ပင်ပန်းနေပြီ။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C062
+  input: ကားလာတဲ့အထိ ခဏစောင့်ပါ။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C063
+  input: ဘဝကြီး ဘယ်လိုလဲ။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C064
+  input: အစ်ကိုကြီး အိပ်တော့နော်။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C065
+  input: မေ့သွားလို့ မသိတော့ဘူး။
+  is_clean: true
+  domain: general
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C066
+  input: ပင်ပန်းနေပြီလား။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C067
+  input: ကျေးဇူးတင်ရမှာ ကျွန်တော်ပါ။
+  is_clean: true
+  domain: academic
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C068
+  input: ဗိုက်ဆာလှပြီ၊ ဘယ်တော့ရမှာလဲ။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C069
+  input: ဒီကို ပြန်လာခဲ့။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C070
+  input: တကယ် တကယ် အရမ်းချစ်ပါတယ်။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C071
+  input: ယုံကြည်ပေးတာ ကျေးဇူးပါ။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C072
+  input: ရင်ထဲမှာတွေ့မယ်။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C073
+  input: ကြာသွားရင် တောင်းပန်ပါတယ်၊ ခဏလေးစောင့်ပါ။
+  is_clean: true
+  domain: conversational
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C074
+  input: မင်္ဂလာပါ၊ ကော်ဖီသောက်မလား။
+  is_clean: true
+  domain: academic
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C075
+  input: လဲတော့မယ်၊ ကူညီပါဦး။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C076
+  input: ရုံးမှာတွေ့မယ်။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C077
+  input: ဒီနေ့ အလုပ်တွေ အောင်မြင်ပါစေ။
+  is_clean: true
+  domain: religious
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C078
+  input: အခု သွားလိုက်တော့နော်။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C079
+  input: မင်း တော်တယ်ဗျာ။
+  is_clean: true
+  domain: general
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C080
+  input: ရေချိုးတော့မယ်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C081
+  input: အခုတလော နေကောင်းလား။
+  is_clean: true
+  domain: academic
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C082
+  input: ဆက်မသွားနိုင်တော့ဘူး၊ ပင်ပန်းလို့။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C083
+  input: မွေးနေ့မှာတွေ့မယ်။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C084
+  input: ပါရမီ ပါလိုက်တာ။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C085
+  input: ကိုယ့်ကို အိပ်မက်မက်နော်။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C086
+  input: အစီအစဉ်တွေ အဆင်ပြေလား။
+  is_clean: true
+  domain: general
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C087
+  input: မကြောက်နဲ့တော့နော်။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C088
+  input: တော်ပါတော့ကွယ်။
+  is_clean: true
+  domain: academic
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C089
+  input: လိုင်းပေါ်မှာ ခဏလေး ကိုင်ထားပေးပါ။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C090
+  input: ကောင်တာသို့ သွားရောက်ပေးပါရန်။
+  is_clean: true
+  domain: technical
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C091
+  input: မင်းအလှည့်အထိ ခဏစောင့်။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C092
+  input: အမလေး... တကယ်လား။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C093
+  input: ဒါပျက်နေလို့ ကူညီပါဦး။
+  is_clean: true
+  domain: general
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C094
+  input: ဒီနေ့ အလုပ်တွေ အဆင်ပြေလား။
+  is_clean: true
+  domain: conversational
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C095
+  input: ဗိုက်က အော်နေပြီ။
+  is_clean: true
+  domain: academic
+  register: informal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C096
+  input: ကူညီပေးဖို့ လာခဲ့မယ်။
+  is_clean: true
+  domain: news
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C097
+  input: အိတ်လေး မပေးပါဦး။
+  is_clean: true
+  domain: technical
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C098
+  input: ဒီလိပ်စာကို သွားလိုက်ပါ။
+  is_clean: true
+  domain: religious
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C099
+  input: လင်းပြီဟေ့၊ မင်္ဂလာနံနက်ခင်းပါ။
+  is_clean: true
+  domain: literary
+  register: colloquial
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []
+- id: BM-GEN-C100
+  input: အစည်းအဝေးမှာလား။
+  is_clean: true
+  domain: general
+  register: formal
+  difficulty_tier: null
+  scope: spelling
+  notes: Clean sentence from pragmatics dataset.
+  expected_errors: []

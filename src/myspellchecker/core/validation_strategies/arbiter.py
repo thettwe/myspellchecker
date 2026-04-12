@@ -16,7 +16,7 @@ Within the same tier, the candidate with higher confidence wins.
 On confidence tie, the candidate from the earlier (lower-priority) strategy
 wins (it had more evidence available when it ran).
 
-v1.3.0: full candidate fusion pipeline with calibrated Noisy-OR across
+Supports a candidate fusion pipeline with calibrated Noisy-OR across
 independence clusters, gated by ``use_candidate_fusion`` config flag.
 """
 
@@ -46,6 +46,11 @@ STRATEGY_TIER: dict[str, int] = {
     "QuestionStructureValidationStrategy": 3,
     "HomophoneValidationStrategy": 3,
     "NgramContextValidationStrategy": 3,
+    # HiddenCompound is treated as contextual rather than structural: it
+    # uses compound frequency lookup + trigram verification to confirm its
+    # candidates, and Tier 3 lets the fusion arbiter resolve ties against
+    # Homophone via confidence rather than always losing to it.
+    "HiddenCompoundStrategy": 3,
     # Tier 4: Neural (MLM/MLP-powered, highest accuracy, highest cost)
     "ConfusableCompoundClassifierStrategy": 4,
     "ConfusableSemanticStrategy": 4,
@@ -145,6 +150,7 @@ INDEPENDENCE_CLUSTERS: dict[str, list[str]] = {
         "SemanticValidationStrategy",
     ],
     "compound": ["BrokenCompoundStrategy"],
+    "hidden_compound": ["HiddenCompoundStrategy"],
     "question": ["QuestionStructureValidationStrategy"],
 }
 

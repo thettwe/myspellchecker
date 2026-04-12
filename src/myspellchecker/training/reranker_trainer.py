@@ -132,7 +132,7 @@ class RerankerMLP(nn.Module if TORCH_AVAILABLE else object):  # type: ignore[mis
 
     Architecture: Linear(input_dim, hidden_dim) -> ReLU -> Dropout -> Linear(hidden_dim, 1)
 
-    Input:  (batch, num_candidates, input_dim)  # v2: 19 features
+    Input:  (batch, num_candidates, input_dim)
     Output: (batch, num_candidates) -- scalar score per candidate
     """
 

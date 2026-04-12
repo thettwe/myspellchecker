@@ -11,7 +11,8 @@ and returning None if the service cannot be created (graceful degradation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.di.service_names import SERVICE_PROVIDER, SERVICE_SEGMENTER
 from myspellchecker.utils.logging_utils import get_logger

@@ -14,7 +14,7 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
-from myspellchecker.core.constants import ET_CONFUSABLE_ERROR
+from myspellchecker.core.constants import ET_CONFUSABLE_ERROR, ET_HOMOPHONE_ERROR
 from myspellchecker.core.response import Error, WordError
 from myspellchecker.core.validation_strategies.base import (
     ValidationContext,
@@ -42,12 +42,16 @@ class StatisticalConfusableStrategy(ValidationStrategy):
     Priority: 24 (within structural phase to avoid fast-path skip)
     """
 
-    # Within the structural phase (cutoff=25) so the fast-path
-    # optimization does NOT skip this strategy on clean sentences.
-    # Confusable errors are "structurally clean" text
-    # that contains the wrong valid word — they MUST be checked
-    # even when no structural errors are found.
+    # Within the structural phase (cutoff=25) so the fast-path optimisation
+    # does not skip this strategy on otherwise-clean sentences.
     _PRIORITY = 24
+
+    # Curated-pair promotion thresholds. A detection whose (word, variant)
+    # is also in the homophone map and whose ratio clears the floor below
+    # is emitted as ``homophone_error`` with a boosted confidence so it
+    # can clear the downstream output filter for ``confusable_error``.
+    _CURATED_PAIR_MIN_RATIO: float = 10.0
+    _CURATED_PAIR_TARGET_CONFIDENCE: float = 0.80
 
     def __init__(
         self,
@@ -55,16 +59,21 @@ class StatisticalConfusableStrategy(ValidationStrategy):
         confusable_map: dict[str, set[str]],
         threshold: float = 5.0,
         confidence: float = 0.85,
+        homophone_map: dict[str, set[str]] | None = None,
     ):
         self.provider = provider
         self._confusable_map = confusable_map
         self._threshold = threshold
         self._confidence = confidence
         self._all_confusable_words = frozenset(confusable_map.keys())
+        self._homophone_map: dict[str, frozenset[str]] = (
+            {k: frozenset(v) for k, v in homophone_map.items()} if homophone_map else {}
+        )
         logger.debug(
-            "StatisticalConfusableStrategy: %d words, threshold=%.1f",
+            "StatisticalConfusableStrategy: %d words, threshold=%.1f, homophone_pairs=%d",
             len(self._all_confusable_words),
             threshold,
+            len(self._homophone_map),
         )
 
     def validate(self, context: ValidationContext) -> list[Error]:
@@ -85,7 +94,6 @@ class StatisticalConfusableStrategy(ValidationStrategy):
             if context.is_name_mask[i]:
                 continue
 
-            # Only check words in confusable map
             if word not in self._all_confusable_words:
                 continue
 
@@ -109,29 +117,55 @@ class StatisticalConfusableStrategy(ValidationStrategy):
 
             if best_variant and best_ratio >= self._threshold:
                 conf = self._ratio_to_confidence(best_ratio)
+
+                # Curated-pair promotion: a detection that is also in the
+                # homophone map carries independent dictionary evidence on
+                # top of the bigram-ratio signal. Promote it from a generic
+                # confusable_error (downstream output filter requires
+                # conf >= 0.75) to a homophone_error with a boosted
+                # confidence so it clears the filter.
+                curated = self._is_curated_homophone_pair(word, best_variant)
+                if curated and best_ratio >= self._CURATED_PAIR_MIN_RATIO:
+                    conf = max(conf, self._CURATED_PAIR_TARGET_CONFIDENCE)
+                    error_type = ET_HOMOPHONE_ERROR
+                else:
+                    error_type = ET_CONFUSABLE_ERROR
+
                 error = WordError(
                     text=word,
                     position=pos_i,
-                    error_type=ET_CONFUSABLE_ERROR,
+                    error_type=error_type,
                     suggestions=[best_variant],
                     confidence=conf,
                 )
                 errors.append(error)
-                context.existing_errors[pos_i] = ET_CONFUSABLE_ERROR
+                context.existing_errors[pos_i] = error_type
                 context.existing_confidences[pos_i] = conf
                 context.existing_suggestions[pos_i] = [best_variant]
 
                 logger.debug(
-                    "statistical_confusable: %s→%s ratio=%.1f conf=%.2f prev=%s next=%s",
+                    "statistical_confusable: %s→%s ratio=%.1f conf=%.2f "
+                    "curated=%s type=%s prev=%s next=%s",
                     word,
                     best_variant,
                     best_ratio,
                     conf,
+                    curated,
+                    error_type,
                     prev_word,
                     next_word,
                 )
 
         return errors
+
+    def _is_curated_homophone_pair(self, word: str, variant: str) -> bool:
+        """Return True if (word, variant) is in the curated homophone map."""
+        if not self._homophone_map:
+            return False
+        alts = self._homophone_map.get(word)
+        if alts and variant in alts:
+            return True
+        return False
 
     def _compute_bigram_ratio(
         self,
@@ -163,9 +197,8 @@ class StatisticalConfusableStrategy(ValidationStrategy):
                 if p_word > 0:
                     ratio = p_variant / p_word
                 else:
-                    # Word has zero prob, variant has nonzero
-                    # → strong signal (use a large but finite ratio)
-                    ratio = 1e6  # Fixed sentinel: variant seen, word unseen
+                    # Variant attested, word never attested in this context.
+                    ratio = 1e6
                 best = max(best, ratio)
 
         if next_word:
@@ -181,19 +214,23 @@ class StatisticalConfusableStrategy(ValidationStrategy):
                 if p_word > 0:
                     ratio = p_variant / p_word
                 else:
-                    ratio = 1e6  # Fixed sentinel: variant seen, word unseen
+                    ratio = 1e6
                 best = max(best, ratio)
 
         return best
 
     def _ratio_to_confidence(self, ratio: float) -> float:
-        """Map bigram ratio to confidence score [0.5, 0.95]."""
-        # sigmoid-like scaling: ratio=5 → 0.70, ratio=50 → 0.88,
-        # ratio=1000+ → 0.95
+        """Map a bigram ratio to a confidence score in ``[0.5, self._confidence]``.
+
+        Uses ``0.5 + 0.45 * min(log10(ratio) / 6.0, 1.0)``. The ``/6.0``
+        divisor is intentionally conservative: it produces ~0.63 for a
+        ratio of 50 and ~0.95 only for ratios approaching 10⁶, which keeps
+        mid-range emissions below the downstream output filter unless the
+        curated-pair promotion path overrides them in :meth:`validate`.
+        """
         if ratio <= 0:
             return 0.5
         log_ratio = math.log10(max(ratio, 1.0))
-        # Scale: log10(5)=0.7→0.70, log10(50)=1.7→0.88, log10(1e6)=6→0.95
         conf = 0.5 + 0.45 * min(log_ratio / 6.0, 1.0)
         return min(conf, self._confidence)
 

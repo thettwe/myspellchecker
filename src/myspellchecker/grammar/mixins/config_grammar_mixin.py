@@ -31,8 +31,11 @@ class ConfigGrammarMixin:
     provider: "DictionaryProvider"
 
     # --- Type stubs for methods provided by POSTagMixin (resolved via MRO) ---
-    def _has_tag(self, pos_string: str | None, target_tag: str) -> bool: ...  # type: ignore[empty-body]
-    def _is_particle_tag(self, tag: str) -> bool: ...  # type: ignore[empty-body]
+    def _has_tag(self, pos_string: str | None, target_tag: str) -> bool:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
+
+    def _is_particle_tag(self, tag: str) -> bool:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
 
     def _check_particle_chains(
         self, words: list[str], pos_tags: list[str | None]

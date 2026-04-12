@@ -302,6 +302,9 @@ _PARTICLE_TOKENS: frozenset[str] = frozenset(
         "ပြီး",
         "ပါ",
         "ဘူး",
+        # Nominalization
+        "ခြင်း",
+        "မှု",
         # Quotative / causal / conditional
         "လို့",
         "ကြောင့်",
@@ -705,6 +708,7 @@ class CompoundDetectionMixin:
         try:
             parts = seg.segment_words(token)
         except Exception:
+            logger.debug("compound segmenter raised on %r", token, exc_info=True)
             return None
         if len(parts) < 2:
             return None
@@ -1128,6 +1132,11 @@ class CompoundDetectionMixin:
             if left in _STANDALONE_PARTICLE_TOKENS:
                 continue
 
+            # Skip reduplication patterns — same word repeated with space
+            # (e.g. "တိုင် တိုင်", "ဆင် ဆင်") is emphatic/adverbial, not broken.
+            if left == right:
+                continue
+
             left_pos = token_positions[i]
             right_pos = token_positions[i + 1]
             left_freq = self.provider.get_word_frequency(left)
@@ -1521,6 +1530,7 @@ class CompoundDetectionMixin:
                 else []
             )
         except Exception:
+            logger.debug("segmenter raised during merged_word check", exc_info=True)
             segmented = []
 
         # Merge space-split tokens (from tokenized) and segmenter output,

@@ -1,4 +1,4 @@
-def generate_completion_script(shell: str) -> str:  # noqa: E501
+def generate_completion_script(shell: str) -> str:
     """Generate shell completion script.
 
     Args:

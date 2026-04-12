@@ -311,10 +311,13 @@ def build_suggestion_strategy(
     ranker = UnifiedRanker(ranker_config=config.ranker)
 
     # Create base composite strategy
+    # Use a higher internal cap to give rerankers more candidates to work with.
+    # The final user-facing truncation happens later in the pipeline.
+    internal_max = max(config.max_suggestions, 8)
     base_strategy: SuggestionStrategy = CompositeSuggestionStrategy(
         strategies=strategies,
         ranker=ranker,
-        max_suggestions=config.max_suggestions,
+        max_suggestions=internal_max,
         deduplicate=True,
     )
 
@@ -362,6 +365,7 @@ def build_context_validation_strategies(
     homophone_checker: HomophoneChecker | None = None,
     semantic_checker: SemanticChecker | None = None,
     pos_disambiguator: Any | None = None,
+    symspell: SymSpell | None = None,
 ) -> list[ValidationStrategy]:
     """
     Build context validation strategies with consistent priority ordering.
@@ -372,15 +376,17 @@ def build_context_validation_strategies(
     1. ToneValidationStrategy (priority 10)
     2. OrthographyValidationStrategy (priority 15)
     3. SyntacticValidationStrategy (priority 20)
-    4. StatisticalConfusableStrategy (priority 24)
-    5. BrokenCompoundStrategy (priority 25)
-    6. POSSequenceValidationStrategy (priority 30)
-    7. QuestionStructureValidationStrategy (priority 40)
-    8. HomophoneValidationStrategy (priority 45)
-    9. ConfusableCompoundClassifierStrategy (priority 47)
-    10. ConfusableSemanticStrategy (priority 48)
-    11. NgramContextValidationStrategy (priority 50)
-    12. SemanticValidationStrategy (priority 70)
+    4. SyllableWindowOOVStrategy (priority 22, needs symspell)
+    5. HiddenCompoundStrategy (priority 23)
+    6. StatisticalConfusableStrategy (priority 24)
+    7. BrokenCompoundStrategy (priority 25)
+    8. POSSequenceValidationStrategy (priority 30)
+    9. QuestionStructureValidationStrategy (priority 40)
+    10. HomophoneValidationStrategy (priority 45)
+    11. ConfusableCompoundClassifierStrategy (priority 47)
+    12. ConfusableSemanticStrategy (priority 48)
+    13. NgramContextValidationStrategy (priority 50)
+    14. SemanticValidationStrategy (priority 70)
 
     This is the canonical strategy building logic used by both
     DI factories and ComponentFactory.
@@ -458,6 +464,60 @@ def build_context_validation_strategies(
         )
         logger.debug("Added BrokenCompoundStrategy (priority 25)")
 
+    # Priority 22: Syllable-Window OOV Detection
+    # Runs first in the structural phase to surface multi-syllable compound
+    # typos that the segmenter over-split into individually valid syllables.
+    # Does not populate existing_errors so HiddenCompound (23) can still
+    # fire at overlapping positions with its own error type.
+    if validation_config.use_syllable_window_oov and symspell is not None:
+        from myspellchecker.core.validation_strategies.syllable_window_oov_strategy import (
+            SyllableWindowOOVStrategy,
+        )
+
+        strategies.append(
+            SyllableWindowOOVStrategy(
+                provider=provider,
+                symspell=symspell,
+                enabled=True,
+                window_sizes=tuple(validation_config.syllable_window_sizes),
+                min_frequency=validation_config.syllable_window_min_frequency,
+                confidence_floor=validation_config.syllable_window_confidence_floor,
+                max_edit_distance=validation_config.syllable_window_max_edit_distance,
+                require_typo_prone=validation_config.syllable_window_require_typo_prone,
+                skip_names=validation_config.syllable_window_skip_names,
+                require_valid_source_words=(
+                    validation_config.syllable_window_require_valid_source_words
+                ),
+            )
+        )
+        logger.debug("Added SyllableWindowOOVStrategy (priority 22)")
+
+    # Priority 23: Hidden Compound Typo Detection
+    # Runs before StatisticalConfusable (24) and BrokenCompound (25) in the
+    # structural phase (priority <= 25 survives the fast-path cutoff).
+    if validation_config.use_hidden_compound_detection:
+        from myspellchecker.core.validation_strategies.hidden_compound_strategy import (
+            HiddenCompoundStrategy,
+        )
+        from myspellchecker.text.phonetic import PhoneticHasher
+
+        strategies.append(
+            HiddenCompoundStrategy(
+                provider=provider,
+                hasher=PhoneticHasher(),
+                enabled=True,
+                max_token_syllables=validation_config.hidden_compound_max_token_syllables,
+                max_variants_per_token=validation_config.hidden_compound_max_variants_per_token,
+                compound_min_frequency=validation_config.hidden_compound_min_frequency,
+                confidence_floor=validation_config.hidden_compound_confidence_floor,
+                enable_trigram_lookahead=validation_config.hidden_compound_enable_trigram_lookahead,
+                variant_cache_size=validation_config.hidden_compound_variant_cache_size,
+                require_typo_prone_chars=validation_config.hidden_compound_require_typo_prone_chars,
+                curated_only=validation_config.hidden_compound_curated_only,
+            )
+        )
+        logger.debug("Added HiddenCompoundStrategy (priority 23)")
+
     # Priority 30: POS Sequence Validation
     if viterbi_tagger:
         strategies.append(
@@ -504,12 +564,17 @@ def build_context_validation_strategies(
             for word, variants in src.items():
                 merged_map.setdefault(word, set()).update(variants)
 
+        # Share the curated homophone map so StatisticalConfusableStrategy
+        # can promote detections that also appear there.
+        homophone_pairs_map = homophone_checker.homophone_map if homophone_checker else None
+
         if merged_map:
             strategies.append(
                 StatisticalConfusableStrategy(
                     provider=provider,
                     confusable_map=merged_map,
                     threshold=validation_config.statistical_confusable_threshold,
+                    homophone_map=homophone_pairs_map,
                 )
             )
             logger.debug("Added StatisticalConfusableStrategy (priority 24)")

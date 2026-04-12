@@ -22,6 +22,7 @@ from myspellchecker.core.constants import (
     ET_DANGLING_WORD,
     ET_DUPLICATE_PUNCTUATION,
     ET_HA_HTOE_CONFUSION,
+    ET_HIDDEN_COMPOUND_TYPO,
     ET_HOMOPHONE_ERROR,
     ET_INCOMPLETE_STACKING,
     ET_LEADING_VOWEL_E,
@@ -120,6 +121,7 @@ _ROOT_CAUSE_NARROW_TYPES = frozenset(
     {
         ET_CONFUSABLE_ERROR,
         ET_HOMOPHONE_ERROR,
+        ET_HIDDEN_COMPOUND_TYPO,
         ET_MEDIAL_CONFUSION,
         ET_COLLOCATION_ERROR,
     }
@@ -583,6 +585,43 @@ class ErrorSuppressionMixin:
                 ):
                     continue
 
+            # Suppress confusable errors on high-frequency valid words with
+            # attached Myanmar punctuation (၊ or ။).  The detector flags
+            # "ရှိ၊" but "ရှိ" is correct — the comma is tokenization noise.
+            _MY_PUNCT = "\u104a\u104b"  # ၊ and ။
+            stripped_punct = token.rstrip(_MY_PUNCT)
+            if (
+                stripped_punct
+                and stripped_punct != token
+                and hasattr(self.provider, "is_valid_word")
+                and self.provider.is_valid_word(stripped_punct)
+                and hasattr(self.provider, "get_word_frequency")
+            ):
+                freq = self.provider.get_word_frequency(stripped_punct)
+                if isinstance(freq, (int, float)) and freq >= 5000:
+                    continue
+
+            # Suppress confusable errors where word and top suggestion differ
+            # only by a dot-below (့, U+1037).  This catches syntactic pairs
+            # like သည် ↔ သည့် (declarative vs attributive) that text-level
+            # detectors flag but are not actionable spelling errors.
+            if e.suggestions:
+                sug_str = str(e.suggestions[0])
+                _DOT_BELOW = "\u1037"
+                if (
+                    sug_str == token + _DOT_BELOW
+                    or token == sug_str + _DOT_BELOW
+                    or (
+                        len(sug_str) == len(token) + 1
+                        and sug_str.replace(_DOT_BELOW, "", 1) == token
+                    )
+                    or (
+                        len(token) == len(sug_str) + 1
+                        and token.replace(_DOT_BELOW, "", 1) == sug_str
+                    )
+                ):
+                    continue
+
             # One-character high-frequency particle swaps (e.g., က↔မ) are
             # highly ambiguous and generate many FPs in real-world prose.
             if len(token) == 1 and e.suggestions and hasattr(self.provider, "get_word_frequency"):
@@ -630,6 +669,18 @@ class ErrorSuppressionMixin:
 
             # Suppress if word is actually valid (segmenter/SymSpell disagreement)
             if hasattr(self.provider, "is_valid_word") and self.provider.is_valid_word(token):
+                continue
+
+            # Suppress if word has attached boundary punctuation (quotes, brackets)
+            # and the stripped form is a valid word.  Corpus text often has
+            # "word" or (word) where the punctuation causes invalid_word FPs.
+            stripped = token.strip("\"'\u201c\u201d\u2018\u2019()[]{}")
+            if (
+                stripped
+                and stripped != token
+                and hasattr(self.provider, "is_valid_word")
+                and self.provider.is_valid_word(stripped)
+            ):
                 continue
 
             # Suppress high-frequency words with no suggestions
@@ -692,7 +743,7 @@ class ErrorSuppressionMixin:
                     word,
                     top_k=top_k,
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:
                 # Graceful degradation: if inference fails, keep the error.
                 continue
 
@@ -741,7 +792,7 @@ class ErrorSuppressionMixin:
             # Segment into syllables
             try:
                 syllables = segmenter.segment_syllables(word)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 continue
             if len(syllables) < 2:
                 continue

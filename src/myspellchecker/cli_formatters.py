@@ -26,15 +26,12 @@ class Formatter:
 
     def begin(self, output: TextIO) -> None:
         """Initialize output stream before writing results."""
-        pass
 
     def write_result(self, output: TextIO, result: Any, line_no: int, file_name: str) -> None:
         """Write a single spell check result to the output stream."""
-        pass
 
     def end(self, output: TextIO, summary: dict[str, Any]) -> None:
         """Finalize output and write summary statistics."""
-        pass
 
 
 class JSONFormatter(Formatter):

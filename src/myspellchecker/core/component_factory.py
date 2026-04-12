@@ -176,6 +176,7 @@ class ComponentFactoryProtocol(Protocol):
         tone_disambiguator: Any | None = None,
         ner_model: Any | None = None,
         pos_disambiguator: Any | None = None,
+        symspell: Any | None = None,
     ) -> Any:
         """Create ContextValidator using strategy pattern."""
         ...
@@ -820,6 +821,7 @@ class ComponentFactory:
         tone_disambiguator: Any | None = None,
         ner_model: Any | None = None,
         pos_disambiguator: Any | None = None,
+        symspell: Any | None = None,
     ) -> Any:
         """
         Create ContextValidator using strategy pattern.
@@ -867,6 +869,7 @@ class ComponentFactory:
             homophone_checker=homophone_checker,
             semantic_checker=semantic_checker,
             pos_disambiguator=pos_disambiguator,
+            symspell=symspell,
         )
 
         # Note: ContextValidator no longer requires provider directly (ISP).
@@ -1012,6 +1015,7 @@ class ComponentFactory:
             tone_disambiguator,
             ner_model,
             pos_disambiguator,
+            symspell=symspell,
         )
 
         return {

@@ -232,6 +232,12 @@ class BrokenCompoundStrategy(ValidationStrategy):
                 if pos_next == pos_i + len(w1):
                     continue
 
+                # ── Reduplication guard ──
+                # Same word repeated with space (e.g. "တိုင် တိုင်") is
+                # emphatic/adverbial reduplication, not a broken compound.
+                if w1 == w2:
+                    continue
+
                 # ── POS-based V+particle detection ──
                 # Generalizes false_compound_keys to ALL verb+particle
                 # combinations. POS tags use: PART (particle), PPM

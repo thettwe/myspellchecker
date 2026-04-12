@@ -45,20 +45,114 @@ _ERROR_TYPE_ENCODING = {
     "missing_conjunction": 23,
 }
 
-_STRATEGY_ENCODING = {
-    "": 0,
-    "ToneValidationStrategy": 1,
-    "OrthographyValidationStrategy": 2,
-    "SyntacticValidationStrategy": 3,
-    "StatisticalConfusableStrategy": 4,
-    "BrokenCompoundStrategy": 5,
-    "POSSequenceValidationStrategy": 6,
-    "QuestionStructureValidationStrategy": 7,
-    "HomophoneValidationStrategy": 8,
-    "NgramContextValidationStrategy": 9,
-    "ConfusableCompoundClassifierStrategy": 10,
-    "ConfusableSemanticStrategy": 11,
-    "SemanticValidationStrategy": 12,
+# Error types absent from the trained 23-dim one-hot vector.
+# These are bypassed by filter_errors (trusted via strategy confidence) and
+# stripped from the context features passed to score_error for trained errors.
+_UNTRAINED_ERROR_TYPES: frozenset[str] = frozenset(
+    {
+        "hidden_compound_typo",
+        "syllable_window_oov",
+    }
+)
+
+_STRATEGY_NAMES = [
+    "ToneValidationStrategy",
+    "OrthographyValidationStrategy",
+    "SyntacticValidationStrategy",
+    "StatisticalConfusableStrategy",
+    "BrokenCompoundStrategy",
+    "POSSequenceValidationStrategy",
+    "QuestionStructureValidationStrategy",
+    "HomophoneValidationStrategy",
+    "NgramContextValidationStrategy",
+    "ConfusableCompoundClassifierStrategy",
+    "ConfusableSemanticStrategy",
+    "SemanticValidationStrategy",
+]
+
+_KNOWN_PARTICLES = frozenset(
+    {
+        "က",
+        "ကို",
+        "မှာ",
+        "တွင်",
+        "၌",
+        "သို့",
+        "မှ",
+        "နှင့်",
+        "နဲ့",
+        "သည်",
+        "တယ်",
+        "ပါ",
+        "ပြီ",
+        "ပြီး",
+        "လျှင်",
+        "လျှင့်",
+        "လို့",
+        "ရင်",
+        "ကတည်းက",
+        "တော့",
+        "ပဲ",
+        "ပေါ့",
+        "ဘူး",
+        "ဘဲ",
+        "လား",
+        "မလား",
+        "သလား",
+        "ပါသလား",
+        "နော်",
+        "လေ",
+        "ခဲ့",
+        "နေ",
+        "ထား",
+        "တတ်",
+        "တတ်တယ်",
+    }
+)
+
+_KNOWN_SUFFIXES = frozenset(
+    {
+        "များ",
+        "တွေ",
+        "တို့",
+        "ခြင်း",
+        "မှု",
+        "ခု",
+        "ယောက်",
+        "ကောင်",
+        "စင်",
+        "ခွက်",
+        "လုံး",
+        "ပါး",
+        "စု",
+        "ဦး",
+    }
+)
+
+_ERROR_TYPE_PRECISION = {
+    "invalid_word": 0.25,
+    "invalid_syllable": 0.45,
+    "confusable_error": 0.30,
+    "medial_confusion": 0.65,
+    "pos_sequence_error": 0.20,
+    "context_probability": 0.12,
+    "broken_compound": 0.35,
+    "tone_ambiguity": 0.18,
+    "homophone_error": 0.40,
+    "semantic_error": 0.20,
+    "particle_confusion": 0.22,
+    "syntax_error": 0.15,
+    "register_mixing": 0.30,
+    "question_structure": 0.25,
+    "missing_asat": 0.18,
+    "collocation_error": 0.20,
+    "ha_htoe_confusion": 0.55,
+    "medial_order_error": 0.60,
+    "aspect_adverb_conflict": 0.25,
+    "dangling_word": 0.10,
+    "merged_sfp_conjunction": 0.08,
+    "tense_mismatch": 0.15,
+    "missing_conjunction": 0.12,
 }
 
 
@@ -141,7 +235,7 @@ class MetaClassifierFusion:
         text = getattr(error, "text", "") or ""
         position = getattr(error, "position", 0)
 
-        # --- Base features (7) ---
+        # --- Base features (6) ---
         features: list[float] = [
             round(confidence, 4),
             1.0 if suggestions else 0.0,
@@ -149,7 +243,6 @@ class MetaClassifierFusion:
             1.0 if source_strategy else 0.0,
             float(min(len(text), 30)),
             1.0 if confidence >= 0.85 else 0.0,
-            float(_STRATEGY_ENCODING.get(source_strategy, 0)),
         ]
 
         # --- Frequency features (5) ---
@@ -180,32 +273,41 @@ class MetaClassifierFusion:
             ]
         )
 
+        # --- Source strategy binary flags (12) ---
+        for sname in _STRATEGY_NAMES:
+            features.append(1.0 if source_strategy == sname else 0.0)
+
         # --- One-hot error type (23) ---
-        if self._n_features > 12:
-            etype_id = _ERROR_TYPE_ENCODING.get(error_type, 0)
-            for i in range(1, 24):
-                features.append(1.0 if etype_id == i else 0.0)
+        etype_id = _ERROR_TYPE_ENCODING.get(error_type, 0)
+        for i in range(1, 24):
+            features.append(1.0 if etype_id == i else 0.0)
 
         # --- Context features (6) ---
-        if self._n_features > 35:
-            errors = all_errors or []
-            n_errors = len(errors)
-            features.append(float(n_errors))
-            features.append(
-                float(sum(1 for e in errors if getattr(e, "error_type", "") == error_type))
-            )
-            other_confs = [
-                getattr(e, "confidence", 0.0)
-                for e in errors
-                if getattr(e, "error_type", "") != error_type
-            ]
-            features.append(round(max(other_confs), 4) if other_confs else 0.0)
-            prev_pos = [
-                getattr(e, "position", 0) for e in errors if getattr(e, "position", 0) < position
-            ]
-            features.append(float(position - max(prev_pos)) if prev_pos else -1.0)
-            features.append(round(position / len(normalized_text), 4) if normalized_text else 0.5)
-            features.append(round(error_index / n_errors, 4) if n_errors > 0 else 0.5)
+        errors = all_errors or []
+        n_errors = len(errors)
+        features.append(float(n_errors))
+        features.append(float(sum(1 for e in errors if getattr(e, "error_type", "") == error_type)))
+        other_confs = [
+            getattr(e, "confidence", 0.0)
+            for e in errors
+            if getattr(e, "error_type", "") != error_type
+        ]
+        features.append(round(max(other_confs), 4) if other_confs else 0.0)
+        prev_pos = [
+            getattr(e, "position", 0) for e in errors if getattr(e, "position", 0) < position
+        ]
+        features.append(float(position - max(prev_pos)) if prev_pos else -1.0)
+        features.append(round(position / len(normalized_text), 4) if normalized_text else 0.5)
+        features.append(round(error_index / n_errors, 4) if n_errors > 0 else 0.5)
+
+        # --- Morphological features (3) ---
+        features.append(1.0 if text in _KNOWN_PARTICLES else 0.0)
+        features.append(1.0 if text in _KNOWN_SUFFIXES else 0.0)
+        syl_count = sum(1 for ch in text if 0x1000 <= ord(ch) <= 0x1021)
+        features.append(float(min(syl_count, 10)))
+
+        # --- Error-type precision baseline (1) ---
+        features.append(_ERROR_TYPE_PRECISION.get(error_type, 0.2))
 
         if len(features) != self._n_features:
             return 0.5
@@ -224,34 +326,44 @@ class MetaClassifierFusion:
     ) -> list:
         """Filter errors by meta-classifier score.
 
-        Removes errors that the classifier predicts are likely false positives.
+        Errors with types in ``_UNTRAINED_ERROR_TYPES`` are kept unconditionally;
+        their emitting strategies enforce their own confidence gates and the
+        classifier has no slot for them in its one-hot vector.
 
-        Args:
-            errors: List of Error objects from the validation pipeline.
-            threshold: Minimum P(true_error) to keep. Defaults to model threshold.
-            provider: Optional DictionaryProvider for word frequency features.
-
-        Returns:
-            Filtered list of errors (same type as input).
+        Trained errors are scored against a context restricted to other trained
+        errors so untrained types do not inflate ``n_errors`` / ``max_other_conf``.
         """
         if threshold is None:
             threshold = self._threshold
 
+        trained_errors = [
+            e for e in errors if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
+        ]
+        trained_count = len(trained_errors)
+
         kept = []
-        for idx, error in enumerate(errors):
+        trained_idx = 0
+        for error in errors:
+            error_type = getattr(error, "error_type", "")
+            if error_type in _UNTRAINED_ERROR_TYPES:
+                kept.append(error)
+                continue
+
             prob = self.score_error(
                 error,
                 provider=provider,
-                all_errors=errors,
-                error_index=idx,
+                all_errors=trained_errors,
+                error_index=trained_idx if trained_count else 0,
                 normalized_text=normalized_text,
             )
+            trained_idx += 1
+
             if prob >= threshold:
                 kept.append(error)
             else:
                 logger.debug(
                     "meta_filter: suppressed %s at pos=%s (prob=%.3f < %.3f)",
-                    getattr(error, "error_type", "?"),
+                    error_type or "?",
                     getattr(error, "position", "?"),
                     prob,
                     threshold,

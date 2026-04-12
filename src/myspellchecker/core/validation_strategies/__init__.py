@@ -39,6 +39,9 @@ from myspellchecker.core.validation_strategies.confusable_compound_classifier_st
 from myspellchecker.core.validation_strategies.confusable_semantic_strategy import (
     ConfusableSemanticStrategy,
 )
+from myspellchecker.core.validation_strategies.hidden_compound_strategy import (
+    HiddenCompoundStrategy,
+)
 from myspellchecker.core.validation_strategies.homophone_strategy import HomophoneValidationStrategy
 from myspellchecker.core.validation_strategies.ngram_strategy import NgramContextValidationStrategy
 from myspellchecker.core.validation_strategies.orthography_strategy import (
@@ -54,6 +57,9 @@ from myspellchecker.core.validation_strategies.semantic_strategy import Semantic
 from myspellchecker.core.validation_strategies.statistical_confusable_strategy import (
     StatisticalConfusableStrategy,
 )
+from myspellchecker.core.validation_strategies.syllable_window_oov_strategy import (
+    SyllableWindowOOVStrategy,
+)
 from myspellchecker.core.validation_strategies.syntactic_strategy import SyntacticValidationStrategy
 from myspellchecker.core.validation_strategies.tone_strategy import ToneValidationStrategy
 
@@ -65,6 +71,8 @@ __all__ = [
     "OrthographyValidationStrategy",
     "SyntacticValidationStrategy",
     "StatisticalConfusableStrategy",
+    "SyllableWindowOOVStrategy",
+    "HiddenCompoundStrategy",
     "BrokenCompoundStrategy",
     "POSSequenceValidationStrategy",
     "QuestionStructureValidationStrategy",

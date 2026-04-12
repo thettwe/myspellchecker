@@ -244,14 +244,15 @@ class TestTrainingMetricsCallback:
 
         assert TrainingMetricsCallback is not None
 
-    def test_metrics_callback_init(self):
+    def test_metrics_callback_init(self, tmp_path):
         """TrainingMetricsCallback initializes correctly."""
         from myspellchecker.training.trainer import TrainingMetricsCallback
 
-        callback = TrainingMetricsCallback(output_dir="/tmp/test")
-        assert callback.output_dir == "/tmp/test"
+        out = str(tmp_path)
+        callback = TrainingMetricsCallback(output_dir=out)
+        assert callback.output_dir == out
         assert callback.metrics == []
-        assert callback.metrics_file == "/tmp/test/training_metrics.json"
+        assert callback.metrics_file == f"{out}/training_metrics.json"
 
     def test_metrics_callback_export_from_module(self):
         """TrainingMetricsCallback exported from training module."""

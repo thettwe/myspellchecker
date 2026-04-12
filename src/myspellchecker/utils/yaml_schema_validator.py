@@ -50,7 +50,7 @@ def validate_yaml_against_schema(
         from importlib.util import find_spec
 
         if find_spec("jsonschema") is None:
-            raise ImportError("jsonschema not found")  # noqa: TRY301
+            raise ImportError("jsonschema not found")
     except ImportError:
         logger.debug(
             "jsonschema package not installed; skipping schema validation for %s",
@@ -64,7 +64,7 @@ def validate_yaml_against_schema(
         return []
 
     try:
-        with open(schema_path, "r", encoding="utf-8") as f:
+        with open(schema_path, encoding="utf-8") as f:
             schema = json.load(f)
     except (json.JSONDecodeError, OSError) as exc:
         logger.warning("Failed to load schema %s: %s", schema_path, exc)
@@ -109,7 +109,7 @@ def _build_validator(
     common_schema: dict[str, Any] | None = None
     if common_path.exists():
         try:
-            with open(common_path, "r", encoding="utf-8") as f:
+            with open(common_path, encoding="utf-8") as f:
                 common_schema = json.load(f)
         except (json.JSONDecodeError, OSError):
             pass
@@ -135,7 +135,7 @@ def _build_validator(
         registry = Registry().with_resources(resources)
         validator_class = jsonschema.validators.validator_for(schema)
         return validator_class(schema, registry=registry)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.debug("Failed to build JSON Schema validator: %s", exc)
         return None
 

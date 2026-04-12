@@ -9,7 +9,7 @@ without replacing the segmenter.
 from __future__ import annotations
 
 import math
-from typing import Callable
+from collections.abc import Callable
 
 from myspellchecker.core.config.algorithm_configs import TokenRefinementConfig
 

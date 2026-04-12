@@ -43,27 +43,45 @@ composite = 0.30 * F1
 
 Where `latency_normalized = min(p95 / 500ms, 1.0)`.
 
-## Current Results (v1.4.0)
+## Current Results (v1.5.0)
 
 ### Run Configuration
 
-- **Database**: `mySpellChecker_production.db` (565 MB, 601K words, full POS + enrichment tables)
+- **Database**: `mySpellChecker_production.db` (577 MB, 601K words, full POS + enrichment tables)
 - **Semantic model**: v2.3-final (ONNX, MLM-based)
 - **Validation level**: word
 - **Platform**: macOS (Apple Silicon)
+- **Benchmark suite**: 1,304 sentences (641 clean, 663 with errors, 670 in-scope error spans, `scope=spelling`)
 
 > **Note:** The dictionary database and semantic model used in these benchmarks are **not included** in the library. They were built from a proprietary corpus using the [data pipeline](https://docs.myspellchecker.com/data-pipeline/index) and [training pipeline](https://docs.myspellchecker.com/guides/training) respectively. Your results will vary depending on the dictionary database you build and the semantic model you train.
 
 ### Overall Metrics (with semantic v2.3)
 
+| Metric | Value | vs v1.4.0 |
+|--------|------:|----------:|
+| **F1** | 77.1% | +6.0 pts |
+| **Precision** | 82.6% | +8.5 pts |
+| **Recall** | 72.2% | +4.0 pts |
+| FPR (clean sentences) | 10.8% | −7.8 pts |
+| Top-1 Suggestion Acc | 70.5% | +0.8 pts |
+| MRR | 0.7569 | +0.010 |
+| p95 latency | 409 ms | — |
+| Composite score | 0.7227 | — |
+
+### Baseline Metrics (no semantic model)
+
+For environments without the semantic model, the structural and context-aware strategies alone still deliver strong results at ~4× lower p95 latency:
+
 | Metric | Value |
 |--------|------:|
-| **F1** | 71.1% |
-| **Precision** | 74.1% |
-| **Recall** | 68.2% |
-| FPR (clean sentences) | 18.6% |
-| Top-1 Suggestion Acc | 69.7% |
-| MRR | 0.7468 |
+| **F1** | 75.6% |
+| **Precision** | 81.2% |
+| **Recall** | 70.8% |
+| FPR (clean sentences) | 11.1% |
+| Top-1 Suggestion Acc | 73.2% |
+| MRR | 0.7794 |
+| p95 latency | 97 ms |
+| Composite score | 0.7899 |
 
 ## How to Run
 

@@ -28,10 +28,10 @@ Example:
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import (
     Protocol,
-    Sequence,
     runtime_checkable,
 )
 

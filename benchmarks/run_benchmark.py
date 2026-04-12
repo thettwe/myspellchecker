@@ -954,7 +954,7 @@ def compute_report(
             "machine": platform.machine(),
         },
         "database": {
-            "path": str(db_path),
+            "name": db_path.name,
             "hash": compute_db_hash(db_path),
             "size_mb": round(db_path.stat().st_size / (1024 * 1024), 1),
         },
@@ -1155,7 +1155,7 @@ def print_summary(report: dict) -> None:
     print("=" * 70)
 
     db = report["database"]
-    print(f"\n  Database: {Path(db['path']).name} ({db['size_mb']} MB, hash: {db['hash']})")
+    print(f"\n  Database: {db['name']} ({db['size_mb']} MB, hash: {db['hash']})")
     print(f"  Level: {report['config']['validation_level']}")
     cfg = report["config"]
     total = cfg["total_sentences"]

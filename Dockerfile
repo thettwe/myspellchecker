@@ -101,7 +101,6 @@ RUN pip install --no-cache-dir \
     pytest-xdist>=3.0.0 \
     pytest-timeout>=2.2.0 \
     hypothesis>=6.0.0 \
-    freezegun>=1.2.0 \
     ruff>=0.3.0 \
     mypy>=1.0.0
 

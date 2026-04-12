@@ -308,13 +308,13 @@ class TestContextValidatorCoverage(MockIsMyanmarMixin):
 
 
 class TestValidatorStaticMethods:
-    def test_validate_is_myanmar_text_helper(self):
-        # Test is_myanmar_text helper from constants (replaces removed Validator.is_myanmar)
-        from myspellchecker.core.constants import is_myanmar_text
+    def test_validate_contains_myanmar_helper(self):
+        # Test contains_myanmar helper from constants (replaces removed Validator.is_myanmar)
+        from myspellchecker.core.constants import contains_myanmar
 
-        assert is_myanmar_text("က") is True
-        assert is_myanmar_text("a") is False
-        assert is_myanmar_text("") is False
+        assert contains_myanmar("က") is True
+        assert contains_myanmar("a") is False
+        assert contains_myanmar("") is False
 
     def test_validate_is_punctuation_check(self):
         # Test static method

@@ -67,13 +67,15 @@ class CompoundDetectionThresholds:
     # ── Broken compound (space-separated) ──
 
     # Both parts above this threshold = space is intentional, not broken compound.
+    # Logic: if min(freq1, freq2) >= threshold, skip (space is intentional).
+    # Lowering this reduces FPs by skipping more common-word pairs.
     rare_standalone_threshold: int = 2000
 
     # Compound frequency must exceed this to override standalone guard.
     dominant_compound_threshold: int = 50000
 
     # Minimum compound frequency for full-token joins (left+right→compound).
-    # Raised from 5000 to 15000 to suppress FPs on common word pairs that
+    # Raised from 5000 to 8000 to suppress FPs on common word pairs that
     # coincidentally form valid but infrequent compounds.
     broken_compound_full_min_freq: int = 8000
 
@@ -210,8 +212,11 @@ class ParticleDetectionThresholds:
     # Minimum frequency for compound with visarga.
     visarga_compound_min_freq: int = 5000
 
-    # Skip compounds above this — lexicalized and correct as-is.
-    visarga_compound_skip_freq: int = 5000
+    # Skip syllables above this freq — established words that are correct
+    # without visarga.  E.g., ခောင် (roof, freq=3K) inside သန်းခောင်စာရင်း
+    # (census) is correct, despite ခောင်း (quantity, freq=51K) being more common.
+    # Lowered from 5000 to 2500 to protect established mid-frequency words.
+    visarga_compound_skip_freq: int = 2500
 
     # Minimum ratio of (with_visarga_freq / without_visarga_freq).
     visarga_compound_min_ratio: float = 10.0

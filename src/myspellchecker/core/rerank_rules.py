@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.constants import (
     ET_CONFUSABLE_ERROR,

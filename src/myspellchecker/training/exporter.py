@@ -7,7 +7,6 @@ Converts PyTorch Transformer models to optimized ONNX format.
 import contextlib
 import io
 import logging
-import os
 import shutil
 import warnings
 from pathlib import Path
@@ -26,10 +25,10 @@ try:
     )
 
 except ImportError:
-    torch = None  # type: ignore
-    onnxruntime = None  # type: ignore
-    quantize_dynamic = None  # type: ignore
-    quant_pre_process = None  # type: ignore
+    torch = None  # type: ignore[assignment]
+    onnxruntime = None  # type: ignore[assignment]
+    quantize_dynamic = None  # type: ignore[assignment]
+    quant_pre_process = None  # type: ignore[assignment]
 
 
 class ONNXExporter:
@@ -65,7 +64,7 @@ class ONNXExporter:
             Path to the final .onnx file.
         """
         self.logger.info(f"Exporting model from {model_dir} to ONNX...")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         # 1. Load Model & Tokenizer
         try:
@@ -84,7 +83,7 @@ class ONNXExporter:
         attention_mask = inputs["attention_mask"]
 
         # 3. Define Output Path
-        onnx_path = os.path.join(output_dir, "model.onnx")
+        onnx_path = str(Path(output_dir) / "model.onnx")
 
         # 4. Export
         # We use dynamic axes so the model accepts any sequence length.
@@ -150,8 +149,8 @@ class ONNXExporter:
 
     def _quantize(self, onnx_path: str, output_dir: str) -> None:
         """Apply dynamic int8 quantization to an ONNX model."""
-        quantized_path = os.path.join(output_dir, "model.quant.onnx")
-        preprocessed_path = os.path.join(output_dir, "model.preprocess.onnx")
+        quantized_path = str(Path(output_dir) / "model.quant.onnx")
+        preprocessed_path = str(Path(output_dir) / "model.preprocess.onnx")
         self.logger.info("Quantizing model to Int8...")
 
         try:
@@ -187,7 +186,7 @@ class ONNXExporter:
 
             Path(preprocessed_path).unlink(missing_ok=True)
 
-            base_path = os.path.join(output_dir, "model.base.onnx")
+            base_path = str(Path(output_dir) / "model.base.onnx")
             shutil.move(onnx_path, base_path)
             shutil.move(quantized_path, onnx_path)
 

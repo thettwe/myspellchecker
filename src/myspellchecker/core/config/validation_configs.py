@@ -26,7 +26,6 @@ class ValidationConfig(BaseModel):
         context_error_confidence_low: Low confidence for context errors (default: 0.6).
         max_syllable_length: Maximum valid syllable length (default: 12).
         syllable_corruption_threshold: Threshold for syllable corruption (default: 3).
-        is_myanmar_text_threshold: Threshold for Myanmar text detection (default: 0.5).
         use_zawgyi_detection: Enable Zawgyi encoding detection (default: True).
         use_zawgyi_conversion: Enable automatic Zawgyi to Unicode conversion (default: True).
         zawgyi_confidence_threshold: Confidence threshold for Zawgyi detection (default: 0.95).
@@ -73,12 +72,6 @@ class ValidationConfig(BaseModel):
         ge=1,
         description="Threshold for detecting corrupted syllables",
     )
-    is_myanmar_text_threshold: float = Field(
-        default=0.5,
-        ge=0.0,
-        le=1.0,
-        description="Minimum ratio of Myanmar characters to classify text as Myanmar",
-    )
     use_zawgyi_detection: bool = Field(
         default=True,
         description="Enable detection of legacy Zawgyi encoding",
@@ -102,12 +95,6 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence score for medial confusion corrections (ျ vs ြ)",
-    )
-    orthography_confidence: float = Field(
-        default=0.9,
-        ge=0.0,
-        le=1.0,
-        description="Confidence score for orthography validation errors",
     )
     raise_on_strategy_error: bool = Field(
         default=False,
@@ -191,41 +178,6 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence for homophone validation strategy",
-    )
-    homophone_improvement_ratio: float = Field(
-        default=5.0,
-        ge=1.0,
-        description="Minimum probability improvement ratio for homophone suggestions",
-    )
-    homophone_min_probability: float = Field(
-        default=0.001,
-        ge=0.0,
-        le=1.0,
-        description=(
-            "Minimum n-gram probability threshold for homophone suggestions. "
-            "Prevents false positives from infrequent n-gram occurrences."
-        ),
-    )
-    homophone_high_freq_threshold: int = Field(
-        default=1000,
-        ge=0,
-        description=(
-            "Word frequency above which a stricter improvement ratio is required. "
-            "Prevents false positives on common, correct words."
-        ),
-    )
-    homophone_high_freq_improvement_ratio: float = Field(
-        default=50.0,
-        ge=1.0,
-        description=(
-            "Improvement ratio required for high-frequency words. "
-            "Much stricter than the default ratio to avoid flagging common words."
-        ),
-    )
-    semantic_min_word_length: int = Field(
-        default=2,
-        ge=1,
-        description="Minimum word length for semantic validation",
     )
     use_homophone_detection: bool = Field(
         default=True,
@@ -385,10 +337,6 @@ class ValidationConfig(BaseModel):
         ),
     )
 
-    use_orthography_validation: bool = Field(
-        default=True,
-        description="Enable orthography validation in validation pipeline",
-    )
     # Output confidence filter thresholds
     # Calibration: confusable_error FPs cluster at 0.72, TPs at 0.88+.
     # colloquial_info notes use confidence 0.3 (informational, not errors)
@@ -422,7 +370,7 @@ class ValidationConfig(BaseModel):
             "(mutex bypass), fast-path exit is automatically disabled, and the "
             "arbiter uses calibrated confidence fusion "
             "across independence clusters to determine which errors to emit. "
-            "When False, the v1.2 mutex-and-shadow-mode behaviour is used."
+            "When False, falls back to mutex-based winner selection with shadow mode."
         ),
     )
     fusion_confidence_threshold: float = Field(
@@ -610,15 +558,6 @@ class ValidationConfig(BaseModel):
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
     )
 
-    truncation_frequency_ratio: int = Field(
-        default=100,
-        ge=1,
-        description=(
-            "Minimum frequency ratio of complete_freq / truncated_freq "
-            "for truncation detection. Higher values = stricter detection."
-        ),
-    )
-
     # Broken compound detection (wrongly split compound words)
     use_broken_compound_detection: bool = Field(
         default=True,
@@ -651,6 +590,144 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence score for broken compound errors.",
+    )
+
+    # Hidden compound typo detection (priority 23, structural phase)
+    use_hidden_compound_detection: bool = Field(
+        default=True,
+        description=(
+            "Enable detection of hidden compound typos. When True, "
+            "HiddenCompoundStrategy runs at priority 23 (before "
+            "StatisticalConfusable and BrokenCompound). It examines multi-token "
+            "windows where each individual token is valid but a confusable "
+            "variant of w_i would form a high-frequency compound with the "
+            "following token(s)."
+        ),
+    )
+    hidden_compound_max_token_syllables: int = Field(
+        default=3,
+        ge=1,
+        le=6,
+        description=(
+            "Maximum syllable count for a token to be considered as a typo "
+            "source. Longer tokens are skipped for performance."
+        ),
+    )
+    hidden_compound_max_variants_per_token: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+        description=(
+            "Maximum confusable variants to generate per candidate token. "
+            "Caps cost of dictionary lookups per sentence."
+        ),
+    )
+    hidden_compound_min_frequency: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum compound frequency required to flag a hidden compound "
+            "typo. Mirrors broken_compound_min_frequency but lower because "
+            "we also permit freq=0 subsumed compounds via trigram lookahead."
+        ),
+    )
+    hidden_compound_confidence_floor: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Minimum confidence to emit a hidden compound typo error. "
+            "Higher floor suppresses marginal corrections."
+        ),
+    )
+    hidden_compound_enable_trigram_lookahead: bool = Field(
+        default=True,
+        description=(
+            "When the bigram variant lookup returns a freq=0 valid dictionary "
+            "entry (subsumed compound case), try the trigram variant (v + "
+            "w_next + w_next2) as well."
+        ),
+    )
+    hidden_compound_variant_cache_size: int = Field(
+        default=8192,
+        ge=64,
+        description=(
+            "LRU cache size for generate_confusable_variants() results per "
+            "process. Larger cache reduces CPU cost at the expense of memory."
+        ),
+    )
+    hidden_compound_require_typo_prone_chars: bool = Field(
+        default=True,
+        description=(
+            "Only process tokens containing at least one typo-prone character "
+            "(e.g., ခ/က, ပ/ဖ, ြ/ျ). Pure-vowel or pure-suffix tokens are "
+            "never sources of confusable typos and can be skipped."
+        ),
+    )
+    hidden_compound_curated_only: bool = Field(
+        default=True,
+        description=(
+            "Require both w_i and w_next to satisfy is_valid_vocabulary() "
+            "(curated=1). Rejects segmenter artifacts with boundary drift."
+        ),
+    )
+
+    # Syllable-window OOV detection (priority 22, structural phase).
+    # Disabled by default: requires per-process SymSpell caching to amortise
+    # the per-window lookup cost before it is viable in production.
+    use_syllable_window_oov: bool = Field(
+        default=False,
+        description=(
+            "Enable SyllableWindowOOVStrategy: detect multi-syllable OOV typos "
+            "that the segmenter decomposes into individually-valid syllables. "
+            "Runs at priority 22 (before HiddenCompound, StatisticalConfusable, "
+            "BrokenCompound)."
+        ),
+    )
+    syllable_window_sizes: tuple[int, ...] = Field(
+        default=(3, 4),
+        description=(
+            "Window sizes to enumerate (in syllables). 2-syllable windows are "
+            "excluded by default; on real text they are dominated by "
+            "particle-deletion false positives."
+        ),
+    )
+    syllable_window_min_frequency: int = Field(
+        default=500,
+        ge=0,
+        description="Minimum SymSpell suggestion frequency to emit a window error.",
+    )
+    syllable_window_confidence_floor: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence required to emit a syllable-window OOV error.",
+    )
+    syllable_window_require_typo_prone: bool = Field(
+        default=True,
+        description=(
+            "Only consider windows containing at least one typo-prone character "
+            "(aspirated/unaspirated pairs, medials, nasals, etc.)."
+        ),
+    )
+    syllable_window_skip_names: bool = Field(
+        default=True,
+        description=(
+            "Skip windows that span any word flagged as a proper name (``context.is_name_mask``)."
+        ),
+    )
+    syllable_window_require_valid_source_words: bool = Field(
+        default=True,
+        description=(
+            "Only emit when every word contributing syllables to the window "
+            "is individually a valid dictionary entry."
+        ),
+    )
+    syllable_window_max_edit_distance: int = Field(
+        default=1,
+        ge=1,
+        le=3,
+        description="Maximum SymSpell edit distance accepted for the candidate.",
     )
 
     # MLM post-filter for invalid_word / dangling_word FP suppression

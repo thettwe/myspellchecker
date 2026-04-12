@@ -755,7 +755,7 @@ class SpellChecker(
         if _symspell is not None and hasattr(_symspell, "clear_session_cache"):
             _symspell.clear_session_cache()
 
-        self.logger.debug(f"Checking text (len={len(text)}) at level {level.value}")
+        self.logger.debug("Checking text (len=%d) at level %s", len(text), level.value)
 
         # Detect Zawgyi-encoded words BEFORE normalization (which may convert them)
         zawgyi_config, zawgyi_warning = self._detect_zawgyi(text)
@@ -1150,6 +1150,7 @@ class SpellChecker(
         self._reconstruct_particle_compound_suggestions(normalized_text, errors)
         self._inject_asat_visarga_candidates(normalized_text, errors)
         self._reconstruct_morpheme_in_compound(normalized_text, errors)
+        self._inject_compound_confusion_candidates(errors)
         self._dedup_errors_by_position(errors)
         self._dedup_errors_by_span(errors)
         self._suppress_tense_adjacent_syntax(errors)

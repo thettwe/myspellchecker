@@ -288,8 +288,27 @@ class DefaultRanker(SuggestionRanker):
                 elif len_diff <= 2:
                     span_bonus = self.short_medium_bonus
 
+        # Compound correction bonus: when a suggestion is longer than the
+        # error span (likely a compound completing a morpheme fragment) and
+        # has dictionary frequency, boost it to counteract span-length penalty.
+        compound_bonus = 0.0
+        if (
+            data.error_length is not None
+            and data.error_length > 0
+            and len(data.term) > data.error_length
+            and data.frequency > 0
+            and data.source in ("compound", "morpheme")
+        ):
+            compound_bonus = 0.15
+
         total_bonus = (
-            freq_bonus + phonetic_bonus + nasal_bonus + same_nasal_bonus + pos_bonus + span_bonus
+            freq_bonus
+            + phonetic_bonus
+            + nasal_bonus
+            + same_nasal_bonus
+            + pos_bonus
+            + span_bonus
+            + compound_bonus
         )
         return base_score - total_bonus
 

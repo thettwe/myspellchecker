@@ -40,7 +40,7 @@ Caching:
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -50,7 +50,7 @@ from myspellchecker.algorithms.inference_backends import (
     HFTokenizerWrapper,
     PyTorchInferenceSession,
 )
-from myspellchecker.core.constants import CONFIDENCE_FLOOR, get_myanmar_char_set, is_myanmar_text
+from myspellchecker.core.constants import CONFIDENCE_FLOOR, contains_myanmar, get_myanmar_char_set
 from myspellchecker.core.exceptions import InferenceError, ModelLoadError
 from myspellchecker.utils.cache import LRUCache
 from myspellchecker.utils.logging_utils import get_logger
@@ -213,7 +213,7 @@ class SemanticChecker:
             self.tokenizer = tokenizer
             self.logger.info("Using provided Semantic Model and Tokenizer objects")
         elif model_path and tokenizer_path:
-            if not os.path.exists(tokenizer_path) and not self._is_hf_model_name(tokenizer_path):
+            if not Path(tokenizer_path).exists() and not self._is_hf_model_name(tokenizer_path):
                 raise FileNotFoundError(f"Tokenizer not found at {tokenizer_path}")
 
             self.logger.info(f"Loading Semantic Model: {model_path}")
@@ -222,7 +222,7 @@ class SemanticChecker:
             self._load_tokenizer(tokenizer_path)
 
             # Determine inference backend
-            is_onnx_model = model_path.endswith(".onnx") and os.path.exists(model_path)
+            is_onnx_model = model_path.endswith(".onnx") and Path(model_path).exists()
 
             if is_onnx_model and not use_pytorch:
                 # ONNX Runtime backend
@@ -381,9 +381,7 @@ class SemanticChecker:
         Returns:
             Lowercase model name string.
         """
-        import os
-
-        name = os.path.basename(model_path).lower()
+        name = Path(model_path).name.lower()
         if "/" in model_path:
             # HuggingFace format: org/model
             name = model_path.split("/")[-1].lower()
@@ -446,7 +444,8 @@ class SemanticChecker:
 
     def _load_tokenizer(self, tokenizer_path: str) -> None:
         """Load tokenizer from path or HuggingFace model name."""
-        if os.path.isdir(tokenizer_path):
+        tokenizer_p = Path(tokenizer_path)
+        if tokenizer_p.is_dir():
             # HuggingFace format directory — try AutoTokenizer first,
             # fall back to raw tokenizer.json if config is incompatible
             try:
@@ -463,13 +462,13 @@ class SemanticChecker:
             except (ValueError, OSError) as e:
                 # AutoTokenizer failed (e.g., unrecognized tokenizer_class).
                 # Fall back to loading tokenizer.json directly if present.
-                fallback = os.path.join(tokenizer_path, "tokenizer.json")
-                if os.path.isfile(fallback) and Tokenizer is not None:
-                    self.tokenizer = Tokenizer.from_file(fallback)
+                fallback = tokenizer_p / "tokenizer.json"
+                if fallback.is_file() and Tokenizer is not None:
+                    self.tokenizer = Tokenizer.from_file(str(fallback))
                     self.logger.info("AutoTokenizer failed (%s), loaded tokenizer.json fallback", e)
                 else:
                     raise
-        elif os.path.isfile(tokenizer_path):
+        elif tokenizer_p.is_file():
             # Custom tokenizer.json file format
             if Tokenizer is None:
                 raise ImportError(
@@ -550,7 +549,7 @@ class SemanticChecker:
                 "Install via 'pip install onnxruntime'."
             )
 
-        if not os.path.exists(model_path):
+        if not Path(model_path).exists():
             raise FileNotFoundError(f"Model not found at {model_path}")
 
         # Check model version compatibility
@@ -708,10 +707,10 @@ class SemanticChecker:
     def _is_myanmar_text(self, text: str) -> bool:
         """Check if text contains Myanmar characters, respecting config.
 
-        Uses the shared is_myanmar_text helper which respects the
+        Uses the shared contains_myanmar helper which respects the
         allow_extended_myanmar config flag.
         """
-        return is_myanmar_text(text, allow_extended=self.allow_extended_myanmar)
+        return contains_myanmar(text, allow_extended=self.allow_extended_myanmar)
 
     def _cached_encode(self, text: str) -> EncodingResult:
         """

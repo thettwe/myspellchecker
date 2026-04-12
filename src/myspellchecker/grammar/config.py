@@ -7,8 +7,9 @@ allowing easy customization and expansion of grammatical validation rules.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, cast
+from typing import Any, cast
 
 import yaml
 
@@ -82,7 +83,7 @@ def _load_yaml_config(
         return None
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             config = yaml.safe_load(f)
             if config:
                 # Optional schema validation — never blocks loading.
@@ -131,7 +132,7 @@ def _validate_config_schema(
                 yaml_path.name,
                 "; ".join(errors),
             )
-    except Exception:  # noqa: BLE001
+    except Exception:
         # Never let validation machinery break config loading.
         logger.debug("Schema validation skipped for %s due to an unexpected error", config_name)
 

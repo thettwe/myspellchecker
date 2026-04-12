@@ -11,15 +11,14 @@
 #
 # Schema: https://myspellchecker.dev/schemas/homophones/v1.0
 
-version: "1.4.2"
+version: "1.4.4"
 category: "homophones"
 description: "Myanmar homophones for real-word error correction"
 
 metadata:
   created_date: "2025-12-30"
-  last_updated: "2026-03-21"
-  total_entries: 217
-  source: "v1.4.2 — added ဆား/စား aspiration confusable pair (BM-515-E4)"
+  last_updated: "2026-04-11"
+  total_entries: 225
 
 # ============================================================
 # HOMOPHONE MAP
@@ -59,6 +58,9 @@ homophones:
   "ကျော": ["ကြော"]
   "ကြက်": ["ကျက်"]          # chicken vs memorize
   "ကျက်": ["ကြက်"]
+
+  # Unidirectional medial ya-pin/ya-yit confusions
+  "ကြွေး": ["ကျွေး"]        # debt/credit vs feed
 
   # ============================================================
   # Nasal Finals (ံ vs န် vs မ် vs င်) - Common confusions
@@ -162,6 +164,8 @@ homophones:
   "ဆိုး": ["စိုး"]           # bad/dye vs rule/worry
   "စိုး": ["ဆိုး"]
   "ဆား": ["စား"]            # salt vs eat (aspiration confusable)
+  # errand vs teacher — unidirectional to protect legitimate စရာ usage
+  "စရာ": ["ဆရာ"]
   # Aspirated/labial pairs
   "ဖူး": ["ဘူး"]            # flower/experience vs gourd/negation (pha↔ba)
   "ဘိုက်": ["ဗိုက်"]         # belly (informal) vs belly (standard)
@@ -240,7 +244,7 @@ homophones:
   # v1.3 additions — expanded ha-htoe real-word pairs
   "ရှာ": ["ရာ"]              # search vs hundred/count
   "ရာ": ["ရှာ"]
-  "ရှင်": ["ရင်"]            # alive/monk vs chest/if
+  "ရှင်": ["ရင်", "ရှင်း"]   # alive/monk vs chest/if vs clean/explain
   "ရင်": ["ရှင်"]
   "ရှုံး": ["ရုံး"]           # lose vs office
   "ရုံး": ["ရှုံး"]
@@ -314,6 +318,16 @@ homophones:
   "ရေ": ["ရေး"]
   "လေ": ["လေး"]            # air/wind vs four/heavy
   "လေး": ["လေ"]
+  # Visarga-missing near-homophones (unidirectional). The "wrong" form
+  # lacks the visarga ( း ); reverse direction is omitted to avoid
+  # flagging every valid occurrence of the "correct" form.
+  "ကောင်": ["ကောင်း"]       # crow/thing vs good/excellent
+  "သာ": ["သား"]             # only/just vs son/meat
+  # Medial ြ (ya-yit) missing on the "wrong" form (unidirectional).
+  "ပီ": ["ပြီ"]              # (dialectal/typo) vs completion particle
+  "မန်": ["မြန်"]            # (rare) vs fast/quick
+  # Missing tone marks on grammatical particles (unidirectional).
+  "ခဲ": ["ခဲ့"]              # hail/ice vs past particle
 
   # ============================================================
   # Particle confusion pairs (similar-looking particles)

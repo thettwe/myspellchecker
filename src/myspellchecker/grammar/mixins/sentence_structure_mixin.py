@@ -37,9 +37,14 @@ class SentenceStructureMixin:
     grammar_config: "GrammarEngineConfig"
 
     # --- Type stubs for methods provided by POSTagMixin (resolved via MRO) ---
-    def _has_tag(self, pos_string: str | None, target_tag: str) -> bool: ...  # type: ignore[empty-body]
-    def _get_primary_tag(self, pos_string: str | None, word: str | None = None) -> str: ...  # type: ignore[empty-body]
-    def _is_particle_like_tag(self, tag: str) -> bool: ...  # type: ignore[empty-body]
+    def _has_tag(self, pos_string: str | None, target_tag: str) -> bool:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
+
+    def _get_primary_tag(self, pos_string: str | None, word: str | None = None) -> str:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
+
+    def _is_particle_like_tag(self, tag: str) -> bool:
+        raise NotImplementedError("provided by POSTagMixin via MRO")
 
     # Future time words (including common misspellings that remain valid dictionary entries)
     _FUTURE_TIME_WORDS: frozenset[str] = frozenset(

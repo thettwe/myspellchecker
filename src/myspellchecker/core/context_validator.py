@@ -396,7 +396,7 @@ class ContextValidator(Validator):
 
             w_idx = sentence.find(word, word_cursor)
             if w_idx == -1:
-                logger.debug(f"Word not found in sentence from cursor {word_cursor}: {word}")
+                logger.debug("Word not found in sentence from cursor %d: %s", word_cursor, word)
                 continue
 
             abs_position = sentence_offset + w_idx
@@ -504,9 +504,8 @@ class ContextValidator(Validator):
                     error.source_strategy = strategy_name
                 errors.extend(strategy_errors)
 
-                # Collect error candidates for arbiter (Phase 2 infrastructure).
-                # Candidates are emitted alongside the mutex -- both systems
-                # active, mutex still determines output.
+                # Collect error candidates for the arbiter alongside the
+                # mutex pipeline; the mutex still determines emitted output.
                 for error in strategy_errors:
                     candidate = ErrorCandidate(
                         strategy_name=strategy_name,
@@ -534,10 +533,13 @@ class ContextValidator(Validator):
                         self.strategy_timings[strategy_name] = (
                             self.strategy_timings.get(strategy_name, 0.0) + elapsed
                         )
-                    logger.debug(f"{strategy_name} took {elapsed:.4f}s")
+                    logger.debug("%s took %.4fs", strategy_name, elapsed)
 
                 logger.debug(
-                    f"{strategy_name} found {len(strategy_errors)} errors (total: {len(errors)})"
+                    "%s found %d errors (total: %d)",
+                    strategy_name,
+                    len(strategy_errors),
+                    len(errors),
                 )
 
             except (RuntimeError, ValueError, TypeError, KeyError, IndexError, AttributeError) as e:
@@ -610,9 +612,9 @@ class ContextValidator(Validator):
     ) -> None:
         """Log arbiter divergence from mutex-selected errors.
 
-        v1.3.0 shadow mode: the arbiter does NOT mutate live Error
-        objects.  It only logs positions where the arbiter disagrees
-        with the mutex, to collect divergence data.
+        Shadow mode: the arbiter does NOT mutate live Error objects.
+        It only logs positions where the arbiter disagrees with the
+        mutex, to collect divergence data.
         """
         error_by_pos = ContextValidator._build_error_by_pos(errors)
 

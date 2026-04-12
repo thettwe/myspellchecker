@@ -462,9 +462,9 @@ def _load_g2p_homophone_groups() -> list[dict[str, object]]:
         return []
 
     try:
-        with open(yaml_path, "r", encoding="utf-8") as fh:
+        with open(yaml_path, encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
-    except Exception:  # noqa: BLE001
+    except Exception:
         logger.warning("Failed to load G2P mappings from %s", yaml_path, exc_info=True)
         return []
 

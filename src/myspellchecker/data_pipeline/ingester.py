@@ -866,7 +866,7 @@ class CorpusIngester:
                 raise ValueError(f"text_col index must be >= 0, got {resolved_text_col}")
 
         try:
-            with open(file_path, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+            with open(file_path, encoding=DEFAULT_FILE_ENCODING) as f:
                 if suffix == ".txt":
                     for line in f:
                         yield line.strip()
