@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-import pyarrow as pa  # type: ignore
+import pyarrow as pa  # type: ignore[import-untyped]
 from rich.console import Console
 from rich.status import Status
 

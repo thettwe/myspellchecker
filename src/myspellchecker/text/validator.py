@@ -61,7 +61,7 @@ See Also
 from __future__ import annotations
 
 # --- Check functions ---
-from myspellchecker.text.validator_checks import (  # noqa: F401
+from myspellchecker.text.validator_checks import (
     get_quality_issues,
     get_truncation_candidates,
     is_fragment_pattern,
@@ -72,14 +72,14 @@ from myspellchecker.text.validator_checks import (  # noqa: F401
 )
 
 # --- Data sets ---
-from myspellchecker.text.validator_data import (  # noqa: F401
+from myspellchecker.text.validator_data import (
     KNOWN_INVALID_WORDS,
     PALI_WHITELIST,
     VALID_PALI_BARE_ENDINGS,
 )
 
 # --- Patterns & character sets ---
-from myspellchecker.text.validator_patterns import (  # noqa: F401
+from myspellchecker.text.validator_patterns import (
     ASAT_BEFORE_VOWEL_PATTERN,
     ASAT_INITIAL_PATTERN,
     BROKEN_VIRAMA_PATTERN,
@@ -185,7 +185,7 @@ __all__ = [
 # importable -- downstream code and tests require zero changes.
 # ============================================================================
 # --- Types ---
-from myspellchecker.text.validator_types import (  # noqa: F401
+from myspellchecker.text.validator_types import (
     ValidationIssue,
     ValidationResult,
 )

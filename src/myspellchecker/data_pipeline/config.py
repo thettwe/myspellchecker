@@ -143,7 +143,7 @@ class PipelineConfig:
     seg_device: int = -1
 
     # POS Tagger configuration (new pluggable system)
-    pos_tagger: POSTaggerConfig | None = None  # type: ignore  # noqa: F821
+    pos_tagger: POSTaggerConfig | None = None  # type: ignore[name-defined]  # noqa: F821
 
     # Pipeline behavior
     enable_resume: bool = True
@@ -158,10 +158,10 @@ class PipelineConfig:
     work_dir: str | Path | None = None
 
     # Console for output (dependency injection for testing)
-    console: PipelineConsole | None = field(default=None)  # type: ignore
+    console: PipelineConsole | None = field(default=None)  # type: ignore[name-defined]
 
     # Reporter for progress reporting (dependency injection for testing)
-    reporter: PipelineReporter | None = field(default=None)  # type: ignore
+    reporter: PipelineReporter | None = field(default=None)  # type: ignore[name-defined]
 
     # Enrichment (Step 5): mine confusable pairs, compounds, collocations, register tags
     enrich: bool = True  # Master toggle (--enrich / --no-enrich)

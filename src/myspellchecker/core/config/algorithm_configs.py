@@ -1587,13 +1587,13 @@ class RankerConfig(BaseModel):
 # Existing imports like ``from algorithm_configs import MorphologyConfig``
 # continue to work because we re-export everything here.
 
-from myspellchecker.core.config.infra_configs import (  # noqa: E402, F401
+from myspellchecker.core.config.infra_configs import (  # noqa: E402
     AlgorithmCacheConfig,
     FrequencyGuardConfig,
     NeuralRerankerConfig,
     TokenRefinementConfig,
 )
-from myspellchecker.core.config.strategy_configs import (  # noqa: E402, F401
+from myspellchecker.core.config.strategy_configs import (  # noqa: E402
     BrokenCompoundStrategyConfig,
     ConfusableSemanticConfig,
     HomophoneStrategyConfig,
@@ -1601,7 +1601,7 @@ from myspellchecker.core.config.strategy_configs import (  # noqa: E402, F401
     SemanticStrategyConfig,
     ToneStrategyConfig,
 )
-from myspellchecker.core.config.text_configs import (  # noqa: E402, F401
+from myspellchecker.core.config.text_configs import (  # noqa: E402
     CompoundResolverConfig,
     MorphologyConfig,
     ReduplicationConfig,

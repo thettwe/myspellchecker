@@ -67,12 +67,12 @@ try:
     TRAINING_AVAILABLE = True
 except ImportError:
     # Training dependencies not installed
-    torch = None  # type: ignore
-    ByteLevelBPETokenizer = None  # type: ignore
-    RobertaConfig = None  # type: ignore
-    BertConfig = None  # type: ignore
-    PreTrainedTokenizerFast = None  # type: ignore
-    TrainerCallback = object  # type: ignore
+    torch = None  # type: ignore[assignment]
+    ByteLevelBPETokenizer = None  # type: ignore[assignment,misc]
+    RobertaConfig = None  # type: ignore[assignment,misc]
+    BertConfig = None  # type: ignore[assignment,misc]
+    PreTrainedTokenizerFast = None  # type: ignore[assignment,misc]
+    TrainerCallback = object  # type: ignore[assignment,misc]
     TRAINING_AVAILABLE = False
 
 # Type checking import for tokenizer type hint

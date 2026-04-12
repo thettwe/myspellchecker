@@ -743,7 +743,7 @@ class ErrorSuppressionMixin:
                     word,
                     top_k=top_k,
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:
                 # Graceful degradation: if inference fails, keep the error.
                 continue
 
@@ -792,7 +792,7 @@ class ErrorSuppressionMixin:
             # Segment into syllables
             try:
                 syllables = segmenter.segment_syllables(word)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 continue
             if len(syllables) < 2:
                 continue

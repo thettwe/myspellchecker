@@ -25,10 +25,10 @@ try:
     )
 
 except ImportError:
-    torch = None  # type: ignore
-    onnxruntime = None  # type: ignore
-    quantize_dynamic = None  # type: ignore
-    quant_pre_process = None  # type: ignore
+    torch = None  # type: ignore[assignment]
+    onnxruntime = None  # type: ignore[assignment]
+    quantize_dynamic = None  # type: ignore[assignment]
+    quant_pre_process = None  # type: ignore[assignment]
 
 
 class ONNXExporter:

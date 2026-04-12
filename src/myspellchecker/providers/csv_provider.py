@@ -102,7 +102,7 @@ class CSVProvider(MemoryProvider):
         if not self.syllables_csv or not self.syllables_csv.exists():
             raise FileNotFoundError(f"Syllables CSV not found: {self.syllables_csv}")
 
-        with open(self.syllables_csv, "r", encoding=self.encoding) as f:
+        with open(self.syllables_csv, encoding=self.encoding) as f:
             reader = csv.DictReader(f)
             try:
                 for row in reader:
@@ -114,7 +114,7 @@ class CSVProvider(MemoryProvider):
         if not self.words_csv or not self.words_csv.exists():
             raise FileNotFoundError(f"Words CSV not found: {self.words_csv}")
 
-        with open(self.words_csv, "r", encoding=self.encoding) as f:
+        with open(self.words_csv, encoding=self.encoding) as f:
             reader = csv.DictReader(f)
             try:
                 for row in reader:
@@ -131,7 +131,7 @@ class CSVProvider(MemoryProvider):
         if not self.bigrams_csv or not self.bigrams_csv.exists():
             raise FileNotFoundError(f"Bigrams CSV not found: {self.bigrams_csv}")
 
-        with open(self.bigrams_csv, "r", encoding=self.encoding) as f:
+        with open(self.bigrams_csv, encoding=self.encoding) as f:
             reader = csv.DictReader(f)
             try:
                 for row in reader:

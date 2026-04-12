@@ -69,7 +69,7 @@ def open_input_file(file_path: str | None, encoding: str = DEFAULT_FILE_ENCODING
     resolved_path = _validate_file_path(file_path)
 
     try:
-        return open(resolved_path, "r", encoding=encoding)
+        return open(resolved_path, encoding=encoding)
     except FileNotFoundError:
         print(f"Error: File not found: {file_path}", file=sys.stderr)
         sys.exit(2)

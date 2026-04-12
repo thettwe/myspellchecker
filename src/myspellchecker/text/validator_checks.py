@@ -9,7 +9,7 @@ Public helpers consumed by the data pipeline, the quality filter, and tests:
 from __future__ import annotations
 
 import threading
-from typing import Callable
+from collections.abc import Callable
 
 from myspellchecker.text.validator_data import (
     _ALLOWED_SINGLE_CONSONANTS,

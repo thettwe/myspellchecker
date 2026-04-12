@@ -499,7 +499,7 @@ class DatabasePackager:
                         skipped_invalid += 1
             else:
                 # Python fallback
-                with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+                with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                     next(f)  # Skip header
                     for line in f:
                         parts = line.strip().split("\t")
@@ -593,7 +593,7 @@ class DatabasePackager:
                         skipped_invalid += 1
             else:
                 # Python fallback
-                with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+                with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                     next(f)  # Skip header
                     for line in f:
                         parts = line.strip().split("\t")
@@ -889,7 +889,7 @@ class DatabasePackager:
 
         try:
             pos_data = []
-            with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+            with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                 next(f)  # Skip header
                 for line in f:
                     parts = line.strip().split("\t")
@@ -926,7 +926,7 @@ class DatabasePackager:
 
         try:
             pos_data = []
-            with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+            with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                 next(f)  # Skip header
                 for line in f:
                     parts = line.strip().split("\t")
@@ -963,7 +963,7 @@ class DatabasePackager:
 
         try:
             pos_data = []
-            with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+            with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                 next(f)  # Skip header
                 for line in f:
                     parts = line.strip().split("\t")
@@ -1023,7 +1023,7 @@ class DatabasePackager:
                 ):
                     bigrams_data.append((id1, id2, probability, count))
             else:
-                with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+                with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                     # Skip header
                     next(f)
 
@@ -1127,7 +1127,7 @@ class DatabasePackager:
                 ):
                     trigrams_data.append((id1, id2, id3, probability, count))
             else:
-                with open(filepath, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+                with open(filepath, encoding=DEFAULT_FILE_ENCODING) as f:
                     # Skip header
                     next(f)
 

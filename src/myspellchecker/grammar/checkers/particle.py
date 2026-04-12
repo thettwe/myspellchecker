@@ -148,7 +148,7 @@ class ParticleChecker:
             return
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data: dict[str, Any] = yaml.safe_load(f) or {}
         except (yaml.YAMLError, OSError) as e:
             logger.warning("Failed to load particle contexts from %s: %s", path, e)

@@ -13,7 +13,8 @@ Resolution order: segmenter, provider → symspell → context_checker → sugge
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.di.service_names import (
     SERVICE_CONTEXT_CHECKER,

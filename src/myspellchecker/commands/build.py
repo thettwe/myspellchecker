@@ -200,7 +200,7 @@ def _cmd_build(args) -> None:
             sys.exit(2)
         try:
             curated_words = {}
-            with open(curated_input_file, "r", encoding="utf-8") as f:
+            with open(curated_input_file, encoding="utf-8") as f:
                 reader = csv.reader(f)
                 header = next(reader, None)
                 if not header:

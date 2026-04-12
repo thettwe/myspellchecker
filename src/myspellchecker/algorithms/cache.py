@@ -70,8 +70,9 @@ from __future__ import annotations
 
 import threading
 import weakref
+from collections.abc import Iterator
 from functools import lru_cache
-from typing import Any, ClassVar, Iterator, cast
+from typing import Any, ClassVar, cast
 
 from myspellchecker.algorithms.interfaces import (
     BigramSource,

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
     from .config import PipelineConfig
 
-import pyarrow as pa  # type: ignore
+import pyarrow as pa  # type: ignore[import-untyped]
 
 from ..core.constants import (
     DEFAULT_DB_NAME,

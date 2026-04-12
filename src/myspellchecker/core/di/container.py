@@ -34,10 +34,10 @@ See Also:
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     TypeVar,
     overload,
 )

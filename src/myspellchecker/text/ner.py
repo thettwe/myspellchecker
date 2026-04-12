@@ -105,7 +105,7 @@ def _parse_gazetteer_yaml(path: Path | None = None) -> GazetteerData:
         return _hardcoded_fallback()
 
     try:
-        import yaml  # noqa: PLC0415
+        import yaml
 
         with open(yaml_path, encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
@@ -258,7 +258,7 @@ def get_gazetteer_data(path: Path | None = None) -> GazetteerData:
 
     Thread-safe lazy initialization.  Pass *path* only in tests.
     """
-    global _GAZETTEER_DATA  # noqa: PLW0603
+    global _GAZETTEER_DATA
     if _GAZETTEER_DATA is None:
         with _gazetteer_lock:
             if _GAZETTEER_DATA is None:

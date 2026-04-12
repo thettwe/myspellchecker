@@ -38,7 +38,7 @@ def _load_yaml(path: Path, name: str) -> dict[str, Any] | None:
         logger.debug("Detection rules file not found: %s", path)
         return None
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
             if isinstance(data, dict):
                 logger.debug("Loaded detection rules from %s", path)

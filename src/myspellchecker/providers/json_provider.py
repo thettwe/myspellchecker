@@ -115,7 +115,7 @@ class JSONProvider(MemoryProvider):
             ValueError: If JSON structure is invalid.
         """
         try:
-            with open(self.json_path, "r", encoding=DEFAULT_FILE_ENCODING) as f:
+            with open(self.json_path, encoding=DEFAULT_FILE_ENCODING) as f:
                 data = json.load(f)
         except json.JSONDecodeError as e:
             raise json.JSONDecodeError(

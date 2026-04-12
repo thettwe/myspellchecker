@@ -38,15 +38,13 @@ import logging
 import re
 import sys
 import time
+from collections.abc import AsyncIterator, Callable, Iterator
 from copy import copy
 from dataclasses import dataclass, field
 from typing import (
     IO,
     TYPE_CHECKING,
     Any,
-    AsyncIterator,
-    Callable,
-    Iterator,
     Protocol,
     TextIO,
     runtime_checkable,

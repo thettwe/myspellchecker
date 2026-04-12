@@ -37,7 +37,7 @@ try:
     _HAS_TRANSFORMER_TAGGER = True
 except ImportError:
     _HAS_TRANSFORMER_TAGGER = False
-    TransformerPOSTagger = None  # type: ignore
+    TransformerPOSTagger = None  # type: ignore[assignment,misc]
 
 from myspellchecker.algorithms.distance.edit_distance import (
     damerau_levenshtein_distance,

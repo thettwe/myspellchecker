@@ -7,7 +7,8 @@ the power of the Strategy pattern and Dependency Injection.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.context_validator import ContextValidator
 from myspellchecker.core.di.service_names import (

@@ -167,7 +167,7 @@ def _load_tense_markers() -> tuple[
     try:
         import yaml
 
-        with open(_YAML_PATH, "r", encoding="utf-8") as f:
+        with open(_YAML_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         if not data or not isinstance(data, dict):

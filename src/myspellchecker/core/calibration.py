@@ -152,7 +152,7 @@ class StrategyCalibrator:
         Falls back to bootstrap defaults on missing file, empty YAML, or
         malformed entries.
         """
-        import yaml  # noqa: PLC0415
+        import yaml
 
         from myspellchecker.utils.logging_utils import get_logger
 

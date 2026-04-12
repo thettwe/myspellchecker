@@ -19,9 +19,10 @@ Features:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from myspellchecker.core.config.algorithm_configs import MorphologyConfig
 from myspellchecker.core.constants import (

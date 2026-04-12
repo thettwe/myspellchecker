@@ -14,7 +14,8 @@ from __future__ import annotations
 
 import importlib.resources
 import random
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import yaml
 

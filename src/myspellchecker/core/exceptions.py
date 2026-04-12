@@ -83,7 +83,6 @@ class MyanmarSpellcheckError(Exception):
         ...     print(f"Spell check error: {e}")
     """
 
-    pass
 
 
 # =============================================================================
@@ -99,7 +98,6 @@ class ConfigurationError(MyanmarSpellcheckError):
     or missing required configuration.
     """
 
-    pass
 
 
 class InvalidConfigError(ConfigurationError):
@@ -110,7 +108,6 @@ class InvalidConfigError(ConfigurationError):
         >>> raise InvalidConfigError("max_edit_distance must be >= 0, got -1")
     """
 
-    pass
 
 
 # =============================================================================
@@ -126,7 +123,6 @@ class DataLoadingError(MyanmarSpellcheckError):
     and other external resources required for operation.
     """
 
-    pass
 
 
 # =============================================================================
@@ -142,7 +138,6 @@ class ProcessingError(MyanmarSpellcheckError):
     subclasses should be used when possible.
     """
 
-    pass
 
 
 class ValidationError(ProcessingError):
@@ -156,7 +151,6 @@ class ValidationError(ProcessingError):
         >>> raise ValidationError("Text contains invalid Myanmar characters")
     """
 
-    pass
 
 
 class TokenizationError(ProcessingError):
@@ -170,7 +164,6 @@ class TokenizationError(ProcessingError):
         >>> raise TokenizationError("Failed to segment text into syllables")
     """
 
-    pass
 
 
 class NormalizationError(ProcessingError):
@@ -184,7 +177,6 @@ class NormalizationError(ProcessingError):
         >>> raise NormalizationError("Failed to convert Zawgyi to Unicode")
     """
 
-    pass
 
 
 # =============================================================================
@@ -200,7 +192,6 @@ class ProviderError(MyanmarSpellcheckError):
     and provider-specific errors.
     """
 
-    pass
 
 
 class ConnectionPoolError(ProviderError):
@@ -214,7 +205,6 @@ class ConnectionPoolError(ProviderError):
         >>> raise ConnectionPoolError("Connection pool exhausted")
     """
 
-    pass
 
 
 # =============================================================================
@@ -230,7 +220,6 @@ class PipelineError(MyanmarSpellcheckError):
     and database packaging errors.
     """
 
-    pass
 
 
 class IngestionError(PipelineError):
@@ -294,7 +283,6 @@ class PackagingError(PipelineError):
         >>> raise PackagingError("Failed to create SQLite database")
     """
 
-    pass
 
 
 # =============================================================================
@@ -309,7 +297,6 @@ class ModelError(MyanmarSpellcheckError):
     This includes model loading, training, and inference errors.
     """
 
-    pass
 
 
 class ModelLoadError(ModelError):
@@ -323,7 +310,6 @@ class ModelLoadError(ModelError):
         >>> raise ModelLoadError("Failed to load POS tagger model")
     """
 
-    pass
 
 
 class InferenceError(ModelError):
@@ -337,7 +323,6 @@ class InferenceError(ModelError):
         >>> raise InferenceError("Failed to run semantic similarity model")
     """
 
-    pass
 
 
 # =============================================================================
@@ -359,7 +344,6 @@ class MissingDependencyError(MyanmarSpellcheckError):
         ... )
     """
 
-    pass
 
 
 class InsufficientStorageError(MyanmarSpellcheckError):
@@ -372,7 +356,6 @@ class InsufficientStorageError(MyanmarSpellcheckError):
         ... )
     """
 
-    pass
 
 
 class CacheError(MyanmarSpellcheckError):
@@ -385,7 +368,6 @@ class CacheError(MyanmarSpellcheckError):
         >>> raise CacheError("Failed to initialize LRU cache")
     """
 
-    pass
 
 
 class MissingDatabaseError(DataLoadingError):
