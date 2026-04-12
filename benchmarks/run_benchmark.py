@@ -935,15 +935,11 @@ def compute_report(
     p99 = latencies_sorted[int(n * 0.99)] if n > 0 else 0.0
 
     # --- Composite score ---
-    latency_normalized = min(p95 / 500.0, 1.0)
-    composite = (
-        0.30 * f1
-        + 0.25 * mrr
-        + 0.20 * (1.0 - fpr)
-        + 0.15 * top1_acc
-        + 0.10 * (1.0 - latency_normalized)
-    )
-
+    # v1.6.0: Latency is a hard gate (pass/fail at 500ms p95), not a sliding scale.
+    # Previous formula gave latency 3x more sensitivity than any accuracy component,
+    # masking real accuracy differences (see Sprint 1 sensitivity analysis).
+    latency_pass = p95 <= 500.0
+    composite = 0.35 * f1 + 0.30 * mrr + 0.20 * (1.0 - fpr) + 0.15 * top1_acc
     # --- Build report ---
     report = {
         "benchmark_version": benchmark.get("version", "1.0.0"),
@@ -995,6 +991,7 @@ def compute_report(
                 "p50": round(p50, 1),
                 "p95": round(p95, 1),
                 "p99": round(p99, 1),
+                "gate_pass": latency_pass,
             },
             "composite_score": round(composite, 4),
         },
@@ -1248,8 +1245,13 @@ def print_summary(report: dict) -> None:
     print(f"  P50:      {lat['p50']:.1f} ms")
     print(f"  P95:      {lat['p95']:.1f} ms")
 
+    latency_gate = lat.get("gate_pass", True)
+    gate_str = "PASS" if latency_gate else "FAIL (p95 > 500ms)"
+    print(f"  Gate:     {gate_str}")
+
     print(f"\n{'─' * 70}")
     print(f"  COMPOSITE SCORE: {report['overall_metrics']['composite_score']:.4f}")
+    print("  Formula: 0.35*F1 + 0.30*MRR + 0.20*(1-FPR) + 0.15*Top1")
     print(f"{'─' * 70}")
 
     rerank_telemetry = report.get("rerank_rule_telemetry", {})

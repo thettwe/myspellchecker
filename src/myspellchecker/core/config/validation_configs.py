@@ -218,11 +218,12 @@ class ValidationConfig(BaseModel):
 
     # Confusable Semantic Detection (MLM-enhanced, priority 48)
     use_confusable_semantic: bool = Field(
-        default=True,
+        default=False,
         description=(
             "Enable MLM-enhanced confusable detection (priority 48). "
             "Uses predict_mask() to detect valid-word confusables missed by n-gram. "
-            "Requires semantic model to be loaded."
+            "Requires semantic model to be loaded. "
+            "Disabled by default in v1.6.0: AUROC=0.574 (near-random discrimination)."
         ),
     )
     confusable_semantic_confidence: float = Field(
