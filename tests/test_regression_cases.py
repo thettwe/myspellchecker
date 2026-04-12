@@ -68,11 +68,13 @@ def test_regression_valid_words(regression_checker):
 def test_regression_invalid_words(regression_checker):
     """Test invalid words/phrases that were previously missed."""
     invalid_phrases = [
-        ("လူမြိုး", "လူမြိုး"),  # Typo for လူမျိုး (Input: လူမြိုး -> Normalized: လူမြိုး)
-        ("မူန်ူး", "မူန်ူး"),  # Corrupt syllable (Asat usage) - now detected as whole
+        # Note: "လူမြိုး" (ya-yit instead of ya-pin) was removed — v1.5.0
+        # auto-normalizes common medial swaps (ြ↔ျ) via the extended_variant
+        # pattern without flagging an error.
         # Note: "လုပ်နီ" was removed — "နီ" is now recognized as a valid word
         # by the segmentation model (it means "red/near" in Myanmar), so the
         # compound check passes with edit_distance=0.
+        ("မူန်ူး", "မူန်ူး"),  # Corrupt syllable (Asat usage) - detected as invalid
     ]
 
     for text, error_segment_raw in invalid_phrases:
@@ -87,9 +89,6 @@ def test_regression_invalid_words(regression_checker):
         if text == "မူန်ူး":
             # The entire string is now treated as invalid syllable
             expected_error_segment = normalize("မူန်ူး")
-        elif text == "လူမြိုး":
-            # "လူမြိုး" segments to "လူ", "မြိုး". We expect error on "မြိုး".
-            expected_error_segment = normalize("မြိုး")
         else:
             expected_error_segment = normalize(error_segment_raw)
 

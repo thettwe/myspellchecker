@@ -118,7 +118,9 @@ def test_context_validator_word_not_found():
     validator = ContextValidator(config, segmenter, strategies=[MockStrategy()])
     with patch("myspellchecker.core.context_validator.logger") as mock_logger:
         validator.validate("sent")
-        mock_logger.debug.assert_any_call("Word not found in sentence from cursor 0: missing")
+        mock_logger.debug.assert_any_call(
+            "Word not found in sentence from cursor %d: %s", 0, "missing"
+        )
 
 
 def test_context_validator_repr():
