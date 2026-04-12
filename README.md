@@ -75,6 +75,8 @@ Full documentation is available at **[docs.myspellchecker.com](https://docs.mysp
 *   **[Syllable Validation](https://docs.myspellchecker.com/features/syllable-validation)**: Core validation layer.
 *   **[Word Validation](https://docs.myspellchecker.com/features/word-validation)**: Dictionary + SymSpell suggestions.
 *   **[Context Checking](https://docs.myspellchecker.com/features/context-checking)**: N-gram probability analysis.
+*   **[Hidden Compound Detection](https://docs.myspellchecker.com/features/hidden-compound-detection)**: Recover compound typos hidden by segmenter over-splitting.
+*   **[Syllable-Window OOV](https://docs.myspellchecker.com/features/syllable-window-oov)**: Multi-syllable OOV detection via SymSpell windows (opt-in).
 *   **[Confusable Detection](https://docs.myspellchecker.com/features/confusable-detection)**: Multi-layer confusable word detection.
 *   **[Homophone Detection](https://docs.myspellchecker.com/features/homophones)**: Sound-alike error detection.
 
