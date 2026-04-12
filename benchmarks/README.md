@@ -43,7 +43,10 @@ composite = 0.30 * F1
 
 Where `latency_normalized = min(p95 / 500ms, 1.0)`.
 
-## Current Results (v1.4.0)
+## Current Results (v1.5.0)
+
+> **Note:** Metric numbers below reflect the last v1.4.0 benchmark run and will be refreshed after the next v1.5.0 benchmark run completes. The v1.5.0 pipeline adds `HiddenCompoundStrategy`, suffix-aware re-segmentation, meta-classifier v2, and benchmark expansion (1,304 sentences); results will be updated accordingly.
+
 
 ### Run Configuration
 

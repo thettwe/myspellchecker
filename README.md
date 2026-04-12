@@ -1,16 +1,16 @@
 # mySpellChecker: Myanmar (Burmese) Text Intelligence Library
 
-> **Myanmar (Burmese) text intelligence library — 12-strategy checking pipeline, dictionary building, and AI model training, from O(1) SymSpell lookups to ONNX-powered inference.**
+> **Myanmar (Burmese) text intelligence library — 14-strategy checking pipeline, dictionary building, and AI model training, from O(1) SymSpell lookups to ONNX-powered inference.**
 
 [![PyPI](https://img.shields.io/pypi/v/myspellchecker)](https://pypi.org/project/myspellchecker/)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Coverage](https://img.shields.io/badge/coverage-75%25-green)](tests/)
-[![Tests](https://img.shields.io/badge/tests-4%2C785_passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-4%2C940_passed-brightgreen)](tests/)
 
 ## Overview
 
-**mySpellChecker** is a comprehensive text intelligence library built specifically for the Myanmar language. It covers three domains: a **12-strategy checking pipeline** (from rule-based validation through grammar checking, N-gram context, confusable detection, homophone detection, to ONNX-powered AI inference), a **dictionary building pipeline** (corpus ingestion, segmentation, N-gram frequency, SQLite packaging), and **AI model training** (semantic MLM fine-tuning with ONNX export). Since Myanmar script is written as a continuous stream without spaces between words, the library uses a multi-layer validation approach — starting with fast syllable-level checks and progressively applying deeper analysis including POS tagging, 8 grammar checkers, and context-aware semantic validation.
+**mySpellChecker** is a comprehensive text intelligence library built specifically for the Myanmar language. It covers three domains: a **14-strategy checking pipeline** (from rule-based validation through grammar checking, N-gram context, hidden-compound and syllable-window detection, confusable and homophone detection, to ONNX-powered AI inference), a **dictionary building pipeline** (corpus ingestion, segmentation, N-gram frequency, SQLite packaging), and **AI model training** (semantic MLM fine-tuning with ONNX export). Since Myanmar script is written as a continuous stream without spaces between words, the library uses a multi-layer validation approach — starting with fast syllable-level checks and progressively applying deeper analysis including POS tagging, 8 grammar checkers, and context-aware semantic validation.
 
 ## Key Features
 
@@ -18,16 +18,20 @@
 
 ### Checking Pipeline
 
-*   **12-Strategy Validation Pipeline**: Composable strategies from fast rule checks (sub-10ms) to AI inference, each layer building on the previous.
+*   **14-Strategy Validation Pipeline**: Composable strategies from fast rule checks (sub-10ms) to AI inference, each layer building on the previous.
 *   **Syllable-First Architecture**: Validates most errors at the syllable level before assembling into words for deeper analysis.
 *   **SymSpell Algorithm**: Custom O(1) symmetric delete implementation with Myanmar-specific variant generation for fast correction suggestions.
 *   **N-gram Context Checking**: Bigram/Trigram probabilities detect real-word errors (correct spelling, wrong context).
+*   **Hidden Compound Detection**: Recovers multi-token compound typos that the segmenter over-splits into individually-valid syllables (e.g. `ခုန်ကျစရိတ်` → `ကုန်ကျစရိတ်`). Walks curated-vocabulary bigram/trigram windows and verifies against high-frequency dictionary compounds.
+*   **Syllable-Window OOV Detection** (opt-in): Complementary structural-phase detector that enumerates syllable-windows across adjacent words and consults SymSpell for high-frequency near-matches.
 *   **Homophone Detection**: Bidirectional N-gram analysis catches sound-alike word errors with frequency-aware guards.
 *   **Confusable Detection**: Multi-layer valid-word confusion detection — statistical bigram, MLP classifier, and MLM semantic analysis.
+*   **Meta-Classifier Post-Filter**: Logistic regression model (41 features) replaces manual per-strategy confidence thresholds; compound-aware features in the v2 model drive FPR reduction.
 *   **Grammar Checking**: 8 specialized checkers — Aspect, Classifier, Compound, MergedWord, Negation, Particle, TenseAgreement, Register.
 *   **POS Tagging**: Pluggable backends — Rule-Based (fast), Viterbi HMM (balanced), Transformer (93% accuracy).
 *   **Joint Segmentation**: Simultaneous word segmentation and POS tagging in a single pass.
-*   **Compound & Morpheme Handling**: DP-based compound resolution, productive reduplication validation, and morpheme-level correction for OOV words.
+*   **Suffix-Aware Re-Segmentation**: DefaultSegmenter post-processes oversized tokens and colloquial-locative merges (e.g. `ရန်ကုန်မာ` → `[ရန်, ကုန်, မာ]`) for cleaner downstream validation.
+*   **Compound & Morpheme Handling**: DP-based compound resolution, ternary compound splits in morpheme correction, productive reduplication validation.
 *   **AI Semantic Checking (Optional)**: ONNX masked language model for context-aware validation.
 *   **Named Entity Recognition**: Heuristic and Transformer-based NER to reduce false positives on names and places.
 
@@ -67,7 +71,7 @@ Full documentation is available at **[docs.myspellchecker.com](https://docs.mysp
 *   **[Configuration Guide](https://docs.myspellchecker.com/guides/configuration)**: All configuration options and profiles.
 
 ### Text Checking
-*   **[Overview](https://docs.myspellchecker.com/features/index)**: 12-strategy text checking pipeline.
+*   **[Overview](https://docs.myspellchecker.com/features/index)**: 14-strategy text checking pipeline.
 *   **[Syllable Validation](https://docs.myspellchecker.com/features/syllable-validation)**: Core validation layer.
 *   **[Word Validation](https://docs.myspellchecker.com/features/word-validation)**: Dictionary + SymSpell suggestions.
 *   **[Context Checking](https://docs.myspellchecker.com/features/context-checking)**: N-gram probability analysis.
@@ -89,7 +93,7 @@ Full documentation is available at **[docs.myspellchecker.com](https://docs.mysp
 
 ### AI-Powered Checking
 *   **[Semantic Checking](https://docs.myspellchecker.com/features/semantic-checking)**: AI-powered MLM validation.
-*   **[Validation Strategies](https://docs.myspellchecker.com/features/validation-strategies)**: 12 composable strategies.
+*   **[Validation Strategies](https://docs.myspellchecker.com/features/validation-strategies)**: 14 composable strategies.
 *   **[Training Models](https://docs.myspellchecker.com/guides/training)**: Train custom semantic models.
 
 ### Text Utilities
@@ -382,13 +386,15 @@ See the [POS Tagging Guide](https://docs.myspellchecker.com/features/pos-tagging
 
 ### Validation Strategies
 
-Composable validation pipeline with 12 strategies:
+Composable validation pipeline with 14 strategies:
 
 | Strategy | Priority | Purpose |
 |----------|----------|---------|
 | ToneValidation | 10 | Tone mark disambiguation |
 | Orthography | 15 | Medial order and compatibility |
 | SyntacticRule | 20 | Grammar rule checking |
+| SyllableWindowOOV | 22 | Multi-syllable OOV detection via SymSpell windows (opt-in) |
+| HiddenCompoundTypo | 23 | Compound typos hidden by segmenter over-splitting |
 | StatisticalConfusable | 24 | Bigram-based confusable detection |
 | BrokenCompound | 25 | Broken compound word detection |
 | POSSequence | 30 | POS sequence validation |
@@ -437,7 +443,7 @@ pip install -e ".[dev]"
 
 ### Testing
 
-The test suite has 4,785 tests with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
+The test suite has 4,940 tests with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
 
 ```bash
 # Run default test suite (~5 min, skips slow tests)
