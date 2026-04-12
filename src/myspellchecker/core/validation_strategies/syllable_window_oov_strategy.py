@@ -162,9 +162,7 @@ class SyllableWindowOOVStrategy(ValidationStrategy):
 
         return [err for _, err in sorted(best_by_pos.values(), key=lambda x: x[1].position)]
 
-    def _flatten_syllables(
-        self, context: ValidationContext
-    ) -> list[tuple[str, int, int]]:
+    def _flatten_syllables(self, context: ValidationContext) -> list[tuple[str, int, int]]:
         """Return ``[(syllable, abs_char_pos, source_word_idx), ...]`` for the context.
 
         Skips words where the syllable tokenizer's output does not concatenate
@@ -180,9 +178,7 @@ class SyllableWindowOOVStrategy(ValidationStrategy):
             if not syllables:
                 continue
             if sum(len(s) for s in syllables) != len(word):
-                self.logger.debug(
-                    f"syllable length mismatch for {word!r}: {syllables}"
-                )
+                self.logger.debug(f"syllable length mismatch for {word!r}: {syllables}")
                 continue
             running = word_pos
             for syl in syllables:
@@ -227,14 +223,12 @@ class SyllableWindowOOVStrategy(ValidationStrategy):
                 source_word_indices = {flat[k][2] for k in range(i, end)}
 
                 if self.skip_names and any(
-                    wi < len(is_name_mask) and is_name_mask[wi]
-                    for wi in source_word_indices
+                    wi < len(is_name_mask) and is_name_mask[wi] for wi in source_word_indices
                 ):
                     continue
 
                 if self.require_valid_source_words and not all(
-                    self.provider.is_valid_word(context.words[wi])
-                    for wi in source_word_indices
+                    self.provider.is_valid_word(context.words[wi]) for wi in source_word_indices
                 ):
                     continue
 
@@ -245,9 +239,7 @@ class SyllableWindowOOVStrategy(ValidationStrategy):
 
                 joined = "".join(flat[k][0] for k in range(i, end))
 
-                if self.require_typo_prone and not any(
-                    c in _TYPO_PRONE_CHARS for c in joined
-                ):
+                if self.require_typo_prone and not any(c in _TYPO_PRONE_CHARS for c in joined):
                     continue
 
                 joined_norm = normalize(joined)

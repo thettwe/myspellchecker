@@ -190,12 +190,8 @@ class TestUntrainedErrorTypeBypass:
 
         with_sw_filtered = bundled_model.filter_errors([legit, *sw_errors])
 
-        legit_in_baseline = [
-            e for e in baseline_filtered if e.error_type == "invalid_word"
-        ]
-        legit_in_with_sw = [
-            e for e in with_sw_filtered if e.error_type == "invalid_word"
-        ]
+        legit_in_baseline = [e for e in baseline_filtered if e.error_type == "invalid_word"]
+        legit_in_with_sw = [e for e in with_sw_filtered if e.error_type == "invalid_word"]
         assert len(legit_in_baseline) == len(legit_in_with_sw)
 
     def test_score_invariant_under_trained_only_context(self, bundled_model):
@@ -208,10 +204,6 @@ class TestUntrainedErrorTypeBypass:
             suggestions=["fix"],
         )
 
-        score_alone = bundled_model.score_error(
-            legit, all_errors=[legit], error_index=0
-        )
-        score_filtered = bundled_model.score_error(
-            legit, all_errors=[legit], error_index=0
-        )
+        score_alone = bundled_model.score_error(legit, all_errors=[legit], error_index=0)
+        score_filtered = bundled_model.score_error(legit, all_errors=[legit], error_index=0)
         assert score_alone == pytest.approx(score_filtered)

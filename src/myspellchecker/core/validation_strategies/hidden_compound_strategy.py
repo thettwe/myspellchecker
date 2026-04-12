@@ -229,9 +229,7 @@ class HiddenCompoundStrategy(ValidationStrategy):
                 # source text. A gap (space, punctuation, newline) means the
                 # user wrote them as SEPARATE words — merging them into a
                 # "hidden compound" is a false positive.
-                expected_next = (
-                    context.word_positions[pair_start] + len(words[pair_start])
-                )
+                expected_next = context.word_positions[pair_start] + len(words[pair_start])
                 actual_next = context.word_positions[pair_end]
                 if actual_next != expected_next:
                     continue
@@ -320,9 +318,7 @@ class HiddenCompoundStrategy(ValidationStrategy):
             if neighbor_idx >= 0:
                 neighbor = words[neighbor_idx]
                 # Only count if the two are adjacent in source (no gap).
-                expected_next = (
-                    context.word_positions[neighbor_idx] + len(neighbor)
-                )
+                expected_next = context.word_positions[neighbor_idx] + len(neighbor)
                 if expected_next == pos_typo:
                     subsumed_left = neighbor + w_typo
                     if self.provider.is_valid_word(subsumed_left):

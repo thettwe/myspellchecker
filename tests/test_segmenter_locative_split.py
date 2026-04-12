@@ -44,9 +44,7 @@ def test_kun_ma_allowlist_split(checker):
     """``ကုန်မာ`` must split to ``["ကုန်", "မာ"]`` via the allowlist."""
     text = "သူငယ်ချင်းက ရန်ကုန်မာ နေတယ်။"
     tokens = checker.segmenter.segment_words(text)
-    assert "ကုန်မာ" not in tokens, (
-        f"Expected ကုန်မာ to be split via allowlist, got tokens={tokens}"
-    )
+    assert "ကုန်မာ" not in tokens, f"Expected ကုန်မာ to be split via allowlist, got tokens={tokens}"
     assert "မာ" in tokens, f"Expected standalone မာ after allowlist split, got tokens={tokens}"
     assert "ကုန်" in tokens, f"Expected standalone ကုန် after allowlist split, got tokens={tokens}"
 

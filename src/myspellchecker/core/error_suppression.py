@@ -674,7 +674,7 @@ class ErrorSuppressionMixin:
             # Suppress if word has attached boundary punctuation (quotes, brackets)
             # and the stripped form is a valid word.  Corpus text often has
             # "word" or (word) where the punctuation causes invalid_word FPs.
-            stripped = token.strip('"\'\u201c\u201d\u2018\u2019()[]{}')
+            stripped = token.strip("\"'\u201c\u201d\u2018\u2019()[]{}")
             if (
                 stripped
                 and stripped != token

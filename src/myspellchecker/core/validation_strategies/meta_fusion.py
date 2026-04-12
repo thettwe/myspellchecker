@@ -70,18 +70,64 @@ _STRATEGY_NAMES = [
     "SemanticValidationStrategy",
 ]
 
-_KNOWN_PARTICLES = frozenset({
-    "က", "ကို", "မှာ", "တွင်", "၌", "သို့", "မှ", "နှင့်", "နဲ့",
-    "သည်", "တယ်", "ပါ", "ပြီ", "ပြီး", "လျှင်", "လျှင့်", "လို့",
-    "ရင်", "ကတည်းက", "တော့", "ပဲ", "ပေါ့", "ဘူး", "ဘဲ",
-    "လား", "မလား", "သလား", "ပါသလား", "နော်", "လေ",
-    "ခဲ့", "နေ", "ထား", "တတ်", "တတ်တယ်",
-})
+_KNOWN_PARTICLES = frozenset(
+    {
+        "က",
+        "ကို",
+        "မှာ",
+        "တွင်",
+        "၌",
+        "သို့",
+        "မှ",
+        "နှင့်",
+        "နဲ့",
+        "သည်",
+        "တယ်",
+        "ပါ",
+        "ပြီ",
+        "ပြီး",
+        "လျှင်",
+        "လျှင့်",
+        "လို့",
+        "ရင်",
+        "ကတည်းက",
+        "တော့",
+        "ပဲ",
+        "ပေါ့",
+        "ဘူး",
+        "ဘဲ",
+        "လား",
+        "မလား",
+        "သလား",
+        "ပါသလား",
+        "နော်",
+        "လေ",
+        "ခဲ့",
+        "နေ",
+        "ထား",
+        "တတ်",
+        "တတ်တယ်",
+    }
+)
 
-_KNOWN_SUFFIXES = frozenset({
-    "များ", "တွေ", "တို့", "ခြင်း", "မှု", "ခု", "ယောက်",
-    "ကောင်", "စင်", "ခွက်", "လုံး", "ပါး", "စု", "ဦး",
-})
+_KNOWN_SUFFIXES = frozenset(
+    {
+        "များ",
+        "တွေ",
+        "တို့",
+        "ခြင်း",
+        "မှု",
+        "ခု",
+        "ယောက်",
+        "ကောင်",
+        "စင်",
+        "ခွက်",
+        "လုံး",
+        "ပါး",
+        "စု",
+        "ဦး",
+    }
+)
 
 _ERROR_TYPE_PRECISION = {
     "invalid_word": 0.25,
@@ -240,9 +286,7 @@ class MetaClassifierFusion:
         errors = all_errors or []
         n_errors = len(errors)
         features.append(float(n_errors))
-        features.append(
-            float(sum(1 for e in errors if getattr(e, "error_type", "") == error_type))
-        )
+        features.append(float(sum(1 for e in errors if getattr(e, "error_type", "") == error_type)))
         other_confs = [
             getattr(e, "confidence", 0.0)
             for e in errors
@@ -293,9 +337,7 @@ class MetaClassifierFusion:
             threshold = self._threshold
 
         trained_errors = [
-            e
-            for e in errors
-            if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
+            e for e in errors if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
         ]
         trained_count = len(trained_errors)
 

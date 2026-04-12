@@ -135,11 +135,7 @@ def create_context_validator(container: "ServiceContainer") -> ContextValidator:
         if container.has_service(SERVICE_NAME_HEURISTIC)
         else None
     )
-    symspell = (
-        container.get(SERVICE_SYMSPELL)
-        if container.has_service(SERVICE_SYMSPELL)
-        else None
-    )
+    symspell = container.get(SERVICE_SYMSPELL) if container.has_service(SERVICE_SYMSPELL) else None
 
     # Build strategies using shared builder
     strategies = build_context_validation_strategies(

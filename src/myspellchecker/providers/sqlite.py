@@ -941,8 +941,7 @@ class SQLiteProvider(NEREntityMixin, EnrichmentMixin, CacheMixin, DictionaryProv
             self._trigram_prob_cache,
             (w1, w2, w3),
             (self.get_word_id(w1), self.get_word_id(w2), self.get_word_id(w3)),
-            "SELECT probability FROM trigrams "
-            "WHERE word1_id = ? AND word2_id = ? AND word3_id = ?",
+            "SELECT probability FROM trigrams WHERE word1_id = ? AND word2_id = ? AND word3_id = ?",
         )
 
     def get_fourgram_probability(self, word1: str, word2: str, word3: str, word4: str) -> float:

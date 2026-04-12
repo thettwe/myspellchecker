@@ -188,9 +188,7 @@ class MorphemeSuggestionStrategy(BaseSuggestionStrategy):
 
         return suggestions[: self._max_suggestions]
 
-    def _suggest_ternary_splits(
-        self, syllables: list[str], term: str
-    ) -> list[SuggestionData]:
+    def _suggest_ternary_splits(self, syllables: list[str], term: str) -> list[SuggestionData]:
         """Try ternary (prefix + error + suffix) splits.
 
         For compounds like "ခုန်ကျစရိတ်" where the error "ခုန်ကျ" is

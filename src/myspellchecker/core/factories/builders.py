@@ -566,9 +566,7 @@ def build_context_validation_strategies(
 
         # Share the curated homophone map so StatisticalConfusableStrategy
         # can promote detections that also appear there.
-        homophone_pairs_map = (
-            homophone_checker.homophone_map if homophone_checker else None
-        )
+        homophone_pairs_map = homophone_checker.homophone_map if homophone_checker else None
 
         if merged_map:
             strategies.append(

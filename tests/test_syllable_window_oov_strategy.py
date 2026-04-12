@@ -42,9 +42,7 @@ class TestSyllableWindowOOVScaffold:
         assert ET_SYLLABLE_WINDOW_OOV == "syllable_window_oov"
         assert ErrorType.SYLLABLE_WINDOW_OOV.value == "syllable_window_oov"
 
-    def test_strategy_priority_is_22(
-        self, hidden_compound_provider: MemoryProvider
-    ) -> None:
+    def test_strategy_priority_is_22(self, hidden_compound_provider: MemoryProvider) -> None:
         s = SyllableWindowOOVStrategy(provider=hidden_compound_provider, symspell=None)
         assert s.priority() == 22
 
@@ -57,9 +55,7 @@ class TestSyllableWindowOOVScaffold:
         assert s.min_frequency == 50
         assert s.confidence_floor == 0.70
 
-    def test_repr_contains_priority(
-        self, hidden_compound_provider: MemoryProvider
-    ) -> None:
+    def test_repr_contains_priority(self, hidden_compound_provider: MemoryProvider) -> None:
         s = SyllableWindowOOVStrategy(provider=hidden_compound_provider, symspell=None)
         text = repr(s)
         assert "SyllableWindowOOVStrategy" in text

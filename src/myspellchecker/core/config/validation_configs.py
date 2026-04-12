@@ -713,8 +713,7 @@ class ValidationConfig(BaseModel):
     syllable_window_skip_names: bool = Field(
         default=True,
         description=(
-            "Skip windows that span any word flagged as a proper name "
-            "(``context.is_name_mask``)."
+            "Skip windows that span any word flagged as a proper name (``context.is_name_mask``)."
         ),
     )
     syllable_window_require_valid_source_words: bool = Field(

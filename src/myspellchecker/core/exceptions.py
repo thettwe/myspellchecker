@@ -84,7 +84,6 @@ class MyanmarSpellcheckError(Exception):
     """
 
 
-
 # =============================================================================
 # Configuration Errors
 # =============================================================================
@@ -99,7 +98,6 @@ class ConfigurationError(MyanmarSpellcheckError):
     """
 
 
-
 class InvalidConfigError(ConfigurationError):
     """
     Raised when a specific configuration value is invalid.
@@ -107,7 +105,6 @@ class InvalidConfigError(ConfigurationError):
     Example:
         >>> raise InvalidConfigError("max_edit_distance must be >= 0, got -1")
     """
-
 
 
 # =============================================================================
@@ -124,7 +121,6 @@ class DataLoadingError(MyanmarSpellcheckError):
     """
 
 
-
 # =============================================================================
 # Processing Errors
 # =============================================================================
@@ -139,7 +135,6 @@ class ProcessingError(MyanmarSpellcheckError):
     """
 
 
-
 class ValidationError(ProcessingError):
     """
     Raised when text validation fails.
@@ -150,7 +145,6 @@ class ValidationError(ProcessingError):
     Example:
         >>> raise ValidationError("Text contains invalid Myanmar characters")
     """
-
 
 
 class TokenizationError(ProcessingError):
@@ -165,7 +159,6 @@ class TokenizationError(ProcessingError):
     """
 
 
-
 class NormalizationError(ProcessingError):
     """
     Raised when text normalization fails.
@@ -176,7 +169,6 @@ class NormalizationError(ProcessingError):
     Example:
         >>> raise NormalizationError("Failed to convert Zawgyi to Unicode")
     """
-
 
 
 # =============================================================================
@@ -193,7 +185,6 @@ class ProviderError(MyanmarSpellcheckError):
     """
 
 
-
 class ConnectionPoolError(ProviderError):
     """
     Raised when the connection pool encounters an error.
@@ -204,7 +195,6 @@ class ConnectionPoolError(ProviderError):
     Example:
         >>> raise ConnectionPoolError("Connection pool exhausted")
     """
-
 
 
 # =============================================================================
@@ -219,7 +209,6 @@ class PipelineError(MyanmarSpellcheckError):
     This includes corpus ingestion, frequency calculation,
     and database packaging errors.
     """
-
 
 
 class IngestionError(PipelineError):
@@ -284,7 +273,6 @@ class PackagingError(PipelineError):
     """
 
 
-
 # =============================================================================
 # Model Errors
 # =============================================================================
@@ -296,7 +284,6 @@ class ModelError(MyanmarSpellcheckError):
 
     This includes model loading, training, and inference errors.
     """
-
 
 
 class ModelLoadError(ModelError):
@@ -311,7 +298,6 @@ class ModelLoadError(ModelError):
     """
 
 
-
 class InferenceError(ModelError):
     """
     Raised when model inference fails.
@@ -322,7 +308,6 @@ class InferenceError(ModelError):
     Example:
         >>> raise InferenceError("Failed to run semantic similarity model")
     """
-
 
 
 # =============================================================================
@@ -345,7 +330,6 @@ class MissingDependencyError(MyanmarSpellcheckError):
     """
 
 
-
 class InsufficientStorageError(MyanmarSpellcheckError):
     """
     Raised when there is not enough disk space to perform an operation.
@@ -357,7 +341,6 @@ class InsufficientStorageError(MyanmarSpellcheckError):
     """
 
 
-
 class CacheError(MyanmarSpellcheckError):
     """
     Raised when caching operations fail.
@@ -367,7 +350,6 @@ class CacheError(MyanmarSpellcheckError):
     Example:
         >>> raise CacheError("Failed to initialize LRU cache")
     """
-
 
 
 class MissingDatabaseError(DataLoadingError):

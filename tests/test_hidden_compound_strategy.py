@@ -108,9 +108,7 @@ class TestHiddenCompoundStrategyRegistration:
         names = [s.__class__.__name__ for s in strategies]
         assert "HiddenCompoundStrategy" in names
 
-    def test_strategy_not_registered_when_disabled(
-        self, memory_provider: MemoryProvider
-    ) -> None:
+    def test_strategy_not_registered_when_disabled(self, memory_provider: MemoryProvider) -> None:
         config = SpellCheckerConfig()
         config.validation.use_hidden_compound_detection = False
         strategies = build_context_validation_strategies(config=config, provider=memory_provider)
@@ -251,9 +249,7 @@ class TestHiddenCompoundDetection:
         ctx = _make_ctx("ပိနပ်", ["ပိ", "နပ်"])
         errors = enabled_strategy.validate(ctx)
         assert len(errors) == 1
-        suggestion_texts = [
-            s.text if hasattr(s, "text") else s for s in errors[0].suggestions
-        ]
+        suggestion_texts = [s.text if hasattr(s, "text") else s for s in errors[0].suggestions]
         assert "ဖိနပ်" in suggestion_texts
 
     def test_ganan_backward_direction(self, enabled_strategy) -> None:
@@ -265,9 +261,7 @@ class TestHiddenCompoundDetection:
         ctx = _make_ctx("ဃဏန်း", ["ဃ", "ဏန်း"])
         errors = enabled_strategy.validate(ctx)
         assert len(errors) == 1
-        suggestion_texts = [
-            s.text if hasattr(s, "text") else s for s in errors[0].suggestions
-        ]
+        suggestion_texts = [s.text if hasattr(s, "text") else s for s in errors[0].suggestions]
         assert "ဂဏန်း" in suggestion_texts
 
     def test_correct_compound_not_flagged(self, enabled_strategy) -> None:

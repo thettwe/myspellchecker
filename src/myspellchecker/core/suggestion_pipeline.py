@@ -1576,9 +1576,7 @@ class SuggestionPipelineMixin:
 
     # --- Compound confusion candidate injection ----------------------------------
 
-    def _inject_compound_confusion_candidates(
-        self, errors: list[Error]
-    ) -> None:
+    def _inject_compound_confusion_candidates(self, errors: list[Error]) -> None:
         """Inject candidates from compound confusion data for OOV errors.
 
         When an OOV error text matches a known compound confusion pattern
@@ -1747,8 +1745,7 @@ class SuggestionPipelineMixin:
             pick_source = getattr(model_pick, "source", "") or ""
             error_source = getattr(e, "source_strategy", "") or ""
             is_compound_source = any(
-                kw in pick_source or kw in error_source
-                for kw in ("morpheme", "compound")
+                kw in pick_source or kw in error_source for kw in ("morpheme", "compound")
             )
             length_allowance = 3 if is_compound_source else 1
             if len(model_pick) > len(current_top) + length_allowance:
