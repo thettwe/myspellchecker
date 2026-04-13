@@ -968,6 +968,15 @@ class SemanticConfig(BaseModel):
             "Lower values are more lenient, higher values require stronger AI agreement."
         ),
     )
+    max_seq_len: int | None = Field(
+        default=None,
+        gt=0,
+        description=(
+            "Override auto-detected maximum sequence length for the ONNX model. "
+            "If None, auto-detects from position embedding dimensions. "
+            "Set this if auto-detection fails (e.g., model exported with dynamic shapes)."
+        ),
+    )
     logit_scale: float | None = Field(
         default=None,
         gt=0.0,
