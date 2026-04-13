@@ -183,6 +183,14 @@ class ValidationConfig(BaseModel):
         default=True,
         description="Enable homophone detection in validation pipeline",
     )
+    # Loan Word Detection (priority 22)
+    use_loan_word_detection: bool = Field(
+        default=True,
+        description=(
+            "Enable loan word transliteration error detection at priority 22. "
+            "Detects valid-in-DB loan word variants and suggests standard forms."
+        ),
+    )
     # Statistical Confusable Gate (priority 24)
     use_statistical_confusable_gate: bool = Field(
         default=True,

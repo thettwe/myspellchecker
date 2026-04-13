@@ -451,6 +451,19 @@ def build_context_validation_strategies(
         )
         logger.debug("Added SyntacticValidationStrategy (priority 20)")
 
+    # Priority 22: Loan Word Transliteration Detection
+    if getattr(validation_config, "use_loan_word_detection", True):
+        from myspellchecker.core.validation_strategies.loan_word_strategy import (
+            LoanWordValidationStrategy,
+        )
+
+        strategies.append(
+            LoanWordValidationStrategy(
+                provider=provider,
+            )
+        )
+        logger.debug("Added LoanWordValidationStrategy (priority 22)")
+
     # Priority 25: Broken Compound Detection
     if validation_config.use_broken_compound_detection:
         strategies.append(

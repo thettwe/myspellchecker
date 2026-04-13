@@ -43,6 +43,7 @@ from myspellchecker.core.validation_strategies.hidden_compound_strategy import (
     HiddenCompoundStrategy,
 )
 from myspellchecker.core.validation_strategies.homophone_strategy import HomophoneValidationStrategy
+from myspellchecker.core.validation_strategies.loan_word_strategy import LoanWordValidationStrategy
 from myspellchecker.core.validation_strategies.ngram_strategy import NgramContextValidationStrategy
 from myspellchecker.core.validation_strategies.orthography_strategy import (
     OrthographyValidationStrategy,
@@ -77,6 +78,7 @@ __all__ = [
     "POSSequenceValidationStrategy",
     "QuestionStructureValidationStrategy",
     "HomophoneValidationStrategy",
+    "LoanWordValidationStrategy",
     "ConfusableCompoundClassifierStrategy",
     "ConfusableSemanticStrategy",
     "NgramContextValidationStrategy",
