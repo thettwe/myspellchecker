@@ -33,7 +33,7 @@ description: "Unconditional loan word transliteration corrections (Tier 1)"
 
 metadata:
   created_date: "2026-04-13"
-  total_entries: 49
+  total_entries: 48
   source: "Inverted from loan_words.yaml + benchmark loan word error analysis"
   notes: "Tier 1 only: incorrect forms that are never valid Myanmar words"
 
@@ -145,12 +145,7 @@ corrections:
     error_type: "missing_consonant"
     confidence: 0.95
 
-  - incorrect: "ဆော့ဖ်ဝဲလ်"
-    correct: "ဆော့ဖ်ဝဲ"
-    source_language: "english"
-    source_word: "software"
-    error_type: "spurious_visarga"
-    confidence: 0.95
+  # NOTE: "ဆော့ဖ်ဝဲလ်" removed — valid variant used in clean text (4 FPs in benchmark)
 
   - incorrect: "အီးမေးလ်း"
     correct: "အီးမေးလ်"
