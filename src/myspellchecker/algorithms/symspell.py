@@ -651,13 +651,19 @@ class SymSpell:
             return []  # No suggestions needed for valid terms
 
         # Generate candidates from multiple sources
+        loan_word_terms: set[str] = set()
         candidate_scores = self._collect_candidates(
-            term, level, is_valid, include_known, use_phonetic
+            term, level, is_valid, include_known, use_phonetic, loan_word_terms
         )
 
         # Rank, filter, and truncate candidates
         result = self._rank_candidates(
-            term, level, candidate_scores, include_known, max_suggestions
+            term,
+            level,
+            candidate_scores,
+            include_known,
+            max_suggestions,
+            loan_word_terms=loan_word_terms,
         )
 
         # Store in session cache (bounded, evict oldest entry on overflow)
@@ -675,6 +681,8 @@ class SymSpell:
         candidate_scores: dict[str, float],
         include_known: bool,
         max_suggestions: int,
+        *,
+        loan_word_terms: set[str] | None = None,
     ) -> list[Suggestion]:
         """
         Evaluate, score, sort, and truncate candidates into ranked suggestions.
@@ -747,7 +755,12 @@ class SymSpell:
                 p_score >= self._phonetic_bypass_threshold
                 and distance <= self.max_edit_distance + self._phonetic_extra_distance
             )
-            if distance <= self.max_edit_distance or phonetic_bypass:
+            # Loan word candidates bypass the edit distance gate entirely.
+            # These are pre-validated variant→standard mappings from loan_words.yaml
+            # that can have edit distances well beyond SymSpell's default max (2),
+            # e.g. ဟတ်ဝဲ→ဟာ့ဒ်ဝဲ (hardware, edit_dist=3).
+            loan_word_bypass = loan_word_terms is not None and candidate in loan_word_terms
+            if distance <= self.max_edit_distance or phonetic_bypass or loan_word_bypass:
                 # Compute score using ranker (always available)
                 suggestion_data = SuggestionData(
                     term=candidate,
@@ -986,6 +999,7 @@ class SymSpell:
         is_valid: bool,
         include_known: bool,
         use_phonetic: bool,
+        loan_word_terms: set[str] | None = None,
     ) -> dict[str, float]:
         """
         Collect candidates from all sources.
@@ -996,6 +1010,7 @@ class SymSpell:
         3. Nasal variants (Myanmar-specific)
         4. Myanmar-specific variant candidates (if enabled and term is OOV)
         5. Phonetic variants (if use_phonetic=True)
+        6. Loan word transliteration variants (word level only)
 
         Args:
             term: Input term to find candidates for
@@ -1003,6 +1018,8 @@ class SymSpell:
             is_valid: Whether the term itself is valid
             include_known: Include the term itself if valid
             use_phonetic: Use phonetic similarity matching
+            loan_word_terms: Output set to track loan word candidates for
+                edit distance filter bypass in ``_rank_candidates()``.
 
         Returns:
             Dict mapping candidate terms to their max phonetic scores
@@ -1034,7 +1051,7 @@ class SymSpell:
 
         # 6. Add loan word transliteration variants (word level only)
         if level == ValidationLevel.WORD.value:
-            self._add_loan_word_candidates(term, level, candidate_scores)
+            self._add_loan_word_candidates(term, level, candidate_scores, loan_word_terms)
 
         return candidate_scores
 
@@ -1200,7 +1217,11 @@ class SymSpell:
                 candidate_scores[variant] = max(candidate_scores.get(variant, 0.0), similarity)
 
     def _add_loan_word_candidates(
-        self, term: str, level: str, candidate_scores: dict[str, float]
+        self,
+        term: str,
+        level: str,
+        candidate_scores: dict[str, float],
+        loan_word_terms: set[str] | None = None,
     ) -> None:
         """Add loan word transliteration variants as candidates.
 
@@ -1209,10 +1230,16 @@ class SymSpell:
         known variants.  This covers transliteration differences that are
         too large for SymSpell's delete-based approach.
 
+        Candidates added here are tracked in *loan_word_terms* so that
+        ``_rank_candidates()`` can bypass the ``max_edit_distance`` filter
+        for them — loan word variant→standard mappings are pre-validated
+        and may have edit distances well beyond SymSpell's default max.
+
         Args:
             term: Input term
             level: Dictionary level (only called for 'word')
             candidate_scores: Dict to add candidates to (modified in place)
+            loan_word_terms: Optional set to track loan word candidates.
         """
         from myspellchecker.core.loan_word_variants import (
             get_loan_word_standard,
@@ -1224,12 +1251,32 @@ class SymSpell:
         for std in standards:
             if self.provider.is_valid_word(std):
                 candidate_scores.setdefault(std, 0.0)
+                if loan_word_terms is not None:
+                    loan_word_terms.add(std)
 
         # standard -> variants (less common: standard form typed, variants exist)
         variants = get_loan_word_variants(term)
         for variant in variants:
             if self.provider.is_valid_word(variant):
                 candidate_scores.setdefault(variant, 0.0)
+                if loan_word_terms is not None:
+                    loan_word_terms.add(variant)
+
+        # Exact-match correction table (Tier 1 unconditional corrections).
+        # These are high-confidence corrections where the incorrect form is
+        # never a valid Myanmar word. Inject with score 1.0 so they rank
+        # above generic edit-distance candidates.
+        try:
+            from myspellchecker.grammar.config import get_grammar_config
+
+            correction = get_grammar_config().get_loan_word_correction(term)
+            if correction:
+                correct = correction["correct"]
+                candidate_scores[correct] = max(candidate_scores.get(correct, 0.0), 1.0)
+                if loan_word_terms is not None:
+                    loan_word_terms.add(correct)
+        except Exception:
+            pass  # Grammar config not available — skip silently
 
     def lookup_compound(
         self, text: str, max_suggestions: int = 5, max_edit_distance: int = 2
