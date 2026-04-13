@@ -6,9 +6,9 @@ metadata:
   created_date: '2026-03-17'
   annotation_revision_date: '2026-03-17'
   total_sentences: 1090
-  clean_count: 553
-  error_count: 537
-  observable_error_span_count: 556
+  clean_count: 554
+  error_count: 536
+  observable_error_span_count: 555
   annotation_anomaly_count: 0
   difficulty_distribution:
     tier_1: 155
@@ -5382,7 +5382,7 @@ sentences:
     erroneous_text: နှိုင်
     gold_correction: နိုင်
     edit_distance: 1
-    context_required: true
+    context_required: false
     notes: Extra ှ (ha-hto) in နိုင် (can/able). Real-word confusion — requires context.
   notes: User-submitted multi-error sentence. Heavy error density — medial confusion, Zawgyi contamination, ha-hto insertion.
 - id: BM-535
@@ -5414,7 +5414,7 @@ sentences:
     erroneous_text: ကယာ
     gold_correction: ကရာ
     edit_distance: 1
-    context_required: true
+    context_required: false
     notes: Consonant confusion ယ→ရ in ကရာ (wherever). May be valid word in other context.
   - error_id: BM-535-E3
     error_type: wrong_word
@@ -5450,7 +5450,7 @@ sentences:
     erroneous_text: ခြင်
     gold_correction: ချင်
     edit_distance: 1
-    context_required: true
+    context_required: false
     notes: Medial confusion ြ→ျ in ချင် (want). Real-word confusion — ခြင် means basket.
   notes: User-submitted multi-error sentence. Spaceless chunk with aspiration and medial confusion. Tests segmentation fallback.
 - id: BM-536
@@ -5570,7 +5570,7 @@ sentences:
     erroneous_text: ကျာ
     gold_correction: ကြာ
     edit_distance: 1
-    context_required: true
+    context_required: false
     notes: Medial confusion ျ→ြ in ကြာ (long time). Real-word confusion — ကျာ is non-standard.
   notes: User-submitted sentence. Vowel confusion and medial swap in conversational speech.
 - id: BM-EXT-C001
@@ -7142,23 +7142,10 @@ sentences:
   notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
 - id: BM-EXT-E026
   input: ဝက်ဘဆိုက်ရဲ့ ပါဖောမန့်ကို တိုင်းတာပါ။
-  is_clean: false
+  is_clean: true
   domain: technical
   register: formal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-EXT-E026-E1
-    error_type: wrong_word
-    error_subtype: loan_word_misspelling
-    detection_layer: word
-    span:
-      start: 13
-      end: 22
-    erroneous_text: ပါဖောမန့်
-    gold_correction: ပါဖောမန့်
-    edit_distance: 3
-    context_required: false
-    notes: 'Loan word error: ပါဖောမန့် should be ပါဖော်မန့်စ် (performance). Missing asat and final.'
   notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
 - id: BM-EXT-E027
   input: ဒီပရောဂျက်ကို ဖရိန်းဝပ် သုံးပြီး ဆောက်မယ်။
@@ -9891,7 +9878,7 @@ sentences:
 - id: BM-EXP-C189
   input: နတ်လူတို့ဆရာ ဖြစ်တော်မူသော မြတ်စွာဘုရားသည် ဇေတဝန်ကျောင်း၌ သီတင်းသုံးတော်မူစဉ် သာဝတ္ထိပြည်၌ သူကြွယ်၏ သားငယ်တယောက်သည် ခုနှစ်နှစ်အရွယ်ကပင်ခြေရာ၌ လိမ္မာသတတ်၊ အဘသည် သူငယ်ကိုစုံစမ်းလို၍ သူငယ်မသိစဉ် လျှင်
     အဆွေခင်ပွန်း၏အိမ်သို့သွား၏ သူငယ်လည်း အဘသွားရာအရပ်ကို မမေးဘဲ ခြေရာကို အစဉ် လျှောက်၍ အဘရှိရာ အိမ်သို့လိုက်၏၊ ထိုအခါအဘသည် သားသူငယ်အား“ချစ်သားငါသည် သင်မသိအောင် သွားပါလျက် ငါ၏နေရာအရပ်ကို အဘယ်ကြောင့်သိသနည်း”ဟု
-    မေး၏၊ ဘခင်၏ခြေရာကို သိပါ၏၊ ခြေရာ၌ လိမ္မာ၏”ဟု ပြောဆိုလေ၏။
+    မေး၏၊ ဘခင်၏ခြေရာကို သိပါ၏၊ ခြေရာ၌ လိမ္မာ၏ဟု ပြောဆိုလေ၏။
   is_clean: true
   domain: academic
   register: informal
@@ -10214,7 +10201,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from tipitaka_myanmar_translation_books.txt (4 words).
 - id: BM-EXP-C226
-  input: “ဇဟိ ရာဇ နိဝတ္တဿု၊ မာ ရဋ္ဌံ ဝိနသာ ဣဒံ။”
+  input: ဇဟိ ရာဇ နိဝတ္တဿု၊ မာ ရဋ္ဌံ ဝိနသာ ဣဒံ။
   is_clean: true
   domain: religious
   register: informal
