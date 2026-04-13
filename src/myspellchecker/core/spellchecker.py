@@ -1225,13 +1225,14 @@ class SpellChecker(
         # further refine the n-gram-based order.
         self._apply_ngram_reranking(text, errors)
 
-        # Semantic re-ranking: use MLM to re-rank suggestions on existing errors.
-        # The semantic model masks each flagged word and checks which suggestion
-        # the model predicts — boosting it to the top of the suggestion list.
-        # This is additive-only: it never adds new errors, only improves suggestion order.
-        if effective_semantic_enabled and self.semantic_checker is not None:
-            self._apply_semantic_reranking(text, errors)
-            layers_applied.append("semantic")
+        # Semantic re-ranking: DISABLED.
+        # The MLM hard-sorts suggestions by raw logit, discarding edit distance,
+        # frequency, and n-gram signals. This hurts Top-1/MRR.
+        # Instead, the MLM logit is fed as a feature (slot 7) to the neural
+        # reranker, which learns the optimal blend from data.
+        # if effective_semantic_enabled and self.semantic_checker is not None:
+        #     self._apply_semantic_reranking(text, errors)
+        #     layers_applied.append("semantic")
 
         # Neural MLP re-ranking: final reranking step using a trained MLP.
         # Runs AFTER both n-gram and semantic reranking to get the final say.
