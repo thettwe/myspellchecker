@@ -1,0 +1,388 @@
+# Loan Word Correction Table - Version 1.0
+#
+# Tier 1: Unconditional corrections where the incorrect form is NEVER
+# a valid Myanmar word. These can be applied without context checking.
+#
+# Data source: Inverted from loan_words.yaml variants + benchmark
+# loan word error analysis (75 instances).
+#
+# Error patterns:
+#   - final_consonant: Final k/t confusion (internet, project, budget)
+#   - medial_confusion: Ya-pin/Ya-yit medial swap (computer)
+#   - spurious_visarga: Extra visarga added (coffee, license, doctor)
+#   - missing_visarga: Missing visarga (email)
+#   - vowel_length: Short/long vowel confusion (digital, video)
+#   - syllable_reorder: Syllable order swapped (software)
+#   - consonant_voicing: Voiced/voiceless confusion (browser)
+#   - broken_stack: Pali stacking broken into virama+consonant (Dhamma, Buddha)
+#   - dropped_stack: Pali stacking dropped entirely (science, president)
+#   - missing_consonant: Missing consonant in transliteration (program)
+#   - missing_asat: Missing asat in transliteration (manager)
+#   - vowel_mapping: Wrong vowel mapping from source language (hotel, democracy)
+#
+# FPR exclusions (moved to Tier 2 or confusable_pairs):
+#   - "phone" variant removed
+#   - "bat/bus" variant removed
+#   - "music" variant removed
+#
+# Schema: https://myspellchecker.dev/schemas/loan-word-corrections/v1.0
+
+version: "1.0.0"
+category: "loan_word_corrections"
+description: "Unconditional loan word transliteration corrections (Tier 1)"
+
+metadata:
+  created_date: "2026-04-13"
+  total_entries: 49
+  source: "Inverted from loan_words.yaml + benchmark loan word error analysis"
+  notes: "Tier 1 only: incorrect forms that are never valid Myanmar words"
+
+corrections:
+  # ── English — Technology ──
+
+  - incorrect: "ကွန်ပြူတာ"
+    correct: "ကွန်ပျူတာ"
+    source_language: "english"
+    source_word: "computer"
+    error_type: "medial_confusion"
+    confidence: 0.98
+
+  - incorrect: "အင်တာနတ်"
+    correct: "အင်တာနက်"
+    source_language: "english"
+    source_word: "internet"
+    error_type: "final_consonant"
+    confidence: 0.98
+
+  - incorrect: "ပရောဂျတ်"
+    correct: "ပရောဂျက်"
+    source_language: "english"
+    source_word: "project"
+    error_type: "final_consonant"
+    confidence: 0.97
+
+  - incorrect: "ဆော့ဝ်ဖဲ"
+    correct: "ဆော့ဖ်ဝဲ"
+    source_language: "english"
+    source_word: "software"
+    error_type: "syllable_reorder"
+    confidence: 0.97
+
+  - incorrect: "ပရိုဂမ်"
+    correct: "ပရိုဂရမ်"
+    source_language: "english"
+    source_word: "program"
+    error_type: "missing_consonant"
+    confidence: 0.97
+
+  - incorrect: "ဘက်ဂျက်"
+    correct: "ဘတ်ဂျက်"
+    source_language: "english"
+    source_word: "budget"
+    error_type: "final_consonant"
+    confidence: 0.96
+
+  - incorrect: "အီမေးလ်"
+    correct: "အီးမေးလ်"
+    source_language: "english"
+    source_word: "email"
+    error_type: "missing_visarga"
+    confidence: 0.96
+
+  - incorrect: "ဒစ်ဂျစ်တယ်"
+    correct: "ဒီဂျစ်တယ်"
+    source_language: "english"
+    source_word: "digital"
+    error_type: "vowel_length"
+    confidence: 0.95
+
+  - incorrect: "ဗိုက်ရပ်စ်"
+    correct: "ဗိုင်းရပ်စ်"
+    source_language: "english"
+    source_word: "virus"
+    error_type: "vowel_length"
+    confidence: 0.96
+
+  - incorrect: "ဘရောက်စာ"
+    correct: "ဘရောက်ဆာ"
+    source_language: "english"
+    source_word: "browser"
+    error_type: "consonant_voicing"
+    confidence: 0.96
+
+  - incorrect: "ကွန်ပ်ယူတာ"
+    correct: "ကွန်ပျူတာ"
+    source_language: "english"
+    source_word: "computer"
+    error_type: "syllable_reorder"
+    confidence: 0.97
+
+  - incorrect: "ကမ္ပ်ယူတာ"
+    correct: "ကွန်ပျူတာ"
+    source_language: "english"
+    source_word: "computer"
+    error_type: "syllable_reorder"
+    confidence: 0.95
+
+  - incorrect: "အင်တာနက့်"
+    correct: "အင်တာနက်"
+    source_language: "english"
+    source_word: "internet"
+    error_type: "spurious_visarga"
+    confidence: 0.97
+
+  - incorrect: "အင်တာနတ့်"
+    correct: "အင်တာနက်"
+    source_language: "english"
+    source_word: "internet"
+    error_type: "final_consonant"
+    confidence: 0.97
+
+  - incorrect: "ဆော့ဝဲ"
+    correct: "ဆော့ဖ်ဝဲ"
+    source_language: "english"
+    source_word: "software"
+    error_type: "missing_consonant"
+    confidence: 0.95
+
+  - incorrect: "ဆော့ဖ်ဝဲလ်"
+    correct: "ဆော့ဖ်ဝဲ"
+    source_language: "english"
+    source_word: "software"
+    error_type: "spurious_visarga"
+    confidence: 0.95
+
+  - incorrect: "အီးမေးလ်း"
+    correct: "အီးမေးလ်"
+    source_language: "english"
+    source_word: "email"
+    error_type: "spurious_visarga"
+    confidence: 0.96
+
+  - incorrect: "အီးမေး"
+    correct: "အီးမေးလ်"
+    source_language: "english"
+    source_word: "email"
+    error_type: "missing_consonant"
+    confidence: 0.93
+
+  - incorrect: "ဗီဒိယို"
+    correct: "ဗီဒီယို"
+    source_language: "english"
+    source_word: "video"
+    error_type: "vowel_length"
+    confidence: 0.95
+
+  - incorrect: "ဗွီဒီယို"
+    correct: "ဗီဒီယို"
+    source_language: "english"
+    source_word: "video"
+    error_type: "medial_confusion"
+    confidence: 0.95
+
+  # ── English — Government/Everyday ──
+
+  - incorrect: "ဒီမိုကရီစီ"
+    correct: "ဒီမိုကရေစီ"
+    source_language: "english"
+    source_word: "democracy"
+    error_type: "vowel_mapping"
+    confidence: 0.97
+
+  - incorrect: "ဒေါက်တား"
+    correct: "ဒေါက်တာ"
+    source_language: "english"
+    source_word: "doctor"
+    error_type: "spurious_visarga"
+    confidence: 0.97
+
+  - incorrect: "ကော်ဖီး"
+    correct: "ကော်ဖီ"
+    source_language: "english"
+    source_word: "coffee"
+    error_type: "spurious_visarga"
+    confidence: 0.97
+
+  - incorrect: "လိုင်စင်း"
+    correct: "လိုင်စင်"
+    source_language: "english"
+    source_word: "license"
+    error_type: "spurious_visarga"
+    confidence: 0.97
+
+  - incorrect: "ဟိုတေလ်"
+    correct: "ဟိုတယ်"
+    source_language: "english"
+    source_word: "hotel"
+    error_type: "vowel_mapping"
+    confidence: 0.96
+
+  - incorrect: "ဗီတမင်"
+    correct: "ဗီတာမင်"
+    source_language: "english"
+    source_word: "vitamin"
+    error_type: "missing_consonant"
+    confidence: 0.96
+
+  - incorrect: "မနေဂျာ"
+    correct: "မန်နေဂျာ"
+    source_language: "english"
+    source_word: "manager"
+    error_type: "missing_asat"
+    confidence: 0.96
+
+  - incorrect: "ဒါတာ"
+    correct: "ဒေတာ"
+    source_language: "english"
+    source_word: "data"
+    error_type: "vowel_mapping"
+    confidence: 0.95
+
+  - incorrect: "ဒတ်တာ"
+    correct: "ဒေတာ"
+    source_language: "english"
+    source_word: "data"
+    error_type: "vowel_mapping"
+    confidence: 0.95
+
+  - incorrect: "ဟတ်ဝဲ"
+    correct: "ဟာ့ဒ်ဝဲ"
+    source_language: "english"
+    source_word: "hardware"
+    error_type: "vowel_length"
+    confidence: 0.95
+
+  - incorrect: "ဟာဒ်ဝဲ"
+    correct: "ဟာ့ဒ်ဝဲ"
+    source_language: "english"
+    source_word: "hardware"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "ဝတ်ဘ်ဆိုက်"
+    correct: "ဝက်ဘ်ဆိုက်"
+    source_language: "english"
+    source_word: "website"
+    error_type: "final_consonant"
+    confidence: 0.96
+
+  - incorrect: "ဝဘ်ဆိုက်"
+    correct: "ဝက်ဘ်ဆိုက်"
+    source_language: "english"
+    source_word: "website"
+    error_type: "missing_consonant"
+    confidence: 0.95
+
+  - incorrect: "ဝက်ဆိုက်"
+    correct: "ဝက်ဘ်ဆိုက်"
+    source_language: "english"
+    source_word: "website"
+    error_type: "missing_consonant"
+    confidence: 0.95
+
+  - incorrect: "ဗီဒီအို"
+    correct: "ဗီဒီယို"
+    source_language: "english"
+    source_word: "video"
+    error_type: "consonant_voicing"
+    confidence: 0.95
+
+  # ── Pali/Sanskrit — Religious/Academic ──
+
+  - incorrect: "ဓမ်မ"
+    correct: "ဓမ္မ"
+    source_language: "pali"
+    source_word: "Dhamma"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "ဗုဒ်ဓ"
+    correct: "ဗုဒ္ဓ"
+    source_language: "pali"
+    source_word: "Buddha"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "သိပံ"
+    correct: "သိပ္ပံ"
+    source_language: "pali"
+    source_word: "science"
+    error_type: "dropped_stack"
+    confidence: 0.99
+
+  - incorrect: "ကမ်မ"
+    correct: "ကမ္မ"
+    source_language: "pali"
+    source_word: "Kamma"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "ဝိဇ်ဇာ"
+    correct: "ဝိဇ္ဇာ"
+    source_language: "pali"
+    source_word: "knowledge"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "သမတ"
+    correct: "သမ္မတ"
+    source_language: "pali"
+    source_word: "president"
+    error_type: "dropped_stack"
+    confidence: 0.98
+
+  - incorrect: "ဝိညာဏ်"
+    correct: "ဝိညာဏ"
+    source_language: "pali"
+    source_word: "consciousness"
+    error_type: "spurious_visarga"
+    confidence: 0.97
+
+  - incorrect: "သံဃ"
+    correct: "သံဃာ"
+    source_language: "pali"
+    source_word: "Sangha"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "နိဗ်ဗာန်"
+    correct: "နိဗ္ဗာန်"
+    source_language: "pali"
+    source_word: "Nibbana"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "ပဋိစ်စသမုပ္ပာဒ်"
+    correct: "ပဋိစ္စသမုပ္ပာဒ်"
+    source_language: "pali"
+    source_word: "dependent origination"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "သုတ်တန်"
+    correct: "သုတ္တန်"
+    source_language: "pali"
+    source_word: "Sutta"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "ဝိနယ"
+    correct: "ဝိနည်း"
+    source_language: "pali"
+    source_word: "Vinaya"
+    error_type: "vowel_mapping"
+    confidence: 0.96
+
+  - incorrect: "အဘိဓမ်မာ"
+    correct: "အဘိဓမ္မာ"
+    source_language: "pali"
+    source_word: "Abhidhamma"
+    error_type: "broken_stack"
+    confidence: 0.99
+
+  - incorrect: "ပိဋိကတ်"
+    correct: "ပိဋကတ်"
+    source_language: "pali"
+    source_word: "Pitaka"
+    error_type: "vowel_mapping"
+    confidence: 0.97

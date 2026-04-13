@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://myspellchecker.dev/schemas/loan-word-corrections/v1.0",
+  "title": "Loan Word Corrections Schema",
+  "description": "Schema for loan word transliteration correction rules",
+  "type": "object",
+  "required": ["version", "category", "description", "metadata", "corrections"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+    },
+    "category": {
+      "type": "string",
+      "const": "loan_word_corrections"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10
+    },
+    "metadata": {
+      "$ref": "_common.schema.json#/definitions/metadata"
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/loan_word_correction_entry"
+      },
+      "minItems": 1
+    }
+  },
+  "definitions": {
+    "loan_word_correction_entry": {
+      "type": "object",
+      "required": ["incorrect", "correct", "source_language", "source_word", "error_type", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "incorrect": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incorrect transliteration form (never valid in Myanmar)"
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Standard correct transliteration"
+        },
+        "source_language": {
+          "type": "string",
+          "enum": ["english", "pali", "sanskrit", "hindi", "thai", "chinese", "japanese", "french", "portuguese", "other"],
+          "description": "Source language of the loan word"
+        },
+        "source_word": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Original word in the source language"
+        },
+        "error_type": {
+          "type": "string",
+          "enum": [
+            "final_consonant",
+            "medial_confusion",
+            "spurious_visarga",
+            "missing_visarga",
+            "vowel_length",
+            "syllable_reorder",
+            "consonant_voicing",
+            "broken_stack",
+            "dropped_stack",
+            "missing_consonant",
+            "missing_asat",
+            "vowel_mapping"
+          ],
+          "description": "Type of transliteration error"
+        },
+        "confidence": {
+          "$ref": "_common.schema.json#/definitions/confidence_score"
+        }
+      }
+    }
+  }
+}

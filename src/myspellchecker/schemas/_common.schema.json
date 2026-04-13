@@ -161,6 +161,7 @@
             "confusion_matrix",
             "corruption_weights",
             "g2p_mappings",
+            "loan_word_corrections",
             "loan_words",
             "detector_confidences",
             "grammar_rules",
@@ -251,6 +252,7 @@
         "ocr_noise",
         "zero_wa_confusion",
         "incomplete_stacking",
+        "loan_word_misspelling",
         "other"
       ]
     }

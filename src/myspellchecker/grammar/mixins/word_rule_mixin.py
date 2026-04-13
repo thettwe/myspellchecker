@@ -246,6 +246,32 @@ class WordRuleMixin:
 
         return None
 
+    def _check_loan_word_corrections(self, word: str) -> tuple[str, str, float] | None:
+        """Check for loan word transliteration errors.
+
+        Performs exact-match lookup against the loan word corrections
+        table.  Tier 1 entries are unconditional (the incorrect form
+        is never a valid Myanmar word), so no context is needed.
+
+        Returns:
+            Tuple of (correction, reason, confidence) or None if no error found.
+        """
+        correction_info = self.config.get_loan_word_correction(word)
+        if not correction_info:
+            return None
+
+        correct = correction_info["correct"]
+        confidence = correction_info.get("confidence", 0.95)
+        source_word = correction_info.get("source_word", "")
+        source_lang = correction_info.get("source_language", "")
+
+        if source_word:
+            reason = f"Loan word '{source_word}' ({source_lang}): use {correct}"
+        else:
+            reason = f"Loan word correction: use {correct}"
+
+        return (correct, reason, confidence)
+
     def _check_config_patterns(
         self,
         curr_word: str,

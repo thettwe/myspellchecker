@@ -5,6 +5,7 @@ Re-exports all parser functions for convenient access.
 
 from myspellchecker.grammar.parsers.grammar_parser import parse_grammar_config
 from myspellchecker.grammar.parsers.homophone_parser import parse_homophones_config
+from myspellchecker.grammar.parsers.loan_word_parser import parse_loan_word_corrections_config
 from myspellchecker.grammar.parsers.morphology_parser import (
     parse_ambiguous_words_config,
     parse_aspects_config,
@@ -28,6 +29,7 @@ __all__ = [
     "parse_compounds_config",
     "parse_grammar_config",
     "parse_homophones_config",
+    "parse_loan_word_corrections_config",
     "parse_morphology_config",
     "parse_morphotactics_config",
     "parse_negation_config",

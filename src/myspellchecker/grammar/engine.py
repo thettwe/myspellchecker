@@ -96,6 +96,7 @@ class RulePriority:
     PARTICLE_TYPO = 85
     VERB_PARTICLE_AGREEMENT = 70
     POS_SEQUENCE = 65
+    LOAN_WORD = 55
     CONFIG_PATTERN = 50
     CLASSIFIER = 45
     MERGED_WORD = 42
@@ -299,6 +300,20 @@ class SyntacticRuleChecker(
                     priority=self.rule_priority.VERB_PARTICLE_AGREEMENT,
                     rule_name="particle_constraint",
                     confidence=constraint_result[2] if len(constraint_result) > 2 else 0.7,
+                )
+            )
+
+        # Rule 3.7: Check loan word corrections (priority 55)
+        loan_result = self._check_loan_word_corrections(curr_word)
+        if loan_result:
+            matches.append(
+                RuleMatch(
+                    position=i,
+                    word=curr_word,
+                    suggestion=loan_result[0],
+                    confidence=loan_result[2] if len(loan_result) > 2 else 0.95,
+                    priority=self.rule_priority.LOAN_WORD,
+                    rule_name="loan_word_correction",
                 )
             )
 
