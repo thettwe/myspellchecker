@@ -37,6 +37,9 @@ STRATEGY_TIER: dict[str, int] = {
     # Tier 1: Deterministic (hard veto — unambiguous Myanmar orthography)
     "ToneValidationStrategy": 1,
     "OrthographyValidationStrategy": 1,
+    # Tier 1.5: Curated lookup (high precision from curated correction tables)
+    "VisargaStrategy": 1,
+    "LoanWordValidationStrategy": 1,
     # Tier 2: Structural (can be wrong, but cheap and early)
     "SyntacticValidationStrategy": 2,
     "StatisticalConfusableStrategy": 2,
@@ -137,7 +140,12 @@ def arbitrate_candidates(
 # Within a cluster we take max(reliability * calibrated_confidence).
 # Across clusters we use Noisy-OR merge (Component 2).
 INDEPENDENCE_CLUSTERS: dict[str, list[str]] = {
-    "deterministic": ["ToneValidationStrategy", "OrthographyValidationStrategy"],
+    "deterministic": [
+        "ToneValidationStrategy",
+        "OrthographyValidationStrategy",
+    ],
+    "loan_word": ["LoanWordValidationStrategy"],
+    "visarga": ["VisargaStrategy"],
     "structural_grammar": ["SyntacticValidationStrategy", "POSSequenceValidationStrategy"],
     "statistical": [
         "StatisticalConfusableStrategy",

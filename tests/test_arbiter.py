@@ -54,8 +54,8 @@ class TestStrategyTier:
         assert _get_tier("CustomStrategy") == 2
 
     def test_all_known_strategies_have_tiers(self):
-        # 12 original strategies + HiddenCompoundStrategy.
-        assert len(STRATEGY_TIER) == 13
+        # 12 original + HiddenCompound + LoanWord + Visarga.
+        assert len(STRATEGY_TIER) == 15
 
 
 class TestSelectWinner:

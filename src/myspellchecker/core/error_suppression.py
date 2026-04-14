@@ -605,7 +605,8 @@ class ErrorSuppressionMixin:
             # only by a dot-below (့, U+1037).  This catches syntactic pairs
             # like သည် ↔ သည့် (declarative vs attributive) that text-level
             # detectors flag but are not actionable spelling errors.
-            if e.suggestions:
+            # Exception: VisargaStrategy curated corrections are trusted.
+            if e.suggestions and getattr(e, "source_strategy", "") != "VisargaStrategy":
                 sug_str = str(e.suggestions[0])
                 _DOT_BELOW = "\u1037"
                 if (

@@ -219,6 +219,42 @@ unconditional:
   # ya-yit→ya-pin: change/move (ပျောင်း → ပြောင်း)
   "ပျောင်း": "ပြောင်း"
 
+  # --- Ha-htoe (ှ) / Wa-hswe (ွ) confusion ---
+
+  # wa-hswe→ha-htoe: compare/compete (ယွဉ် never valid)
+  "ယွဉ်": "ယှဉ်"
+
+  # extra ha-htoe: education (ပညှာ never valid)
+  "ပညှာ": "ပညာ"
+
+  # ha-htoe→wa-hswe: bloom/open (ပှင့် never valid)
+  "ပှင့်": "ပွင့်"
+
+  # missing ha-htoe: heart (နလုံး freq=51 vs နှလုံး freq=27K)
+  "နလုံး": "နှလုံး"
+
+  # missing wa-hswe: money (ငေ freq=102 vs ငွေ freq=163K)
+  "ငေ": "ငွေ"
+
+  # extra ha-htoe: give birth (မွှေးဖွား is "fragrant" — different word)
+  # Note: မွှေး=fragrant IS valid, but in benchmark it appears as typo for မွေး
+  # Adding as unconditional is risky — skip for now
+
+  # missing ha-htoe: Myanmar (invalid double medial ျှ→ြ)
+  "မျှန်မာ": "မြန်မာ"
+
+  # compound: direct/instruct (ညွန်ကြား common typo for ညွှန်ကြား)
+  "ညွန်ကြား": "ညွှန်ကြား"
+
+  # compound: heart+son (နလုံးသား never valid)
+  "နလုံးသား": "နှလုံးသား"
+
+  # compound: apply (လျောက်ထား low freq vs လျှောက်ထား)
+  "လျောက်ထား": "လျှောက်ထား"
+
+  # compound: compare+compete
+  "ယွဉ်ပြိုင်": "ယှဉ်ပြိုင်"
+
 # ============================================================
 # CONTEXTUAL
 # Triggered ONLY when followed by specific trailing tokens.

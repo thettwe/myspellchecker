@@ -63,6 +63,7 @@ from myspellchecker.core.validation_strategies.syllable_window_oov_strategy impo
 )
 from myspellchecker.core.validation_strategies.syntactic_strategy import SyntacticValidationStrategy
 from myspellchecker.core.validation_strategies.tone_strategy import ToneValidationStrategy
+from myspellchecker.core.validation_strategies.visarga_strategy import VisargaStrategy
 
 __all__ = [
     "ErrorCandidate",
@@ -79,6 +80,7 @@ __all__ = [
     "QuestionStructureValidationStrategy",
     "HomophoneValidationStrategy",
     "LoanWordValidationStrategy",
+    "VisargaStrategy",
     "ConfusableCompoundClassifierStrategy",
     "ConfusableSemanticStrategy",
     "NgramContextValidationStrategy",
