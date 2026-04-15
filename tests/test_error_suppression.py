@@ -273,3 +273,65 @@ class TestSuppressLowValueContextProbability:
         errors = [_make_error(error_type="context_probability")]
         mixin._suppress_low_value_context_probability(errors)
         assert len(errors) == 1
+
+
+class TestMLMWordSuppression:
+    """Tests for _suppress_invalid_word_via_mlm morpheme boundary filtering."""
+
+    def test_does_not_suppress_when_prefix_is_morpheme_boundary(self):
+        """MLM predicting 'အတိုင်းအတာ' should NOT suppress 'အတိုင်' (missing visarga)."""
+        semantic = MagicMock()
+        # MLM predicts a compound starting with the error word + visarga
+        semantic.predict_mask.return_value = [("အတိုင်းအတာ", 9.5)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="အတိုင်", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 1, "Should keep error — visarga boundary means missing-visarga"
+
+    def test_does_not_suppress_dot_below_boundary(self):
+        """MLM predicting 'ခွင့်ပြု' should NOT suppress 'ခွင်' (missing dot-below)."""
+        semantic = MagicMock()
+        semantic.predict_mask.return_value = [("ခွင့်ပြု", 9.0)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="ခွင်", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 1, "Should keep error — dot-below boundary"
+
+    def test_suppresses_legitimate_compound_prefix(self):
+        """MLM predicting 'ကျွန်တော်' should suppress 'ကျွန်' (valid prefix)."""
+        semantic = MagicMock()
+        # Consonant suffix — legitimate compound
+        semantic.predict_mask.return_value = [("ကျွန်တော်", 9.0)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="ကျွန်", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 0, "Should suppress — consonant suffix is legitimate prefix"
+
+    def test_suppresses_exact_word_match(self):
+        """MLM predicting the exact word should always suppress."""
+        semantic = MagicMock()
+        semantic.predict_mask.return_value = [("ကျောင်း", 9.0)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="ကျောင်း", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 0, "Exact match should always suppress"

@@ -162,6 +162,11 @@ _NER_LOC_DEFAULT_CONFIDENCE = _ST.ner_loc_default_confidence
 _BOUNDARY_PUNCT = frozenset("၊။,.!?;:\"'()[]{}")
 _LOW_VALUE_QUOTATIVE_SYNTAX_TOKENS = frozenset(normalize(token) for token in ("လို့", "ဆိုတာ", "ဆိုပြီး"))
 
+# Morpheme boundary characters: visarga (း), dot below (့), asat (်).
+# Used to prevent prefix-match suppression when the "prefix" is actually
+# the error word and the suffix is a morpheme marker (missing-visarga/asat).
+_MORPHEME_BOUNDARY_CHARS = frozenset({"\u1038", "\u1037", "\u103a"})
+
 
 class ErrorSuppressionMixin:
     """Mixin providing error suppression and deduplication methods for SpellChecker."""
@@ -753,12 +758,21 @@ class ErrorSuppressionMixin:
 
             # Check if the original word (or a compound starting with it)
             # appears in the predictions above the threshold.
+            # Exclude prefix matches where the suffix starts with a morpheme
+            # boundary (visarga း, dot below ့, asat ်) — those indicate a
+            # missing-visarga/asat error, not a valid compound prefix.
             for pred_word, score in predictions:
                 if score < threshold:
                     # Predictions are sorted best-first; once we drop
                     # below the threshold we can stop.
                     break
-                if pred_word == word or pred_word.startswith(word):
+                if pred_word == word:
+                    to_remove.add(idx)
+                    break
+                if (
+                    pred_word.startswith(word)
+                    and pred_word[len(word)] not in _MORPHEME_BOUNDARY_CHARS
+                ):
                     to_remove.add(idx)
                     break
 
