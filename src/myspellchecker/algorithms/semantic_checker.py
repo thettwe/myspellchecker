@@ -1453,10 +1453,18 @@ class SemanticChecker:
         is_short_word = len(word) <= self._SHORT_WORD_MAX_LEN
 
         # Case 1: predicted compounds that start with the target word.
+        # Exclude predictions where the suffix starts with a morpheme boundary
+        # character (visarga း, dot below ့, asat ်).  When the MLM predicts a
+        # compound like "အတိုင်းအတာ" for target "အတိုင်", the suffix "းအတာ"
+        # begins with visarga — this signals a missing-visarga/asat error, not
+        # a legitimate prefix relationship.
+        morpheme_boundary_chars = frozenset({"\u1038", "\u1037", "\u103a"})  # း ့ ်
         prefix_scores = [
             float(score)
             for pred_word, score in top_preds
-            if pred_word.startswith(word) and pred_word != word
+            if pred_word.startswith(word)
+            and pred_word != word
+            and pred_word[len(word)] not in morpheme_boundary_chars
         ]
         if prefix_scores:
             best_prefix_score = max(prefix_scores)
@@ -1486,7 +1494,6 @@ class SemanticChecker:
             return False
 
         # Case 2: target word extends a predicted base token (BPE-like extension).
-        morpheme_boundary_chars = frozenset({"\u1038", "\u1037", "\u103a"})  # း ့ ်
         for pred_word, score in top_preds:
             if not pred_word or not word.startswith(pred_word):
                 continue
