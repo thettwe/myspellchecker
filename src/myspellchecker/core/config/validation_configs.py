@@ -421,6 +421,25 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    suppression_immune_strategies: frozenset[str] = Field(
+        default=frozenset(),
+        description=(
+            "Set of strategy class names whose errors are immune to post-context "
+            "suppression rules. Errors from these strategies pass through suppression "
+            "untouched. Use for strategies empirically shown to have high precision "
+            "but whose TPs are incorrectly suppressed."
+        ),
+    )
+
+    use_pos_sequence: bool = Field(
+        default=True,
+        description="Enable POSSequenceValidationStrategy in context validation.",
+    )
+    use_ngram_context: bool = Field(
+        default=True,
+        description="Enable NgramContextValidationStrategy in context validation.",
+    )
+
     enable_fast_path: bool = Field(
         default=True,
         description=(

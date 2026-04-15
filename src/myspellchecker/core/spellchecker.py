@@ -1153,6 +1153,15 @@ class SpellChecker(
         self._inject_compound_confusion_candidates(errors)
         self._dedup_errors_by_position(errors)
         self._dedup_errors_by_span(errors)
+
+        # Protect immune strategy errors from suppression
+        immune = self.config.validation.suppression_immune_strategies
+        immune_errors: list[Error] = []
+        if immune:
+            immune_errors = [e for e in errors if e.source_strategy in immune]
+            for e in immune_errors:
+                errors.remove(e)
+
         self._suppress_tense_adjacent_syntax(errors)
         self._suppress_low_value_syllable_errors(errors, text=normalized_text)
         self._suppress_low_value_syntax_errors(errors, text=normalized_text)
@@ -1162,6 +1171,10 @@ class SpellChecker(
         self._suppress_low_value_semantic_errors(errors, text=normalized_text)
         self._suppress_known_entity_errors(errors, text=normalized_text)
         self._filter_ner_entities(errors, normalized_text)
+
+        # Restore immune errors
+        if immune_errors:
+            errors.extend(immune_errors)
 
         return errors, layers_applied
 

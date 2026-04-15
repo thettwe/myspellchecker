@@ -540,7 +540,7 @@ def build_context_validation_strategies(
         logger.debug("Added HiddenCompoundStrategy (priority 23)")
 
     # Priority 30: POS Sequence Validation
-    if viterbi_tagger:
+    if viterbi_tagger and validation_config.use_pos_sequence:
         strategies.append(
             POSSequenceValidationStrategy(
                 viterbi_tagger=viterbi_tagger,
@@ -665,7 +665,7 @@ def build_context_validation_strategies(
         logger.debug("Added ConfusableSemanticStrategy (priority 48)")
 
     # Priority 50: N-gram Context Validation
-    if context_checker and config.use_context_checker:
+    if context_checker and config.use_context_checker and validation_config.use_ngram_context:
         strategies.append(
             NgramContextValidationStrategy(
                 context_checker=context_checker,

@@ -501,6 +501,10 @@ def run_benchmark(
     no_confusable_semantic: bool = False,
     confusable_preset: str = "relaxed",
     enable_strategy_debug: bool = False,
+    no_fast_path: bool = False,
+    no_suppression: bool = False,
+    suppress_immune: str | None = None,
+    disable_strategies: str | None = None,
     reranker_path: Optional[Path] = None,
     confidence_gap: float | None = None,
     scope: str = "spelling",
@@ -606,6 +610,29 @@ def run_benchmark(
     if enable_strategy_debug:
         print("  Strategy gate debug: enabled")
 
+    if no_fast_path:
+        config.validation.enable_fast_path = False
+        print("  Fast-path: DISABLED (all strategies run on every sentence)")
+
+    if suppress_immune:
+        immune_set = frozenset(s.strip() for s in suppress_immune.split(","))
+        config.validation.suppression_immune_strategies = immune_set
+        print(f"  Suppression immune: {', '.join(sorted(immune_set))}")
+
+    if disable_strategies:
+        for name in (s.strip().lower() for s in disable_strategies.split(",")):
+            if name in ("pos", "pos_sequence"):
+                config.validation.use_pos_sequence = False
+                print("  Disabled: POSSequenceValidationStrategy")
+            elif name in ("ngram", "ngram_context"):
+                config.validation.use_ngram_context = False
+                print("  Disabled: NgramContextValidationStrategy")
+            elif name in ("homophone",):
+                config.validation.use_homophone_detection = False
+                print("  Disabled: HomophoneValidationStrategy")
+            else:
+                print(f"  Warning: unknown strategy '{name}' — ignored")
+
     if enable_fusion:
         config.validation.use_candidate_fusion = True
         config.validation.fusion_confidence_threshold = fusion_threshold
@@ -637,6 +664,29 @@ def run_benchmark(
     # Initialize checker with specified database
     provider = SQLiteProvider(database_path=str(db_path))
     checker = SpellChecker(config=config, provider=provider)
+
+    if no_suppression:
+        # Monkey-patch all suppression methods to no-ops for ablation testing.
+        # This lets us see how many errors strategies produce before suppression.
+        suppression_methods = [
+            "_suppress_generic_pos_sequence_errors",
+            "_suppress_tense_adjacent_syntax",
+            "_suppress_low_value_syllable_errors",
+            "_suppress_low_value_syntax_errors",
+            "_suppress_low_value_pos_sequence_errors",
+            "_suppress_low_value_context_probability",
+            "_suppress_low_value_confusable_errors",
+            "_suppress_low_value_semantic_errors",
+            "_suppress_known_entity_errors",
+            "_suppress_low_value_word_errors",
+            "_suppress_compound_split_valid_words",
+            "_suppress_invalid_word_via_mlm",
+            "_filter_ner_entities",
+        ]
+        for method_name in suppression_methods:
+            if hasattr(checker, method_name):
+                setattr(checker, method_name, lambda *args, **kwargs: None)
+        print("  Suppression: DISABLED (all post-context suppression bypassed)")
     val_level = ValidationLevel.WORD if level == "word" else ValidationLevel.SYLLABLE
 
     # Warmup runs
@@ -1121,6 +1171,7 @@ def compute_report(
                 }
                 if m.matched:
                     match_entry["system_type"] = m.system_error_type
+                    match_entry["source_strategy"] = m.system_source_strategy
                     match_entry["suggestions"] = m.system_suggestions
                     if m.gold_correction:
                         match_entry["top1_correct"] = m.top1_correct
@@ -1132,6 +1183,7 @@ def compute_report(
                     "text": e.get("text", ""),
                     "type": e.get("error_type", ""),
                     "pos": e.get("position", -1),
+                    "source_strategy": e.get("source_strategy", ""),
                 }
                 for e in r.system_errors
             ]
@@ -1447,6 +1499,44 @@ def main():
         ),
     )
     parser.add_argument(
+        "--no-fast-path",
+        action="store_true",
+        default=False,
+        help=(
+            "Disable fast-path optimization. When enabled, contextual strategies "
+            "(priority >25) always run even if structural strategies find no errors."
+        ),
+    )
+    parser.add_argument(
+        "--no-suppression",
+        action="store_true",
+        default=False,
+        help=(
+            "Disable all post-context error suppression rules. "
+            "Shows raw strategy output before filtering."
+        ),
+    )
+    parser.add_argument(
+        "--suppress-immune",
+        type=str,
+        default=None,
+        metavar="STRATEGIES",
+        help=(
+            "Comma-separated strategy class names to exempt from post-context "
+            "suppression. Example: HiddenCompoundStrategy,ConfusableSemanticStrategy"
+        ),
+    )
+    parser.add_argument(
+        "--disable-strategies",
+        type=str,
+        default=None,
+        metavar="NAMES",
+        help=(
+            "Comma-separated short names of strategies to disable. "
+            "Options: pos, ngram, homophone. Example: pos,ngram,homophone"
+        ),
+    )
+    parser.add_argument(
         "--reranker",
         type=Path,
         default=None,
@@ -1531,6 +1621,10 @@ def main():
         no_confusable_semantic=args.no_confusable_semantic,
         confusable_preset=args.confusable_preset,
         enable_strategy_debug=args.debug_strategy_gates,
+        no_fast_path=args.no_fast_path,
+        no_suppression=args.no_suppression,
+        suppress_immune=args.suppress_immune,
+        disable_strategies=args.disable_strategies,
         reranker_path=args.reranker,
         confidence_gap=args.confidence_gap,
         scope=args.scope,
@@ -1559,9 +1653,13 @@ def main():
     if args.disable_targeted_grammar_completion_templates:
         targeted_tags += "_no_grammar_tpl"
     debug_tag = "_debug_gates" if args.debug_strategy_gates else ""
+    fast_path_tag = "_no_fast_path" if args.no_fast_path else ""
+    suppression_tag = "_no_suppression" if args.no_suppression else ""
+    immune_tag = "_immune" if args.suppress_immune else ""
+    disable_tag = "_disabled" if args.disable_strategies else ""
     output_file = output_dir / (
         f"benchmark_{db_name}_{args.level}{semantic_tag}{ner_tag}"
-        f"{targeted_tags}{debug_tag}_{timestamp}.json"
+        f"{targeted_tags}{debug_tag}{fast_path_tag}{suppression_tag}{immune_tag}{disable_tag}_{timestamp}.json"
     )
 
     with open(output_file, "w", encoding="utf-8") as f:
