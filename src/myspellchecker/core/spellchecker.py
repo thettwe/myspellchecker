@@ -961,7 +961,8 @@ class SpellChecker(
         # final candidate lists to avoid widening suppression scope.
         self._suppress_low_value_confusable_errors(errors, text=normalized_text)
         self._suppress_low_value_semantic_errors(errors, text=normalized_text)
-        self._suppress_low_value_word_errors(errors, text=normalized_text)
+        if not self.config.validation.bypass_word_heuristic_suppression:
+            self._suppress_low_value_word_errors(errors, text=normalized_text)
 
         # Confidence-gated output filter: suppress error types where the
         # system has low precision unless confidence exceeds a per-type
@@ -1007,12 +1008,16 @@ class SpellChecker(
 
         # MLM post-filter: suppress invalid_word/dangling_word FPs when the
         # semantic model confirms the word is contextually plausible.
-        if self._semantic_checker is not None:
+        if (
+            self._semantic_checker is not None
+            and not self.config.validation.bypass_word_heuristic_suppression
+        ):
             self._suppress_invalid_word_via_mlm(errors, normalized_text)
 
         # Post-validation compound splitting: suppress invalid_word errors
         # that greedily split into all-valid dictionary words.
-        self._suppress_compound_split_valid_words(errors)
+        if not self.config.validation.bypass_word_heuristic_suppression:
+            self._suppress_compound_split_valid_words(errors)
 
         # Post-validation meta-classifier filter: suppress likely FPs using
         # a learned model trained on per-error features.

@@ -780,6 +780,15 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    bypass_word_heuristic_suppression: bool = Field(
+        default=False,
+        description=(
+            "Bypass heuristic word-level suppression (dict-check, MLM plausibility, "
+            "compound-split). When True, all word-level errors flow directly to "
+            "the meta-classifier. Used for meta-classifier retraining."
+        ),
+    )
+
 
 class ProviderConfig(BaseModel):
     """

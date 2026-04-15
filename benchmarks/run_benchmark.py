@@ -505,6 +505,7 @@ def run_benchmark(
     no_suppression: bool = False,
     suppress_immune: str | None = None,
     disable_strategies: str | None = None,
+    bypass_word_suppress: bool = False,
     reranker_path: Optional[Path] = None,
     confidence_gap: float | None = None,
     scope: str = "spelling",
@@ -632,6 +633,10 @@ def run_benchmark(
                 print("  Disabled: HomophoneValidationStrategy")
             else:
                 print(f"  Warning: unknown strategy '{name}' — ignored")
+
+    if bypass_word_suppress:
+        config.validation.bypass_word_heuristic_suppression = True
+        print("  Word-level heuristic suppression: BYPASSED")
 
     if enable_fusion:
         config.validation.use_candidate_fusion = True
@@ -1537,6 +1542,15 @@ def main():
         ),
     )
     parser.add_argument(
+        "--bypass-word-suppress",
+        action="store_true",
+        default=False,
+        help=(
+            "Bypass word-level heuristic suppressions (dict/MLM/compound-split). "
+            "All word-level errors flow to the meta-classifier."
+        ),
+    )
+    parser.add_argument(
         "--reranker",
         type=Path,
         default=None,
@@ -1625,6 +1639,7 @@ def main():
         no_suppression=args.no_suppression,
         suppress_immune=args.suppress_immune,
         disable_strategies=args.disable_strategies,
+        bypass_word_suppress=args.bypass_word_suppress,
         reranker_path=args.reranker,
         confidence_gap=args.confidence_gap,
         scope=args.scope,
@@ -1657,9 +1672,10 @@ def main():
     suppression_tag = "_no_suppression" if args.no_suppression else ""
     immune_tag = "_immune" if args.suppress_immune else ""
     disable_tag = "_disabled" if args.disable_strategies else ""
+    bypass_tag = "_bypass_word" if args.bypass_word_suppress else ""
     output_file = output_dir / (
         f"benchmark_{db_name}_{args.level}{semantic_tag}{ner_tag}"
-        f"{targeted_tags}{debug_tag}{fast_path_tag}{suppression_tag}{immune_tag}{disable_tag}_{timestamp}.json"
+        f"{targeted_tags}{debug_tag}{fast_path_tag}{suppression_tag}{immune_tag}{disable_tag}{bypass_tag}_{timestamp}.json"
     )
 
     with open(output_file, "w", encoding="utf-8") as f:
