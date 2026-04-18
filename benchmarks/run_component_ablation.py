@@ -176,6 +176,12 @@ def _run_with_config_override(
     **_extra: Any,
 ) -> dict[str, Any]:
     """Run benchmark with SpellCheckerConfig overrides for ngram/grammar toggling."""
+    from benchmarks.run_benchmark import (
+        SentenceResult,
+        compute_db_hash,
+        load_benchmark,
+        match_errors,
+    )
     from myspellchecker import SpellChecker
     from myspellchecker.core.config.algorithm_configs import (
         NeuralRerankerConfig,
@@ -184,14 +190,6 @@ def _run_with_config_override(
     from myspellchecker.core.config.main import SpellCheckerConfig
     from myspellchecker.core.constants import ValidationLevel
     from myspellchecker.providers.sqlite import SQLiteProvider
-
-    from benchmarks.run_benchmark import (
-        compute_db_hash,
-        load_benchmark,
-        match_errors,
-        SentenceResult,
-        SpanMatch,
-    )
 
     benchmark = load_benchmark(benchmark_path)
     sentences = benchmark["sentences"]
@@ -354,7 +352,11 @@ def _run_with_config_override(
     # Composite
     latency_normalized = min(p95 / 500.0, 1.0)
     composite = (
-        0.30 * f1 + 0.25 * mrr + 0.20 * (1.0 - fpr) + 0.15 * top1_acc + 0.10 * (1.0 - latency_normalized)
+        0.30 * f1
+        + 0.25 * mrr
+        + 0.20 * (1.0 - fpr)
+        + 0.15 * top1_acc
+        + 0.10 * (1.0 - latency_normalized)
     )
 
     return {
@@ -419,9 +421,9 @@ def run_ablation_matrix(args: argparse.Namespace) -> dict[str, Any]:
 
     results: dict[str, dict[str, Any]] = {}
     for case in cases:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  Running: {case.label}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         start = time.perf_counter()
 
         report = run_case(
@@ -481,23 +483,25 @@ def render_markdown(report: dict[str, Any]) -> str:
         "|--------|-----------|----|----|-----|------|----|----|----|----|",
     ]
 
-    for case_id, result in report["results"].items():
+    for _case_id, result in report["results"].items():
         m = result["metrics"]
         lines.append(
             f"| {result['label'][:30]} | {m['composite']:.4f} | "
-            f"{m['f1']*100:.1f}% | {m['fpr']*100:.1f}% | "
-            f"{m['mrr']:.4f} | {m['top1_accuracy']*100:.1f}% | "
+            f"{m['f1'] * 100:.1f}% | {m['fpr'] * 100:.1f}% | "
+            f"{m['mrr']:.4f} | {m['top1_accuracy'] * 100:.1f}% | "
             f"{m['tp']} | {m['fp']} | {m['fn']} | {m['p95_ms']:.0f} |"
         )
 
     # Delta table
-    lines.extend([
-        "",
-        "## Deltas vs Baseline",
-        "",
-        "| Config | ΔComposite | ΔF1 | ΔFPR | ΔMRR | ΔTP | ΔFP | ΔFN |",
-        "|--------|-----------|-----|------|------|-----|-----|-----|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Deltas vs Baseline",
+            "",
+            "| Config | ΔComposite | ΔF1 | ΔFPR | ΔMRR | ΔTP | ΔFP | ΔFN |",
+            "|--------|-----------|-----|------|------|-----|-----|-----|",
+        ]
+    )
 
     for case_id, result in report["results"].items():
         if case_id == "baseline":
@@ -507,21 +511,23 @@ def render_markdown(report: dict[str, Any]) -> str:
             continue
         lines.append(
             f"| {result['label'][:30]} | {d.get('composite', 0):+.4f} | "
-            f"{d.get('f1', 0)*100:+.1f}pp | {d.get('fpr', 0)*100:+.1f}pp | "
+            f"{d.get('f1', 0) * 100:+.1f}pp | {d.get('fpr', 0) * 100:+.1f}pp | "
             f"{d.get('mrr', 0):+.4f} | {d.get('tp', 0):+d} | "
             f"{d.get('fp', 0):+d} | {d.get('fn', 0):+d} |"
         )
 
-    lines.extend([
-        "",
-        "## Interpretation",
-        "",
-        "- **Positive ΔComposite when component removed** → component is hurting overall",
-        "- **Negative ΔComposite when component removed** → component is helping",
-        "- **Large ΔFPR** → component is a major source of false positives",
-        "- **Large ΔFN** → component is critical for detection",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            "- **Positive ΔComposite when component removed** → component is hurting overall",
+            "- **Negative ΔComposite when component removed** → component is helping",
+            "- **Large ΔFPR** → component is a major source of false positives",
+            "- **Large ΔFN** → component is critical for detection",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 

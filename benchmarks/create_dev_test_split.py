@@ -48,7 +48,7 @@ def stratified_split(
     dev_sentences: list[dict] = []
     test_sentences: list[dict] = []
 
-    for stratum_key, items in sorted(strata.items()):
+    for _stratum_key, items in sorted(strata.items()):
         n = len(items)
         n_test = max(1, round(n * test_ratio))  # At least 1 per stratum
 
@@ -102,9 +102,15 @@ def build_split_yaml(
     return {
         "version": original_metadata.get("version", "1.0.0"),
         "category": "benchmark",
-        "description": f"{split_name.upper()} split of Myanmar spell checker benchmark. "
-        f"Stratified by domain + difficulty tier. "
-        f"{'Use for threshold tuning and development.' if split_name == 'dev' else 'NEVER use for tuning. Final evaluation only.'}",
+        "description": (
+            f"{split_name.upper()} split of Myanmar spell checker benchmark. "
+            f"Stratified by domain + difficulty tier. "
+            + (
+                "Use for threshold tuning and development."
+                if split_name == "dev"
+                else "NEVER use for tuning. Final evaluation only."
+            )
+        ),
         "metadata": {
             "split": split_name,
             "created_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
@@ -128,7 +134,9 @@ def _parse_args() -> argparse.Namespace:
         default=Path("benchmarks/myspellchecker_benchmark.yaml"),
         help="Source benchmark YAML.",
     )
-    parser.add_argument("--test-ratio", type=float, default=0.20, help="Test set ratio (default 0.20).")
+    parser.add_argument(
+        "--test-ratio", type=float, default=0.20, help="Test set ratio (default 0.20)."
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
     parser.add_argument(
         "--output-dir",
@@ -163,12 +171,20 @@ def main() -> int:
     dev_stats = compute_split_stats(dev_sentences)
     test_stats = compute_split_stats(test_sentences)
 
-    print(f"\n  Dev split: {dev_stats['total']} sentences ({dev_stats['clean']} clean, {dev_stats['error']} error)")
-    print(f"  Test split: {test_stats['total']} sentences ({test_stats['clean']} clean, {test_stats['error']} error)")
+    print(
+        f"\n  Dev split: {dev_stats['total']} sentences "
+        f"({dev_stats['clean']} clean, {dev_stats['error']} error)"
+    )
+    print(
+        f"  Test split: {test_stats['total']} sentences "
+        f"({test_stats['clean']} clean, {test_stats['error']} error)"
+    )
 
     # Verify stratification quality
     print("\n  Domain distribution comparison:")
-    all_domains = sorted(set(list(dev_stats["domains"].keys()) + list(test_stats["domains"].keys())))
+    all_domains = sorted(
+        set(list(dev_stats["domains"].keys()) + list(test_stats["domains"].keys()))
+    )
     for domain in all_domains:
         dev_n = dev_stats["domains"].get(domain, 0)
         test_n = test_stats["domains"].get(domain, 0)

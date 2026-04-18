@@ -126,7 +126,9 @@ class VisargaStrategy(ValidationStrategy):
                 errors.append(self._make_error(word, pos_i, correct, conf, context))
                 logger.debug(
                     "visarga_tier1: %s -> %s conf=%.2f",
-                    word, correct, conf,
+                    word,
+                    correct,
+                    conf,
                 )
                 continue
 
@@ -138,7 +140,10 @@ class VisargaStrategy(ValidationStrategy):
                 errors.append(self._make_error(word, pos_i, variant, conf, context))
                 logger.debug(
                     "visarga_generative: %s -> %s conf=%.2f type=%s",
-                    word, variant, conf, vtype,
+                    word,
+                    variant,
+                    conf,
+                    vtype,
                 )
 
         return errors

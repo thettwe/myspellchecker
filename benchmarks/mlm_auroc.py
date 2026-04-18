@@ -21,7 +21,7 @@ import json
 import sqlite3
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -39,7 +39,8 @@ def load_probe_pairs(db_path: Path, limit: int = 200) -> list[dict]:
     db = sqlite3.connect(str(db_path))
 
     # Get pairs where both words have high frequency and are multi-char
-    pairs = db.execute("""
+    pairs = db.execute(
+        """
         SELECT cp.word1, cp.word2, cp.confusion_type,
                w1.frequency as freq1, w2.frequency as freq2
         FROM confusable_pairs cp
@@ -49,7 +50,9 @@ def load_probe_pairs(db_path: Path, limit: int = 200) -> list[dict]:
           AND length(cp.word1) > 1 AND length(cp.word2) > 1
         ORDER BY RANDOM()
         LIMIT ?
-    """, (limit,)).fetchall()
+    """,
+        (limit,),
+    ).fetchall()
 
     db.close()
 
@@ -68,15 +71,17 @@ def load_probe_pairs(db_path: Path, limit: int = 200) -> list[dict]:
         template = templates[i % len(templates)]
         sentence = template.format(word=word1)
 
-        probe_set.append({
-            "word1": word1,
-            "word2": word2,
-            "type": conf_type,
-            "freq1": freq1,
-            "freq2": freq2,
-            "sentence": sentence,
-            "target": word1,
-        })
+        probe_set.append(
+            {
+                "word1": word1,
+                "word2": word2,
+                "type": conf_type,
+                "freq1": freq1,
+                "freq2": freq2,
+                "sentence": sentence,
+                "target": word1,
+            }
+        )
 
     return probe_set
 
@@ -84,7 +89,7 @@ def load_probe_pairs(db_path: Path, limit: int = 200) -> list[dict]:
 def compute_auroc(labels: list[int], scores: list[float]) -> float:
     """Compute AUROC from binary labels and continuous scores."""
     # Sort by score descending
-    paired = sorted(zip(scores, labels), reverse=True)
+    paired = sorted(zip(scores, labels, strict=False), reverse=True)
 
     tp = 0
     fp = 0
@@ -98,7 +103,7 @@ def compute_auroc(labels: list[int], scores: list[float]) -> float:
     fpr_prev = 0.0
     auc = 0.0
 
-    for score, label in paired:
+    for _score, label in paired:
         if label == 1:
             tp += 1
         else:
@@ -145,7 +150,7 @@ def run_auroc_test(
 
     for i, probe in enumerate(probe_set):
         if (i + 1) % 50 == 0:
-            print(f"    {i+1}/{len(probe_set)}...", flush=True)
+            print(f"    {i + 1}/{len(probe_set)}...", flush=True)
 
         sentence = probe["sentence"]
         correct_word = probe["target"]
@@ -162,18 +167,20 @@ def run_auroc_test(
                 logit_diffs.append(diff)
                 labels.append(1)
 
-                details.append({
-                    "sentence": sentence,
-                    "correct": correct_word,
-                    "confusable": confusable_word,
-                    "correct_score": round(correct_score, 4),
-                    "confusable_score": round(confusable_score, 4),
-                    "logit_diff": round(diff, 4),
-                    "discriminated": diff > 0,
-                })
+                details.append(
+                    {
+                        "sentence": sentence,
+                        "correct": correct_word,
+                        "confusable": confusable_word,
+                        "correct_score": round(correct_score, 4),
+                        "confusable_score": round(confusable_score, 4),
+                        "logit_diff": round(diff, 4),
+                        "discriminated": diff > 0,
+                    }
+                )
             else:
                 skipped += 1
-        except Exception as e:
+        except Exception:
             errors += 1
 
     elapsed = time.perf_counter() - start
@@ -264,7 +271,7 @@ def main() -> int:
     print(f"  Loaded {len(probe_set)} probe pairs")
 
     # Run AUROC test
-    print(f"\n  Running discrimination test...")
+    print("\n  Running discrimination test...")
     results = run_auroc_test(args.semantic, probe_set)
 
     if "error" in results:
@@ -272,18 +279,18 @@ def main() -> int:
         return 1
 
     # Print results
-    print(f"\n{'='*60}")
-    print(f"  MLM Discrimination Results")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print("  MLM Discrimination Results")
+    print(f"{'=' * 60}")
     print(f"  AUROC (win rate): {results['auroc']:.4f}")
     print(f"  Evaluated: {results['evaluated']}/{results['total_pairs']}")
     print(f"  Mean logit_diff: {results['mean_logit_diff']:.4f}")
     print(f"  Median logit_diff: {results['median_logit_diff']:.4f}")
     print(f"  Std logit_diff: {results['std_logit_diff']:.4f}")
     print(f"  Elapsed: {results['elapsed_s']:.1f}s")
-    print(f"\n  Threshold accuracy:")
+    print("\n  Threshold accuracy:")
     for k, v in results["threshold_accuracy"].items():
-        print(f"    {k}: {v*100:.1f}%")
+        print(f"    {k}: {v * 100:.1f}%")
 
     # Assessment
     auroc = results["auroc"]

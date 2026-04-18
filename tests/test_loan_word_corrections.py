@@ -14,7 +14,6 @@ from myspellchecker.grammar.parsers.loan_word_parser import (
     parse_loan_word_corrections_config,
 )
 
-
 # --- Parser tests ---
 
 

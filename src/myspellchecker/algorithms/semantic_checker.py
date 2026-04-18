@@ -706,8 +706,7 @@ class SemanticChecker:
                     safe_len = max_pos - 2
                     if safe_len > 0:
                         self.logger.debug(
-                            "Detected max_position_embeddings=%d from %s "
-                            "-> safe max_seq_len=%d",
+                            "Detected max_position_embeddings=%d from %s -> safe max_seq_len=%d",
                             max_pos,
                             init.name,
                             safe_len,

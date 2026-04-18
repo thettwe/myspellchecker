@@ -78,7 +78,9 @@ def extract_per_sentence_components(sentences: list[dict]) -> dict[str, np.ndarr
         mrr_proxy[i] = np.mean(ranks) if ranks else np.nan
 
         # Top1
-        top1_hits = sum(1 for m in s.get("span_matches", []) if m.get("matched") and m.get("top1_correct"))
+        top1_hits = sum(
+            1 for m in s.get("span_matches", []) if m.get("matched") and m.get("top1_correct")
+        )
         total_matches = sum(1 for m in s.get("span_matches", []) if m.get("matched"))
         top1_proxy[i] = top1_hits / total_matches if total_matches > 0 else np.nan
 
@@ -222,19 +224,22 @@ def render_report(
         neg = data["variations"]["-0.05"]["delta"]
         pos = data["variations"]["+0.05"]["delta"]
         lines.append(
-            f"| {key} | {data['base_weight']:.2f} | {neg:+.5f} | {pos:+.5f} | {data['sensitivity']:.5f} |"
+            f"| {key} | {data['base_weight']:.2f} | {neg:+.5f} | {pos:+.5f} | "
+            f"{data['sensitivity']:.5f} |"
         )
 
-    lines.extend([
-        "",
-        f"**Most sensitive to**: `{perturbation['sensitivity_ranking'][0]}`",
-        f"**Least sensitive to**: `{perturbation['sensitivity_ranking'][-1]}`",
-        "",
-        "## Component Correlations (per-sentence)",
-        "",
-        "| | F1 | MRR | Top1 |",
-        "|---|---|---|---|",
-    ])
+    lines.extend(
+        [
+            "",
+            f"**Most sensitive to**: `{perturbation['sensitivity_ranking'][0]}`",
+            f"**Least sensitive to**: `{perturbation['sensitivity_ranking'][-1]}`",
+            "",
+            "## Component Correlations (per-sentence)",
+            "",
+            "| | F1 | MRR | Top1 |",
+            "|---|---|---|---|",
+        ]
+    )
 
     for k1 in ["f1", "mrr", "top1"]:
         row = f"| {k1} |"
@@ -243,19 +248,22 @@ def render_report(
             row += f" {corr:.3f} |"
         lines.append(row)
 
-    lines.extend([
-        "",
-        "High correlation (>0.8) between components means they double-count the same signal.",
-        "",
-        "## Latency Component Analysis",
-        "",
-        f"- p95 latency: {latency_analysis['p95_ms']:.0f}ms",
-        f"- Normalized: {latency_analysis['latency_normalized']:.3f}",
-        f"- Composite contribution: {latency_analysis['composite_contribution']:.4f} (fixed)",
-        f"- Discriminative: {'Yes' if latency_analysis['is_discriminative'] else 'No (near-constant)'}",
-        f"- {latency_analysis['note']}",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "High correlation (>0.8) between components means they double-count the same signal.",
+            "",
+            "## Latency Component Analysis",
+            "",
+            f"- p95 latency: {latency_analysis['p95_ms']:.0f}ms",
+            f"- Normalized: {latency_analysis['latency_normalized']:.3f}",
+            f"- Composite contribution: {latency_analysis['composite_contribution']:.4f} (fixed)",
+            f"- Discriminative: "
+            f"{'Yes' if latency_analysis['is_discriminative'] else 'No (near-constant)'}",
+            f"- {latency_analysis['note']}",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -264,7 +272,9 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Composite score sensitivity analysis.")
     parser.add_argument("--report", type=Path, default=None, help="Existing benchmark JSON.")
     parser.add_argument("--db", type=Path, default=None, help="Database for fresh run.")
-    parser.add_argument("--benchmark", type=Path, default=Path("benchmarks/myspellchecker_benchmark.yaml"))
+    parser.add_argument(
+        "--benchmark", type=Path, default=Path("benchmarks/myspellchecker_benchmark.yaml")
+    )
     parser.add_argument("--semantic", type=Path, default=None)
     parser.add_argument("--reranker", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=Path("benchmarks/results/sensitivity"))
@@ -317,8 +327,10 @@ def main() -> int:
         "latency_norm": min(p95 / 500.0, 1.0),
     }
 
-    print(f"Aggregate metrics: F1={aggregate_metrics['f1']:.4f} MRR={aggregate_metrics['mrr']:.4f} "
-          f"FPR={aggregate_metrics['fpr']:.4f} Top1={aggregate_metrics['top1_accuracy']:.4f}")
+    print(
+        f"Aggregate metrics: F1={aggregate_metrics['f1']:.4f} MRR={aggregate_metrics['mrr']:.4f} "
+        f"FPR={aggregate_metrics['fpr']:.4f} Top1={aggregate_metrics['top1_accuracy']:.4f}"
+    )
 
     # 1. Weight perturbation
     perturbation = weight_perturbation_analysis(aggregate_metrics)
@@ -340,12 +352,15 @@ def main() -> int:
 
     md_path.write_text(markdown, encoding="utf-8")
     json_path.write_text(
-        json.dumps({
-            "perturbation": perturbation,
-            "correlations": correlations,
-            "latency_analysis": latency_analysis,
-            "aggregate_metrics": aggregate_metrics,
-        }, indent=2),
+        json.dumps(
+            {
+                "perturbation": perturbation,
+                "correlations": correlations,
+                "latency_analysis": latency_analysis,
+                "aggregate_metrics": aggregate_metrics,
+            },
+            indent=2,
+        ),
         encoding="utf-8",
     )
 

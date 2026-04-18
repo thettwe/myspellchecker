@@ -67,11 +67,15 @@ def compute_metrics_from_sentences(sentences: list[dict]) -> dict[str, float]:
 
     # Top1
     top1_correct = sum(
-        1 for s in sentences for m in s.get("matches", s.get("span_matches", []))
+        1
+        for s in sentences
+        for m in s.get("matches", s.get("span_matches", []))
         if m.get("detected", m.get("matched")) and m.get("top1_correct")
     )
     total_matched = sum(
-        1 for s in sentences for m in s.get("matches", s.get("span_matches", []))
+        1
+        for s in sentences
+        for m in s.get("matches", s.get("span_matches", []))
         if m.get("detected", m.get("matched"))
     )
     top1_acc = top1_correct / total_matched if total_matched > 0 else 0.0
@@ -88,7 +92,9 @@ def compute_metrics_from_sentences(sentences: list[dict]) -> dict[str, float]:
     latency_norm = min(p95 / 500.0, 1.0)
 
     # Composite
-    composite = 0.30 * f1 + 0.25 * mrr + 0.20 * (1.0 - fpr) + 0.15 * top1_acc + 0.10 * (1.0 - latency_norm)
+    composite = (
+        0.30 * f1 + 0.25 * mrr + 0.20 * (1.0 - fpr) + 0.15 * top1_acc + 0.10 * (1.0 - latency_norm)
+    )
 
     return {
         "f1": f1,
@@ -117,7 +123,7 @@ def bootstrap_ci(
     print(f"  Running {n_bootstrap:,} bootstrap resamples on {n} sentences...")
     start = time.perf_counter()
 
-    for i in range(n_bootstrap):
+    for _i in range(n_bootstrap):
         # Resample with replacement
         indices = rng.integers(0, n, size=n)
         sample = [sentences[idx] for idx in indices]
@@ -193,17 +199,19 @@ def render_report(
             f"{ci['ci_width']:.4f} | {ci['min_detectable_effect']:.4f} |"
         )
 
-    lines.extend([
-        "",
-        "## Interpretation",
-        "",
-        "- **CI Width**: The range of plausible values for the metric given sampling variation",
-        "- **Min Detectable Effect**: Smallest improvement we can confidently distinguish from noise",
-        "- If a sprint improvement was smaller than the Min Detectable Effect, it may be noise",
-        "",
-        "## v1.5 Sprint Improvements vs Statistical Power",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            "- **CI Width**: The range of plausible values for the metric given sampling variation",
+            "- **Min Detectable Effect**: Smallest improvement we can confidently distinguish",
+            "- If a sprint improvement was smaller than the Min Detectable Effect, it may be noise",
+            "",
+            "## v1.5 Sprint Improvements vs Statistical Power",
+            "",
+        ]
+    )
 
     composite_mde = ci_results["composite"]["min_detectable_effect"]
     lines.append(f"Composite Min Detectable Effect: **{composite_mde:.4f}**")

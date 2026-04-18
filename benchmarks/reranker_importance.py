@@ -52,15 +52,20 @@ def analyze_feature_correlations(reranker_path: Path) -> dict[str, Any]:
 
     # Features with near-zero std have no discriminative power
     low_variance = []
-    for i, (name, std) in enumerate(zip(feature_names, stds)):
+    for i, (name, std) in enumerate(zip(feature_names, stds, strict=False)):
         if std < 0.01:
             low_variance.append({"feature": name, "std": float(std), "mean": float(means[i])})
 
     # Coefficient of variation (normalized variance)
     cv = stds / (np.abs(means) + 1e-10)
     feature_cv = [
-        {"feature": name, "cv": round(float(c), 4), "mean": round(float(m), 4), "std": round(float(s), 4)}
-        for name, c, m, s in zip(feature_names, cv, means, stds)
+        {
+            "feature": name,
+            "cv": round(float(c), 4),
+            "mean": round(float(m), 4),
+            "std": round(float(s), 4),
+        }
+        for name, c, m, s in zip(feature_names, cv, means, stds, strict=False)
     ]
     feature_cv.sort(key=lambda x: x["cv"])
 
@@ -158,7 +163,7 @@ def _predict_batch(reranker, features: np.ndarray) -> np.ndarray:
 
     for i in range(n_samples):
         # Single sample: (1, max_candidates, n_features)
-        sample = features[i:i+1]
+        sample = features[i : i + 1]
         try:
             output = reranker._session.run(
                 [reranker._output_name],
@@ -184,7 +189,7 @@ def render_report(
         "",
         f"Generated: {datetime.now(timezone.utc).isoformat()}",
         "",
-        f"## Model Info",
+        "## Model Info",
         f"- Schema: {correlation_analysis.get('schema', 'unknown')}",
         f"- Features: {correlation_analysis.get('n_features', 0)}",
         f"- Cross features: {correlation_analysis.get('cross_features', [])}",
@@ -193,31 +198,37 @@ def render_report(
     ]
 
     if correlation_analysis.get("low_variance_features"):
-        lines.extend([
-            "## Low-Variance Features (potentially dead weight)",
-            "",
-        ])
+        lines.extend(
+            [
+                "## Low-Variance Features (potentially dead weight)",
+                "",
+            ]
+        )
         for f in correlation_analysis["low_variance_features"]:
             lines.append(f"- **{f['feature']}**: std={f['std']:.6f}, mean={f['mean']:.4f}")
         lines.append("")
 
-    lines.extend([
-        "## Feature Statistics (sorted by coefficient of variation)",
-        "",
-        "| Feature | Mean | Std | CV |",
-        "|---------|------|-----|-----|",
-    ])
+    lines.extend(
+        [
+            "## Feature Statistics (sorted by coefficient of variation)",
+            "",
+            "| Feature | Mean | Std | CV |",
+            "|---------|------|-----|-----|",
+        ]
+    )
     for f in correlation_analysis.get("feature_stats", []):
         lines.append(f"| {f['feature']} | {f['mean']:.4f} | {f['std']:.4f} | {f['cv']:.4f} |")
 
     if importance_analysis:
-        lines.extend([
-            "",
-            "## Feature Importance (zero-out ablation)",
-            "",
-            "| Feature | Top-1 Changed % | Any Rank Changed % | Mean Rank Δ |",
-            "|---------|----------------|-------------------|------------|",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Feature Importance (zero-out ablation)",
+                "",
+                "| Feature | Top-1 Changed % | Any Rank Changed % | Mean Rank Δ |",
+                "|---------|----------------|-------------------|------------|",
+            ]
+        )
         for name, scores in importance_analysis["feature_importance"].items():
             lines.append(
                 f"| {name} | {scores['pct_top1_changed']:.1f}% | "
@@ -232,7 +243,9 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Reranker feature importance analysis.")
     parser.add_argument("--db", type=Path, required=True)
     parser.add_argument("--reranker", type=Path, required=True)
-    parser.add_argument("--benchmark", type=Path, default=Path("benchmarks/myspellchecker_benchmark.yaml"))
+    parser.add_argument(
+        "--benchmark", type=Path, default=Path("benchmarks/myspellchecker_benchmark.yaml")
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("benchmarks/results/reranker"))
     return parser.parse_args()
 
@@ -261,7 +274,7 @@ def main() -> int:
     print("\n  Running zero-out ablation (500 synthetic samples)...")
     importance = run_ablation_importance(args.db, args.reranker, args.benchmark)
 
-    print(f"\n  Feature importance (by Top-1 change %):")
+    print("\n  Feature importance (by Top-1 change %):")
     for name, scores in importance["feature_importance"].items():
         bar = "█" * int(scores["pct_top1_changed"] / 2)
         print(f"    {name:30s} {scores['pct_top1_changed']:5.1f}% {bar}")
@@ -275,10 +288,17 @@ def main() -> int:
     json_path = args.output_dir / f"importance_{ts}.json"
 
     md_path.write_text(markdown, encoding="utf-8")
-    json_path.write_text(json.dumps({
-        "correlation_analysis": corr_analysis,
-        "importance_analysis": importance,
-    }, indent=2, default=str), encoding="utf-8")
+    json_path.write_text(
+        json.dumps(
+            {
+                "correlation_analysis": corr_analysis,
+                "importance_analysis": importance,
+            },
+            indent=2,
+            default=str,
+        ),
+        encoding="utf-8",
+    )
 
     print(f"\n  Saved: {md_path}")
     return 0
