@@ -62,3 +62,12 @@ sym_shape_infer_temp.onnx
 
 # Project instructions (local only)
 CLAUDE.md
+
+# Archived benchmark artifacts (local only, see benchmarks/_archive/README.md)
+benchmarks/_archive/
+
+# Stale rule-file backups (local only — use git history if you need diffs)
+src/myspellchecker/rules/*.pre_*
+src/myspellchecker/rules/*.bak
+benchmarks/*.pre_*
+benchmarks/*.bak
