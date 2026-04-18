@@ -191,6 +191,18 @@ class ValidationConfig(BaseModel):
             "Detects valid-in-DB loan word variants and suggests standard forms."
         ),
     )
+    loan_word_detection_confidence: float = Field(
+        default=0.90,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence for loan-word variant short-circuit in WordValidator "
+            "(Prong-3 propagation fix). Fires when an OOV word is a known "
+            "variant in loan_words.yaml or loan_words_mined.yaml, bypassing "
+            "SymSpell's max_edit_distance gate. High default since the "
+            "variant lookup is rule-based and curated/gated by linguist review."
+        ),
+    )
     # Statistical Confusable Gate (priority 24)
     use_statistical_confusable_gate: bool = Field(
         default=True,
@@ -756,6 +768,117 @@ class ValidationConfig(BaseModel):
         ge=1,
         le=3,
         description="Maximum SymSpell edit distance accepted for the candidate.",
+    )
+
+    # Mined confusable pair detection (priority 49, post-semantic).
+    # Enabled by default in v1.7.0+: mines 4K+ confusable pairs from the DB and
+    # uses semantic MLM margin to flag real-word confusable errors that SymSpell
+    # cannot surface (both forms are in-dictionary). Added to suppression
+    # immunity by default since pipeline suppression was observed to remove
+    # valid emissions.
+    use_mined_confusable_pair: bool = Field(
+        default=False,
+        description=(
+            "Enable MinedConfusablePairStrategy: flag real-word confusables using "
+            "mined ed-1 pair list with semantic MLM margin gate. Requires "
+            "semantic_checker to be configured. Runs at priority 49."
+        ),
+    )
+    mined_pair_yaml_path: str | None = Field(
+        default=None,
+        description=(
+            "Optional path to mined pairs YAML. If None, the strategy loads "
+            "the bundled `rules/mined_confusable_pairs.yaml`."
+        ),
+    )
+    mined_pair_low_freq_min: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum frequency for the lower-frequency member of a pair to enter the partner map."
+        ),
+    )
+    mined_pair_freq_ratio: float = Field(
+        default=2.0,
+        ge=1.0,
+        description=(
+            "Minimum partner-freq / current-freq ratio for the strategy to consider "
+            "swapping. Prevents low-freq partners from dominating high-freq tokens."
+        ),
+    )
+    mined_pair_mlm_margin: float = Field(
+        default=2.5,
+        ge=0.0,
+        description=(
+            "Minimum MLM(partner) - MLM(current) margin at target position required "
+            "to emit a confusable error. Higher is more conservative."
+        ),
+    )
+    mined_pair_backend: str = Field(
+        default="mlm",
+        description=(
+            "Scoring backend for the strategy. 'mlm' uses the existing SemanticChecker "
+            "(conservative, +14 FN rescues in A/B). 'classifier' uses a dedicated "
+            "fine-tuned classifier (higher recall, +14 TP vs mlm at same FPR). "
+            "Set 'classifier' and provide `mined_pair_classifier_path` to load the model."
+        ),
+    )
+    mined_pair_classifier_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to a fine-tuned classifier checkpoint (HuggingFace-format) or an "
+            "ONNX model. Required when `mined_pair_backend == 'classifier'`."
+        ),
+    )
+
+    # ByT5 safety net (priority 80, after every other strategy)
+    # Runs only on sentences where the rest of the pipeline flagged nothing.
+    # Uses a fine-tuned ByT5-small seq2seq model to propose whole-sentence
+    # corrections; edits are gated by dict membership + MLM plausibility margin.
+    use_byt5_safety_net: bool = Field(
+        default=False,
+        description=(
+            "Enable ByT5SafetyNetStrategy (priority 80). Runs a fine-tuned "
+            "ByT5-small seq2seq model on sentences with zero pipeline "
+            "emissions, gated by dict membership + MLM margin. Requires "
+            "`byt5_safety_net_model_path` to point at an ONNX bundle or HF dir."
+        ),
+    )
+    byt5_safety_net_model_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to ByT5 model directory: either ONNX bundle "
+            "(encoder.onnx + decoder.onnx + onnx_meta.json) or a HuggingFace "
+            "checkpoint directory (for the PyTorch fallback)."
+        ),
+    )
+    byt5_safety_net_mlm_gate_margin: float = Field(
+        default=2.0,
+        ge=-20.0,
+        le=20.0,
+        description=(
+            "Minimum MLM(replacement) - MLM(original) margin at the masked "
+            "position required to emit a ByT5 safety-net edit."
+        ),
+    )
+    byt5_safety_net_min_typo_prone_chars: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Minimum typo-prone character count in the sentence before the "
+            "safety net fires. Filters sentences with no plausible typo source."
+        ),
+    )
+    byt5_safety_net_max_sentence_chars: int = Field(
+        default=400,
+        ge=1,
+        description="Skip sentences longer than this (byte-level inference cost).",
+    )
+    byt5_safety_net_confidence: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score for ByT5 safety-net errors.",
     )
 
     # MLM post-filter for invalid_word / dangling_word FP suppression

@@ -19,6 +19,7 @@ from myspellchecker.algorithms.suggestion_strategy import (
 )
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.constants import ET_COLLOQUIAL_INFO, ET_COLLOQUIAL_VARIANT
+from myspellchecker.core.loan_word_variants import get_loan_word_standard
 from myspellchecker.core.response import Error, WordError
 from myspellchecker.core.token_refinement import build_validation_token_paths
 from myspellchecker.core.validators.base import Validator
@@ -672,6 +673,27 @@ class WordValidator(Validator):
                 colloquial_error = self._check_colloquial_variant(word, position)
                 if colloquial_error:
                     errors.append(colloquial_error)
+                myanmar_word_idx += 1
+                continue
+
+            # Prong-3: known loan-word variant short-circuit. If this OOV word
+            # is listed in loan_words.yaml or loan_words_mined.yaml as a
+            # variant of a standard form, emit the correction directly rather
+            # than falling through to SymSpell — which drops candidates with
+            # edit distance > max_edit_distance (default 2). Workstream:
+            # loan-word-db-mining / task: loanword-prong3-01.
+            loan_standards = get_loan_word_standard(word)
+            if loan_standards:
+                standards_list = sorted(loan_standards)
+                errors.append(
+                    WordError(
+                        text=word,
+                        position=position,
+                        suggestions=[standards_list[0]] + standards_list[1:],
+                        confidence=self.config.validation.loan_word_detection_confidence,
+                        syllable_count=len(syllables),
+                    )
+                )
                 myanmar_word_idx += 1
                 continue
 
