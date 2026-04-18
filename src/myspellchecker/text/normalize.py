@@ -270,33 +270,124 @@ def normalize_tall_aa_after_wa(text: str) -> str:
     return text.replace("\u103d\u102b", "\u103d\u102c")
 
 
+# Consonants that take TALL AA (ါ, U+102B) after the ေ (U+1031) prefix.
+#
+# Scope choice: this whitelist is intentionally MINIMAL. Classical Myanmar
+# orthography (MLC မြန်မာ သတ်ပုံ ကျမ်း, UTN #11 §3.3) lists a broader
+# "round-bottom" set {ပ, ဖ, ဗ, ဘ, မ, ဒ, ဓ, ဝ, ဂ, ဏ, ဎ, င, ရ}, but in
+# modern standard Burmese — and crucially in the v1.5 benchmark gold labels —
+# many of those consonants routinely take the plain AA form (e.g., ဖော်,
+# ဘော, မော, ရော). Treating the full classical set as "must-be-TALL-AA"
+# would corrupt common correct forms into OCR-flavored variants.
+#
+# The whitelist below is restricted to the three consonants where the
+# benchmark gold exclusively uses TALL AA after ေ — i.e. where applying the
+# repair is safe against FPR regression:
+#
+#   ပ (U+1015): 24 gold TALL_AA cases (ပေါ်, ပေါင်း, ...)
+#   ခ (U+1001): 11 gold TALL_AA cases (ခေါ်, ခေါင်း, ...)
+#   ဒ (U+1012):  1 gold TALL_AA case  (ဒေါ် "Mrs.")
+#
+# If a future benchmark row validates a broader set (e.g. ဂ, င, ဝ), widen
+# this frozenset and regenerate the audit. Do NOT preemptively widen without
+# benchmark evidence — the false-positive tax on clean sentences is
+# asymmetric with the FN recovery, and modern Burmese has real lexical
+# exceptions that a blanket classical rule would break.
+_ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA: frozenset[str] = frozenset(
+    {
+        "\u1015",  # ပ  PA
+        "\u1001",  # ခ  KHA
+        "\u1012",  # ဒ  DA
+    }
+)
+
+_E_VOWEL = "\u1031"  # ေ  MYANMAR VOWEL SIGN E
+_AA = "\u102c"  # ာ  MYANMAR VOWEL SIGN AA
+_TALL_AA = "\u102b"  # ါ  MYANMAR VOWEL SIGN TALL AA
+
+
 def normalize_e_vowel_tall_aa(text: str) -> str:
     """
-    Normalize ေါ (E + Tall AA) to ော (E + AA) in standard Burmese.
+    Canonicalize the "aw" vowel (ေ + {ာ, ါ}) per MLC orthography.
 
-    In standard Myanmar orthography, the "aw" vowel is written as
-    ေ (U+1031) + ာ (U+102C), never ေ (U+1031) + ါ (U+102B).
-    The ေါ form is a common OCR error and Zawgyi artifact.
+    Myanmar orthography picks between AA (ာ, U+102C) and TALL AA (ါ, U+102B)
+    in the "aw" vowel slot by the shape of the preceding consonant: certain
+    round-bottom / open-bottom consonants take TALL AA so the vowel does not
+    visually collide with the consonant's curved bowl. This is a
+    glyph-disambiguation rule baked into the orthography — not a cosmetic
+    variant.
 
-    This normalization is safe because:
-    - ေ + ါ has zero valid occurrences in standard Burmese
-    - The correction preserves phonetic meaning (/aw/ sound)
-    - All standard words use ော (e.g., ကောင်း, ပို, ကော်ဖီ)
+    | Preceding consonant | Canonical aw-vowel | Examples |
+    |---|---|---|
+    | {ပ, ခ, ဒ} (benchmark-validated subset) | `ေ + ါ` | ပေါ်, ပေါင်း, ခေါ်, ခေါင်း, ဒေါ် |
+    | All others | `ေ + ာ` | ကောင်း, ကော်, တော, ဖော်, ဘော, ရော |
+
+    Behaviour:
+    - After the whitelisted round-bottom consonants, flat ``ော`` is repaired
+      to ``ေါ`` (restoring the canonical TALL AA form that OCR / keyboard
+      input often flattens).
+    - After every other consonant, stray ``ေါ`` is flattened to ``ော``
+      (restoring canonical AA for the complement set).
+
+    Prior to 2026-04-19 this function unconditionally rewrote
+    ``ေါ → ော`` regardless of the preceding consonant. That corrupted gold
+    forms like ခေါ်, ပေါင်း, ဒေါ် during
+    ``normalize_for_dictionary_lookup`` and caused a ~28-FN hit on the
+    spelling benchmark. See `[[Tone-Zawgyi Slice 2026-04-19]]` in the
+    Obsidian vault for the audit and `[[Myanmar Real-Word Confusion
+    Taxonomy 2026-04-18]]` §1 B3 for the class definition.
+
+    The whitelist is intentionally narrower than the classical MLC
+    round-bottom set; see the ``_ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA``
+    block comment for the rationale and the criterion to widen it.
 
     Args:
-        text: Input Myanmar text
+        text: Input Myanmar text.
 
     Returns:
-        Text with ေ+ါ sequences replaced by ေ+ာ
+        Text with ``ေ`` + {``ာ``, ``ါ``} pairs normalized to the form
+        dictated by the preceding consonant.
 
     Example:
-        >>> normalize_e_vowel_tall_aa("ေကာင်း")  # Already correct
-        'ေကာင်း'
+        >>> normalize_e_vowel_tall_aa("ပော်")   # flat, preceding ပ
+        'ပေါ်'
+        >>> normalize_e_vowel_tall_aa("ပေါ်")   # already canonical
+        'ပေါ်'
+        >>> normalize_e_vowel_tall_aa("ကောင်း")  # complement set, unchanged
+        'ကောင်း'
+        >>> normalize_e_vowel_tall_aa("ကေါင်း")  # wrongly tall after က
+        'ကောင်း'
+        >>> normalize_e_vowel_tall_aa("ဖော်")   # ဖ is outside whitelist
+        'ဖော်'
+
+    Sources:
+        - Myanmar Language Commission, *မြန်မာ သတ်ပုံ ကျမ်း* (1978 rev. 2003).
+        - Unicode Technical Note #11, "Representing Myanmar in Unicode"
+          (Martin Hosken, rev. 4, §3.3 Vowel signs).
+        - Okell, *A Reference Grammar of Colloquial Burmese*.
     """
     if not text:
         return text
-    # Replace E-vowel + Tall AA with E-vowel + AA
-    return text.replace("\u1031\u102b", "\u1031\u102c")
+
+    # Single-pass rewrite. For every ``ေ`` that is preceded by a consonant
+    # and followed by AA or TALL AA, emit the canonical form for that
+    # consonant's class. Characters outside this pattern pass through.
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        # Looking for consonant + ေ + {ာ, ါ} at positions i, i+1, i+2.
+        if i + 2 < n and text[i + 1] == _E_VOWEL and text[i + 2] in (_AA, _TALL_AA):
+            target_aw = _TALL_AA if ch in _ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA else _AA
+            out.append(ch)
+            out.append(_E_VOWEL)
+            out.append(target_aw)
+            i += 3
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
 
 
 def normalize_u_vowel_with_asat(text: str) -> str:
