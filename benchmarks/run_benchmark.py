@@ -678,6 +678,16 @@ def run_benchmark(
     if _os.environ.get("MSC_USE_MINED_CONFUSABLE_PAIR", "").lower() in ("1", "true", "yes"):
         config.validation.use_mined_confusable_pair = True
         print("  use_mined_confusable_pair: ENABLED (via MSC_USE_MINED_CONFUSABLE_PAIR)")
+    if _os.environ.get("MSC_USE_SEGMENTER_MERGE_RESCUE", "").lower() in ("1", "true", "yes"):
+        config.validation.use_segmenter_post_merge_rescue = True
+        print("  use_segmenter_post_merge_rescue: ENABLED (via MSC_USE_SEGMENTER_MERGE_RESCUE)")
+    sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
+    if sme_bigram_env:
+        try:
+            config.validation.segmenter_merge_bigram_threshold = float(sme_bigram_env)
+            print(f"  segmenter_merge_bigram_threshold: {sme_bigram_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SEG_MERGE_BIGRAM_THRESHOLD not a float: {sme_bigram_env}")
     mined_backend = _os.environ.get("MSC_MINED_PAIR_BACKEND", "").strip().lower()
     if mined_backend in ("classifier", "mlm"):
         config.validation.mined_pair_backend = mined_backend

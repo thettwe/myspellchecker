@@ -184,6 +184,115 @@ class WordValidator(Validator):
 
     # Helper methods to reduce cyclomatic complexity
 
+    def _merge_probe_adjacent_pairs(self, words: list[str]) -> list[str]:
+        """Rescue over-segmented multi-token fragments by probing merges.
+
+        For each adjacent pair (a, b), check if the concatenation `a+b` is:
+          1. A known loan-word variant (loan_words.yaml + loan_words_mined.yaml)
+          2. A valid dict word (only accepts if at least one side is NOT
+             already a valid word — guards legit adjacent-word pairs)
+          3. A valid dict word with asat (U+103A) appended (missing-asat typo)
+          4. A bigram-associated pair above
+             ``validation.segmenter_merge_bigram_threshold``
+
+        Greedy left-to-right: a merged token can be merged further with its
+        new right neighbour (i.e. three fragments can collapse to one).
+
+        Does not mutate the input list.
+
+        Workstream: segmenter-post-merge-rescue / task: seg-probe-01.
+        """
+        if len(words) < 2:
+            return words
+
+        # Lazy import: avoid import cycle if loan_word_variants imports us.
+        from myspellchecker.core.loan_word_variants import get_loan_word_standard
+
+        ngram_provider = None
+        if self.context_checker is not None:
+            ngram_provider = getattr(self.context_checker, "provider", None)
+        bigram_threshold = self.config.validation.segmenter_merge_bigram_threshold
+
+        # Work on a copy so we don't mutate the caller's list.
+        work = list(words)
+        out: list[str] = []
+        i = 0
+        while i < len(work):
+            if i + 1 >= len(work):
+                out.append(work[i])
+                i += 1
+                continue
+
+            a = work[i]
+            b = work[i + 1]
+            if not a or not b or not a.strip() or not b.strip():
+                out.append(a)
+                i += 1
+                continue
+
+            # Only merge Myanmar-char pairs — skip punctuation, latin tokens.
+            if not (self._is_myanmar_with_config(a) and self._is_myanmar_with_config(b)):
+                out.append(a)
+                i += 1
+                continue
+
+            merged = a + b
+            hit = False
+
+            # Probe 1: variant map (highest confidence).
+            if get_loan_word_standard(merged):
+                hit = True
+
+            # Probe 2: dict word with at-least-one-fragment-OOV guard.
+            if not hit and self.word_repository.is_valid_word(merged):
+                a_valid = self.word_repository.is_valid_word(a)
+                b_valid = self.word_repository.is_valid_word(b)
+                if not (a_valid and b_valid):
+                    hit = True
+
+            # Probe 3: dict word with asat (missing-asat typo).
+            if not hit and self.word_repository.is_valid_word(merged + "\u103a"):
+                hit = True
+
+            # Probe 4: bigram association (weakest — gated by threshold).
+            # Disabled by default (threshold < 0). Even with fragment-rarity
+            # guards a 2026-04-18 sweep showed FPR regressions from 8% → 22%
+            # when enabled. Kept in code for future calibration.
+            if (
+                not hit
+                and bigram_threshold >= 0
+                and ngram_provider is not None
+                and hasattr(ngram_provider, "get_bigram_probability")
+            ):
+                freq_floor = 100  # fragment rarity threshold
+                fa = self.word_repository.get_word_frequency(a) or 0
+                fb = self.word_repository.get_word_frequency(b) or 0
+                one_rare = (
+                    not isinstance(fa, (int, float))
+                    or not isinstance(fb, (int, float))
+                    or min(fa, fb) < freq_floor
+                )
+                if one_rare:
+                    try:
+                        pr = ngram_provider.get_bigram_probability(a, b)
+                        if pr > bigram_threshold:
+                            hit = True
+                    except Exception:
+                        pass
+
+            if hit:
+                # Update the working copy so the merged token can cascade —
+                # next iteration sees `work[i+1] = merged` as the new `a` and
+                # can attempt another merge with work[i+2].
+                work[i + 1] = merged
+                i += 1
+                continue
+
+            out.append(a)
+            i += 1
+
+        return out
+
     def _is_valid_compound(self, word: str) -> bool:
         """Check if word is a valid compound (splits into valid parts with no edits).
 
@@ -548,6 +657,13 @@ class WordValidator(Validator):
         """Validate one tokenization path and return word-level errors."""
         errors: list[Error] = []
         current_idx = 0
+
+        # Segmenter post-merge rescue (seg-probe-01). Rewrites `words` in place
+        # by merging adjacent fragments whose concatenation hits a variant
+        # map / dict / dict+asat / bigram probe. Off by default until FPR
+        # calibration (seg-fpr-gate-01).
+        if self.config.validation.use_segmenter_post_merge_rescue:
+            words = self._merge_probe_adjacent_pairs(words)
 
         myanmar_words = [
             w

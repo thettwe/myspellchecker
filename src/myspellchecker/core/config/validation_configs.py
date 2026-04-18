@@ -203,6 +203,31 @@ class ValidationConfig(BaseModel):
             "variant lookup is rule-based and curated/gated by linguist review."
         ),
     )
+    # Segmenter post-merge rescue (seg-probe-01; default off until FPR gate).
+    use_segmenter_post_merge_rescue: bool = Field(
+        default=False,
+        description=(
+            "Enable post-segmentation probe-and-merge rescue in WordValidator. "
+            "For each adjacent fragment pair (a, b) in the segmenter output, "
+            "probe `a+b` against the loan-word variant map, dict, dict+asat, "
+            "and bigram store. If any probe hits, replace (a, b) with the "
+            "merged token for validation. Off by default until FPR calibration "
+            "(seg-fpr-gate-01) confirms the thresholds below hold."
+        ),
+    )
+    segmenter_merge_bigram_threshold: float = Field(
+        default=-1.0,
+        ge=-1.0,
+        description=(
+            "Minimum bigram probability for the weakest merge-probe (bigram "
+            "association). Negative = probe 4 disabled (the default). Setting "
+            "to 0.0 accepts any positive probability; higher = stricter. "
+            "Probe 4 is hard to calibrate cleanly — sweep in 2026-04-18 "
+            "showed large FPR regressions even with fragment-rarity guards. "
+            "Kept in code for future calibration but disabled by default. "
+            "See seg-fpr-gate-01."
+        ),
+    )
     # Statistical Confusable Gate (priority 24)
     use_statistical_confusable_gate: bool = Field(
         default=True,
