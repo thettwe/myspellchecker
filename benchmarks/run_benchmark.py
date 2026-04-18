@@ -509,6 +509,7 @@ def run_benchmark(
     reranker_path: Optional[Path] = None,
     confidence_gap: float | None = None,
     scope: str = "spelling",
+    domain: str = "all",
     enable_fusion: bool = False,
     fusion_threshold: float = 0.5,
     calibration_path: Path | None = None,
@@ -523,6 +524,11 @@ def run_benchmark(
         warmup: Number of warmup runs before timing.
         scope: Comma-separated scopes to include (default: "spelling").
             Use "all" to include every error regardless of scope field.
+        domain: Spelling-first domain filter — "spelling", "grammar", "both",
+            or "all" (default). Reads the per-span `domain` field added in
+            benchmark v1.4.0. Combined with `scope` as AND (span must pass
+            both filters to be counted). Errors without a `domain` field are
+            conservatively treated as in-domain for "all" only.
 
         enable_ner: Enable NER-based FP suppression (PER+LOC) using heuristic
             NER with place-name dictionary.
@@ -666,6 +672,129 @@ def run_benchmark(
         else:
             print("  Confusable preset: relaxed (loosened guards)")
 
+    # Optional env-driven overrides (useful for ablation without extra CLI flags).
+    import os as _os
+
+    if _os.environ.get("MSC_USE_MINED_CONFUSABLE_PAIR", "").lower() in ("1", "true", "yes"):
+        config.validation.use_mined_confusable_pair = True
+        print("  use_mined_confusable_pair: ENABLED (via MSC_USE_MINED_CONFUSABLE_PAIR)")
+    mined_backend = _os.environ.get("MSC_MINED_PAIR_BACKEND", "").strip().lower()
+    if mined_backend in ("classifier", "mlm"):
+        config.validation.mined_pair_backend = mined_backend
+        print(f"  mined_pair_backend: {mined_backend} (via MSC_MINED_PAIR_BACKEND)")
+    mined_classifier_path = _os.environ.get("MSC_MINED_PAIR_CLASSIFIER_PATH", "").strip()
+    if mined_classifier_path:
+        config.validation.mined_pair_classifier_path = mined_classifier_path
+        print(f"  mined_pair_classifier_path: {mined_classifier_path}")
+    mined_margin_env = _os.environ.get("MSC_MINED_PAIR_MARGIN", "").strip()
+    if mined_margin_env:
+        try:
+            config.validation.mined_pair_mlm_margin = float(mined_margin_env)
+            print(f"  mined_pair_mlm_margin: {mined_margin_env} (via MSC_MINED_PAIR_MARGIN)")
+        except ValueError:
+            print(f"  WARNING: MSC_MINED_PAIR_MARGIN not a float: {mined_margin_env}")
+    mined_ratio_env = _os.environ.get("MSC_MINED_PAIR_FREQ_RATIO", "").strip()
+    if mined_ratio_env:
+        try:
+            config.validation.mined_pair_freq_ratio = float(mined_ratio_env)
+            print(f"  mined_pair_freq_ratio: {mined_ratio_env} (via MSC_MINED_PAIR_FREQ_RATIO)")
+        except ValueError:
+            print(f"  WARNING: MSC_MINED_PAIR_FREQ_RATIO not a float: {mined_ratio_env}")
+    mined_lfm_env = _os.environ.get("MSC_MINED_PAIR_LOW_FREQ_MIN", "").strip()
+    if mined_lfm_env:
+        try:
+            config.validation.mined_pair_low_freq_min = int(mined_lfm_env)
+            print(f"  mined_pair_low_freq_min: {mined_lfm_env} (via MSC_MINED_PAIR_LOW_FREQ_MIN)")
+        except ValueError:
+            print(f"  WARNING: MSC_MINED_PAIR_LOW_FREQ_MIN not an int: {mined_lfm_env}")
+
+    # BrokenCompoundStrategy overrides (broken_compound FN reduction)
+    bc_rare_env = _os.environ.get("MSC_BC_RARE_THRESHOLD", "").strip()
+    bc_cmin_env = _os.environ.get("MSC_BC_COMPOUND_MIN_FREQ", "").strip()
+    bc_ratio_env = _os.environ.get("MSC_BC_COMPOUND_RATIO", "").strip()
+    if bc_rare_env:
+        config.validation.broken_compound_rare_threshold = int(bc_rare_env)
+        print(f"  broken_compound_rare_threshold: {bc_rare_env}")
+    if bc_cmin_env:
+        config.validation.broken_compound_min_frequency = int(bc_cmin_env)
+        print(f"  broken_compound_min_frequency: {bc_cmin_env}")
+    if bc_ratio_env:
+        config.validation.broken_compound_ratio = float(bc_ratio_env)
+        print(f"  broken_compound_ratio: {bc_ratio_env}")
+
+    # HiddenCompoundStrategy overrides
+    hc_max_syl_env = _os.environ.get("MSC_HC_MAX_SYLLABLES", "").strip()
+    hc_max_var_env = _os.environ.get("MSC_HC_MAX_VARIANTS", "").strip()
+    hc_min_freq_env = _os.environ.get("MSC_HC_MIN_FREQ", "").strip()
+    hc_conf_env = _os.environ.get("MSC_HC_CONFIDENCE_FLOOR", "").strip()
+    hc_curated_env = _os.environ.get("MSC_HC_CURATED_ONLY", "").strip().lower()
+    if hc_max_syl_env:
+        config.validation.hidden_compound_max_token_syllables = int(hc_max_syl_env)
+        print(f"  hidden_compound_max_token_syllables: {hc_max_syl_env}")
+    if hc_max_var_env:
+        config.validation.hidden_compound_max_variants_per_token = int(hc_max_var_env)
+        print(f"  hidden_compound_max_variants_per_token: {hc_max_var_env}")
+    if hc_min_freq_env:
+        config.validation.hidden_compound_min_frequency = int(hc_min_freq_env)
+        print(f"  hidden_compound_min_frequency: {hc_min_freq_env}")
+    if hc_conf_env:
+        config.validation.hidden_compound_confidence_floor = float(hc_conf_env)
+        print(f"  hidden_compound_confidence_floor: {hc_conf_env}")
+    if hc_curated_env in ("false", "0", "no", "off"):
+        config.validation.hidden_compound_curated_only = False
+        print("  hidden_compound_curated_only: False")
+
+    # SyllableWindowOOVStrategy overrides (enable + tune)
+    sw_env = _os.environ.get("MSC_USE_SYLLABLE_WINDOW_OOV", "").strip().lower()
+    sw_sizes_env = _os.environ.get("MSC_SW_WINDOW_SIZES", "").strip()
+    sw_minfreq_env = _os.environ.get("MSC_SW_MIN_FREQ", "").strip()
+    sw_conf_env = _os.environ.get("MSC_SW_CONFIDENCE_FLOOR", "").strip()
+    sw_ed_env = _os.environ.get("MSC_SW_MAX_ED", "").strip()
+    if sw_env in ("1", "true", "yes", "on"):
+        config.validation.use_syllable_window_oov = True
+        print("  use_syllable_window_oov: True")
+    if sw_sizes_env:
+        sizes = tuple(int(s) for s in sw_sizes_env.split(",") if s.strip())
+        config.validation.syllable_window_sizes = sizes
+        print(f"  syllable_window_sizes: {sizes}")
+    if sw_minfreq_env:
+        config.validation.syllable_window_min_frequency = int(sw_minfreq_env)
+        print(f"  syllable_window_min_frequency: {sw_minfreq_env}")
+    if sw_conf_env:
+        config.validation.syllable_window_confidence_floor = float(sw_conf_env)
+        print(f"  syllable_window_confidence_floor: {sw_conf_env}")
+    if sw_ed_env:
+        config.validation.syllable_window_max_edit_distance = int(sw_ed_env)
+        print(f"  syllable_window_max_edit_distance: {sw_ed_env}")
+
+    # ByT5 safety-net overrides
+    byt5_env = _os.environ.get("MSC_USE_BYT5_SAFETY_NET", "").strip().lower()
+    byt5_path_env = _os.environ.get("MSC_BYT5_MODEL_PATH", "").strip()
+    byt5_margin_env = _os.environ.get("MSC_BYT5_MLM_MARGIN", "").strip()
+    byt5_min_prone_env = _os.environ.get("MSC_BYT5_MIN_TYPO_PRONE", "").strip()
+    byt5_max_chars_env = _os.environ.get("MSC_BYT5_MAX_CHARS", "").strip()
+    if byt5_env in ("1", "true", "yes", "on"):
+        config.validation.use_byt5_safety_net = True
+        print("  use_byt5_safety_net: True")
+    if byt5_path_env:
+        config.validation.byt5_safety_net_model_path = byt5_path_env
+        print(f"  byt5_safety_net_model_path: {byt5_path_env}")
+    if byt5_margin_env:
+        config.validation.byt5_safety_net_mlm_gate_margin = float(byt5_margin_env)
+        print(f"  byt5_safety_net_mlm_gate_margin: {byt5_margin_env}")
+    if byt5_min_prone_env:
+        config.validation.byt5_safety_net_min_typo_prone_chars = int(byt5_min_prone_env)
+        print(f"  byt5_safety_net_min_typo_prone_chars: {byt5_min_prone_env}")
+    if byt5_max_chars_env:
+        config.validation.byt5_safety_net_max_sentence_chars = int(byt5_max_chars_env)
+        print(f"  byt5_safety_net_max_sentence_chars: {byt5_max_chars_env}")
+    # Auto-register ByT5 as suppression-immune when enabled (class name is
+    # what the context_validator ultimately stamps on the error).
+    if config.validation.use_byt5_safety_net:
+        existing_immune = set(config.validation.suppression_immune_strategies or ())
+        existing_immune.add("ByT5SafetyNetStrategy")
+        config.validation.suppression_immune_strategies = frozenset(existing_immune)
+
     # Initialize checker with specified database
     provider = SQLiteProvider(database_path=str(db_path))
     checker = SpellChecker(config=config, provider=provider)
@@ -711,6 +840,25 @@ def run_benchmark(
             return True
         return err.get("scope", "spelling") in _scope_set
 
+    # Domain filtering — spelling-first (benchmark v1.4.0+).
+    _domain_norm = domain.strip().lower() if domain else "all"
+    if _domain_norm not in {"spelling", "grammar", "both", "all"}:
+        print(
+            f"WARNING: unknown --domain {_domain_norm!r}; falling back to 'all'",
+            file=sys.stderr,
+        )
+        _domain_norm = "all"
+
+    def _in_domain(err: dict) -> bool:
+        """Return True if gold error passes the active domain filter."""
+        if _domain_norm == "all":
+            return True
+        err_domain = err.get("domain")
+        if err_domain is None:
+            # v1.3.x benchmarks or hand-added spans without a label — pass only for 'all'.
+            return False
+        return err_domain == _domain_norm
+
     # Run benchmark
     results: list[SentenceResult] = []
     rerank_rule_telemetry: dict[str, dict[str, int]] = {}
@@ -718,14 +866,16 @@ def run_benchmark(
     fn_reason_telemetry: dict[str, Any] = {"histogram": {}, "examples": []}
     total_start = time.perf_counter()
     total_out_of_scope = 0
+    total_out_of_domain = 0
 
     for sentence in sentences:
         input_text = sentence["input"]
         is_clean = sentence["is_clean"]
         all_gold_errors = sentence.get("expected_errors", [])
-        in_scope_errors = [e for e in all_gold_errors if _in_scope(e)]
-        out_of_scope_errors = [e for e in all_gold_errors if not _in_scope(e)]
-        total_out_of_scope += len(out_of_scope_errors)
+        in_scope_errors = [e for e in all_gold_errors if _in_scope(e) and _in_domain(e)]
+        out_of_scope_errors = [e for e in all_gold_errors if not (_in_scope(e) and _in_domain(e))]
+        total_out_of_scope += sum(1 for e in all_gold_errors if not _in_scope(e))
+        total_out_of_domain += sum(1 for e in all_gold_errors if _in_scope(e) and not _in_domain(e))
         # For matching, use ALL gold errors so out-of-scope matches
         # absorb system detections (not counted as FP).
         gold_errors = all_gold_errors
@@ -876,6 +1026,8 @@ def run_benchmark(
         fn_reason_telemetry=fn_reason_telemetry,
         scope=scope,
         total_out_of_scope=total_out_of_scope,
+        domain=_domain_norm,
+        total_out_of_domain=total_out_of_domain,
     )
     report["config"]["targeted_rerank_hints"] = targeted_rerank_hints
     report["config"]["targeted_candidate_injections"] = targeted_candidate_injections
@@ -897,6 +1049,8 @@ def compute_report(
     fn_reason_telemetry: dict[str, Any] | None = None,
     scope: str = "spelling",
     total_out_of_scope: int = 0,
+    domain: str = "all",
+    total_out_of_domain: int = 0,
 ) -> dict:
     """Compute all metrics and produce the final report."""
 
@@ -1016,6 +1170,8 @@ def compute_report(
             "error_sentences": len(results) - clean_total,
             "scope": scope,
             "out_of_scope_errors_excluded": total_out_of_scope,
+            "domain": domain,
+            "out_of_domain_errors_excluded": total_out_of_domain,
         },
         "overall_metrics": {
             "detection": {
@@ -1606,6 +1762,18 @@ def main():
             "Use 'all' to include everything. (default: spelling)"
         ),
     )
+    parser.add_argument(
+        "--domain",
+        type=str,
+        choices=["spelling", "grammar", "both", "all"],
+        default="all",
+        help=(
+            "Spelling-first domain filter (benchmark v1.4.0+). Reads the per-span "
+            "`domain` field assigned by scripts/label_benchmark_domains.py. "
+            "Combined with --scope as AND. Errors without a `domain` field are "
+            "excluded from non-'all' runs. (default: all)"
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -1643,6 +1811,7 @@ def main():
         reranker_path=args.reranker,
         confidence_gap=args.confidence_gap,
         scope=args.scope,
+        domain=args.domain,
         enable_fusion=args.fusion,
         fusion_threshold=args.fusion_threshold,
         calibration_path=args.calibration,

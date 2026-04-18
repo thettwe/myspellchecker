@@ -30,6 +30,7 @@ coverage.json
 
 # Benchmark results (keep benchmark scripts)
 benchmarks/results/
+benchmarks/_tmp/
 !benchmarks/*.py
 
 # Generated database files
