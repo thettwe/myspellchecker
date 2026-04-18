@@ -777,6 +777,28 @@ def run_benchmark(
         config.validation.syllable_window_max_edit_distance = int(sw_ed_env)
         print(f"  syllable_window_max_edit_distance: {sw_ed_env}")
 
+    # Tone safety-net overrides (tzn-implement-tone-safety-01).
+    # Probes trailing tone insert / delete candidates against the dictionary
+    # for the D2 real-word confusion bucket. Default off; enable via
+    # MSC_USE_TONE_SAFETY_NET=1. Scalar knobs let the benchmark grid the
+    # precision vs coverage tradeoff without a code change.
+    tsn_env = _os.environ.get("MSC_USE_TONE_SAFETY_NET", "").strip().lower()
+    tsn_minfreq_env = _os.environ.get("MSC_TONE_SAFETY_NET_MIN_FREQ", "").strip()
+    tsn_ratio_env = _os.environ.get("MSC_TONE_SAFETY_NET_FREQ_RATIO", "").strip()
+    tsn_skip_env = _os.environ.get("MSC_TONE_SAFETY_NET_SKIP_ABOVE", "").strip()
+    if tsn_env in ("1", "true", "yes", "on"):
+        config.validation.use_tone_safety_net = True
+        print("  use_tone_safety_net: True")
+    if tsn_minfreq_env:
+        config.validation.tone_safety_net_min_frequency = int(tsn_minfreq_env)
+        print(f"  tone_safety_net_min_frequency: {tsn_minfreq_env}")
+    if tsn_ratio_env:
+        config.validation.tone_safety_net_freq_ratio = float(tsn_ratio_env)
+        print(f"  tone_safety_net_freq_ratio: {tsn_ratio_env}")
+    if tsn_skip_env:
+        config.validation.tone_safety_net_skip_above_freq = int(tsn_skip_env)
+        print(f"  tone_safety_net_skip_above_freq: {tsn_skip_env}")
+
     # Pre-segmenter raw-token SymSpell probe overrides (cgc-implement-01)
     raw_env = _os.environ.get("MSC_USE_PRE_SEGMENTER_RAW_PROBE", "").strip().lower()
     raw_ed_env = _os.environ.get("MSC_RAW_PROBE_MAX_ED", "").strip()

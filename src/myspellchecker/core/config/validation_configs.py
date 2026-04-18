@@ -803,6 +803,62 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # Tone-safety-net candidate generator (priority 22, structural phase).
+    # Targets the D2 bucket from [[Tone-Zawgyi Slice 2026-04-19]]: real-word
+    # confusions where the gold form differs from the typo by a single
+    # trailing tone character {း, ့, ံ, ်}. Disabled by default until
+    # tzn-benchmark-01 measures composite + FPR impact. Audit evidence
+    # suggests ~17 net-new FN addressable after dedup with the already-
+    # shipped mined_confusable_pair strategy.
+    use_tone_safety_net: bool = Field(
+        default=False,
+        description=(
+            "Enable ToneSafetyNetStrategy: probe trailing tone insert / delete "
+            "candidates for real-word confusions where both typo and gold are "
+            "valid dict words. Runs at priority 22 (before StatisticalConfusable "
+            "and BrokenCompound). Default-off pending benchmark gate."
+        ),
+    )
+    tone_safety_net_min_frequency: int = Field(
+        default=1000,
+        ge=0,
+        description=(
+            "Minimum dictionary frequency a tone-variant candidate must clear. "
+            "Calibrated higher than the raw-token probe (100) because real-word "
+            "confusion has an asymmetric FP cost — common tokens must stay "
+            "un-flagged unless the alternative is demonstrably more frequent."
+        ),
+    )
+    tone_safety_net_freq_ratio: float = Field(
+        default=10.0,
+        gt=0.0,
+        description=(
+            "Minimum ``freq(candidate) / freq(token)`` ratio required to emit "
+            "a correction. A value of 10 means the tone-variant must be at "
+            "least 10x more common than the token in the dictionary corpus. "
+            "Lowering this will widen coverage at the cost of FPR."
+        ),
+    )
+    tone_safety_net_skip_above_freq: int = Field(
+        default=50000,
+        ge=0,
+        description=(
+            "Do not probe tokens whose own frequency already exceeds this "
+            "value. Guards very common words (particles, pronouns, frequent "
+            "verbs) from being second-guessed by the tone-variant lookup."
+        ),
+    )
+    tone_safety_net_confidence: float = Field(
+        default=0.80,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence score emitted for tone-safety-net errors. Calibrated "
+            "below the raw-token probe's 0.85 because real-word confusion "
+            "carries more context ambiguity than OOV token recovery."
+        ),
+    )
+
     # Syllable-window OOV detection (priority 22, structural phase).
     # Disabled by default: requires per-process SymSpell caching to amortise
     # the per-window lookup cost before it is viable in production.

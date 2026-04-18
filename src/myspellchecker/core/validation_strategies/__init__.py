@@ -65,6 +65,9 @@ from myspellchecker.core.validation_strategies.syllable_window_oov_strategy impo
     SyllableWindowOOVStrategy,
 )
 from myspellchecker.core.validation_strategies.syntactic_strategy import SyntacticValidationStrategy
+from myspellchecker.core.validation_strategies.tone_safety_net_strategy import (
+    ToneSafetyNetStrategy,
+)
 from myspellchecker.core.validation_strategies.tone_strategy import ToneValidationStrategy
 from myspellchecker.core.validation_strategies.visarga_strategy import VisargaStrategy
 
@@ -77,6 +80,7 @@ __all__ = [
     "SyntacticValidationStrategy",
     "StatisticalConfusableStrategy",
     "SyllableWindowOOVStrategy",
+    "ToneSafetyNetStrategy",
     "HiddenCompoundStrategy",
     "PreSegmenterRawProbeStrategy",
     "BrokenCompoundStrategy",
