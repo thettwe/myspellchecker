@@ -777,6 +777,24 @@ def run_benchmark(
         config.validation.syllable_window_max_edit_distance = int(sw_ed_env)
         print(f"  syllable_window_max_edit_distance: {sw_ed_env}")
 
+    # Pre-segmenter raw-token SymSpell probe overrides (cgc-implement-01)
+    raw_env = _os.environ.get("MSC_USE_PRE_SEGMENTER_RAW_PROBE", "").strip().lower()
+    raw_ed_env = _os.environ.get("MSC_RAW_PROBE_MAX_ED", "").strip()
+    raw_freq_env = _os.environ.get("MSC_RAW_PROBE_MIN_FREQ", "").strip()
+    raw_len_env = _os.environ.get("MSC_RAW_PROBE_MAX_LEN", "").strip()
+    if raw_env in ("1", "true", "yes", "on"):
+        config.validation.use_pre_segmenter_raw_probe = True
+        print("  use_pre_segmenter_raw_probe: True")
+    if raw_ed_env:
+        config.validation.pre_segmenter_raw_probe_max_ed = int(raw_ed_env)
+        print(f"  pre_segmenter_raw_probe_max_ed: {raw_ed_env}")
+    if raw_freq_env:
+        config.validation.pre_segmenter_raw_probe_min_freq = int(raw_freq_env)
+        print(f"  pre_segmenter_raw_probe_min_freq: {raw_freq_env}")
+    if raw_len_env:
+        config.validation.pre_segmenter_raw_probe_max_length = int(raw_len_env)
+        print(f"  pre_segmenter_raw_probe_max_length: {raw_len_env}")
+
     # ByT5 safety-net overrides
     byt5_env = _os.environ.get("MSC_USE_BYT5_SAFETY_NET", "").strip().lower()
     byt5_path_env = _os.environ.get("MSC_BYT5_MODEL_PATH", "").strip()

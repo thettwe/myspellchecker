@@ -737,6 +737,71 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # Pre-segmenter raw-token SymSpell probe (priority 23, structural phase).
+    # Runs SymSpell.lookup(raw_token, level='word') on whitespace/punctuation-
+    # delimited tokens BEFORE they reach the segmenter. Recovers compound typos
+    # the segmenter would otherwise fragment into piecewise-valid subtokens
+    # (e.g. "စွမ်းဆောင်ရည" → ["စွမ်းဆောင်", "ရ", "ည"] hides the asat drop).
+    # See [[Pre-Segmenter Raw-Token SymSpell Probe 2026-04-18]] decision doc.
+    use_pre_segmenter_raw_probe: bool = Field(
+        default=False,
+        description=(
+            "Run SymSpell.lookup(raw_token, level='word') on unsegmented "
+            "whitespace-delimited tokens before segmentation. Catches typo'd "
+            "compounds whose segmenter fragmentation makes them invisible to "
+            "piecewise strategies. Default off until the benchmark gate on "
+            "cgc-benchmark-01 confirms composite hold + FPR ≤ 8.5%."
+        ),
+    )
+    pre_segmenter_raw_probe_max_ed: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description=(
+            "Maximum SymSpell edit distance accepted for a raw-token probe hit. "
+            "Raising above 2 introduces a larger FP hit (real-word confusion) "
+            "than candidate-gen gain; keep at 2 unless a dedicated precision "
+            "workstream lowers that ceiling."
+        ),
+    )
+    pre_segmenter_raw_probe_min_freq: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum dictionary frequency for a SymSpell suggestion to be "
+            "emitted by the raw-token probe. Guards against swapping a rare "
+            "OOV compound with a homophone-like dict neighbour."
+        ),
+    )
+    pre_segmenter_raw_probe_max_length: int = Field(
+        default=15,
+        ge=1,
+        description=(
+            "Maximum character length for a raw token to be probed. Matches "
+            "SymSpell's default max_word_length; tokens beyond this are "
+            "excluded from SymSpell's index and cannot be recovered."
+        ),
+    )
+    pre_segmenter_raw_probe_max_length_diff: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Maximum absolute length difference between the raw token and the "
+            "suggested candidate. Larger differences usually indicate a wrong "
+            "compound join or phrase substitution rather than a typo."
+        ),
+    )
+    pre_segmenter_raw_probe_confidence: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence score emitted for raw-token probe errors. Calibrated "
+            "to survive the meta-classifier's learnt boundary for word-level "
+            "typos without displacing higher-priority structural emissions."
+        ),
+    )
+
     # Syllable-window OOV detection (priority 22, structural phase).
     # Disabled by default: requires per-process SymSpell caching to amortise
     # the per-window lookup cost before it is viable in production.

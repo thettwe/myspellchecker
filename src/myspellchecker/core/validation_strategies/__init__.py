@@ -51,6 +51,9 @@ from myspellchecker.core.validation_strategies.orthography_strategy import (
 from myspellchecker.core.validation_strategies.pos_sequence_strategy import (
     POSSequenceValidationStrategy,
 )
+from myspellchecker.core.validation_strategies.pre_segmenter_raw_probe_strategy import (
+    PreSegmenterRawProbeStrategy,
+)
 from myspellchecker.core.validation_strategies.question_strategy import (
     QuestionStructureValidationStrategy,
 )
@@ -75,6 +78,7 @@ __all__ = [
     "StatisticalConfusableStrategy",
     "SyllableWindowOOVStrategy",
     "HiddenCompoundStrategy",
+    "PreSegmenterRawProbeStrategy",
     "BrokenCompoundStrategy",
     "POSSequenceValidationStrategy",
     "QuestionStructureValidationStrategy",
