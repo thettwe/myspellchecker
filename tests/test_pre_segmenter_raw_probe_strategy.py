@@ -84,16 +84,25 @@ def _context(sentence: str, words: list[str]) -> ValidationContext:
 
 
 class TestConfigWiring:
-    def test_flag_defaults_off(self) -> None:
+    def test_flag_defaults_on(self) -> None:
+        """Shipped default-on after cgc-benchmark-01 confirmed the gate."""
         config = SpellCheckerConfig()
-        assert config.validation.use_pre_segmenter_raw_probe is False
+        assert config.validation.use_pre_segmenter_raw_probe is True
         assert config.validation.pre_segmenter_raw_probe_max_ed == 2
         assert config.validation.pre_segmenter_raw_probe_min_freq == 100
         assert config.validation.pre_segmenter_raw_probe_max_length == 15
 
-    def test_strategy_not_registered_when_disabled(self, provider: MemoryProvider) -> None:
+    def test_strategy_not_registered_when_flag_disabled(
+        self, provider: MemoryProvider, sym_hit: _FakeSymSpell
+    ) -> None:
+        """Explicitly turning the flag off removes the strategy from the list."""
         config = SpellCheckerConfig()
-        strategies = build_context_validation_strategies(config=config, provider=provider)
+        config.validation.use_pre_segmenter_raw_probe = False
+        strategies = build_context_validation_strategies(
+            config=config,
+            provider=provider,
+            symspell=sym_hit,  # type: ignore[arg-type]
+        )
         names = [s.__class__.__name__ for s in strategies]
         assert "PreSegmenterRawProbeStrategy" not in names
 

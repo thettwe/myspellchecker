@@ -744,13 +744,14 @@ class ValidationConfig(BaseModel):
     # (e.g. "စွမ်းဆောင်ရည" → ["စွမ်းဆောင်", "ရ", "ည"] hides the asat drop).
     # See [[Pre-Segmenter Raw-Token SymSpell Probe 2026-04-18]] decision doc.
     use_pre_segmenter_raw_probe: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Run SymSpell.lookup(raw_token, level='word') on unsegmented "
             "whitespace-delimited tokens before segmentation. Catches typo'd "
             "compounds whose segmenter fragmentation makes them invisible to "
-            "piecewise strategies. Default off until the benchmark gate on "
-            "cgc-benchmark-01 confirms composite hold + FPR ≤ 8.5%."
+            "piecewise strategies. Shipped default-on after cgc-benchmark-01: "
+            "composite 0.6053 → 0.6137 (+0.0084), candidate_not_generated "
+            "789 → 707 (−82 FN), FPR delta +0.05 pp (essentially flat)."
         ),
     )
     pre_segmenter_raw_probe_max_ed: int = Field(
