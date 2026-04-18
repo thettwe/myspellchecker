@@ -680,6 +680,32 @@ def build_context_validation_strategies(
         )
         logger.debug("Added ConfusableCompoundClassifierStrategy (priority 47)")
 
+    # Priority 46: MLM span-mask candidate generator.
+    # Wraps semantic-v2.4 as a candidate generator for real-word confusions,
+    # the highest-ceiling lever among the no-train prototypes per the
+    # 2026-04-18 probe (+297 TP simulated at 8% position-level FP). Must run
+    # before ConfusableCompoundClassifier so the MLM's proposal is seen by
+    # the classifier's downstream decision.
+    if semantic_checker and validation_config.use_mlm_span_mask_candgen:
+        from myspellchecker.core.validation_strategies.mlm_span_mask_candgen_strategy import (
+            MLMSpanMaskCandGenStrategy,
+        )
+
+        strategies.append(
+            MLMSpanMaskCandGenStrategy(
+                semantic_checker=semantic_checker,
+                provider=provider,
+                enabled=True,
+                top_k=validation_config.mlm_candgen_top_k,
+                margin=validation_config.mlm_candgen_margin,
+                max_edit_distance=validation_config.mlm_candgen_max_ed,
+                skip_above_freq=validation_config.mlm_candgen_skip_above_freq,
+                min_token_length=validation_config.mlm_candgen_min_token_length,
+                confidence=validation_config.mlm_candgen_confidence,
+            )
+        )
+        logger.debug("Added MLMSpanMaskCandGenStrategy (priority 46)")
+
     # Priority 48: Confusable Semantic Detection (MLM-enhanced)
     if semantic_checker and validation_config.use_confusable_semantic:
         # Load curated confusable pairs from YAML

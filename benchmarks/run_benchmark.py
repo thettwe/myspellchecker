@@ -777,6 +777,27 @@ def run_benchmark(
         config.validation.syllable_window_max_edit_distance = int(sw_ed_env)
         print(f"  syllable_window_max_edit_distance: {sw_ed_env}")
 
+    # MLM span-mask candgen overrides (mlm-cg-prototype-01).
+    # Wraps semantic-v2.4 as a candidate generator for real-word confusions.
+    # Default off; enable via MSC_USE_MLM_CANDGEN=1. Scalars let the
+    # benchmark grid the K/margin/ED trade-offs without a code change.
+    mlm_cg_env = _os.environ.get("MSC_USE_MLM_CANDGEN", "").strip().lower()
+    mlm_cg_k_env = _os.environ.get("MSC_MLM_CANDGEN_TOP_K", "").strip()
+    mlm_cg_margin_env = _os.environ.get("MSC_MLM_CANDGEN_MARGIN", "").strip()
+    mlm_cg_ed_env = _os.environ.get("MSC_MLM_CANDGEN_MAX_ED", "").strip()
+    if mlm_cg_env in ("1", "true", "yes", "on"):
+        config.validation.use_mlm_span_mask_candgen = True
+        print("  use_mlm_span_mask_candgen: True")
+    if mlm_cg_k_env:
+        config.validation.mlm_candgen_top_k = int(mlm_cg_k_env)
+        print(f"  mlm_candgen_top_k: {mlm_cg_k_env}")
+    if mlm_cg_margin_env:
+        config.validation.mlm_candgen_margin = float(mlm_cg_margin_env)
+        print(f"  mlm_candgen_margin: {mlm_cg_margin_env}")
+    if mlm_cg_ed_env:
+        config.validation.mlm_candgen_max_ed = int(mlm_cg_ed_env)
+        print(f"  mlm_candgen_max_ed: {mlm_cg_ed_env}")
+
     # Tone safety-net overrides (tzn-implement-tone-safety-01).
     # Probes trailing tone insert / delete candidates against the dictionary
     # for the D2 real-word confusion bucket. Default off; enable via

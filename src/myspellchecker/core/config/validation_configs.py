@@ -803,6 +803,84 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # MLM-as-candidate-generator (priority 46).
+    # Wraps semantic-v2.4 RoBERTa span-masking as a production candidate
+    # generator — the existing MLM is already deployed for scoring at
+    # priorities 48 (ConfusableSemantic) and 70 (Semantic); this strategy
+    # adds a *generation* path. Probe (2026-04-18) measured +297 TP at 8%
+    # position-level FP rate on the sweet-spot (K=10, margin=2.0). Default
+    # off pending the mlm-cg-benchmark-01 gate.
+    use_mlm_span_mask_candgen: bool = Field(
+        default=False,
+        description=(
+            "Enable MLMSpanMaskCandGenStrategy: use semantic-v2.4 span-masking "
+            "as a production candidate generator for real-word confusions. "
+            "Fires per Myanmar token, filters predictions by ED ≤ 2 + dict "
+            "membership, gates on score(candidate) − score(typo) ≥ margin. "
+            "Default-off pending benchmark gate."
+        ),
+    )
+    mlm_candgen_top_k: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description=(
+            "Number of MLM top predictions to decode per masked token. "
+            "Probe sweet spot: 10. Raising to 50 adds only ~3pp recall but "
+            "doubles the FP surface because more unrelated words survive "
+            "the ED filter."
+        ),
+    )
+    mlm_candgen_margin: float = Field(
+        default=2.0,
+        ge=0.0,
+        description=(
+            "Required ``score(candidate) − score(typo)`` margin. Higher = "
+            "fewer emissions, higher precision. Probe-simulated trade "
+            "points: m=1.0 → 311 TP / 10.8% FP, m=2.0 → 297 TP / 8% FP, "
+            "m=3.0 → 279 TP / 5.6% FP."
+        ),
+    )
+    mlm_candgen_max_ed: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description=(
+            "Maximum edit distance accepted between the typo and the MLM "
+            "candidate. ED = 2 keeps the strategy on-task for typo repair; "
+            "widening to 3 admits whole-word semantic replacements that "
+            "belong in a separate workstream."
+        ),
+    )
+    mlm_candgen_skip_above_freq: int = Field(
+        default=50_000,
+        ge=0,
+        description=(
+            "Skip tokens whose own frequency already exceeds this value. "
+            "Prevents the MLM from second-guessing common words where "
+            "user intent is overwhelmingly the written form."
+        ),
+    )
+    mlm_candgen_min_token_length: int = Field(
+        default=2,
+        ge=1,
+        description=(
+            "Minimum token length probed by the MLM. Single-char tokens "
+            "produce very noisy MLM predictions; skipping them trades a "
+            "tiny amount of recall for a large FPR reduction."
+        ),
+    )
+    mlm_candgen_confidence: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence stamped on MLM-candgen errors. Calibrated below "
+            "the raw-token probe's 0.85 because real-word confusion carries "
+            "more context ambiguity than OOV recovery."
+        ),
+    )
+
     # Tone-safety-net candidate generator (priority 22, structural phase).
     # Targets the D2 bucket from [[Tone-Zawgyi Slice 2026-04-19]]: real-word
     # confusions where the gold form differs from the typo by a single
