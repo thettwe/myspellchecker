@@ -28,7 +28,6 @@ definition.
 
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
 
 from myspellchecker.core.constants import ET_WORD
@@ -53,12 +52,6 @@ _DOT_BELOW = "\u1037"  # ့
 _ANUSVARA = "\u1036"  # ံ
 _ASAT = "\u103a"  # ်
 _TONE_CHARS: tuple[str, ...] = (_VISARGA, _DOT_BELOW, _ANUSVARA)
-
-# Whitespace / punctuation delimited Myanmar spans — the same raw-token
-# grammar used by :class:`PreSegmenterRawProbeStrategy`. Extended-A / B
-# ranges are included so tokens in other Myanmar-script languages still
-# reach downstream strategies without being intercepted.
-_RAW_TOKEN_REGEX = re.compile(r"[\u1000-\u109F\uA9E0-\uA9FF\uAA60-\uAA7F]+")
 
 
 class ToneSafetyNetStrategy(ValidationStrategy):
@@ -122,43 +115,41 @@ class ToneSafetyNetStrategy(ValidationStrategy):
         if not self.enabled:
             return []
 
-        sentence = context.sentence
-        if not sentence:
+        words = context.words
+        if not words:
             return []
 
-        sentence_base = self._resolve_sentence_base(context)
         errors: list[Error] = []
 
-        for match in _RAW_TOKEN_REGEX.finditer(sentence):
-            raw_token = match.group(0)
-            local_start = match.start()
-            local_end = match.end()
-            abs_start = sentence_base + local_start
-
-            if abs_start in context.existing_errors:
+        for idx, word in enumerate(words):
+            if idx >= len(context.word_positions):
                 continue
-            if not self._should_probe(raw_token, context, local_start, local_end):
+            position = context.word_positions[idx]
+
+            if position in context.existing_errors:
+                continue
+            if not self._should_probe(word, context, idx):
                 continue
 
-            candidate = self._best_candidate(raw_token)
+            candidate = self._best_candidate(word)
             if candidate is None:
                 continue
 
             suggestion_text, cand_freq, token_freq = candidate
             error = WordError(
-                text=raw_token,
-                position=abs_start,
+                text=word,
+                position=position,
                 error_type=ET_WORD,
                 suggestions=[Suggestion(text=suggestion_text, source="tone_safety_net")],
                 confidence=self.confidence,
             )
             errors.append(error)
-            context.existing_errors[abs_start] = ET_WORD
-            context.existing_confidences[abs_start] = self.confidence
-            context.existing_suggestions[abs_start] = [suggestion_text]
+            context.existing_errors[position] = ET_WORD
+            context.existing_confidences[position] = self.confidence
+            context.existing_suggestions[position] = [suggestion_text]
             logger.debug(
                 "tone_safety_net: %s (freq=%d) -> %s (freq=%d) ratio=%.1f conf=%.2f",
-                raw_token,
+                word,
                 token_freq,
                 suggestion_text,
                 cand_freq,
@@ -170,28 +161,31 @@ class ToneSafetyNetStrategy(ValidationStrategy):
 
     def _should_probe(
         self,
-        raw_token: str,
+        word: str,
         context: ValidationContext,
-        local_start: int,
-        local_end: int,
+        idx: int,
     ) -> bool:
-        """Return True if ``raw_token`` is a viable probe target."""
-        if not raw_token:
+        """Return True if the segmented ``word`` is a viable probe target."""
+        if not word:
+            return False
+        # Must contain Myanmar characters; Latin / punctuation tokens pass
+        # through unchanged.
+        if not any("\u1000" <= ch <= "\u109f" for ch in word):
             return False
         # The strategy only operates on real-word confusions; skip OOV
         # tokens because SymSpell / raw-probe already handle those.
-        if not self.provider.is_valid_word(raw_token):
+        if not self.provider.is_valid_word(word):
             return False
         # Very common words are unlikely to be typos; skip to bound FPR.
-        token_freq = self.provider.get_word_frequency(raw_token) or 0
+        token_freq = self.provider.get_word_frequency(word) or 0
         if token_freq > self.skip_above_freq:
             return False
         # Colloquial whitelist: these are flagged informationally, not as
         # errors — the tone-safety-net must not upgrade them silently.
-        if is_colloquial_variant(raw_token):
+        if is_colloquial_variant(word):
             return False
-        # Skip tokens overlapping name-masked spans.
-        if self._overlaps_name(context, local_start, local_end):
+        # Skip tokens flagged as proper names by the mask.
+        if context.is_name_mask and idx < len(context.is_name_mask) and context.is_name_mask[idx]:
             return False
         return True
 
@@ -236,38 +230,6 @@ class ToneSafetyNetStrategy(ValidationStrategy):
         if best is None:
             return None
         return best[0], best[1], token_freq
-
-    @staticmethod
-    def _resolve_sentence_base(context: ValidationContext) -> int:
-        """Return the absolute offset of ``context.sentence`` in the full text.
-
-        Mirrors :meth:`PreSegmenterRawProbeStrategy._resolve_sentence_base`.
-        """
-        if not context.words or not context.word_positions:
-            return 0
-        first_local = context.sentence.find(context.words[0]) if context.sentence else 0
-        if first_local < 0:
-            first_local = 0
-        return context.word_positions[0] - first_local
-
-    @staticmethod
-    def _overlaps_name(
-        context: ValidationContext,
-        local_start: int,
-        local_end: int,
-    ) -> bool:
-        """Return True if any name-masked word overlaps ``[local_start, local_end)``."""
-        if not context.is_name_mask:
-            return False
-        sentence_base = ToneSafetyNetStrategy._resolve_sentence_base(context)
-        for idx, word in enumerate(context.words):
-            if idx >= len(context.is_name_mask) or not context.is_name_mask[idx]:
-                continue
-            word_local_start = context.word_positions[idx] - sentence_base
-            word_local_end = word_local_start + len(word)
-            if word_local_start < local_end and word_local_end > local_start:
-                return True
-        return False
 
     def __repr__(self) -> str:
         return (

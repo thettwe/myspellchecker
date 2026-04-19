@@ -28,7 +28,6 @@ workstream doc at ``10_Workstreams/Active/mlm-candidate-generator.md``.
 
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
 
 from myspellchecker.algorithms.distance.edit_distance import (
@@ -50,11 +49,6 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 _PRIORITY = 46
-
-# Myanmar token regex: whitespace/punctuation-delimited Myanmar-script
-# spans. Extended-A / B ranges are included so Shan/Mon tokens pass through
-# without being attacked. Mirrors the raw-token regex used elsewhere.
-_RAW_TOKEN_REGEX = re.compile(r"[\u1000-\u109F\uA9E0-\uA9FF\uAA60-\uAA7F]+")
 
 
 class MLMSpanMaskCandGenStrategy(ValidationStrategy):
@@ -127,42 +121,41 @@ class MLMSpanMaskCandGenStrategy(ValidationStrategy):
             return []
 
         sentence = context.sentence
-        if not sentence:
+        words = context.words
+        if not sentence or not words:
             return []
 
-        sentence_base = self._resolve_sentence_base(context)
         errors: list[Error] = []
 
-        for match in _RAW_TOKEN_REGEX.finditer(sentence):
-            raw_token = match.group(0)
-            local_start = match.start()
-            local_end = match.end()
-            abs_start = sentence_base + local_start
-
-            if abs_start in context.existing_errors:
+        for idx, word in enumerate(words):
+            if idx >= len(context.word_positions):
                 continue
-            if not self._should_probe(raw_token, context, local_start, local_end):
+            position = context.word_positions[idx]
+
+            if position in context.existing_errors:
+                continue
+            if not self._should_probe(word, context, idx):
                 continue
 
-            candidate = self._best_candidate(sentence, raw_token)
+            candidate = self._best_candidate(sentence, word)
             if candidate is None:
                 continue
 
             suggestion_text, cand_score, token_score, cand_ed = candidate
             error = WordError(
-                text=raw_token,
-                position=abs_start,
+                text=word,
+                position=position,
                 error_type=ET_WORD,
                 suggestions=[Suggestion(text=suggestion_text, source="mlm_span_mask_candgen")],
                 confidence=self.confidence,
             )
             errors.append(error)
-            context.existing_errors[abs_start] = ET_WORD
-            context.existing_confidences[abs_start] = self.confidence
-            context.existing_suggestions[abs_start] = [suggestion_text]
+            context.existing_errors[position] = ET_WORD
+            context.existing_confidences[position] = self.confidence
+            context.existing_suggestions[position] = [suggestion_text]
             logger.debug(
                 "mlm_span_mask_candgen: %s (score=%.3f) -> %s (score=%.3f) delta=%.3f ed=%d",
-                raw_token,
+                word,
                 token_score,
                 suggestion_text,
                 cand_score,
@@ -174,28 +167,32 @@ class MLMSpanMaskCandGenStrategy(ValidationStrategy):
 
     def _should_probe(
         self,
-        raw_token: str,
+        word: str,
         context: ValidationContext,
-        local_start: int,
-        local_end: int,
+        idx: int,
     ) -> bool:
-        """Return True if ``raw_token`` is a viable probe target."""
-        if not raw_token:
+        """Return True if the segmented ``word`` is a viable probe target."""
+        if not word:
             return False
-        if len(raw_token) < self.min_token_length:
+        if len(word) < self.min_token_length:
+            return False
+        # Require at least one Myanmar character; Latin / punctuation tokens
+        # pass through.
+        if not any("\u1000" <= ch <= "\u109f" for ch in word):
             return False
         # Only score real-word confusions — the token must itself be a
         # valid dictionary word. OOV handling is owned by the raw-token
         # probe / SymSpell strategies.
-        if not self.provider.is_valid_word(raw_token):
+        if not self.provider.is_valid_word(word):
             return False
         # High-frequency tokens are unlikely to be typos; skip to bound FPR.
-        token_freq = self.provider.get_word_frequency(raw_token) or 0
+        token_freq = self.provider.get_word_frequency(word) or 0
         if token_freq > self.skip_above_freq:
             return False
-        if is_colloquial_variant(raw_token):
+        if is_colloquial_variant(word):
             return False
-        if self._overlaps_name(context, local_start, local_end):
+        # Skip tokens flagged as proper names.
+        if context.is_name_mask and idx < len(context.is_name_mask) and context.is_name_mask[idx]:
             return False
         return True
 
@@ -254,38 +251,6 @@ class MLMSpanMaskCandGenStrategy(ValidationStrategy):
         if best_score - token_score < self.margin:
             return None
         return best_word, best_score, float(token_score), best_ed
-
-    @staticmethod
-    def _resolve_sentence_base(context: ValidationContext) -> int:
-        """Return the absolute offset of ``context.sentence`` in the full text.
-
-        Mirrors :meth:`PreSegmenterRawProbeStrategy._resolve_sentence_base`.
-        """
-        if not context.words or not context.word_positions:
-            return 0
-        first_local = context.sentence.find(context.words[0]) if context.sentence else 0
-        if first_local < 0:
-            first_local = 0
-        return context.word_positions[0] - first_local
-
-    @staticmethod
-    def _overlaps_name(
-        context: ValidationContext,
-        local_start: int,
-        local_end: int,
-    ) -> bool:
-        """Return True if any name-masked word overlaps ``[local_start, local_end)``."""
-        if not context.is_name_mask:
-            return False
-        sentence_base = MLMSpanMaskCandGenStrategy._resolve_sentence_base(context)
-        for idx, word in enumerate(context.words):
-            if idx >= len(context.is_name_mask) or not context.is_name_mask[idx]:
-                continue
-            word_local_start = context.word_positions[idx] - sentence_base
-            word_local_end = word_local_start + len(word)
-            if word_local_start < local_end and word_local_end > local_start:
-                return True
-        return False
 
     def __repr__(self) -> str:
         return (
