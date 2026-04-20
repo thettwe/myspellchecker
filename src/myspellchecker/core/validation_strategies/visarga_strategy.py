@@ -111,6 +111,8 @@ class VisargaStrategy(ValidationStrategy):
         errors: list[Error] = []
 
         for i, word in enumerate(context.words):
+            if i >= len(context.word_positions):
+                continue
             pos_i = context.word_positions[i]
 
             if pos_i in context.existing_errors:

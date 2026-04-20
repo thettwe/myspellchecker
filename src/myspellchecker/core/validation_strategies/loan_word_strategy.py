@@ -110,6 +110,8 @@ class LoanWordValidationStrategy(ValidationStrategy):
         errors: list[Error] = []
 
         for i, word in enumerate(context.words):
+            if i >= len(context.word_positions):
+                continue
             pos_i = context.word_positions[i]
 
             # Skip positions already flagged by higher-priority strategies.
