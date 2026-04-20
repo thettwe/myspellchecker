@@ -661,6 +661,39 @@ class ValidationConfig(BaseModel):
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
     )
 
+    # Skip-rule confidence gate (ssr-implement-01).
+    # At word_validator.py the 4+syllable-all-valid-parts unconditional skip
+    # was added to suppress FPs on genuine compound/verb-chain merges. That
+    # rule also hid true-positive missing-asat / substitution typos whose
+    # fragmented form happens to produce all-valid syllables (canonical
+    # example: "စွမ်းဆောင်ရည" → ["စွမ်း", "ဆောင်", "ရ", "ည"], all dict-valid,
+    # but SymSpell finds "စွမ်းဆောင်ရည်" at ed=1 freq 48k). The confidence
+    # gate lets validation proceed when SymSpell has a strong top-1 candidate.
+    # Gate parameters derived from [[Skip Rule Suppression Audit 2026-04-20]]:
+    # measured 13 TP / 2 FP / 87% precision over the 52-row actionable subset
+    # of 970 total skip events on the full spelling benchmark.
+    skip_rule_gate_max_ed: int = Field(
+        default=2,
+        ge=0,
+        le=3,
+        description=(
+            "Max SymSpell edit distance for the skip-rule confidence gate. "
+            "When the 4+syllable-all-valid skip predicate fires, validation "
+            "is allowed to proceed if SymSpell's top-1 candidate is within "
+            "this edit distance and clears skip_rule_gate_min_freq."
+        ),
+    )
+    skip_rule_gate_min_freq: int = Field(
+        default=1000,
+        ge=0,
+        description=(
+            "Min SymSpell top-1 candidate frequency for the skip-rule "
+            "confidence gate. Audit data showed 87% precision at freq>=1000, "
+            "100% at freq>=10000. 1000 is chosen to recover 13 TP at the "
+            "cost of 2 FP across the 2084-sentence benchmark."
+        ),
+    )
+
     # Broken compound detection (wrongly split compound words)
     use_broken_compound_detection: bool = Field(
         default=True,

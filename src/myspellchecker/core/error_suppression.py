@@ -837,11 +837,53 @@ class ErrorSuppressionMixin:
             # real spelling error.  Require 3+ syllables because 2-syllable
             # tokens have higher overlap with genuine compound typos where
             # both syllables happen to be valid words individually.
+            # Exception (ssr-implement-01): don't suppress when SymSpell has
+            # a strong top-1 candidate (ed<=skip_rule_gate_max_ed,
+            # freq>=skip_rule_gate_min_freq). That signal distinguishes a
+            # missing-asat / substitution typo from a genuine merge. Gate
+            # parameters + rationale in [[Skip Rule Suppression Audit
+            # 2026-04-20]].
             if all_valid and len(parts) >= 2 and len(syllables) >= 4:
-                to_remove.add(idx)
+                if not self._skip_rule_has_confident_candidate(word):
+                    to_remove.add(idx)
 
         if to_remove:
             errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
+
+    def _skip_rule_has_confident_candidate(self, word: str) -> bool:
+        """Return True if SymSpell has a top-1 candidate clearing the skip-rule gate.
+
+        Mirrors :meth:`WordValidator._has_confident_symspell_candidate` so the
+        pre-validation skip and the post-validation ``invalid_word``
+        suppression make the same decision. See
+        ``seg-skip-rule-refactor / ssr-implement-01``.
+        """
+        symspell = getattr(self, "symspell", None)
+        config = getattr(self, "config", None)
+        if symspell is None or config is None:
+            return False
+        validation = getattr(config, "validation", None)
+        if validation is None:
+            return False
+        max_ed = getattr(validation, "skip_rule_gate_max_ed", None)
+        min_freq = getattr(validation, "skip_rule_gate_min_freq", None)
+        if max_ed is None or min_freq is None:
+            return False
+        try:
+            candidates = symspell.lookup(word, level="word", max_suggestions=1)
+        except (RuntimeError, ValueError, KeyError):
+            return False
+        if not candidates:
+            return False
+        top = candidates[0]
+        term = getattr(top, "term", None)
+        if term is None or term == word:
+            return False
+        if float(getattr(top, "edit_distance", 99)) > max_ed:
+            return False
+        if int(getattr(top, "frequency", 0) or 0) < min_freq:
+            return False
+        return True
 
     def _suppress_low_value_semantic_errors(
         self,

@@ -335,3 +335,118 @@ class TestMLMWordSuppression:
         errors = [_make_error(text="ကျောင်း", error_type="invalid_word")]
         mixin._suppress_invalid_word_via_mlm(errors, "test text")
         assert len(errors) == 0, "Exact match should always suppress"
+
+
+# ---------------------------------------------------------------------------
+# Compound-split-valid-words suppression + skip-rule confidence gate
+# (ssr-implement-01 — seg-skip-rule-refactor workstream)
+# ---------------------------------------------------------------------------
+
+
+class TestSuppressCompoundSplitValidWords:
+    """Regression tests for the 4+syllable-all-valid suppression path."""
+
+    def _build_mixin(
+        self,
+        *,
+        max_ed: int = 2,
+        min_freq: int = 1000,
+        syllables: list[str],
+        valid_syllables: set[str] | None = None,
+        symspell_top1: tuple[str, float, int] | None = None,
+    ):
+        """Create a mixin with just enough wiring to exercise the suppressor.
+
+        The greedy reassembly in _suppress_compound_split_valid_words first
+        tries the whole word as one valid part, then shorter prefixes. For
+        the suppressor's "all_valid + len(parts)>=2" predicate to fire, the
+        whole word must NOT be a dict word while the individual syllables
+        MUST be. We model that by defaulting ``valid_syllables`` to the
+        syllable set and treating anything else as invalid.
+        """
+        mixin = _make_mixin()
+        if valid_syllables is None:
+            valid_syllables = set(syllables)
+        mixin.provider.is_valid_word = lambda w: w in valid_syllables
+        mixin.segmenter.segment_syllables.return_value = syllables
+
+        # Wire the skip-rule gate params.
+        mixin.config.validation.skip_rule_gate_max_ed = max_ed
+        mixin.config.validation.skip_rule_gate_min_freq = min_freq
+
+        # SymSpell mock.
+        if symspell_top1 is None:
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = []
+        else:
+            term, ed, freq = symspell_top1
+            cand = MagicMock()
+            cand.term = term
+            cand.edit_distance = ed
+            cand.frequency = freq
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = [cand]
+        return mixin
+
+    def test_suppresses_4_syllable_all_valid_without_candidate(self):
+        # No SymSpell candidate → skip rule must fire and suppress the error.
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=None,
+        )
+        errors = [_make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == []
+
+    def test_keeps_error_when_symspell_has_confident_candidate(self):
+        # SymSpell top-1 inside the gate → confidence says this is a real typo.
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("စွမ်းဆောင်ရည်", 1.0, 48_971),
+        )
+        err = _make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")
+        errors = [err]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == [err]
+
+    def test_suppresses_when_candidate_below_freq_gate(self):
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("စွမ်းဆောင်ရည်", 1.0, 500),  # below min_freq=1000
+        )
+        errors = [_make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == []
+
+    def test_suppresses_when_candidate_above_ed_gate(self):
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("some_far_word", 3.0, 50_000),  # ed=3 > max_ed=2
+        )
+        errors = [_make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == []
+
+    def test_skip_rule_helper_returns_false_when_candidate_matches_input(self):
+        # SymSpell echoing the input back is not a useful suggestion.
+        mixin = self._build_mixin(
+            syllables=["a", "b", "c", "d"],
+            symspell_top1=("WORD", 0.0, 9999),
+        )
+        assert mixin._skip_rule_has_confident_candidate("WORD") is False
+
+    def test_skip_rule_helper_tolerates_missing_symspell(self):
+        mixin = self._build_mixin(
+            syllables=["a", "b", "c", "d"],
+            symspell_top1=None,
+        )
+        mixin.symspell = None
+        assert mixin._skip_rule_has_confident_candidate("anything") is False
+
+    def test_does_not_suppress_short_word_even_without_candidate(self):
+        # len(word) < 4 is guarded earlier; should not be touched.
+        mixin = self._build_mixin(syllables=["a"], symspell_top1=None)
+        err = _make_error(text="abc", error_type="invalid_word")
+        errors = [err]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == [err]

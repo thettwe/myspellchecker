@@ -320,6 +320,37 @@ class WordValidator(Validator):
             out.append(candidate)
         return out
 
+    def _has_confident_symspell_candidate(self, word: str) -> bool:
+        """Return True if SymSpell has a top-1 candidate clearing the confidence gate.
+
+        Gate parameters (``skip_rule_gate_max_ed``, ``skip_rule_gate_min_freq``)
+        come from the audit at ``[[Skip Rule Suppression Audit 2026-04-20]]``.
+        Used by the 4+syllable-all-valid skip at ``_validate_token_path`` to
+        distinguish recoverable typos (whose fragmented form happens to be
+        all-valid syllables) from genuine compound/verb-chain merges.
+
+        Workstream: seg-skip-rule-refactor / task: ssr-implement-01.
+        """
+        if self.symspell is None:
+            return False
+        max_ed = self.config.validation.skip_rule_gate_max_ed
+        min_freq = self.config.validation.skip_rule_gate_min_freq
+        try:
+            candidates = self.symspell.lookup(word, level="word", max_suggestions=1)
+        except (RuntimeError, ValueError, KeyError):
+            return False
+        if not candidates:
+            return False
+        top = candidates[0]
+        term = getattr(top, "term", None)
+        if term is None or term == word:
+            return False
+        if float(getattr(top, "edit_distance", 99)) > max_ed:
+            return False
+        if int(getattr(top, "frequency", 0) or 0) < min_freq:
+            return False
+        return True
+
     def _is_valid_compound(self, word: str) -> bool:
         """Check if word is a valid compound (splits into valid parts with no edits).
 
@@ -763,11 +794,18 @@ class WordValidator(Validator):
             if len(syllables) >= 2:
                 valid_parts = sum(1 for s in syllables if self.word_repository.is_valid_word(s))
                 # For tokens with 4+ syllables where ALL are valid dictionary
-                # words, skip unconditionally — these are segmenter merges of
-                # valid words (verb chains, compound+particle), not real errors.
+                # words, skip by default — these are usually segmenter merges
+                # of valid words (verb chains, compound+particle), not real
+                # errors. But if SymSpell has a strong top-1 candidate
+                # (ed<=skip_rule_gate_max_ed, freq>=skip_rule_gate_min_freq)
+                # then this is a recoverable missing-asat / substitution typo
+                # whose fragmented form happens to be all-valid syllables.
+                # Gate parameters derived from
+                # [[Skip Rule Suppression Audit 2026-04-20]] (ssr-implement-01).
                 if valid_parts == len(syllables) and len(syllables) >= 4:
-                    myanmar_word_idx += 1
-                    continue
+                    if not self._has_confident_symspell_candidate(word):
+                        myanmar_word_idx += 1
+                        continue
                 if valid_parts >= max(len(syllables) // 2, 1):
                     # Check whole word + asat
                     asat_form = word + "\u103a"
