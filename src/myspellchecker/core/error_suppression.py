@@ -52,7 +52,7 @@ from myspellchecker.core.correction_utils import (
     _PRESERVE_ERROR_TYPES,
     filter_syllable_errors_in_valid_words,
 )
-from myspellchecker.core.response import Error, SyllableError
+from myspellchecker.core.response import Error, Suggestion, SyllableError, WordError
 from myspellchecker.text.normalize import normalize
 
 if TYPE_CHECKING:
@@ -970,8 +970,6 @@ class ErrorSuppressionMixin:
                 indices_to_remove.add(idx)
                 continue
             emitted_rescues.add(key)
-
-            from myspellchecker.core.response import Suggestion, WordError
 
             rescue = WordError(
                 text=enc_text,
