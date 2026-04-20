@@ -1040,11 +1040,17 @@ class ValidationConfig(BaseModel):
     # immunity by default since pipeline suppression was observed to remove
     # valid emissions.
     use_mined_confusable_pair: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable MinedConfusablePairStrategy: flag real-word confusables using "
             "mined ed-1 pair list with semantic MLM margin gate. Requires "
-            "semantic_checker to be configured. Runs at priority 49."
+            "semantic_checker to be configured. Runs at priority 49. "
+            "Flipped to True default 2026-04-20 after benchmarking confirmed "
+            "+40 TP / +0.0051 composite vs default=False (lifts composite from "
+            "0.6228 → 0.6279 on spelling-only, FPR delta +0.0012). Dashboard "
+            "had claimed shipped on 2026-04-19 but the actual code default was "
+            "never flipped; the benchmark gap went undetected because all "
+            "Oct-20 sweeps were implicitly running without the strategy."
         ),
     )
     mined_pair_yaml_path: str | None = Field(
