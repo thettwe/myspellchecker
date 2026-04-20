@@ -7,7 +7,7 @@ inherits from this mixin, keeping the same ``self.method()`` call sites.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
 from myspellchecker.core.constants import (
@@ -166,6 +166,42 @@ _LOW_VALUE_QUOTATIVE_SYNTAX_TOKENS = frozenset(normalize(token) for token in ("�
 # Used to prevent prefix-match suppression when the "prefix" is actually
 # the error word and the suffix is a morpheme marker (missing-visarga/asat).
 _MORPHEME_BOUNDARY_CHARS = frozenset({"\u1038", "\u1037", "\u103a"})
+
+# Greedy dictionary-guided reassembly maximum span (syllables per part).
+_GREEDY_REASSEMBLY_MAX_SPAN = 4
+
+
+def _greedy_syllable_reassembly(
+    syllables: Sequence[str],
+    is_valid_word: Callable[[str], bool],
+    max_span: int = _GREEDY_REASSEMBLY_MAX_SPAN,
+) -> tuple[list[str], bool]:
+    """Greedy dictionary-guided reassembly of a syllable sequence into words.
+
+    Walks the sequence left-to-right, picking the longest prefix of up to
+    ``max_span`` syllables that forms a dictionary-valid word. Returns the
+    parts found so far and a boolean indicating whether the full sequence
+    reassembled with every part being a valid dictionary word.
+
+    When the greedy step fails at some position, the returned list is the
+    partial assembly up to (but not including) that position and the flag
+    is ``False``.
+    """
+    parts: list[str] = []
+    i = 0
+    n = len(syllables)
+    while i < n:
+        best_len = 0
+        upper = min(max_span, n - i)
+        for k in range(upper, 0, -1):
+            if is_valid_word("".join(syllables[i : i + k])):
+                best_len = k
+                break
+        if best_len == 0:
+            return parts, False
+        parts.append("".join(syllables[i : i + best_len]))
+        i += best_len
+    return parts, True
 
 
 class ErrorSuppressionMixin:
@@ -822,25 +858,8 @@ class ErrorSuppressionMixin:
             if len(syllables) < 2:
                 continue
 
-            # Greedy reassembly: longest valid dictionary word first
-            parts: list[str] = []
-            i = 0
-            n = len(syllables)
-            all_valid = True
-            while i < n:
-                best_len = 0
-                upper = min(4, n - i)
-                for k in range(upper, 0, -1):
-                    candidate = "".join(syllables[i : i + k])
-                    if provider.is_valid_word(candidate):
-                        best_len = k
-                        break
-                if best_len > 0:
-                    parts.append("".join(syllables[i : i + best_len]))
-                    i += best_len
-                else:
-                    all_valid = False
-                    break
+            # Greedy reassembly: longest valid dictionary word first.
+            parts, all_valid = _greedy_syllable_reassembly(syllables, provider.is_valid_word)
 
             # If ALL parts are valid words AND the token has 3+ syllables,
             # this is very likely a segmenter merge of valid words — not a
@@ -1035,25 +1054,7 @@ class ErrorSuppressionMixin:
                 continue
             if len(syllables) < min_syllables:
                 continue
-            # Greedy reassembly (longest valid first, ≤4 syllable lookahead)
-            parts: list[str] = []
-            i = 0
-            n = len(syllables)
-            all_valid = True
-            while i < n:
-                best_len = 0
-                upper = min(4, n - i)
-                for k in range(upper, 0, -1):
-                    candidate = "".join(syllables[i : i + k])
-                    if provider.is_valid_word(candidate):
-                        best_len = k
-                        break
-                if best_len > 0:
-                    parts.append("".join(syllables[i : i + best_len]))
-                    i += best_len
-                else:
-                    all_valid = False
-                    break
+            parts, all_valid = _greedy_syllable_reassembly(syllables, provider.is_valid_word)
             if not (all_valid and len(parts) >= 2):
                 continue
             span_start = err.position
