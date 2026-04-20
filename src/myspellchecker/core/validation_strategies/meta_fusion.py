@@ -350,6 +350,7 @@ class MetaClassifierFusion:
             for e in errors
             if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
             and getattr(e, "source_strategy", "") not in _BYPASS_META_STRATEGIES
+            and not getattr(e, "_boosted_by_compound_split", False)
         ]
         trained_count = len(trained_errors)
 
@@ -358,6 +359,12 @@ class MetaClassifierFusion:
         for error in errors:
             error_type = getattr(error, "error_type", "")
             if error_type in _UNTRAINED_ERROR_TYPES:
+                kept.append(error)
+                continue
+            # Combined-signal boost bypasses meta — its emission was already
+            # validated by the structural (compound-split would fire) AND
+            # inner-confusable cooccurrence signal (ccb-implement-01).
+            if getattr(error, "_boosted_by_compound_split", False):
                 kept.append(error)
                 continue
 

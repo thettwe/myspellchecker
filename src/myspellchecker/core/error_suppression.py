@@ -548,6 +548,16 @@ class ErrorSuppressionMixin:
                 filtered.append(e)
                 continue
 
+            # Compound-split structural boost (ccb-implement-01). When the
+            # combined-signal boost has marked this error, R2's structural
+            # fragment checks should skip — the outer compound-split signal
+            # is stronger evidence than R2's self-suggest heuristic would
+            # have been. See [[Compound-Split Confusable Boost Audit
+            # 2026-04-20]].
+            if getattr(e, "_boosted_by_compound_split", False):
+                filtered.append(e)
+                continue
+
             # Fragment-like short spans inside a longer token are usually
             # segmentation artifacts in natural corpora.
             if (
@@ -849,6 +859,112 @@ class ErrorSuppressionMixin:
 
         if to_remove:
             errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
+
+    def _boost_inner_confusable_for_compound_splits(self, errors: list[Error]) -> None:
+        """Boost inner confusable_error confidence inside compound-split spans.
+
+        Replicates the :meth:`_suppress_compound_split_valid_words` predicate
+        to find long OOV tokens whose syllables are all individually valid
+        (4+ syllables). For each such token that ALSO contains an inner
+        ``confusable_error`` emission at a sub-span with confidence below
+        ``compound_split_confusable_boost_inner_conf_ceiling``, boost that
+        emission's confidence by ``compound_split_confusable_boost``.
+
+        This runs BEFORE the ``_CONFIDENCE_THRESHOLDS`` filter at
+        ``_apply_error_post_processing``. The boosted confusable errors
+        then pass the 0.75 threshold and survive to the final response.
+
+        Mutates errors in-place (modifies confidence values only).
+
+        Workstream: compound-split-confusable-boost / task: ccb-implement-01.
+        See ``[[Compound-Split Confusable Boost Audit 2026-04-20]]``.
+        """
+        if not errors:
+            return
+        config = getattr(self, "config", None)
+        validation = getattr(config, "validation", None) if config else None
+        if validation is None:
+            return
+        if not getattr(validation, "compound_split_confusable_boost_enabled", False):
+            return
+        provider = getattr(self, "provider", None)
+        segmenter = getattr(self, "segmenter", None)
+        if provider is None or segmenter is None:
+            return
+
+        boost = float(getattr(validation, "compound_split_confusable_boost", 0.20))
+        ceiling = float(
+            getattr(validation, "compound_split_confusable_boost_inner_conf_ceiling", 0.75)
+        )
+        min_syllables = int(getattr(validation, "compound_split_confusable_boost_min_syllables", 4))
+
+        # Identify "compound-split-suppressible" outer spans. Mirrors the
+        # predicate in _suppress_compound_split_valid_words: ET_WORD errors
+        # whose text has ≥min_syllables, where a greedy dictionary reassembly
+        # produces parts that are ALL valid dictionary words.
+        outer_spans: list[tuple[int, int]] = []
+        for err in errors:
+            if err.error_type != ET_WORD:
+                continue
+            word = normalize(err.text)
+            if not word or len(word) < 4:
+                continue
+            try:
+                syllables = segmenter.segment_syllables(word)
+            except Exception:
+                continue
+            if len(syllables) < min_syllables:
+                continue
+            # Greedy reassembly (longest valid first, ≤4 syllable lookahead)
+            parts: list[str] = []
+            i = 0
+            n = len(syllables)
+            all_valid = True
+            while i < n:
+                best_len = 0
+                upper = min(4, n - i)
+                for k in range(upper, 0, -1):
+                    candidate = "".join(syllables[i : i + k])
+                    if provider.is_valid_word(candidate):
+                        best_len = k
+                        break
+                if best_len > 0:
+                    parts.append("".join(syllables[i : i + best_len]))
+                    i += best_len
+                else:
+                    all_valid = False
+                    break
+            if not (all_valid and len(parts) >= 2):
+                continue
+            span_start = err.position
+            span_end = err.position + len(err.text)
+            outer_spans.append((span_start, span_end))
+
+        if not outer_spans:
+            return
+
+        # Boost inner confusable emissions inside any outer span.
+        # Marker attribute `_boosted_by_compound_split` lets downstream
+        # suppressors (particularly R2 in _suppress_low_value_confusable_errors
+        # and _dedup_errors_by_span) skip their structural checks for these
+        # boosted emissions. The final confidence is guaranteed to clear
+        # the downstream `_CONFIDENCE_THRESHOLDS` gate (ceiling + epsilon)
+        # so boosted errors actually reach the response.
+        threshold_epsilon = 0.01
+        for other in errors:
+            if other.error_type != ET_CONFUSABLE_ERROR:
+                continue
+            conf = float(getattr(other, "confidence", 1.0) or 0.0)
+            if conf >= ceiling:
+                continue
+            pos = other.position
+            end = pos + len(other.text or "")
+            for outer_start, outer_end in outer_spans:
+                if pos >= outer_start and end <= outer_end:
+                    boosted = max(conf + boost, ceiling + threshold_epsilon)
+                    other.confidence = min(1.0, boosted)
+                    other._boosted_by_compound_split = True
+                    break
 
     def _skip_rule_has_confident_candidate(self, word: str) -> bool:
         """Return True if SymSpell has a top-1 candidate clearing the skip-rule gate.
@@ -1187,12 +1303,22 @@ class ErrorSuppressionMixin:
             # removed by span dedup anyway (it contains sub-errors), but by then
             # the precise narrow detection is already lost.
             # Guard: confusable_error fragments must not displace invalid_word.
+            # Exception (ccb-implement-01): boosted-by-compound-split confusable
+            # DOES displace the wider invalid_word — the combined structural
+            # signal is strong enough. See
+            # [[Compound-Split Confusable Boost Audit 2026-04-20]].
+            _e_boosted = getattr(e, "_boosted_by_compound_split", False)
+            _prev_boosted = getattr(prev, "_boosted_by_compound_split", False)
             if (
                 e.error_type in _ROOT_CAUSE_NARROW_TYPES
                 and prev.error_type in _GENERIC_WIDE_TYPES
                 and e.suggestions
                 and e_len < prev_len
-                and not (e.error_type == ET_CONFUSABLE_ERROR and prev.error_type == ET_WORD)
+                and not (
+                    e.error_type == ET_CONFUSABLE_ERROR
+                    and prev.error_type == ET_WORD
+                    and not _e_boosted
+                )
             ):
                 best_by_pos[pos] = e
                 continue
@@ -1201,7 +1327,11 @@ class ErrorSuppressionMixin:
                 and e.error_type in _GENERIC_WIDE_TYPES
                 and prev.suggestions
                 and prev_len < e_len
-                and not (prev.error_type == ET_CONFUSABLE_ERROR and e.error_type == ET_WORD)
+                and not (
+                    prev.error_type == ET_CONFUSABLE_ERROR
+                    and e.error_type == ET_WORD
+                    and not _prev_boosted
+                )
             ):
                 continue
 
@@ -1306,8 +1436,16 @@ class ErrorSuppressionMixin:
                     # generic spans (pos_sequence, context_prob, invalid_word).
                     # Guard: confusable_error on a fragment must not displace
                     # a definite invalid_word that covers the whole token.
+                    # Exception (ccb-implement-01): when the confusable is
+                    # marked `_boosted_by_compound_split`, the combined
+                    # signal (compound-split would fire on outer ∩ confusable
+                    # at sub-span) is strong enough evidence to displace the
+                    # wider invalid_word. See [[Compound-Split Confusable
+                    # Boost Audit 2026-04-20]].
                     _confusable_displaces_oov = (
-                        e.error_type == ET_CONFUSABLE_ERROR and k.error_type == ET_WORD
+                        e.error_type == ET_CONFUSABLE_ERROR
+                        and k.error_type == ET_WORD
+                        and not getattr(e, "_boosted_by_compound_split", False)
                     )
                     if (
                         e.error_type in _ROOT_CAUSE_NARROW_TYPES

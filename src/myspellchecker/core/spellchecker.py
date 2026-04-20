@@ -1156,6 +1156,11 @@ class SpellChecker(
         self._inject_asat_visarga_candidates(normalized_text, errors)
         self._reconstruct_morpheme_in_compound(normalized_text, errors)
         self._inject_compound_confusion_candidates(errors)
+        # Combined-signal confidence boost (ccb-implement-01). Must run
+        # BEFORE _dedup_errors_by_span since that step would remove the
+        # inner confusable_error (contained within the wider invalid_word).
+        # See [[Compound-Split Confusable Boost Audit 2026-04-20]].
+        self._boost_inner_confusable_for_compound_splits(errors)
         self._dedup_errors_by_position(errors)
         self._dedup_errors_by_span(errors)
 

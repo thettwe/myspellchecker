@@ -450,3 +450,196 @@ class TestSuppressCompoundSplitValidWords:
         errors = [err]
         mixin._suppress_compound_split_valid_words(errors)
         assert errors == [err]
+
+
+# ---------------------------------------------------------------------------
+# Compound-split confusable boost (ccb-implement-01)
+# ---------------------------------------------------------------------------
+
+
+class TestBoostInnerConfusableForCompoundSplits:
+    """Regression tests for the combined-signal boost helper.
+
+    The helper runs BEFORE _CONFIDENCE_THRESHOLDS filter and boosts inner
+    confusable_error confidence when both (a) compound-split-predicate fires
+    on an outer long token AND (b) an inner confusable at a sub-span is
+    below the ceiling.
+    """
+
+    def _build_mixin(
+        self,
+        *,
+        enabled: bool = True,
+        boost: float = 0.20,
+        ceiling: float = 0.75,
+        min_syllables: int = 4,
+        outer_syllables: list[str] | None = None,
+        outer_valid_syllables: set[str] | None = None,
+    ):
+        mixin = _make_mixin()
+        mixin.config.validation.compound_split_confusable_boost_enabled = enabled
+        mixin.config.validation.compound_split_confusable_boost = boost
+        mixin.config.validation.compound_split_confusable_boost_inner_conf_ceiling = ceiling
+        mixin.config.validation.compound_split_confusable_boost_min_syllables = min_syllables
+
+        if outer_syllables is not None:
+            mixin.segmenter.segment_syllables.return_value = outer_syllables
+            if outer_valid_syllables is None:
+                outer_valid_syllables = set(outer_syllables)
+            mixin.provider.is_valid_word = lambda w: w in outer_valid_syllables
+        return mixin
+
+    def test_boost_fires_when_conditions_met(self):
+        # Outer ET_WORD at [0, 24) containing inner confusable at [12, 18)
+        mixin = self._build_mixin(
+            outer_syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            outer_valid_syllables={"စွမ်း", "ဆောင်", "ရ", "ည"},
+        )
+        outer = _make_error(text="အသုံးပျုသူအား", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="ပျု",
+            position=5,
+            suggestions=["ပြု"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        # inner conf should have been boosted by 0.20 → 0.76
+        assert abs(inner.confidence - 0.76) < 1e-9
+
+    def test_no_boost_when_disabled(self):
+        mixin = self._build_mixin(
+            enabled=False,
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_no_boost_when_no_outer_compound_split_span(self):
+        # No invalid_word error at all → no outer span to trigger boost
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_no_boost_when_inner_outside_outer_span(self):
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        far_inner = _make_error(
+            text="xy",
+            position=100,  # far outside outer span
+            suggestions=["xz"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, far_inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert far_inner.confidence == 0.56
+
+    def test_no_boost_when_inner_already_above_ceiling(self):
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        high_conf_inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.90,
+        )
+        errors = [outer, high_conf_inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        # Above ceiling (0.75 default) → no boost needed
+        assert high_conf_inner.confidence == 0.90
+
+    def test_boost_bounded_at_1(self):
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+            boost=0.50,
+            ceiling=0.95,
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.70,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        # 0.70 + 0.50 = 1.20 → clipped to 1.0
+        assert inner.confidence == 1.0
+
+    def test_no_boost_when_outer_syllables_below_min(self):
+        # Only 3 syllables — doesn't meet the 4+ predicate
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c"],
+        )
+        outer = _make_error(text="abcdef", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_no_boost_when_outer_syllable_invalid(self):
+        # Compound-split predicate requires ALL syllables valid.
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+            outer_valid_syllables={"a", "b", "c"},  # 'd' missing → predicate fails
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_tolerates_missing_segmenter_or_provider(self):
+        mixin = self._build_mixin(outer_syllables=["a", "b", "c", "d"])
+        mixin.segmenter = None
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        # Should not crash; no boost applied
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56

@@ -661,6 +661,60 @@ class ValidationConfig(BaseModel):
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
     )
 
+    # Compound-split confusable boost (ccb-implement-01).
+    # When `_suppress_compound_split_valid_words` would fire on a long OOV
+    # token whose syllables are all individually valid (4+ syllables),
+    # the same structural signal that marks it as a "benign merge" ALSO
+    # indicates an inner confusable_error is more likely a real typo than
+    # a clean-text FP. Audit at [[Compound-Split Confusable Boost Audit
+    # 2026-04-20]]: 13 cooccurrences across 2,084 sentences, 11 at gold
+    # spans, 0 on clean text. Boosting inner confusable confidence by
+    # +0.20 pushes them past the _CONFIDENCE_THRESHOLDS['confusable_error']
+    # gate (0.75) for 9 TP at 0 clean FP (100% precision).
+    compound_split_confusable_boost_enabled: bool = Field(
+        default=True,
+        description=(
+            "Enable confidence boost for inner confusable_error emissions "
+            "inside compound-split-suppressible spans. Structural AND-gate: "
+            "boost only fires when BOTH (a) a long token would be killed "
+            "by _suppress_compound_split_valid_words AND (b) a confusable "
+            "emission exists at a sub-span below the ceiling. See "
+            "[[Compound-Split Confusable Boost Audit 2026-04-20]]."
+        ),
+    )
+    compound_split_confusable_boost: float = Field(
+        default=0.20,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence increment applied to eligible inner confusable "
+            "emissions. Default 0.20 pushes conf ≥ 0.55 past the "
+            "_CONFIDENCE_THRESHOLDS['confusable_error']=0.75 gate. Audit "
+            "sweep: +0.15 → 7 TP, +0.20 → 9 TP, +0.25 → 11 TP; all at 0 "
+            "clean-sentence FP. Final confidence is clipped at 1.0."
+        ),
+    )
+    compound_split_confusable_boost_inner_conf_ceiling: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Only boost inner confusable emissions below this ceiling. "
+            "Default matches _CONFIDENCE_THRESHOLDS['confusable_error']; "
+            "emissions at or above already pass the downstream gate so "
+            "boosting them is a no-op."
+        ),
+    )
+    compound_split_confusable_boost_min_syllables: int = Field(
+        default=4,
+        ge=2,
+        description=(
+            "Minimum syllables in the outer token for the structural "
+            "signal to fire. Matches _suppress_compound_split_valid_words "
+            "'4+ syllables' predicate; keep in sync if that rule changes."
+        ),
+    )
+
     # Skip-rule confidence gate (ssr-implement-01).
     # At word_validator.py the 4+syllable-all-valid-parts unconditional skip
     # was added to suppress FPs on genuine compound/verb-chain merges. That
