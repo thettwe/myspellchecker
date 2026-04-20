@@ -22,7 +22,7 @@ from myspellchecker.core.constants import ET_COLLOQUIAL_INFO, ET_COLLOQUIAL_VARI
 from myspellchecker.core.loan_word_variants import get_loan_word_standard
 from myspellchecker.core.response import Error, WordError
 from myspellchecker.core.token_refinement import build_validation_token_paths
-from myspellchecker.core.validators.base import Validator
+from myspellchecker.core.validators.base import REGISTER_CRITICAL_PRONOUNS, Validator
 from myspellchecker.providers.interfaces import SyllableRepository, WordRepository
 from myspellchecker.segmenters import Segmenter
 from myspellchecker.text.morphology import WordAnalysis, analyze_word
@@ -38,10 +38,6 @@ _BOUNDARY_PUNCT_RE = re.compile(
     r'^["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+|'
     r'["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+$'
 )
-
-# Informal pronouns that are register-critical -- colloquial_info should still
-# be emitted for these even when high-frequency, since they signal informal register.
-_REGISTER_CRITICAL_PRONOUNS: frozenset[str] = frozenset({"\u1004\u102b"})  # ငါ
 
 
 class WordValidator(Validator):
@@ -621,7 +617,7 @@ class WordValidator(Validator):
                 if (
                     isinstance(word_freq, (int, float))
                     and word_freq >= threshold
-                    and word not in _REGISTER_CRITICAL_PRONOUNS
+                    and word not in REGISTER_CRITICAL_PRONOUNS
                 ):
                     return None
             return WordError(

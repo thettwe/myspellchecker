@@ -13,6 +13,11 @@ from myspellchecker.core.constants import (
 from myspellchecker.core.response import Error
 from myspellchecker.text.validator import validate_word
 
+# Informal pronouns that are register-critical -- colloquial_info should still
+# be emitted for these even when high-frequency, since they signal informal
+# register. Shared by :class:`WordValidator` and :class:`SyllableValidator`.
+REGISTER_CRITICAL_PRONOUNS: frozenset[str] = frozenset({"ငါ"})
+
 
 class Validator(ABC):
     """
