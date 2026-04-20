@@ -674,12 +674,16 @@ class ValidationConfig(BaseModel):
     # `ု`+`ိ` sequence exists. Gate precision 95.1% at ed≤1, freq≥500
     # across 2,084 sentences (58 TP / 3 clean-FP on the actionable subset).
     structural_syllable_early_exit_enabled: bool = Field(
-        default=True,
+        default=False,
         description=(
             "Enable structural-syllable early-exit rescue. When the "
             "syllable rule validator rejects a syllable AND the enclosing "
             "segmenter token has a confident SymSpell correction, emit an "
-            "authoritative word-level error bypassing downstream filters."
+            "authoritative word-level error bypassing downstream filters. "
+            "Parked 2026-04-20: benchmark delivered +1 TP vs audit-predicted "
+            "+58; baseline redundancy + position-based TP scoring made the "
+            "rescue mostly inert. See "
+            "60_Decisions/Structural Syllable Early Exit 2026-04-20.md."
         ),
     )
     structural_syllable_early_exit_max_ed: int = Field(
