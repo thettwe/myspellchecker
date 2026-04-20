@@ -304,8 +304,7 @@ class ValidationConfig(BaseModel):
         description=(
             "Enable MLM-enhanced confusable detection (priority 48). "
             "Uses predict_mask() to detect valid-word confusables missed by n-gram. "
-            "Requires semantic model to be loaded. "
-            "v1.6.0: AUROC=0.843 on real sentences. Adds +9 TP, -3 FP."
+            "Requires semantic model to be loaded."
         ),
     )
     confusable_semantic_confidence: float = Field(
@@ -776,9 +775,8 @@ class ValidationConfig(BaseModel):
         ge=0,
         description=(
             "Min SymSpell top-1 candidate frequency for the skip-rule "
-            "confidence gate. Audit data showed 87% precision at freq>=1000, "
-            "100% at freq>=10000. 1000 is chosen to recover 13 TP at the "
-            "cost of 2 FP across the 2084-sentence benchmark."
+            "confidence gate. The default threshold balances precision "
+            "against recall recovery; raising it tightens precision."
         ),
     )
 
@@ -918,7 +916,7 @@ class ValidationConfig(BaseModel):
             "Maximum SymSpell edit distance accepted for a raw-token probe hit. "
             "Raising above 2 introduces a larger FP hit (real-word confusion) "
             "than candidate-gen gain; keep at 2 unless a dedicated precision "
-            "workstream lowers that ceiling."
+            "effort has lowered that ceiling."
         ),
     )
     pre_segmenter_raw_probe_min_freq: int = Field(
@@ -991,9 +989,7 @@ class ValidationConfig(BaseModel):
         ge=0.0,
         description=(
             "Required ``score(candidate) − score(typo)`` margin. Higher = "
-            "fewer emissions, higher precision. Probe-simulated trade "
-            "points: m=1.0 → 311 TP / 10.8% FP, m=2.0 → 297 TP / 8% FP, "
-            "m=3.0 → 279 TP / 5.6% FP."
+            "fewer emissions, higher precision."
         ),
     )
     mlm_candgen_max_ed: int = Field(
@@ -1003,8 +999,8 @@ class ValidationConfig(BaseModel):
         description=(
             "Maximum edit distance accepted between the typo and the MLM "
             "candidate. ED = 2 keeps the strategy on-task for typo repair; "
-            "widening to 3 admits whole-word semantic replacements that "
-            "belong in a separate workstream."
+            "widening to 3 admits whole-word semantic replacements outside "
+            "the intended scope of this strategy."
         ),
     )
     mlm_candgen_skip_above_freq: int = Field(
@@ -1196,9 +1192,9 @@ class ValidationConfig(BaseModel):
         default="mlm",
         description=(
             "Scoring backend for the strategy. 'mlm' uses the existing SemanticChecker "
-            "(conservative, +14 FN rescues in A/B). 'classifier' uses a dedicated "
-            "fine-tuned classifier (higher recall, +14 TP vs mlm at same FPR). "
-            "Set 'classifier' and provide `mined_pair_classifier_path` to load the model."
+            "(conservative baseline). 'classifier' uses a dedicated fine-tuned "
+            "classifier (higher recall at the same FPR). Set 'classifier' and "
+            "provide `mined_pair_classifier_path` to load the model."
         ),
     )
     mined_pair_classifier_path: str | None = Field(

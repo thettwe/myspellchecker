@@ -6,10 +6,9 @@ Loads transliteration variants from two sources and merges them:
    entries across english/pali_sanskrit/other sections.
 2. ``rules/loan_words_mined.yaml`` — mined from the production DB's
    ``confusable_pairs`` table via ``scripts/mine_loan_word_pairs.py``. ~54
-   additional variant→standard pairs as of v1.6.0 (2026-04-18), gated at
-   context_overlap>=0.6, freq_ratio>=50, 2+ variant syllables, aspiration
-   dropped, with a hand-curated blacklist for semantic/directional rejects.
-   Linguist review passed at 93% precision.
+   additional variant→standard pairs gated at ``context_overlap >= 0.6``,
+   ``freq_ratio >= 50``, 2+ variant syllables, aspiration dropped, with a
+   hand-curated blacklist for semantic/directional rejects.
 
 Conflict resolution: YAML entries win. A variant already in ``loan_words.yaml``
 is never overwritten by the mined set.
