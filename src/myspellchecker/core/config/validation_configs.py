@@ -228,6 +228,44 @@ class ValidationConfig(BaseModel):
             "See seg-fpr-gate-01."
         ),
     )
+    # Probe-5: SymSpell on merged string (seg-lever2-01, 2026-04-20).
+    # Off by default — opens the "merged near-match" path targeting the 239
+    # segmenter_over_splits FN where merged token differs from gold by ed<=2.
+    use_segmenter_merge_symspell_probe: bool = Field(
+        default=False,
+        description=(
+            "Enable Probe-5 in the segmenter post-merge rescue. After probes "
+            "1-4 fail, run SymSpell on the merged string; if a candidate with "
+            "frequency >= segmenter_merge_symspell_min_freq exists at "
+            "edit_distance <= segmenter_merge_symspell_max_ed, accept the "
+            "merge and let WordValidator emit the correction. Requires "
+            "use_segmenter_post_merge_rescue=True. See seg-lever2-01."
+        ),
+    )
+    segmenter_merge_symspell_max_ed: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description=(
+            "Max edit distance for the Probe-5 SymSpell lookup on merged strings. Default 2."
+        ),
+    )
+    segmenter_merge_symspell_min_freq: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum corpus frequency for the Probe-5 SymSpell top-1 "
+            "candidate. Filters low-quality dict neighbours. Default 100."
+        ),
+    )
+    segmenter_merge_symspell_min_merged_len: int = Field(
+        default=4,
+        ge=2,
+        description=(
+            "Minimum character length of the merged string to run Probe-5. "
+            "Short merges are too prone to spurious ed<=2 matches. Default 4."
+        ),
+    )
     # Statistical Confusable Gate (priority 24)
     use_statistical_confusable_gate: bool = Field(
         default=True,

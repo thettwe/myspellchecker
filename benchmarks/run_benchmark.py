@@ -688,6 +688,25 @@ def run_benchmark(
             print(f"  segmenter_merge_bigram_threshold: {sme_bigram_env}")
         except ValueError:
             print(f"  WARNING: MSC_SEG_MERGE_BIGRAM_THRESHOLD not a float: {sme_bigram_env}")
+    if _os.environ.get("MSC_USE_SEGMENTER_MERGE_SYMSPELL", "").lower() in ("1", "true", "yes"):
+        config.validation.use_segmenter_merge_symspell_probe = True
+        print(
+            "  use_segmenter_merge_symspell_probe: ENABLED (via MSC_USE_SEGMENTER_MERGE_SYMSPELL)"
+        )
+    sme_ss_ed_env = _os.environ.get("MSC_SEG_MERGE_SS_MAX_ED", "").strip()
+    if sme_ss_ed_env:
+        try:
+            config.validation.segmenter_merge_symspell_max_ed = int(sme_ss_ed_env)
+            print(f"  segmenter_merge_symspell_max_ed: {sme_ss_ed_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SEG_MERGE_SS_MAX_ED not an int: {sme_ss_ed_env}")
+    sme_ss_freq_env = _os.environ.get("MSC_SEG_MERGE_SS_MIN_FREQ", "").strip()
+    if sme_ss_freq_env:
+        try:
+            config.validation.segmenter_merge_symspell_min_freq = int(sme_ss_freq_env)
+            print(f"  segmenter_merge_symspell_min_freq: {sme_ss_freq_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SEG_MERGE_SS_MIN_FREQ not an int: {sme_ss_freq_env}")
     mined_backend = _os.environ.get("MSC_MINED_PAIR_BACKEND", "").strip().lower()
     if mined_backend in ("classifier", "mlm"):
         config.validation.mined_pair_backend = mined_backend

@@ -192,7 +192,7 @@ class WordValidator(Validator):
         ngram_provider: object | None,
         bigram_threshold: float,
     ) -> str | None:
-        """Run probes 1-4 on one adjacent pair. Return merged string or None.
+        """Run probes 1-5 on one adjacent pair. Return merged string or None.
 
         Probes (stop at first hit):
           1. loan_word variant map → highest confidence
@@ -200,6 +200,8 @@ class WordValidator(Validator):
           3. dict word with asat (U+103A) appended → medium
           4. bigram association above threshold, fragment-rarity guarded
              → off by default (threshold < 0)
+          5. SymSpell near-match on merged string, ed<=2, freq floor
+             → off by default (seg-lever2-01 opt-in flag)
         """
         if not a or not b or not a.strip() or not b.strip():
             return None
@@ -212,10 +214,11 @@ class WordValidator(Validator):
         if get_loan_word_standard(merged):
             return merged
 
+        a_valid = self.word_repository.is_valid_word(a)
+        b_valid = self.word_repository.is_valid_word(b)
+
         # Probe 2: dict word (guard: at least one fragment must be OOV).
         if self.word_repository.is_valid_word(merged):
-            a_valid = self.word_repository.is_valid_word(a)
-            b_valid = self.word_repository.is_valid_word(b)
             if not (a_valid and b_valid):
                 return merged
 
@@ -244,6 +247,36 @@ class WordValidator(Validator):
                         return merged
                 except Exception:
                     pass
+
+        # Probe 5: SymSpell near-match on merged (seg-lever2-01).
+        # Guarded by opt-in flag + fragment-OOV guard + merged-length floor +
+        # freq floor + top-1 not equal to either fragment. Targets the 239
+        # over-split FN where merged differs from gold by ed<=2 per the
+        # 2026-04-19 candidate_not_generated audit.
+        if (
+            self.config.validation.use_segmenter_merge_symspell_probe
+            and self.symspell is not None
+            and not (a_valid and b_valid)
+            and len(merged) >= self.config.validation.segmenter_merge_symspell_min_merged_len
+        ):
+            try:
+                candidates = self.symspell.lookup(
+                    merged,
+                    level="word",
+                    max_suggestions=1,
+                )
+            except Exception:
+                candidates = []
+            if candidates:
+                top = candidates[0]
+                if (
+                    getattr(top, "term", None) not in (a, b, merged)
+                    and getattr(top, "edit_distance", 99)
+                    <= self.config.validation.segmenter_merge_symspell_max_ed
+                    and getattr(top, "frequency", 0)
+                    >= self.config.validation.segmenter_merge_symspell_min_freq
+                ):
+                    return merged
         return None
 
     def _merge_probe_adjacent_pairs(self, words: list[str]) -> list[str]:
