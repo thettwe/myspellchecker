@@ -707,6 +707,20 @@ def run_benchmark(
             print(f"  segmenter_merge_symspell_min_freq: {sme_ss_freq_env}")
         except ValueError:
             print(f"  WARNING: MSC_SEG_MERGE_SS_MIN_FREQ not an int: {sme_ss_freq_env}")
+    sk_ed_env = _os.environ.get("MSC_SKIP_RULE_GATE_MAX_ED", "").strip()
+    if sk_ed_env:
+        try:
+            config.validation.skip_rule_gate_max_ed = int(sk_ed_env)
+            print(f"  skip_rule_gate_max_ed: {sk_ed_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SKIP_RULE_GATE_MAX_ED not an int: {sk_ed_env}")
+    sk_freq_env = _os.environ.get("MSC_SKIP_RULE_GATE_MIN_FREQ", "").strip()
+    if sk_freq_env:
+        try:
+            config.validation.skip_rule_gate_min_freq = int(sk_freq_env)
+            print(f"  skip_rule_gate_min_freq: {sk_freq_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SKIP_RULE_GATE_MIN_FREQ not an int: {sk_freq_env}")
     mined_backend = _os.environ.get("MSC_MINED_PAIR_BACKEND", "").strip().lower()
     if mined_backend in ("classifier", "mlm"):
         config.validation.mined_pair_backend = mined_backend
