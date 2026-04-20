@@ -397,8 +397,7 @@ class HiddenCompoundStrategy(ValidationStrategy):
         if confidence < self.confidence_floor:
             return None
 
-        # Format S — canonical single-token gold format
-        # (decided via /octo:debate Round 3, 2-1 vote):
+        # Format S — canonical single-token gold format.
         # Always emit the minimal-edit single-token variant as the primary
         # suggestion. The full compound is kept as the secondary for users
         # who want to see the context, but benchmark Top1 and user-facing

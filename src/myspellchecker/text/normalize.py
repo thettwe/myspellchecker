@@ -329,13 +329,11 @@ def normalize_e_vowel_tall_aa(text: str) -> str:
     - After every other consonant, stray ``ေါ`` is flattened to ``ော``
       (restoring canonical AA for the complement set).
 
-    Prior to 2026-04-19 this function unconditionally rewrote
-    ``ေါ → ော`` regardless of the preceding consonant. That corrupted gold
-    forms like ခေါ်, ပေါင်း, ဒေါ် during
-    ``normalize_for_dictionary_lookup`` and caused a ~28-FN hit on the
-    spelling benchmark. See `[[Tone-Zawgyi Slice 2026-04-19]]` in the
-    Obsidian vault for the audit and `[[Myanmar Real-Word Confusion
-    Taxonomy 2026-04-18]]` §1 B3 for the class definition.
+    An earlier version of this function unconditionally rewrote
+    ``ေါ → ော`` regardless of the preceding consonant, which corrupted
+    gold forms like ခေါ်, ပေါင်း, ဒေါ် during
+    ``normalize_for_dictionary_lookup``. The consonant whitelist guards
+    against that class of regression.
 
     The whitelist is intentionally narrower than the classical MLC
     round-bottom set; see the ``_ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA``

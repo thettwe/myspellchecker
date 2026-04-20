@@ -201,7 +201,8 @@ class WordValidator(Validator):
           4. bigram association above threshold, fragment-rarity guarded
              → off by default (threshold < 0)
           5. SymSpell near-match on merged string, ed<=2, freq floor
-             → off by default (seg-lever2-01 opt-in flag)
+             → off by default (opt-in via
+             ``use_segmenter_merge_symspell_probe``)
         """
         if not a or not b or not a.strip() or not b.strip():
             return None
@@ -248,11 +249,11 @@ class WordValidator(Validator):
                 except Exception:
                     pass
 
-        # Probe 5: SymSpell near-match on merged (seg-lever2-01).
+        # Probe 5: SymSpell near-match on merged string.
         # Guarded by opt-in flag + fragment-OOV guard + merged-length floor +
-        # freq floor + top-1 not equal to either fragment. Targets the 239
-        # over-split FN where merged differs from gold by ed<=2 per the
-        # 2026-04-19 candidate_not_generated audit.
+        # freq floor + top-1 not equal to either fragment. Targets the
+        # segmenter over-split bucket where the merged token differs from
+        # the gold by a small edit distance.
         if (
             self.config.validation.use_segmenter_merge_symspell_probe
             and self.symspell is not None
@@ -290,10 +291,6 @@ class WordValidator(Validator):
         which the prior right-only cascade would leave as two tokens.
 
         Does not mutate the input list.
-
-        Workstream: segmenter-post-merge-rescue / tasks: seg-probe-01 (code),
-        seg-fpr-gate-01 (calibration), seg-left-cascade-fix (this pop-retry
-        loop).
         """
         if len(words) < 2:
             return list(words)
@@ -323,13 +320,11 @@ class WordValidator(Validator):
     def _has_confident_symspell_candidate(self, word: str) -> bool:
         """Return True if SymSpell has a top-1 candidate clearing the confidence gate.
 
-        Gate parameters (``skip_rule_gate_max_ed``, ``skip_rule_gate_min_freq``)
-        come from the audit at ``[[Skip Rule Suppression Audit 2026-04-20]]``.
-        Used by the 4+syllable-all-valid skip at ``_validate_token_path`` to
-        distinguish recoverable typos (whose fragmented form happens to be
-        all-valid syllables) from genuine compound/verb-chain merges.
-
-        Workstream: seg-skip-rule-refactor / task: ssr-implement-01.
+        Gate parameters: ``skip_rule_gate_max_ed`` and
+        ``skip_rule_gate_min_freq`` in :class:`ValidationConfig`. Used by
+        the 4+syllable-all-valid skip at ``_validate_token_path`` to
+        distinguish recoverable typos (whose fragmented form happens to
+        be all-valid syllables) from genuine compound/verb-chain merges.
         """
         if self.symspell is None:
             return False
@@ -716,10 +711,10 @@ class WordValidator(Validator):
         errors: list[Error] = []
         current_idx = 0
 
-        # Segmenter post-merge rescue (seg-probe-01). Rewrites `words` in place
-        # by merging adjacent fragments whose concatenation hits a variant
-        # map / dict / dict+asat / bigram probe. Off by default until FPR
-        # calibration (seg-fpr-gate-01).
+        # Segmenter post-merge rescue. Rewrites ``words`` in place by
+        # merging adjacent fragments whose concatenation hits a variant
+        # map / dict / dict+asat / bigram probe. Off by default until
+        # FPR calibration.
         if self.config.validation.use_segmenter_post_merge_rescue:
             words = self._merge_probe_adjacent_pairs(words)
 
@@ -800,8 +795,8 @@ class WordValidator(Validator):
                 # (ed<=skip_rule_gate_max_ed, freq>=skip_rule_gate_min_freq)
                 # then this is a recoverable missing-asat / substitution typo
                 # whose fragmented form happens to be all-valid syllables.
-                # Gate parameters derived from
-                # [[Skip Rule Suppression Audit 2026-04-20]] (ssr-implement-01).
+                # See ``skip_rule_gate_*`` in ValidationConfig for gate
+                # parameters and rationale.
                 if valid_parts == len(syllables) and len(syllables) >= 4:
                     if not self._has_confident_symspell_candidate(word):
                         myanmar_word_idx += 1
@@ -861,8 +856,7 @@ class WordValidator(Validator):
             # is listed in loan_words.yaml or loan_words_mined.yaml as a
             # variant of a standard form, emit the correction directly rather
             # than falling through to SymSpell — which drops candidates with
-            # edit distance > max_edit_distance (default 2). Workstream:
-            # loan-word-db-mining / task: loanword-prong3-01.
+            # edit distance > max_edit_distance (default 2).
             loan_standards = get_loan_word_standard(word)
             if loan_standards:
                 standards_list = sorted(loan_standards)

@@ -13,8 +13,6 @@ Distinguishes from ``ByT5SafetyNetStrategy`` in purpose and integration:
   feeds the candidates into the ranker as a secondary source. The ranker
   (not the generator) decides what to emit.
 
-Workstream: byt5-candidate-generator / Task: byt5gen-wrapper-01
-
 Model I/O contract (matches the safety-net generator's): input is the full
 Myanmar sentence with the typo in place; output is the corrected sentence
 (byte-level, whitespace-tokenized at the sentence level). We run beam

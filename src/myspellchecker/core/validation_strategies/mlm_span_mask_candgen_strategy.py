@@ -7,23 +7,12 @@ the predictions to dictionary words within an edit-distance budget of the
 typo, and gates the emission on a logit margin ``score(candidate) −
 score(typo) ≥ margin``.
 
-The backing probe (2026-04-18) measured:
-
-- 67.9% top-10 recall on the 187 pure real-word-confusion FNs.
-- 38.9% top-10 recall on all 864 spelling FNs.
-- Sweet spot (K=10, margin=2.0) → **+297 TP at 8% position-level FP rate**,
-  Δcomposite +0.039 in simulation.
-
-This strategy is the production realisation of that probe, behind the
-``use_mlm_span_mask_candgen`` flag (default off) pending the
-``mlm-cg-benchmark-01`` gate.
+Gated by :attr:`ValidationConfig.use_mlm_span_mask_candgen` (default off)
+pending a benchmark gate that measures composite + FPR impact.
 
 Priority **46** — after the structural phase and the confusable strategies
 at 24/25, but before :class:`ConfusableCompoundClassifierStrategy` (47) so
 that the MLM's proposal survives the classifier's gate.
-
-See ``[[MLM Candidate Generation Probe 2026-04-18]]`` and the companion
-workstream doc at ``10_Workstreams/Active/mlm-candidate-generator.md``.
 """
 
 from __future__ import annotations

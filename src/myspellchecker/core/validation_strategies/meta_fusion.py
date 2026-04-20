@@ -364,10 +364,9 @@ class MetaClassifierFusion:
                 continue
             # Combined-signal boost bypasses meta — its emission was already
             # validated by the structural (compound-split would fire) AND
-            # inner-confusable cooccurrence signal (ccb-implement-01).
-            # Similarly, structural-syllable early-exit (sse-implement-01)
-            # bypasses: syllable_rule_validator + enclosing-OOV + SS hit is
-            # a definitive signal.
+            # inner-confusable cooccurrence signal. Similarly, the
+            # structural-syllable early-exit bypasses: syllable_rule_validator
+            # + enclosing-OOV + SymSpell hit is a definitive signal.
             if getattr(error, "_boosted_by_compound_split", False) or getattr(
                 error, "_structural_early_exit", False
             ):

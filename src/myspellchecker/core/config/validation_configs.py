@@ -203,7 +203,7 @@ class ValidationConfig(BaseModel):
             "variant lookup is rule-based and curated/gated by linguist review."
         ),
     )
-    # Segmenter post-merge rescue (seg-probe-01; default off until FPR gate).
+    # Segmenter post-merge rescue (default off until FPR calibration lands).
     use_segmenter_post_merge_rescue: bool = Field(
         default=False,
         description=(
@@ -212,7 +212,7 @@ class ValidationConfig(BaseModel):
             "probe `a+b` against the loan-word variant map, dict, dict+asat, "
             "and bigram store. If any probe hits, replace (a, b) with the "
             "merged token for validation. Off by default until FPR calibration "
-            "(seg-fpr-gate-01) confirms the thresholds below hold."
+            "confirms the thresholds below hold."
         ),
     )
     segmenter_merge_bigram_threshold: float = Field(
@@ -222,15 +222,14 @@ class ValidationConfig(BaseModel):
             "Minimum bigram probability for the weakest merge-probe (bigram "
             "association). Negative = probe 4 disabled (the default). Setting "
             "to 0.0 accepts any positive probability; higher = stricter. "
-            "Probe 4 is hard to calibrate cleanly — sweep in 2026-04-18 "
-            "showed large FPR regressions even with fragment-rarity guards. "
-            "Kept in code for future calibration but disabled by default. "
-            "See seg-fpr-gate-01."
+            "Probe 4 is hard to calibrate cleanly — prior sweeps showed large "
+            "FPR regressions even with fragment-rarity guards. Kept in code "
+            "for future calibration but disabled by default."
         ),
     )
-    # Probe-5: SymSpell on merged string (seg-lever2-01, 2026-04-20).
-    # Off by default — opens the "merged near-match" path targeting the 239
-    # segmenter_over_splits FN where merged token differs from gold by ed<=2.
+    # Probe-5: SymSpell on merged string. Off by default — opens the
+    # "merged near-match" path targeting segmenter over-split tokens where
+    # the merged token differs from the gold by a small edit distance.
     use_segmenter_merge_symspell_probe: bool = Field(
         default=False,
         description=(
@@ -239,7 +238,7 @@ class ValidationConfig(BaseModel):
             "frequency >= segmenter_merge_symspell_min_freq exists at "
             "edit_distance <= segmenter_merge_symspell_max_ed, accept the "
             "merge and let WordValidator emit the correction. Requires "
-            "use_segmenter_post_merge_rescue=True. See seg-lever2-01."
+            "use_segmenter_post_merge_rescue=True."
         ),
     )
     segmenter_merge_symspell_max_ed: int = Field(
@@ -661,7 +660,7 @@ class ValidationConfig(BaseModel):
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
     )
 
-    # Structural syllable early-exit (sse-implement-01).
+    # Structural syllable early-exit.
     # When `syllable_validator` emits `invalid_syllable` AND the
     # `syllable_rule_validator.validate()` returns False (categorical
     # Myanmar language violation: two consecutive vowels, broken stacking,
@@ -669,10 +668,10 @@ class ValidationConfig(BaseModel):
     # OOV, AND SymSpell returns a top-1 hit at ed≤max_ed freq≥min_freq,
     # emit an authoritative `invalid_word` on the enclosing token and
     # bypass downstream suppressors.
-    # Audit at [[Meta-Classifier FN Investigation 2026-04-20]]: structural
-    # violations are categorical — no legitimate "colloquial" version of
-    # `ု`+`ိ` sequence exists. Gate precision 95.1% at ed≤1, freq≥500
-    # across 2,084 sentences (58 TP / 3 clean-FP on the actionable subset).
+    #
+    # Disabled by default: when benchmarked, baseline strategies already
+    # covered the same FN subset on their own, so the rescue added
+    # negligible TPs. Kept archived behind a flag for future revival.
     structural_syllable_early_exit_enabled: bool = Field(
         default=False,
         description=(
@@ -680,10 +679,7 @@ class ValidationConfig(BaseModel):
             "syllable rule validator rejects a syllable AND the enclosing "
             "segmenter token has a confident SymSpell correction, emit an "
             "authoritative word-level error bypassing downstream filters. "
-            "Parked 2026-04-20: benchmark delivered +1 TP vs audit-predicted "
-            "+58; baseline redundancy + position-based TP scoring made the "
-            "rescue mostly inert. See "
-            "60_Decisions/Structural Syllable Early Exit 2026-04-20.md."
+            "Disabled by default (archived); see CHANGELOG for rationale."
         ),
     )
     structural_syllable_early_exit_max_ed: int = Field(
@@ -692,8 +688,8 @@ class ValidationConfig(BaseModel):
         le=3,
         description=(
             "Max SymSpell edit distance for the structural-syllable "
-            "early-exit gate. Default 1 → 95% precision. Raising to 2 "
-            "drops precision to 84% (audit data)."
+            "early-exit gate. Default 1 for high precision; raising to 2 "
+            "widens recall at a precision cost."
         ),
     )
     structural_syllable_early_exit_min_freq: int = Field(
@@ -701,21 +697,19 @@ class ValidationConfig(BaseModel):
         ge=0,
         description=(
             "Min SymSpell top-1 frequency for the structural-syllable "
-            "early-exit gate. 500 chosen for clean audit precision; "
-            "lowering to 100 adds TPs at marginal precision cost."
+            "early-exit gate. 500 chosen for precision; lowering adds "
+            "TPs at a precision cost."
         ),
     )
 
-    # Compound-split confusable boost (ccb-implement-01).
+    # Compound-split confusable boost.
     # When `_suppress_compound_split_valid_words` would fire on a long OOV
     # token whose syllables are all individually valid (4+ syllables),
     # the same structural signal that marks it as a "benign merge" ALSO
     # indicates an inner confusable_error is more likely a real typo than
-    # a clean-text FP. Audit at [[Compound-Split Confusable Boost Audit
-    # 2026-04-20]]: 13 cooccurrences across 2,084 sentences, 11 at gold
-    # spans, 0 on clean text. Boosting inner confusable confidence by
-    # +0.20 pushes them past the _CONFIDENCE_THRESHOLDS['confusable_error']
-    # gate (0.75) for 9 TP at 0 clean FP (100% precision).
+    # a clean-text FP. Boosting inner confusable confidence pushes
+    # eligible emissions past the _CONFIDENCE_THRESHOLDS['confusable_error']
+    # gate at 100% clean-text precision in prior benchmarking.
     compound_split_confusable_boost_enabled: bool = Field(
         default=True,
         description=(
@@ -723,8 +717,7 @@ class ValidationConfig(BaseModel):
             "inside compound-split-suppressible spans. Structural AND-gate: "
             "boost only fires when BOTH (a) a long token would be killed "
             "by _suppress_compound_split_valid_words AND (b) a confusable "
-            "emission exists at a sub-span below the ceiling. See "
-            "[[Compound-Split Confusable Boost Audit 2026-04-20]]."
+            "emission exists at a sub-span below the ceiling."
         ),
     )
     compound_split_confusable_boost: float = Field(
@@ -734,9 +727,8 @@ class ValidationConfig(BaseModel):
         description=(
             "Confidence increment applied to eligible inner confusable "
             "emissions. Default 0.20 pushes conf ≥ 0.55 past the "
-            "_CONFIDENCE_THRESHOLDS['confusable_error']=0.75 gate. Audit "
-            "sweep: +0.15 → 7 TP, +0.20 → 9 TP, +0.25 → 11 TP; all at 0 "
-            "clean-sentence FP. Final confidence is clipped at 1.0."
+            "_CONFIDENCE_THRESHOLDS['confusable_error']=0.75 gate. "
+            "Final confidence is clipped at 1.0."
         ),
     )
     compound_split_confusable_boost_inner_conf_ceiling: float = Field(
@@ -760,7 +752,7 @@ class ValidationConfig(BaseModel):
         ),
     )
 
-    # Skip-rule confidence gate (ssr-implement-01).
+    # Skip-rule confidence gate.
     # At word_validator.py the 4+syllable-all-valid-parts unconditional skip
     # was added to suppress FPs on genuine compound/verb-chain merges. That
     # rule also hid true-positive missing-asat / substitution typos whose
@@ -768,9 +760,6 @@ class ValidationConfig(BaseModel):
     # example: "စွမ်းဆောင်ရည" → ["စွမ်း", "ဆောင်", "ရ", "ည"], all dict-valid,
     # but SymSpell finds "စွမ်းဆောင်ရည်" at ed=1 freq 48k). The confidence
     # gate lets validation proceed when SymSpell has a strong top-1 candidate.
-    # Gate parameters derived from [[Skip Rule Suppression Audit 2026-04-20]]:
-    # measured 13 TP / 2 FP / 87% precision over the 52-row actionable subset
-    # of 970 total skip events on the full spelling benchmark.
     skip_rule_gate_max_ed: int = Field(
         default=2,
         ge=0,
@@ -912,16 +901,13 @@ class ValidationConfig(BaseModel):
     # delimited tokens BEFORE they reach the segmenter. Recovers compound typos
     # the segmenter would otherwise fragment into piecewise-valid subtokens
     # (e.g. "စွမ်းဆောင်ရည" → ["စွမ်းဆောင်", "ရ", "ည"] hides the asat drop).
-    # See [[Pre-Segmenter Raw-Token SymSpell Probe 2026-04-18]] decision doc.
     use_pre_segmenter_raw_probe: bool = Field(
         default=True,
         description=(
             "Run SymSpell.lookup(raw_token, level='word') on unsegmented "
             "whitespace-delimited tokens before segmentation. Catches typo'd "
             "compounds whose segmenter fragmentation makes them invisible to "
-            "piecewise strategies. Shipped default-on after cgc-benchmark-01: "
-            "composite 0.6053 → 0.6137 (+0.0084), candidate_not_generated "
-            "789 → 707 (−82 FN), FPR delta +0.05 pp (essentially flat)."
+            "piecewise strategies."
         ),
     )
     pre_segmenter_raw_probe_max_ed: int = Field(
@@ -977,9 +963,8 @@ class ValidationConfig(BaseModel):
     # Wraps semantic-v2.4 RoBERTa span-masking as a production candidate
     # generator — the existing MLM is already deployed for scoring at
     # priorities 48 (ConfusableSemantic) and 70 (Semantic); this strategy
-    # adds a *generation* path. Probe (2026-04-18) measured +297 TP at 8%
-    # position-level FP rate on the sweet-spot (K=10, margin=2.0). Default
-    # off pending the mlm-cg-benchmark-01 gate.
+    # adds a *generation* path. Disabled by default pending a benchmark
+    # gate that measures composite + FPR impact.
     use_mlm_span_mask_candgen: bool = Field(
         default=False,
         description=(
@@ -1052,12 +1037,10 @@ class ValidationConfig(BaseModel):
     )
 
     # Tone-safety-net candidate generator (priority 22, structural phase).
-    # Targets the D2 bucket from [[Tone-Zawgyi Slice 2026-04-19]]: real-word
-    # confusions where the gold form differs from the typo by a single
-    # trailing tone character {း, ့, ံ, ်}. Disabled by default until
-    # tzn-benchmark-01 measures composite + FPR impact. Audit evidence
-    # suggests ~17 net-new FN addressable after dedup with the already-
-    # shipped mined_confusable_pair strategy.
+    # Targets real-word confusions where the gold form differs from the
+    # typo by a single trailing tone character {း, ့, ံ, ်}. Disabled by
+    # default pending a benchmark gate that measures composite + FPR
+    # impact.
     use_tone_safety_net: bool = Field(
         default=False,
         description=(
@@ -1176,13 +1159,7 @@ class ValidationConfig(BaseModel):
         description=(
             "Enable MinedConfusablePairStrategy: flag real-word confusables using "
             "mined ed-1 pair list with semantic MLM margin gate. Requires "
-            "semantic_checker to be configured. Runs at priority 49. "
-            "Flipped to True default 2026-04-20 after benchmarking confirmed "
-            "+40 TP / +0.0051 composite vs default=False (lifts composite from "
-            "0.6228 → 0.6279 on spelling-only, FPR delta +0.0012). Dashboard "
-            "had claimed shipped on 2026-04-19 but the actual code default was "
-            "never flipped; the benchmark gap went undetected because all "
-            "Oct-20 sweeps were implicitly running without the strategy."
+            "semantic_checker to be configured. Runs at priority 49."
         ),
     )
     mined_pair_yaml_path: str | None = Field(

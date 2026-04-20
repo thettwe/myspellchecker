@@ -513,11 +513,11 @@ def build_context_validation_strategies(
         )
         logger.debug("Added SyllableWindowOOVStrategy (priority 22)")
 
-    # Priority 22: Tone Safety Net (D2 missing / extra tone marks)
-    # Probes trailing tone insert / delete candidates against the dictionary
-    # to recover real-word confusions the mined_confusable_pair strategy
-    # missed because the miner's freq_ratio gate was too strict. See
-    # [[Tone-Zawgyi Slice 2026-04-19]] for the audit.
+    # Priority 22: Tone Safety Net (missing / extra trailing tone marks).
+    # Probes trailing tone insert / delete candidates against the
+    # dictionary to recover real-word confusions the
+    # ``mined_confusable_pair`` strategy misses when its freq_ratio gate
+    # filters out rare-form pairs.
     if validation_config.use_tone_safety_net:
         from myspellchecker.core.validation_strategies.tone_safety_net_strategy import (
             ToneSafetyNetStrategy,
@@ -539,7 +539,7 @@ def build_context_validation_strategies(
     # Runs SymSpell.lookup(raw_token, level='word') on unsegmented Myanmar spans
     # BEFORE any segmentation-dependent strategy looks at the sentence. Catches
     # compound typos the segmenter would otherwise fragment into piecewise-valid
-    # subtokens (the `segmenter_over_splits` audit bucket).
+    # subtokens.
     # Registered before HiddenCompoundStrategy so that on priority ties the
     # probe fires first and HiddenCompound sees the already-claimed position.
     if validation_config.use_pre_segmenter_raw_probe and symspell is not None:

@@ -18,12 +18,8 @@ strict for rare-form pairs.
 
 Priority **22** — structural phase, ahead of the fast-path cutoff and
 ahead of :class:`StatisticalConfusableStrategy` (priority 24). Default-off
-behind :attr:`ValidationConfig.use_tone_safety_net` until the
-``tzn-benchmark-01`` gate measures composite delta + FPR impact.
-
-See [[Tone-Zawgyi Slice 2026-04-19]] for the audit and
-[[Myanmar Real-Word Confusion Taxonomy 2026-04-18]] §1 D2 for the class
-definition.
+behind :attr:`ValidationConfig.use_tone_safety_net` pending a benchmark
+gate that measures composite delta + FPR impact.
 """
 
 from __future__ import annotations

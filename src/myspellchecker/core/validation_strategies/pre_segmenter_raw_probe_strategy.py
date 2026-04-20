@@ -11,12 +11,8 @@ The fix is structural rather than algorithmic: probe
 the top candidate is an edit-distance-≤2 high-frequency dictionary word.
 
 Priority **23** — inside the structural phase, surviving the fast-path
-cutoff at ``ContextValidator._FAST_PATH_PRIORITY_CUTOFF``. Default-off
-behind :attr:`ValidationConfig.use_pre_segmenter_raw_probe` until the
-``cgc-benchmark-01`` gate confirms composite hold + FPR ≤ 8.5%.
-
-See [[Pre-Segmenter Raw-Token SymSpell Probe 2026-04-18]] for the decision
-doc and ceiling validation.
+cutoff at ``ContextValidator._FAST_PATH_PRIORITY_CUTOFF``. Gated by
+:attr:`ValidationConfig.use_pre_segmenter_raw_probe`.
 """
 
 from __future__ import annotations

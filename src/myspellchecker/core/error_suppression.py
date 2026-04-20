@@ -548,12 +548,10 @@ class ErrorSuppressionMixin:
                 filtered.append(e)
                 continue
 
-            # Compound-split structural boost (ccb-implement-01). When the
-            # combined-signal boost has marked this error, R2's structural
-            # fragment checks should skip — the outer compound-split signal
-            # is stronger evidence than R2's self-suggest heuristic would
-            # have been. See [[Compound-Split Confusable Boost Audit
-            # 2026-04-20]].
+            # Compound-split structural boost. When the combined-signal
+            # boost has marked this error, R2's structural fragment checks
+            # should skip — the outer compound-split signal is stronger
+            # evidence than R2's self-suggest heuristic would have been.
             if getattr(e, "_boosted_by_compound_split", False) or getattr(
                 e, "_structural_early_exit", False
             ):
@@ -849,12 +847,10 @@ class ErrorSuppressionMixin:
             # real spelling error.  Require 3+ syllables because 2-syllable
             # tokens have higher overlap with genuine compound typos where
             # both syllables happen to be valid words individually.
-            # Exception (ssr-implement-01): don't suppress when SymSpell has
-            # a strong top-1 candidate (ed<=skip_rule_gate_max_ed,
+            # Exception: don't suppress when SymSpell has a strong top-1
+            # candidate (ed<=skip_rule_gate_max_ed,
             # freq>=skip_rule_gate_min_freq). That signal distinguishes a
-            # missing-asat / substitution typo from a genuine merge. Gate
-            # parameters + rationale in [[Skip Rule Suppression Audit
-            # 2026-04-20]].
+            # missing-asat / substitution typo from a genuine merge.
             if all_valid and len(parts) >= 2 and len(syllables) >= 4:
                 if not self._skip_rule_has_confident_candidate(word):
                     to_remove.add(idx)
@@ -877,9 +873,6 @@ class ErrorSuppressionMixin:
 
         Runs before ``_dedup_errors_by_position`` so the new error
         participates in dedup from the start.
-
-        Workstream: structural-syllable-early-exit / task: sse-implement-01.
-        See ``[[Meta-Classifier FN Investigation 2026-04-20]]`` for audit.
         """
         if not errors:
             return
@@ -1005,9 +998,6 @@ class ErrorSuppressionMixin:
         then pass the 0.75 threshold and survive to the final response.
 
         Mutates errors in-place (modifies confidence values only).
-
-        Workstream: compound-split-confusable-boost / task: ccb-implement-01.
-        See ``[[Compound-Split Confusable Boost Audit 2026-04-20]]``.
         """
         if not errors:
             return
@@ -1101,8 +1091,7 @@ class ErrorSuppressionMixin:
 
         Mirrors :meth:`WordValidator._has_confident_symspell_candidate` so the
         pre-validation skip and the post-validation ``invalid_word``
-        suppression make the same decision. See
-        ``seg-skip-rule-refactor / ssr-implement-01``.
+        suppression make the same decision.
         """
         symspell = getattr(self, "symspell", None)
         config = getattr(self, "config", None)
@@ -1433,10 +1422,9 @@ class ErrorSuppressionMixin:
             # removed by span dedup anyway (it contains sub-errors), but by then
             # the precise narrow detection is already lost.
             # Guard: confusable_error fragments must not displace invalid_word.
-            # Exception (ccb-implement-01): boosted-by-compound-split confusable
-            # DOES displace the wider invalid_word — the combined structural
-            # signal is strong enough. See
-            # [[Compound-Split Confusable Boost Audit 2026-04-20]].
+            # Exception: boosted-by-compound-split confusable DOES displace
+            # the wider invalid_word — the combined structural signal is
+            # strong enough.
             _e_boosted = getattr(e, "_boosted_by_compound_split", False) or getattr(
                 e, "_structural_early_exit", False
             )
@@ -1570,12 +1558,11 @@ class ErrorSuppressionMixin:
                     # generic spans (pos_sequence, context_prob, invalid_word).
                     # Guard: confusable_error on a fragment must not displace
                     # a definite invalid_word that covers the whole token.
-                    # Exception (ccb-implement-01): when the confusable is
-                    # marked `_boosted_by_compound_split`, the combined
-                    # signal (compound-split would fire on outer ∩ confusable
-                    # at sub-span) is strong enough evidence to displace the
-                    # wider invalid_word. See [[Compound-Split Confusable
-                    # Boost Audit 2026-04-20]].
+                    # Exception: when the confusable is marked
+                    # ``_boosted_by_compound_split``, the combined signal
+                    # (compound-split would fire on outer ∩ confusable at
+                    # sub-span) is strong enough evidence to displace the
+                    # wider invalid_word.
                     _confusable_displaces_oov = (
                         e.error_type == ET_CONFUSABLE_ERROR
                         and k.error_type == ET_WORD
