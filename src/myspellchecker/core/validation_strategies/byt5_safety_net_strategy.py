@@ -314,7 +314,13 @@ class ByT5SafetyNetStrategy(ValidationStrategy):
         for src, tgt in zip(source_tokens, corrected_tokens, strict=False):
             tok_pos = sentence.find(src, cursor)
             if tok_pos < 0:
-                cursor = cursor + len(src)
+                # Source token not found at or after ``cursor``. Skip this
+                # edit and re-anchor the cursor past the next whitespace
+                # boundary rather than advancing by ``len(src)`` from an
+                # unknown offset, which would corrupt every subsequent
+                # token's position lookup.
+                next_ws = sentence.find(" ", cursor)
+                cursor = next_ws + 1 if next_ws >= 0 else len(sentence)
                 continue
             cursor = tok_pos + len(src)
             if src == tgt or not tgt.strip():
@@ -361,14 +367,28 @@ class ByT5SafetyNetStrategy(ValidationStrategy):
                         break
                     offset += len(s)
                 # Try syllable-level windows centred on change_syll_idx.
+                # Guard against ``lo`` exceeding either sequence length, which
+                # can happen when ``change_syll_idx`` was computed from the
+                # target syllabification but ``src_sylls`` is shorter. In
+                # that case ``cand_src`` would be empty and downstream
+                # gates would spuriously accept (empty string is ``in``
+                # every sentence).
                 for radius in range(0, max(len(tgt_sylls), len(src_sylls))):
                     lo = max(0, change_syll_idx - radius)
+                    if lo >= len(tgt_sylls) or lo >= len(src_sylls):
+                        continue
                     hi_t = min(len(tgt_sylls), change_syll_idx + radius + 1)
                     hi_s = min(len(src_sylls), change_syll_idx + radius + 1)
                     cand_tgt = "".join(tgt_sylls[lo:hi_t])
                     cand_src = "".join(src_sylls[lo:hi_s])
+                    if not cand_src or not cand_tgt:
+                        continue
                     if self._is_in_dict(cand_tgt):
-                        prefix_len = sum(len(tgt_sylls[i]) for i in range(lo))
+                        # ``left_pre`` is a character offset into the SOURCE
+                        # token (applied as ``tok_pos + left_pre`` below),
+                        # so sum the SOURCE syllable widths — not the target
+                        # syllable widths — up to ``lo``.
+                        prefix_len = sum(len(src_sylls[i]) for i in range(lo))
                         enlarged_src = cand_src
                         enlarged_tgt = cand_tgt
                         left_pre = prefix_len
