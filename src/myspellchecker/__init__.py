@@ -11,7 +11,7 @@ Basic Usage:
     >>> result = checker.check("မြနမ်ာနိုငံ။")
     >>> print(result.has_errors)
 
-For more information, see the documentation at: https://github.com/thettwe/my-spellchecker
+For more information, see the documentation at: https://github.com/thettwe/myspellchecker
 """
 
 import logging
