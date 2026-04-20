@@ -351,6 +351,7 @@ class MetaClassifierFusion:
             if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
             and getattr(e, "source_strategy", "") not in _BYPASS_META_STRATEGIES
             and not getattr(e, "_boosted_by_compound_split", False)
+            and not getattr(e, "_structural_early_exit", False)
         ]
         trained_count = len(trained_errors)
 
@@ -364,7 +365,12 @@ class MetaClassifierFusion:
             # Combined-signal boost bypasses meta — its emission was already
             # validated by the structural (compound-split would fire) AND
             # inner-confusable cooccurrence signal (ccb-implement-01).
-            if getattr(error, "_boosted_by_compound_split", False):
+            # Similarly, structural-syllable early-exit (sse-implement-01)
+            # bypasses: syllable_rule_validator + enclosing-OOV + SS hit is
+            # a definitive signal.
+            if getattr(error, "_boosted_by_compound_split", False) or getattr(
+                error, "_structural_early_exit", False
+            ):
                 kept.append(error)
                 continue
 

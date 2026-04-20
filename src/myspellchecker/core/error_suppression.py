@@ -554,7 +554,9 @@ class ErrorSuppressionMixin:
             # is stronger evidence than R2's self-suggest heuristic would
             # have been. See [[Compound-Split Confusable Boost Audit
             # 2026-04-20]].
-            if getattr(e, "_boosted_by_compound_split", False):
+            if getattr(e, "_boosted_by_compound_split", False) or getattr(
+                e, "_structural_early_exit", False
+            ):
                 filtered.append(e)
                 continue
 
@@ -859,6 +861,136 @@ class ErrorSuppressionMixin:
 
         if to_remove:
             errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
+
+    def _structural_syllable_early_exit(self, errors: list[Error], text: str) -> None:
+        """Rescue categorical Myanmar syllable-structure violations.
+
+        For each ``invalid_syllable`` error, if (a) the syllable rule
+        validator rejects the syllable (structural Myanmar language
+        violation — two consecutive vowels, broken stacking, etc.), AND
+        (b) the enclosing segmenter token is OOV, AND (c) SymSpell returns
+        a confident top-1 correction on the enclosing token (clearing
+        ``structural_syllable_early_exit_{max_ed,min_freq}``), replace the
+        syllable-level error with an authoritative word-level error on the
+        enclosing span. Mark the new error with
+        ``_structural_early_exit=True`` so downstream filters preserve it.
+
+        Runs before ``_dedup_errors_by_position`` so the new error
+        participates in dedup from the start.
+
+        Workstream: structural-syllable-early-exit / task: sse-implement-01.
+        See ``[[Meta-Classifier FN Investigation 2026-04-20]]`` for audit.
+        """
+        if not errors:
+            return
+        config = getattr(self, "config", None)
+        validation = getattr(config, "validation", None) if config else None
+        if validation is None:
+            return
+        if not getattr(validation, "structural_syllable_early_exit_enabled", False):
+            return
+
+        rule_validator = getattr(self, "syllable_rule_validator", None)
+        symspell = getattr(self, "symspell", None)
+        provider = getattr(self, "provider", None)
+        segmenter = getattr(self, "segmenter", None)
+        if rule_validator is None or symspell is None or provider is None or segmenter is None:
+            return
+        if not text:
+            return
+
+        max_ed = int(getattr(validation, "structural_syllable_early_exit_max_ed", 1))
+        min_freq = int(getattr(validation, "structural_syllable_early_exit_min_freq", 500))
+
+        # Segment once; build position map for enclosing-token lookup.
+        try:
+            tokens = segmenter.segment_words(text)
+        except Exception:
+            return
+        token_positions: list[tuple[int, int, str]] = []
+        cursor = 0
+        for tok in tokens:
+            ti = text.find(tok, cursor)
+            if ti < 0:
+                ti = text.find(tok)
+                if ti < 0:
+                    continue
+            te = ti + len(tok)
+            token_positions.append((ti, te, tok))
+            cursor = te
+
+        emitted_rescues: set[tuple[int, int, str]] = set()
+        indices_to_remove: set[int] = set()
+        new_errors: list[Error] = []
+
+        for idx, e in enumerate(errors):
+            if getattr(e, "error_type", "") != ET_SYLLABLE:
+                continue
+            syl_text = e.text or ""
+            if not syl_text:
+                continue
+            try:
+                if rule_validator.validate(syl_text):
+                    continue
+            except Exception:
+                continue
+            pos = e.position
+            end = pos + len(syl_text)
+            enclosing: tuple[int, int, str] | None = None
+            for ti, te, tok in token_positions:
+                if ti <= pos and te >= end:
+                    enclosing = (ti, te, tok)
+                    break
+            if enclosing is None:
+                continue
+            ti, te, enc_text = enclosing
+            if not enc_text:
+                continue
+            try:
+                if provider.is_valid_word(enc_text):
+                    continue
+            except Exception:
+                continue
+            try:
+                sugs = symspell.lookup(enc_text, level="word", max_suggestions=1)
+            except Exception:
+                continue
+            if not sugs:
+                continue
+            top = sugs[0]
+            term = getattr(top, "term", None)
+            if not term or term == enc_text:
+                continue
+            ss_ed = float(getattr(top, "edit_distance", 99))
+            ss_freq = int(getattr(top, "frequency", 0) or 0)
+            if ss_ed > max_ed or ss_freq < min_freq:
+                continue
+            key = (ti, te, term)
+            if key in emitted_rescues:
+                indices_to_remove.add(idx)
+                continue
+            emitted_rescues.add(key)
+
+            from myspellchecker.core.response import Suggestion, WordError
+
+            rescue = WordError(
+                text=enc_text,
+                position=ti,
+                suggestions=[Suggestion(text=term, source="structural_syllable_early_exit")],
+                confidence=0.95,
+                error_type=ET_WORD,
+                syllable_count=max(1, len(syl_text)),
+            )
+            # Flag via setattr to keep the runtime marker off the static type.
+            setattr(rescue, "_structural_early_exit", True)  # noqa: B010
+            new_errors.append(rescue)
+            indices_to_remove.add(idx)
+
+        if not new_errors and not indices_to_remove:
+            return
+        kept = [e for i, e in enumerate(errors) if i not in indices_to_remove]
+        kept.extend(new_errors)
+        errors[:] = kept
 
     def _boost_inner_confusable_for_compound_splits(self, errors: list[Error]) -> None:
         """Boost inner confusable_error confidence inside compound-split spans.
@@ -1307,8 +1439,12 @@ class ErrorSuppressionMixin:
             # DOES displace the wider invalid_word — the combined structural
             # signal is strong enough. See
             # [[Compound-Split Confusable Boost Audit 2026-04-20]].
-            _e_boosted = getattr(e, "_boosted_by_compound_split", False)
-            _prev_boosted = getattr(prev, "_boosted_by_compound_split", False)
+            _e_boosted = getattr(e, "_boosted_by_compound_split", False) or getattr(
+                e, "_structural_early_exit", False
+            )
+            _prev_boosted = getattr(prev, "_boosted_by_compound_split", False) or getattr(
+                prev, "_structural_early_exit", False
+            )
             if (
                 e.error_type in _ROOT_CAUSE_NARROW_TYPES
                 and prev.error_type in _GENERIC_WIDE_TYPES
@@ -1445,7 +1581,10 @@ class ErrorSuppressionMixin:
                     _confusable_displaces_oov = (
                         e.error_type == ET_CONFUSABLE_ERROR
                         and k.error_type == ET_WORD
-                        and not getattr(e, "_boosted_by_compound_split", False)
+                        and not (
+                            getattr(e, "_boosted_by_compound_split", False)
+                            or getattr(e, "_structural_early_exit", False)
+                        )
                     )
                     if (
                         e.error_type in _ROOT_CAUSE_NARROW_TYPES

@@ -453,6 +453,221 @@ class TestSuppressCompoundSplitValidWords:
 
 
 # ---------------------------------------------------------------------------
+# Structural-syllable early-exit (sse-implement-01)
+# ---------------------------------------------------------------------------
+
+
+class TestStructuralSyllableEarlyExit:
+    """Regression tests for the structural-syllable early-exit helper.
+
+    When syllable_rule_validator rejects a syllable (categorical Myanmar
+    violation) AND the enclosing segmenter token is OOV AND SymSpell has
+    a clean top-1 hit, the helper replaces the invalid_syllable with an
+    authoritative WordError on the enclosing span.
+    """
+
+    def _build_mixin(
+        self,
+        *,
+        enabled: bool = True,
+        max_ed: int = 1,
+        min_freq: int = 500,
+        rule_validator_returns: dict[str, bool] | None = None,
+        segmenter_tokens: list[str] | None = None,
+        dict_words: set[str] | None = None,
+        symspell_top1: tuple[str, float, int] | None = None,
+    ):
+        mixin = _make_mixin()
+        mixin.config.validation.structural_syllable_early_exit_enabled = enabled
+        mixin.config.validation.structural_syllable_early_exit_max_ed = max_ed
+        mixin.config.validation.structural_syllable_early_exit_min_freq = min_freq
+
+        # Rule validator mock — returns True for syllables that ARE structurally valid
+        rv = MagicMock()
+        rv_map = rule_validator_returns or {}
+
+        def rv_validate(s):
+            return rv_map.get(s, True)
+
+        rv.validate.side_effect = rv_validate
+        # Attach as attribute — the helper reads `self.syllable_rule_validator`
+        mixin.syllable_rule_validator = rv
+
+        # Segmenter
+        if segmenter_tokens is not None:
+            mixin.segmenter.segment_words.return_value = segmenter_tokens
+
+        # Provider is_valid_word
+        dw = dict_words or set()
+        mixin.provider.is_valid_word = lambda w: w in dw
+
+        # SymSpell mock
+        if symspell_top1 is None:
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = []
+        else:
+            term, ed, freq = symspell_top1
+            cand = MagicMock()
+            cand.term = term
+            cand.edit_distance = ed
+            cand.frequency = freq
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = [cand]
+        return mixin
+
+    def test_fires_when_all_conditions_met(self):
+        # Sentence: "foo ကြုိး bar" where "ကြုိး" has a structural violation
+        # and the enclosing segmenter token IS "ကြုိး" (same span — standalone token).
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},  # gold is valid, target is not
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        text = "ကြုိး"
+        mixin._structural_syllable_early_exit(errors, text)
+        # Original invalid_syllable should be removed, replaced by WordError
+        assert len(errors) == 1
+        new_err = errors[0]
+        assert new_err.text == "ကြုိး"
+        assert new_err.error_type == "invalid_word"
+        assert new_err.confidence == 0.95
+        assert "ကြိုး" in [str(s) for s in (new_err.suggestions or [])]
+        assert getattr(new_err, "_structural_early_exit", False) is True
+
+    def test_no_fire_when_rule_validator_accepts(self):
+        # Syllable is structurally valid → skip
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": True},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        # No replacement
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_enclosing_is_dict_word(self):
+        # Enclosing token IS in the dictionary → not the right class of error
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြုိး", "ကြိုး"},  # errorful is ALSO dict-valid (pretend)
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_symspell_ed_exceeds(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 3.0, 52178),  # ed=3 > max_ed=1
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_symspell_freq_below_floor(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 100),  # freq 100 < min_freq 500
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_disabled(self):
+        mixin = self._build_mixin(
+            enabled=False,
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_deduplicates_multiple_syllables_in_same_enclosing(self):
+        # Two invalid_syllables inside the same enclosing token → single rescue
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိ": False, "း": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        e1 = _make_error(text="ကြုိ", position=0, error_type="invalid_syllable")
+        e2 = _make_error(text="း", position=4, error_type="invalid_syllable")
+        errors = [e1, e2]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        # Both invalid_syllables removed, single WordError rescue emitted
+        rescues = [e for e in errors if getattr(e, "_structural_early_exit", False)]
+        assert len(rescues) == 1
+        # Original invalid_syllables removed
+        assert not any(getattr(e, "error_type", "") == "invalid_syllable" for e in errors)
+
+    def test_no_fire_without_symspell_hit(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=None,
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_empty_text_is_noop(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_ignores_non_syllable_errors(self):
+        # Only targets invalid_syllable type
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_word")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        # Word-level error untouched
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_word"
+        assert not getattr(errors[0], "_structural_early_exit", False)
+
+
+# ---------------------------------------------------------------------------
 # Compound-split confusable boost (ccb-implement-01)
 # ---------------------------------------------------------------------------
 

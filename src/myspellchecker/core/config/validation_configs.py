@@ -661,6 +661,47 @@ class ValidationConfig(BaseModel):
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
     )
 
+    # Structural syllable early-exit (sse-implement-01).
+    # When `syllable_validator` emits `invalid_syllable` AND the
+    # `syllable_rule_validator.validate()` returns False (categorical
+    # Myanmar language violation: two consecutive vowels, broken stacking,
+    # medial-vowel reorder, etc.), AND the enclosing segmenter token is
+    # OOV, AND SymSpell returns a top-1 hit at ed≤max_ed freq≥min_freq,
+    # emit an authoritative `invalid_word` on the enclosing token and
+    # bypass downstream suppressors.
+    # Audit at [[Meta-Classifier FN Investigation 2026-04-20]]: structural
+    # violations are categorical — no legitimate "colloquial" version of
+    # `ု`+`ိ` sequence exists. Gate precision 95.1% at ed≤1, freq≥500
+    # across 2,084 sentences (58 TP / 3 clean-FP on the actionable subset).
+    structural_syllable_early_exit_enabled: bool = Field(
+        default=True,
+        description=(
+            "Enable structural-syllable early-exit rescue. When the "
+            "syllable rule validator rejects a syllable AND the enclosing "
+            "segmenter token has a confident SymSpell correction, emit an "
+            "authoritative word-level error bypassing downstream filters."
+        ),
+    )
+    structural_syllable_early_exit_max_ed: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description=(
+            "Max SymSpell edit distance for the structural-syllable "
+            "early-exit gate. Default 1 → 95% precision. Raising to 2 "
+            "drops precision to 84% (audit data)."
+        ),
+    )
+    structural_syllable_early_exit_min_freq: int = Field(
+        default=500,
+        ge=0,
+        description=(
+            "Min SymSpell top-1 frequency for the structural-syllable "
+            "early-exit gate. 500 chosen for clean audit precision; "
+            "lowering to 100 adds TPs at marginal precision cost."
+        ),
+    )
+
     # Compound-split confusable boost (ccb-implement-01).
     # When `_suppress_compound_split_valid_words` would fire on a long OOV
     # token whose syllables are all individually valid (4+ syllables),

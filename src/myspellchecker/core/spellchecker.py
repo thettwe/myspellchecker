@@ -1132,6 +1132,13 @@ class SpellChecker(
 
         # Layer 1: Syllable validation + cascade suppression
         self._validate_syllables(normalized_text, errors, layers_applied)
+        # Structural-syllable early-exit (sse-implement-01). Runs BEFORE
+        # cascade/pali/bare suppressors so categorical Myanmar syllable-
+        # structure violations with a confident SymSpell correction get
+        # rescued as authoritative word-level errors before any syllable
+        # suppressor can kill them. See [[Meta-Classifier FN Investigation
+        # 2026-04-20]] + `structural_syllable_early_exit` in config.
+        self._structural_syllable_early_exit(errors, normalized_text)
         self._suppress_cascade_syllable_errors(errors, normalized_text)
         self._suppress_pali_stacking_errors(errors, normalized_text)
 
