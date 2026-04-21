@@ -20,6 +20,9 @@ STRATEGY_RELIABILITY: dict[str, float] = {
     # Tier 1: Deterministic -- high precision on valid inputs
     "ToneValidationStrategy": 0.85,
     "OrthographyValidationStrategy": 0.90,
+    # Tier 1.5: Curated lookup -- high precision from curated correction tables
+    "VisargaStrategy": 0.90,
+    "LoanWordValidationStrategy": 0.90,
     # Tier 2: Structural -- moderate precision
     "SyntacticValidationStrategy": 0.70,
     "StatisticalConfusableStrategy": 0.75,

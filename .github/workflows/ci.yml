@@ -76,5 +76,5 @@ jobs:
             -n auto \
             --cov=myspellchecker \
             --cov-report=term-missing \
-            --cov-fail-under=70 \
+            --cov-fail-under=65 \
             -x

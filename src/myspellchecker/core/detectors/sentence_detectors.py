@@ -765,6 +765,10 @@ class SentenceDetectorsMixin(
         Flags casual particles (ဟ, ကွာ) at sentence end when the text contains
         an honorific term (ဆရာကြီး, ဒေါ်, etc.), suggesting a respectful alternative.
         """
+        # Normalize input so honorific membership works against the
+        # post-normalize ``_HONORIFIC_TERMS`` set regardless of caller
+        # (production pipeline already normalizes; direct unit-test calls do not).
+        text = normalize(text)
         has_honorific = any(h in text for h in self._HONORIFIC_TERMS)
         if not has_honorific:
             return

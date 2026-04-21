@@ -501,9 +501,15 @@ def run_benchmark(
     no_confusable_semantic: bool = False,
     confusable_preset: str = "relaxed",
     enable_strategy_debug: bool = False,
+    no_fast_path: bool = False,
+    no_suppression: bool = False,
+    suppress_immune: str | None = None,
+    disable_strategies: str | None = None,
+    bypass_word_suppress: bool = False,
     reranker_path: Optional[Path] = None,
     confidence_gap: float | None = None,
     scope: str = "spelling",
+    domain: str = "all",
     enable_fusion: bool = False,
     fusion_threshold: float = 0.5,
     calibration_path: Path | None = None,
@@ -518,6 +524,11 @@ def run_benchmark(
         warmup: Number of warmup runs before timing.
         scope: Comma-separated scopes to include (default: "spelling").
             Use "all" to include every error regardless of scope field.
+        domain: Spelling-first domain filter — "spelling", "grammar", "both",
+            or "all" (default). Reads the per-span `domain` field added in
+            benchmark v1.4.0. Combined with `scope` as AND (span must pass
+            both filters to be counted). Errors without a `domain` field are
+            conservatively treated as in-domain for "all" only.
 
         enable_ner: Enable NER-based FP suppression (PER+LOC) using heuristic
             NER with place-name dictionary.
@@ -606,6 +617,33 @@ def run_benchmark(
     if enable_strategy_debug:
         print("  Strategy gate debug: enabled")
 
+    if no_fast_path:
+        config.validation.enable_fast_path = False
+        print("  Fast-path: DISABLED (all strategies run on every sentence)")
+
+    if suppress_immune:
+        immune_set = frozenset(s.strip() for s in suppress_immune.split(","))
+        config.validation.suppression_immune_strategies = immune_set
+        print(f"  Suppression immune: {', '.join(sorted(immune_set))}")
+
+    if disable_strategies:
+        for name in (s.strip().lower() for s in disable_strategies.split(",")):
+            if name in ("pos", "pos_sequence"):
+                config.validation.use_pos_sequence = False
+                print("  Disabled: POSSequenceValidationStrategy")
+            elif name in ("ngram", "ngram_context"):
+                config.validation.use_ngram_context = False
+                print("  Disabled: NgramContextValidationStrategy")
+            elif name in ("homophone",):
+                config.validation.use_homophone_detection = False
+                print("  Disabled: HomophoneValidationStrategy")
+            else:
+                print(f"  Warning: unknown strategy '{name}' — ignored")
+
+    if bypass_word_suppress:
+        config.validation.bypass_word_heuristic_suppression = True
+        print("  Word-level heuristic suppression: BYPASSED")
+
     if enable_fusion:
         config.validation.use_candidate_fusion = True
         config.validation.fusion_confidence_threshold = fusion_threshold
@@ -634,9 +672,259 @@ def run_benchmark(
         else:
             print("  Confusable preset: relaxed (loosened guards)")
 
+    # Optional env-driven overrides (useful for ablation without extra CLI flags).
+    import os as _os
+
+    if _os.environ.get("MSC_USE_MINED_CONFUSABLE_PAIR", "").lower() in ("1", "true", "yes"):
+        config.validation.use_mined_confusable_pair = True
+        print("  use_mined_confusable_pair: ENABLED (via MSC_USE_MINED_CONFUSABLE_PAIR)")
+    if _os.environ.get("MSC_USE_SEGMENTER_MERGE_RESCUE", "").lower() in ("1", "true", "yes"):
+        config.validation.use_segmenter_post_merge_rescue = True
+        print("  use_segmenter_post_merge_rescue: ENABLED (via MSC_USE_SEGMENTER_MERGE_RESCUE)")
+    sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
+    if sme_bigram_env:
+        try:
+            config.validation.segmenter_merge_bigram_threshold = float(sme_bigram_env)
+            print(f"  segmenter_merge_bigram_threshold: {sme_bigram_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SEG_MERGE_BIGRAM_THRESHOLD not a float: {sme_bigram_env}")
+    if _os.environ.get("MSC_USE_SEGMENTER_MERGE_SYMSPELL", "").lower() in ("1", "true", "yes"):
+        config.validation.use_segmenter_merge_symspell_probe = True
+        print(
+            "  use_segmenter_merge_symspell_probe: ENABLED (via MSC_USE_SEGMENTER_MERGE_SYMSPELL)"
+        )
+    sme_ss_ed_env = _os.environ.get("MSC_SEG_MERGE_SS_MAX_ED", "").strip()
+    if sme_ss_ed_env:
+        try:
+            config.validation.segmenter_merge_symspell_max_ed = int(sme_ss_ed_env)
+            print(f"  segmenter_merge_symspell_max_ed: {sme_ss_ed_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SEG_MERGE_SS_MAX_ED not an int: {sme_ss_ed_env}")
+    sme_ss_freq_env = _os.environ.get("MSC_SEG_MERGE_SS_MIN_FREQ", "").strip()
+    if sme_ss_freq_env:
+        try:
+            config.validation.segmenter_merge_symspell_min_freq = int(sme_ss_freq_env)
+            print(f"  segmenter_merge_symspell_min_freq: {sme_ss_freq_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SEG_MERGE_SS_MIN_FREQ not an int: {sme_ss_freq_env}")
+    sk_ed_env = _os.environ.get("MSC_SKIP_RULE_GATE_MAX_ED", "").strip()
+    if sk_ed_env:
+        try:
+            config.validation.skip_rule_gate_max_ed = int(sk_ed_env)
+            print(f"  skip_rule_gate_max_ed: {sk_ed_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SKIP_RULE_GATE_MAX_ED not an int: {sk_ed_env}")
+    sk_freq_env = _os.environ.get("MSC_SKIP_RULE_GATE_MIN_FREQ", "").strip()
+    if sk_freq_env:
+        try:
+            config.validation.skip_rule_gate_min_freq = int(sk_freq_env)
+            print(f"  skip_rule_gate_min_freq: {sk_freq_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_SKIP_RULE_GATE_MIN_FREQ not an int: {sk_freq_env}")
+    mined_backend = _os.environ.get("MSC_MINED_PAIR_BACKEND", "").strip().lower()
+    if mined_backend in ("classifier", "mlm"):
+        config.validation.mined_pair_backend = mined_backend
+        print(f"  mined_pair_backend: {mined_backend} (via MSC_MINED_PAIR_BACKEND)")
+    mined_classifier_path = _os.environ.get("MSC_MINED_PAIR_CLASSIFIER_PATH", "").strip()
+    if mined_classifier_path:
+        config.validation.mined_pair_classifier_path = mined_classifier_path
+        print(f"  mined_pair_classifier_path: {mined_classifier_path}")
+    mined_margin_env = _os.environ.get("MSC_MINED_PAIR_MARGIN", "").strip()
+    if mined_margin_env:
+        try:
+            config.validation.mined_pair_mlm_margin = float(mined_margin_env)
+            print(f"  mined_pair_mlm_margin: {mined_margin_env} (via MSC_MINED_PAIR_MARGIN)")
+        except ValueError:
+            print(f"  WARNING: MSC_MINED_PAIR_MARGIN not a float: {mined_margin_env}")
+    mined_ratio_env = _os.environ.get("MSC_MINED_PAIR_FREQ_RATIO", "").strip()
+    if mined_ratio_env:
+        try:
+            config.validation.mined_pair_freq_ratio = float(mined_ratio_env)
+            print(f"  mined_pair_freq_ratio: {mined_ratio_env} (via MSC_MINED_PAIR_FREQ_RATIO)")
+        except ValueError:
+            print(f"  WARNING: MSC_MINED_PAIR_FREQ_RATIO not a float: {mined_ratio_env}")
+    mined_lfm_env = _os.environ.get("MSC_MINED_PAIR_LOW_FREQ_MIN", "").strip()
+    if mined_lfm_env:
+        try:
+            config.validation.mined_pair_low_freq_min = int(mined_lfm_env)
+            print(f"  mined_pair_low_freq_min: {mined_lfm_env} (via MSC_MINED_PAIR_LOW_FREQ_MIN)")
+        except ValueError:
+            print(f"  WARNING: MSC_MINED_PAIR_LOW_FREQ_MIN not an int: {mined_lfm_env}")
+
+    # BrokenCompoundStrategy overrides (broken_compound FN reduction)
+    bc_rare_env = _os.environ.get("MSC_BC_RARE_THRESHOLD", "").strip()
+    bc_cmin_env = _os.environ.get("MSC_BC_COMPOUND_MIN_FREQ", "").strip()
+    bc_ratio_env = _os.environ.get("MSC_BC_COMPOUND_RATIO", "").strip()
+    if bc_rare_env:
+        config.validation.broken_compound_rare_threshold = int(bc_rare_env)
+        print(f"  broken_compound_rare_threshold: {bc_rare_env}")
+    if bc_cmin_env:
+        config.validation.broken_compound_min_frequency = int(bc_cmin_env)
+        print(f"  broken_compound_min_frequency: {bc_cmin_env}")
+    if bc_ratio_env:
+        config.validation.broken_compound_ratio = float(bc_ratio_env)
+        print(f"  broken_compound_ratio: {bc_ratio_env}")
+
+    # HiddenCompoundStrategy overrides
+    hc_max_syl_env = _os.environ.get("MSC_HC_MAX_SYLLABLES", "").strip()
+    hc_max_var_env = _os.environ.get("MSC_HC_MAX_VARIANTS", "").strip()
+    hc_min_freq_env = _os.environ.get("MSC_HC_MIN_FREQ", "").strip()
+    hc_conf_env = _os.environ.get("MSC_HC_CONFIDENCE_FLOOR", "").strip()
+    hc_curated_env = _os.environ.get("MSC_HC_CURATED_ONLY", "").strip().lower()
+    if hc_max_syl_env:
+        config.validation.hidden_compound_max_token_syllables = int(hc_max_syl_env)
+        print(f"  hidden_compound_max_token_syllables: {hc_max_syl_env}")
+    if hc_max_var_env:
+        config.validation.hidden_compound_max_variants_per_token = int(hc_max_var_env)
+        print(f"  hidden_compound_max_variants_per_token: {hc_max_var_env}")
+    if hc_min_freq_env:
+        config.validation.hidden_compound_min_frequency = int(hc_min_freq_env)
+        print(f"  hidden_compound_min_frequency: {hc_min_freq_env}")
+    if hc_conf_env:
+        config.validation.hidden_compound_confidence_floor = float(hc_conf_env)
+        print(f"  hidden_compound_confidence_floor: {hc_conf_env}")
+    if hc_curated_env in ("false", "0", "no", "off"):
+        config.validation.hidden_compound_curated_only = False
+        print("  hidden_compound_curated_only: False")
+
+    # SyllableWindowOOVStrategy overrides (enable + tune)
+    sw_env = _os.environ.get("MSC_USE_SYLLABLE_WINDOW_OOV", "").strip().lower()
+    sw_sizes_env = _os.environ.get("MSC_SW_WINDOW_SIZES", "").strip()
+    sw_minfreq_env = _os.environ.get("MSC_SW_MIN_FREQ", "").strip()
+    sw_conf_env = _os.environ.get("MSC_SW_CONFIDENCE_FLOOR", "").strip()
+    sw_ed_env = _os.environ.get("MSC_SW_MAX_ED", "").strip()
+    if sw_env in ("1", "true", "yes", "on"):
+        config.validation.use_syllable_window_oov = True
+        print("  use_syllable_window_oov: True")
+    if sw_sizes_env:
+        sizes = tuple(int(s) for s in sw_sizes_env.split(",") if s.strip())
+        config.validation.syllable_window_sizes = sizes
+        print(f"  syllable_window_sizes: {sizes}")
+    if sw_minfreq_env:
+        config.validation.syllable_window_min_frequency = int(sw_minfreq_env)
+        print(f"  syllable_window_min_frequency: {sw_minfreq_env}")
+    if sw_conf_env:
+        config.validation.syllable_window_confidence_floor = float(sw_conf_env)
+        print(f"  syllable_window_confidence_floor: {sw_conf_env}")
+    if sw_ed_env:
+        config.validation.syllable_window_max_edit_distance = int(sw_ed_env)
+        print(f"  syllable_window_max_edit_distance: {sw_ed_env}")
+
+    # MLM span-mask candgen overrides (mlm-cg-prototype-01).
+    # Wraps semantic-v2.4 as a candidate generator for real-word confusions.
+    # Default off; enable via MSC_USE_MLM_CANDGEN=1. Scalars let the
+    # benchmark grid the K/margin/ED trade-offs without a code change.
+    mlm_cg_env = _os.environ.get("MSC_USE_MLM_CANDGEN", "").strip().lower()
+    mlm_cg_k_env = _os.environ.get("MSC_MLM_CANDGEN_TOP_K", "").strip()
+    mlm_cg_margin_env = _os.environ.get("MSC_MLM_CANDGEN_MARGIN", "").strip()
+    mlm_cg_ed_env = _os.environ.get("MSC_MLM_CANDGEN_MAX_ED", "").strip()
+    if mlm_cg_env in ("1", "true", "yes", "on"):
+        config.validation.use_mlm_span_mask_candgen = True
+        print("  use_mlm_span_mask_candgen: True")
+    if mlm_cg_k_env:
+        config.validation.mlm_candgen_top_k = int(mlm_cg_k_env)
+        print(f"  mlm_candgen_top_k: {mlm_cg_k_env}")
+    if mlm_cg_margin_env:
+        config.validation.mlm_candgen_margin = float(mlm_cg_margin_env)
+        print(f"  mlm_candgen_margin: {mlm_cg_margin_env}")
+    if mlm_cg_ed_env:
+        config.validation.mlm_candgen_max_ed = int(mlm_cg_ed_env)
+        print(f"  mlm_candgen_max_ed: {mlm_cg_ed_env}")
+
+    # Tone safety-net overrides (tzn-implement-tone-safety-01).
+    # Probes trailing tone insert / delete candidates against the dictionary
+    # for the D2 real-word confusion bucket. Default off; enable via
+    # MSC_USE_TONE_SAFETY_NET=1. Scalar knobs let the benchmark grid the
+    # precision vs coverage tradeoff without a code change.
+    tsn_env = _os.environ.get("MSC_USE_TONE_SAFETY_NET", "").strip().lower()
+    tsn_minfreq_env = _os.environ.get("MSC_TONE_SAFETY_NET_MIN_FREQ", "").strip()
+    tsn_ratio_env = _os.environ.get("MSC_TONE_SAFETY_NET_FREQ_RATIO", "").strip()
+    tsn_skip_env = _os.environ.get("MSC_TONE_SAFETY_NET_SKIP_ABOVE", "").strip()
+    if tsn_env in ("1", "true", "yes", "on"):
+        config.validation.use_tone_safety_net = True
+        print("  use_tone_safety_net: True")
+    if tsn_minfreq_env:
+        config.validation.tone_safety_net_min_frequency = int(tsn_minfreq_env)
+        print(f"  tone_safety_net_min_frequency: {tsn_minfreq_env}")
+    if tsn_ratio_env:
+        config.validation.tone_safety_net_freq_ratio = float(tsn_ratio_env)
+        print(f"  tone_safety_net_freq_ratio: {tsn_ratio_env}")
+    if tsn_skip_env:
+        config.validation.tone_safety_net_skip_above_freq = int(tsn_skip_env)
+        print(f"  tone_safety_net_skip_above_freq: {tsn_skip_env}")
+
+    # Pre-segmenter raw-token SymSpell probe overrides (cgc-implement-01)
+    raw_env = _os.environ.get("MSC_USE_PRE_SEGMENTER_RAW_PROBE", "").strip().lower()
+    raw_ed_env = _os.environ.get("MSC_RAW_PROBE_MAX_ED", "").strip()
+    raw_freq_env = _os.environ.get("MSC_RAW_PROBE_MIN_FREQ", "").strip()
+    raw_len_env = _os.environ.get("MSC_RAW_PROBE_MAX_LEN", "").strip()
+    if raw_env in ("1", "true", "yes", "on"):
+        config.validation.use_pre_segmenter_raw_probe = True
+        print("  use_pre_segmenter_raw_probe: True")
+    if raw_ed_env:
+        config.validation.pre_segmenter_raw_probe_max_ed = int(raw_ed_env)
+        print(f"  pre_segmenter_raw_probe_max_ed: {raw_ed_env}")
+    if raw_freq_env:
+        config.validation.pre_segmenter_raw_probe_min_freq = int(raw_freq_env)
+        print(f"  pre_segmenter_raw_probe_min_freq: {raw_freq_env}")
+    if raw_len_env:
+        config.validation.pre_segmenter_raw_probe_max_length = int(raw_len_env)
+        print(f"  pre_segmenter_raw_probe_max_length: {raw_len_env}")
+
+    # ByT5 safety-net overrides
+    byt5_env = _os.environ.get("MSC_USE_BYT5_SAFETY_NET", "").strip().lower()
+    byt5_path_env = _os.environ.get("MSC_BYT5_MODEL_PATH", "").strip()
+    byt5_margin_env = _os.environ.get("MSC_BYT5_MLM_MARGIN", "").strip()
+    byt5_min_prone_env = _os.environ.get("MSC_BYT5_MIN_TYPO_PRONE", "").strip()
+    byt5_max_chars_env = _os.environ.get("MSC_BYT5_MAX_CHARS", "").strip()
+    if byt5_env in ("1", "true", "yes", "on"):
+        config.validation.use_byt5_safety_net = True
+        print("  use_byt5_safety_net: True")
+    if byt5_path_env:
+        config.validation.byt5_safety_net_model_path = byt5_path_env
+        print(f"  byt5_safety_net_model_path: {byt5_path_env}")
+    if byt5_margin_env:
+        config.validation.byt5_safety_net_mlm_gate_margin = float(byt5_margin_env)
+        print(f"  byt5_safety_net_mlm_gate_margin: {byt5_margin_env}")
+    if byt5_min_prone_env:
+        config.validation.byt5_safety_net_min_typo_prone_chars = int(byt5_min_prone_env)
+        print(f"  byt5_safety_net_min_typo_prone_chars: {byt5_min_prone_env}")
+    if byt5_max_chars_env:
+        config.validation.byt5_safety_net_max_sentence_chars = int(byt5_max_chars_env)
+        print(f"  byt5_safety_net_max_sentence_chars: {byt5_max_chars_env}")
+    # Auto-register ByT5 as suppression-immune when enabled (class name is
+    # what the context_validator ultimately stamps on the error).
+    if config.validation.use_byt5_safety_net:
+        existing_immune = set(config.validation.suppression_immune_strategies or ())
+        existing_immune.add("ByT5SafetyNetStrategy")
+        config.validation.suppression_immune_strategies = frozenset(existing_immune)
+
     # Initialize checker with specified database
     provider = SQLiteProvider(database_path=str(db_path))
     checker = SpellChecker(config=config, provider=provider)
+
+    if no_suppression:
+        # Monkey-patch all suppression methods to no-ops for ablation testing.
+        # This lets us see how many errors strategies produce before suppression.
+        suppression_methods = [
+            "_suppress_generic_pos_sequence_errors",
+            "_suppress_tense_adjacent_syntax",
+            "_suppress_low_value_syllable_errors",
+            "_suppress_low_value_syntax_errors",
+            "_suppress_low_value_pos_sequence_errors",
+            "_suppress_low_value_context_probability",
+            "_suppress_low_value_confusable_errors",
+            "_suppress_low_value_semantic_errors",
+            "_suppress_known_entity_errors",
+            "_suppress_low_value_word_errors",
+            "_suppress_compound_split_valid_words",
+            "_suppress_invalid_word_via_mlm",
+            "_filter_ner_entities",
+        ]
+        for method_name in suppression_methods:
+            if hasattr(checker, method_name):
+                setattr(checker, method_name, lambda *args, **kwargs: None)
+        print("  Suppression: DISABLED (all post-context suppression bypassed)")
     val_level = ValidationLevel.WORD if level == "word" else ValidationLevel.SYLLABLE
 
     # Warmup runs
@@ -656,6 +944,25 @@ def run_benchmark(
             return True
         return err.get("scope", "spelling") in _scope_set
 
+    # Domain filtering — spelling-first (benchmark v1.4.0+).
+    _domain_norm = domain.strip().lower() if domain else "all"
+    if _domain_norm not in {"spelling", "grammar", "both", "all"}:
+        print(
+            f"WARNING: unknown --domain {_domain_norm!r}; falling back to 'all'",
+            file=sys.stderr,
+        )
+        _domain_norm = "all"
+
+    def _in_domain(err: dict) -> bool:
+        """Return True if gold error passes the active domain filter."""
+        if _domain_norm == "all":
+            return True
+        err_domain = err.get("domain")
+        if err_domain is None:
+            # v1.3.x benchmarks or hand-added spans without a label — pass only for 'all'.
+            return False
+        return err_domain == _domain_norm
+
     # Run benchmark
     results: list[SentenceResult] = []
     rerank_rule_telemetry: dict[str, dict[str, int]] = {}
@@ -663,14 +970,16 @@ def run_benchmark(
     fn_reason_telemetry: dict[str, Any] = {"histogram": {}, "examples": []}
     total_start = time.perf_counter()
     total_out_of_scope = 0
+    total_out_of_domain = 0
 
     for sentence in sentences:
         input_text = sentence["input"]
         is_clean = sentence["is_clean"]
         all_gold_errors = sentence.get("expected_errors", [])
-        in_scope_errors = [e for e in all_gold_errors if _in_scope(e)]
-        out_of_scope_errors = [e for e in all_gold_errors if not _in_scope(e)]
-        total_out_of_scope += len(out_of_scope_errors)
+        in_scope_errors = [e for e in all_gold_errors if _in_scope(e) and _in_domain(e)]
+        out_of_scope_errors = [e for e in all_gold_errors if not (_in_scope(e) and _in_domain(e))]
+        total_out_of_scope += sum(1 for e in all_gold_errors if not _in_scope(e))
+        total_out_of_domain += sum(1 for e in all_gold_errors if _in_scope(e) and not _in_domain(e))
         # For matching, use ALL gold errors so out-of-scope matches
         # absorb system detections (not counted as FP).
         gold_errors = all_gold_errors
@@ -821,6 +1130,8 @@ def run_benchmark(
         fn_reason_telemetry=fn_reason_telemetry,
         scope=scope,
         total_out_of_scope=total_out_of_scope,
+        domain=_domain_norm,
+        total_out_of_domain=total_out_of_domain,
     )
     report["config"]["targeted_rerank_hints"] = targeted_rerank_hints
     report["config"]["targeted_candidate_injections"] = targeted_candidate_injections
@@ -842,6 +1153,8 @@ def compute_report(
     fn_reason_telemetry: dict[str, Any] | None = None,
     scope: str = "spelling",
     total_out_of_scope: int = 0,
+    domain: str = "all",
+    total_out_of_domain: int = 0,
 ) -> dict:
     """Compute all metrics and produce the final report."""
 
@@ -935,15 +1248,11 @@ def compute_report(
     p99 = latencies_sorted[int(n * 0.99)] if n > 0 else 0.0
 
     # --- Composite score ---
-    latency_normalized = min(p95 / 500.0, 1.0)
-    composite = (
-        0.30 * f1
-        + 0.25 * mrr
-        + 0.20 * (1.0 - fpr)
-        + 0.15 * top1_acc
-        + 0.10 * (1.0 - latency_normalized)
-    )
-
+    # v1.6.0: Latency is a hard gate (pass/fail at 500ms p95), not a sliding scale.
+    # Previous formula gave latency 3x more sensitivity than any accuracy component,
+    # masking real accuracy differences (see Sprint 1 sensitivity analysis).
+    latency_pass = p95 <= 500.0
+    composite = 0.35 * f1 + 0.30 * mrr + 0.20 * (1.0 - fpr) + 0.15 * top1_acc
     # --- Build report ---
     report = {
         "benchmark_version": benchmark.get("version", "1.0.0"),
@@ -965,6 +1274,8 @@ def compute_report(
             "error_sentences": len(results) - clean_total,
             "scope": scope,
             "out_of_scope_errors_excluded": total_out_of_scope,
+            "domain": domain,
+            "out_of_domain_errors_excluded": total_out_of_domain,
         },
         "overall_metrics": {
             "detection": {
@@ -995,6 +1306,7 @@ def compute_report(
                 "p50": round(p50, 1),
                 "p95": round(p95, 1),
                 "p99": round(p99, 1),
+                "gate_pass": latency_pass,
             },
             "composite_score": round(composite, 4),
         },
@@ -1124,6 +1436,7 @@ def compute_report(
                 }
                 if m.matched:
                     match_entry["system_type"] = m.system_error_type
+                    match_entry["source_strategy"] = m.system_source_strategy
                     match_entry["suggestions"] = m.system_suggestions
                     if m.gold_correction:
                         match_entry["top1_correct"] = m.top1_correct
@@ -1135,6 +1448,7 @@ def compute_report(
                     "text": e.get("text", ""),
                     "type": e.get("error_type", ""),
                     "pos": e.get("position", -1),
+                    "source_strategy": e.get("source_strategy", ""),
                 }
                 for e in r.system_errors
             ]
@@ -1248,8 +1562,13 @@ def print_summary(report: dict) -> None:
     print(f"  P50:      {lat['p50']:.1f} ms")
     print(f"  P95:      {lat['p95']:.1f} ms")
 
+    latency_gate = lat.get("gate_pass", True)
+    gate_str = "PASS" if latency_gate else "FAIL (p95 > 500ms)"
+    print(f"  Gate:     {gate_str}")
+
     print(f"\n{'─' * 70}")
     print(f"  COMPOSITE SCORE: {report['overall_metrics']['composite_score']:.4f}")
+    print("  Formula: 0.35*F1 + 0.30*MRR + 0.20*(1-FPR) + 0.15*Top1")
     print(f"{'─' * 70}")
 
     rerank_telemetry = report.get("rerank_rule_telemetry", {})
@@ -1445,6 +1764,53 @@ def main():
         ),
     )
     parser.add_argument(
+        "--no-fast-path",
+        action="store_true",
+        default=False,
+        help=(
+            "Disable fast-path optimization. When enabled, contextual strategies "
+            "(priority >25) always run even if structural strategies find no errors."
+        ),
+    )
+    parser.add_argument(
+        "--no-suppression",
+        action="store_true",
+        default=False,
+        help=(
+            "Disable all post-context error suppression rules. "
+            "Shows raw strategy output before filtering."
+        ),
+    )
+    parser.add_argument(
+        "--suppress-immune",
+        type=str,
+        default=None,
+        metavar="STRATEGIES",
+        help=(
+            "Comma-separated strategy class names to exempt from post-context "
+            "suppression. Example: HiddenCompoundStrategy,ConfusableSemanticStrategy"
+        ),
+    )
+    parser.add_argument(
+        "--disable-strategies",
+        type=str,
+        default=None,
+        metavar="NAMES",
+        help=(
+            "Comma-separated short names of strategies to disable. "
+            "Options: pos, ngram, homophone. Example: pos,ngram,homophone"
+        ),
+    )
+    parser.add_argument(
+        "--bypass-word-suppress",
+        action="store_true",
+        default=False,
+        help=(
+            "Bypass word-level heuristic suppressions (dict/MLM/compound-split). "
+            "All word-level errors flow to the meta-classifier."
+        ),
+    )
+    parser.add_argument(
         "--reranker",
         type=Path,
         default=None,
@@ -1500,6 +1866,18 @@ def main():
             "Use 'all' to include everything. (default: spelling)"
         ),
     )
+    parser.add_argument(
+        "--domain",
+        type=str,
+        choices=["spelling", "grammar", "both", "all"],
+        default="all",
+        help=(
+            "Spelling-first domain filter (benchmark v1.4.0+). Reads the per-span "
+            "`domain` field assigned by scripts/label_benchmark_domains.py. "
+            "Combined with --scope as AND. Errors without a `domain` field are "
+            "excluded from non-'all' runs. (default: all)"
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -1529,9 +1907,15 @@ def main():
         no_confusable_semantic=args.no_confusable_semantic,
         confusable_preset=args.confusable_preset,
         enable_strategy_debug=args.debug_strategy_gates,
+        no_fast_path=args.no_fast_path,
+        no_suppression=args.no_suppression,
+        suppress_immune=args.suppress_immune,
+        disable_strategies=args.disable_strategies,
+        bypass_word_suppress=args.bypass_word_suppress,
         reranker_path=args.reranker,
         confidence_gap=args.confidence_gap,
         scope=args.scope,
+        domain=args.domain,
         enable_fusion=args.fusion,
         fusion_threshold=args.fusion_threshold,
         calibration_path=args.calibration,
@@ -1557,9 +1941,14 @@ def main():
     if args.disable_targeted_grammar_completion_templates:
         targeted_tags += "_no_grammar_tpl"
     debug_tag = "_debug_gates" if args.debug_strategy_gates else ""
+    fast_path_tag = "_no_fast_path" if args.no_fast_path else ""
+    suppression_tag = "_no_suppression" if args.no_suppression else ""
+    immune_tag = "_immune" if args.suppress_immune else ""
+    disable_tag = "_disabled" if args.disable_strategies else ""
+    bypass_tag = "_bypass_word" if args.bypass_word_suppress else ""
     output_file = output_dir / (
         f"benchmark_{db_name}_{args.level}{semantic_tag}{ner_tag}"
-        f"{targeted_tags}{debug_tag}_{timestamp}.json"
+        f"{targeted_tags}{debug_tag}{fast_path_tag}{suppression_tag}{immune_tag}{disable_tag}{bypass_tag}_{timestamp}.json"
     )
 
     with open(output_file, "w", encoding="utf-8") as f:

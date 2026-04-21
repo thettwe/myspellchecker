@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Pre-commit hook: runs commit_guard.py in fast mode.
+# Installed once via: git config core.hooksPath .githooks
+#
+# Fast mode = ruff check + ruff format --check + staged-diff inspection.
+# Takes ~5 seconds. Agent runs full/task mode explicitly when closing tasks.
+#
+# Bypass (INTERACTIVE ONLY, never from agents): SKIP_COMMIT_GUARD=1 git commit ...
+
+set -e
+
+if [[ "${SKIP_COMMIT_GUARD:-0}" == "1" ]]; then
+    echo "commit_guard: SKIPPED (SKIP_COMMIT_GUARD=1). Not allowed in autonomous mode." >&2
+    exit 0
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Prefer the project venv; fall back to system python if not present.
+if [[ -x "$REPO_ROOT/venv/bin/python" ]]; then
+    PY="$REPO_ROOT/venv/bin/python"
+else
+    PY="$(command -v python3 || command -v python)"
+fi
+
+exec "$PY" scripts/commit_guard.py --mode fast

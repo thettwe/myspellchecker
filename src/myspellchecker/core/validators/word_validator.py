@@ -19,9 +19,10 @@ from myspellchecker.algorithms.suggestion_strategy import (
 )
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.constants import ET_COLLOQUIAL_INFO, ET_COLLOQUIAL_VARIANT
+from myspellchecker.core.loan_word_variants import get_loan_word_standard
 from myspellchecker.core.response import Error, WordError
 from myspellchecker.core.token_refinement import build_validation_token_paths
-from myspellchecker.core.validators.base import Validator
+from myspellchecker.core.validators.base import REGISTER_CRITICAL_PRONOUNS, Validator
 from myspellchecker.providers.interfaces import SyllableRepository, WordRepository
 from myspellchecker.segmenters import Segmenter
 from myspellchecker.text.morphology import WordAnalysis, analyze_word
@@ -37,10 +38,6 @@ _BOUNDARY_PUNCT_RE = re.compile(
     r'^["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+|'
     r'["\'\u201c\u201d\u2018\u2019"()\[\]{},;:.\u2026\-\u2013\u2014/\\]+$'
 )
-
-# Informal pronouns that are register-critical -- colloquial_info should still
-# be emitted for these even when high-frequency, since they signal informal register.
-_REGISTER_CRITICAL_PRONOUNS: frozenset[str] = frozenset({"\u1004\u102b"})  # ငါ
 
 
 class WordValidator(Validator):
@@ -182,6 +179,168 @@ class WordValidator(Validator):
         return None
 
     # Helper methods to reduce cyclomatic complexity
+
+    def _probe_adjacent_merge(
+        self,
+        a: str,
+        b: str,
+        *,
+        ngram_provider: object | None,
+        bigram_threshold: float,
+    ) -> str | None:
+        """Run probes 1-5 on one adjacent pair. Return merged string or None.
+
+        Probes (stop at first hit):
+          1. loan_word variant map → highest confidence
+          2. dict word, at-least-one-fragment-OOV guard → medium
+          3. dict word with asat (U+103A) appended → medium
+          4. bigram association above threshold, fragment-rarity guarded
+             → off by default (threshold < 0)
+          5. SymSpell near-match on merged string, ed<=2, freq floor
+             → off by default (opt-in via
+             ``use_segmenter_merge_symspell_probe``)
+        """
+        if not a or not b or not a.strip() or not b.strip():
+            return None
+        if not (self._is_myanmar_with_config(a) and self._is_myanmar_with_config(b)):
+            return None
+
+        merged = a + b
+
+        # Probe 1: variant map.
+        if get_loan_word_standard(merged):
+            return merged
+
+        a_valid = self.word_repository.is_valid_word(a)
+        b_valid = self.word_repository.is_valid_word(b)
+
+        # Probe 2: dict word (guard: at least one fragment must be OOV).
+        if self.word_repository.is_valid_word(merged):
+            if not (a_valid and b_valid):
+                return merged
+
+        # Probe 3: dict word with asat appended (missing-asat typo).
+        if self.word_repository.is_valid_word(merged + "\u103a"):
+            return merged
+
+        # Probe 4: bigram association, off by default (threshold < 0).
+        if (
+            bigram_threshold >= 0
+            and ngram_provider is not None
+            and hasattr(ngram_provider, "get_bigram_probability")
+        ):
+            freq_floor = 100
+            fa = self.word_repository.get_word_frequency(a) or 0
+            fb = self.word_repository.get_word_frequency(b) or 0
+            one_rare = (
+                not isinstance(fa, (int, float))
+                or not isinstance(fb, (int, float))
+                or min(fa, fb) < freq_floor
+            )
+            if one_rare:
+                try:
+                    pr = ngram_provider.get_bigram_probability(a, b)
+                    if pr > bigram_threshold:
+                        return merged
+                except Exception:
+                    pass
+
+        # Probe 5: SymSpell near-match on merged string.
+        # Guarded by opt-in flag + fragment-OOV guard + merged-length floor +
+        # freq floor + top-1 not equal to either fragment. Targets the
+        # segmenter over-split bucket where the merged token differs from
+        # the gold by a small edit distance.
+        if (
+            self.config.validation.use_segmenter_merge_symspell_probe
+            and self.symspell is not None
+            and not (a_valid and b_valid)
+            and len(merged) >= self.config.validation.segmenter_merge_symspell_min_merged_len
+        ):
+            try:
+                candidates = self.symspell.lookup(
+                    merged,
+                    level="word",
+                    max_suggestions=1,
+                )
+            except Exception:
+                candidates = []
+            if candidates:
+                top = candidates[0]
+                if (
+                    getattr(top, "term", None) not in (a, b, merged)
+                    and getattr(top, "edit_distance", 99)
+                    <= self.config.validation.segmenter_merge_symspell_max_ed
+                    and getattr(top, "frequency", 0)
+                    >= self.config.validation.segmenter_merge_symspell_min_freq
+                ):
+                    return merged
+        return None
+
+    def _merge_probe_adjacent_pairs(self, words: list[str]) -> list[str]:
+        """Rescue over-segmented multi-token fragments by probing merges.
+
+        Pop-and-retry cascade: for each incoming token, attempt to absorb
+        it into the tail of ``out`` via :meth:`_probe_adjacent_merge`. On a
+        hit, pop the tail, merge, and keep probing left until no more
+        merges fire. This handles 3-fragment chunks where the rightmost
+        pair merges first (e.g. ``['စွမ်းဆောင်', 'ရ', 'ည']`` → ``['စွမ်းဆောင်ရည']``)
+        which the prior right-only cascade would leave as two tokens.
+
+        Does not mutate the input list.
+        """
+        if len(words) < 2:
+            return list(words)
+
+        ngram_provider = None
+        if self.context_checker is not None:
+            ngram_provider = getattr(self.context_checker, "provider", None)
+        bigram_threshold = self.config.validation.segmenter_merge_bigram_threshold
+
+        out: list[str] = []
+        for token in words:
+            candidate = token
+            while out:
+                merged = self._probe_adjacent_merge(
+                    out[-1],
+                    candidate,
+                    ngram_provider=ngram_provider,
+                    bigram_threshold=bigram_threshold,
+                )
+                if merged is None:
+                    break
+                out.pop()
+                candidate = merged
+            out.append(candidate)
+        return out
+
+    def _has_confident_symspell_candidate(self, word: str) -> bool:
+        """Return True if SymSpell has a top-1 candidate clearing the confidence gate.
+
+        Gate parameters: ``skip_rule_gate_max_ed`` and
+        ``skip_rule_gate_min_freq`` in :class:`ValidationConfig`. Used by
+        the 4+syllable-all-valid skip at ``_validate_token_path`` to
+        distinguish recoverable typos (whose fragmented form happens to
+        be all-valid syllables) from genuine compound/verb-chain merges.
+        """
+        if self.symspell is None:
+            return False
+        max_ed = self.config.validation.skip_rule_gate_max_ed
+        min_freq = self.config.validation.skip_rule_gate_min_freq
+        try:
+            candidates = self.symspell.lookup(word, level="word", max_suggestions=1)
+        except (RuntimeError, ValueError, KeyError):
+            return False
+        if not candidates:
+            return False
+        top = candidates[0]
+        term = getattr(top, "term", None)
+        if term is None or term == word:
+            return False
+        if float(getattr(top, "edit_distance", 99)) > max_ed:
+            return False
+        if int(getattr(top, "frequency", 0) or 0) < min_freq:
+            return False
+        return True
 
     def _is_valid_compound(self, word: str) -> bool:
         """Check if word is a valid compound (splits into valid parts with no edits).
@@ -458,7 +617,7 @@ class WordValidator(Validator):
                 if (
                     isinstance(word_freq, (int, float))
                     and word_freq >= threshold
-                    and word not in _REGISTER_CRITICAL_PRONOUNS
+                    and word not in REGISTER_CRITICAL_PRONOUNS
                 ):
                     return None
             return WordError(
@@ -548,6 +707,13 @@ class WordValidator(Validator):
         errors: list[Error] = []
         current_idx = 0
 
+        # Segmenter post-merge rescue. Rewrites ``words`` in place by
+        # merging adjacent fragments whose concatenation hits a variant
+        # map / dict / dict+asat / bigram probe. Off by default until
+        # FPR calibration.
+        if self.config.validation.use_segmenter_post_merge_rescue:
+            words = self._merge_probe_adjacent_pairs(words)
+
         myanmar_words = [
             w
             for w in words
@@ -619,11 +785,18 @@ class WordValidator(Validator):
             if len(syllables) >= 2:
                 valid_parts = sum(1 for s in syllables if self.word_repository.is_valid_word(s))
                 # For tokens with 4+ syllables where ALL are valid dictionary
-                # words, skip unconditionally — these are segmenter merges of
-                # valid words (verb chains, compound+particle), not real errors.
+                # words, skip by default — these are usually segmenter merges
+                # of valid words (verb chains, compound+particle), not real
+                # errors. But if SymSpell has a strong top-1 candidate
+                # (ed<=skip_rule_gate_max_ed, freq>=skip_rule_gate_min_freq)
+                # then this is a recoverable missing-asat / substitution typo
+                # whose fragmented form happens to be all-valid syllables.
+                # See ``skip_rule_gate_*`` in ValidationConfig for gate
+                # parameters and rationale.
                 if valid_parts == len(syllables) and len(syllables) >= 4:
-                    myanmar_word_idx += 1
-                    continue
+                    if not self._has_confident_symspell_candidate(word):
+                        myanmar_word_idx += 1
+                        continue
                 if valid_parts >= max(len(syllables) // 2, 1):
                     # Check whole word + asat
                     asat_form = word + "\u103a"
@@ -672,6 +845,26 @@ class WordValidator(Validator):
                 colloquial_error = self._check_colloquial_variant(word, position)
                 if colloquial_error:
                     errors.append(colloquial_error)
+                myanmar_word_idx += 1
+                continue
+
+            # Prong-3: known loan-word variant short-circuit. If this OOV word
+            # is listed in loan_words.yaml or loan_words_mined.yaml as a
+            # variant of a standard form, emit the correction directly rather
+            # than falling through to SymSpell — which drops candidates with
+            # edit distance > max_edit_distance (default 2).
+            loan_standards = get_loan_word_standard(word)
+            if loan_standards:
+                standards_list = sorted(loan_standards)
+                errors.append(
+                    WordError(
+                        text=word,
+                        position=position,
+                        suggestions=[standards_list[0]] + standards_list[1:],
+                        confidence=self.config.validation.loan_word_detection_confidence,
+                        syllable_count=len(syllables),
+                    )
+                )
                 myanmar_word_idx += 1
                 continue
 

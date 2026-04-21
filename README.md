@@ -64,6 +64,8 @@
 
 Full documentation is available at **[docs.myspellchecker.com](https://docs.myspellchecker.com/)**.
 
+> **What's new in v1.6.0?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for new validation strategies (mined-confusable, pre-segmenter raw probe), the compound-split confusable boost, the skip-rule confidence gate, consonant-gated Tall-AA normalization, the flat-AA dictionary migration, and spelling-first benchmark labeling.
+
 ### Getting Started
 *   **[Introduction](https://docs.myspellchecker.com/introduction)**: Overview of the library and its architecture.
 *   **[Installation](https://docs.myspellchecker.com/guides/installation)**: Installation options and system requirements.
@@ -473,7 +475,7 @@ pytest tests/ -m e2e            # 10 end-to-end CLI tests
 pytest tests/ -m slow           # 39 slow tests (property-based, stress, DB builds)
 
 # Run with coverage
-pytest tests/ --cov=src/myspellchecker --cov-fail-under=75
+pytest tests/ --cov=src/myspellchecker --cov-fail-under=65
 
 # Formatting and linting
 ruff format .

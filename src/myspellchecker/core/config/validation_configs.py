@@ -183,6 +183,88 @@ class ValidationConfig(BaseModel):
         default=True,
         description="Enable homophone detection in validation pipeline",
     )
+    # Loan Word Detection (priority 22)
+    use_loan_word_detection: bool = Field(
+        default=True,
+        description=(
+            "Enable loan word transliteration error detection at priority 22. "
+            "Detects valid-in-DB loan word variants and suggests standard forms."
+        ),
+    )
+    loan_word_detection_confidence: float = Field(
+        default=0.90,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence for loan-word variant short-circuit in WordValidator "
+            "(Prong-3 propagation fix). Fires when an OOV word is a known "
+            "variant in loan_words.yaml or loan_words_mined.yaml, bypassing "
+            "SymSpell's max_edit_distance gate. High default since the "
+            "variant lookup is rule-based and curated/gated by linguist review."
+        ),
+    )
+    # Segmenter post-merge rescue (default off until FPR calibration lands).
+    use_segmenter_post_merge_rescue: bool = Field(
+        default=False,
+        description=(
+            "Enable post-segmentation probe-and-merge rescue in WordValidator. "
+            "For each adjacent fragment pair (a, b) in the segmenter output, "
+            "probe `a+b` against the loan-word variant map, dict, dict+asat, "
+            "and bigram store. If any probe hits, replace (a, b) with the "
+            "merged token for validation. Off by default until FPR calibration "
+            "confirms the thresholds below hold."
+        ),
+    )
+    segmenter_merge_bigram_threshold: float = Field(
+        default=-1.0,
+        ge=-1.0,
+        description=(
+            "Minimum bigram probability for the weakest merge-probe (bigram "
+            "association). Negative = probe 4 disabled (the default). Setting "
+            "to 0.0 accepts any positive probability; higher = stricter. "
+            "Probe 4 is hard to calibrate cleanly — prior sweeps showed large "
+            "FPR regressions even with fragment-rarity guards. Kept in code "
+            "for future calibration but disabled by default."
+        ),
+    )
+    # Probe-5: SymSpell on merged string. Off by default — opens the
+    # "merged near-match" path targeting segmenter over-split tokens where
+    # the merged token differs from the gold by a small edit distance.
+    use_segmenter_merge_symspell_probe: bool = Field(
+        default=False,
+        description=(
+            "Enable Probe-5 in the segmenter post-merge rescue. After probes "
+            "1-4 fail, run SymSpell on the merged string; if a candidate with "
+            "frequency >= segmenter_merge_symspell_min_freq exists at "
+            "edit_distance <= segmenter_merge_symspell_max_ed, accept the "
+            "merge and let WordValidator emit the correction. Requires "
+            "use_segmenter_post_merge_rescue=True."
+        ),
+    )
+    segmenter_merge_symspell_max_ed: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description=(
+            "Max edit distance for the Probe-5 SymSpell lookup on merged strings. Default 2."
+        ),
+    )
+    segmenter_merge_symspell_min_freq: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum corpus frequency for the Probe-5 SymSpell top-1 "
+            "candidate. Filters low-quality dict neighbours. Default 100."
+        ),
+    )
+    segmenter_merge_symspell_min_merged_len: int = Field(
+        default=4,
+        ge=2,
+        description=(
+            "Minimum character length of the merged string to run Probe-5. "
+            "Short merges are too prone to spurious ed<=2 matches. Default 4."
+        ),
+    )
     # Statistical Confusable Gate (priority 24)
     use_statistical_confusable_gate: bool = Field(
         default=True,
@@ -412,6 +494,25 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    suppression_immune_strategies: frozenset[str] = Field(
+        default=frozenset(),
+        description=(
+            "Set of strategy class names whose errors are immune to post-context "
+            "suppression rules. Errors from these strategies pass through suppression "
+            "untouched. Use for strategies empirically shown to have high precision "
+            "but whose TPs are incorrectly suppressed."
+        ),
+    )
+
+    use_pos_sequence: bool = Field(
+        default=True,
+        description="Enable POSSequenceValidationStrategy in context validation.",
+    )
+    use_ngram_context: bool = Field(
+        default=True,
+        description="Enable NgramContextValidationStrategy in context validation.",
+    )
+
     enable_fast_path: bool = Field(
         default=True,
         description=(
@@ -558,6 +659,127 @@ class ValidationConfig(BaseModel):
         description="Frequency threshold for prefix-asat and compound synthesis guards.",
     )
 
+    # Structural syllable early-exit.
+    # When `syllable_validator` emits `invalid_syllable` AND the
+    # `syllable_rule_validator.validate()` returns False (categorical
+    # Myanmar language violation: two consecutive vowels, broken stacking,
+    # medial-vowel reorder, etc.), AND the enclosing segmenter token is
+    # OOV, AND SymSpell returns a top-1 hit at ed≤max_ed freq≥min_freq,
+    # emit an authoritative `invalid_word` on the enclosing token and
+    # bypass downstream suppressors.
+    #
+    # Disabled by default: when benchmarked, baseline strategies already
+    # covered the same FN subset on their own, so the rescue added
+    # negligible TPs. Kept archived behind a flag for future revival.
+    structural_syllable_early_exit_enabled: bool = Field(
+        default=False,
+        description=(
+            "Enable structural-syllable early-exit rescue. When the "
+            "syllable rule validator rejects a syllable AND the enclosing "
+            "segmenter token has a confident SymSpell correction, emit an "
+            "authoritative word-level error bypassing downstream filters. "
+            "Disabled by default (archived); see CHANGELOG for rationale."
+        ),
+    )
+    structural_syllable_early_exit_max_ed: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description=(
+            "Max SymSpell edit distance for the structural-syllable "
+            "early-exit gate. Default 1 for high precision; raising to 2 "
+            "widens recall at a precision cost."
+        ),
+    )
+    structural_syllable_early_exit_min_freq: int = Field(
+        default=500,
+        ge=0,
+        description=(
+            "Min SymSpell top-1 frequency for the structural-syllable "
+            "early-exit gate. 500 chosen for precision; lowering adds "
+            "TPs at a precision cost."
+        ),
+    )
+
+    # Compound-split confusable boost.
+    # When `_suppress_compound_split_valid_words` would fire on a long OOV
+    # token whose syllables are all individually valid (4+ syllables),
+    # the same structural signal that marks it as a "benign merge" ALSO
+    # indicates an inner confusable_error is more likely a real typo than
+    # a clean-text FP. Boosting inner confusable confidence pushes
+    # eligible emissions past the _CONFIDENCE_THRESHOLDS['confusable_error']
+    # gate at 100% clean-text precision in prior benchmarking.
+    compound_split_confusable_boost_enabled: bool = Field(
+        default=True,
+        description=(
+            "Enable confidence boost for inner confusable_error emissions "
+            "inside compound-split-suppressible spans. Structural AND-gate: "
+            "boost only fires when BOTH (a) a long token would be killed "
+            "by _suppress_compound_split_valid_words AND (b) a confusable "
+            "emission exists at a sub-span below the ceiling."
+        ),
+    )
+    compound_split_confusable_boost: float = Field(
+        default=0.20,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence increment applied to eligible inner confusable "
+            "emissions. Default 0.20 pushes conf ≥ 0.55 past the "
+            "_CONFIDENCE_THRESHOLDS['confusable_error']=0.75 gate. "
+            "Final confidence is clipped at 1.0."
+        ),
+    )
+    compound_split_confusable_boost_inner_conf_ceiling: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Only boost inner confusable emissions below this ceiling. "
+            "Default matches _CONFIDENCE_THRESHOLDS['confusable_error']; "
+            "emissions at or above already pass the downstream gate so "
+            "boosting them is a no-op."
+        ),
+    )
+    compound_split_confusable_boost_min_syllables: int = Field(
+        default=4,
+        ge=2,
+        description=(
+            "Minimum syllables in the outer token for the structural "
+            "signal to fire. Matches _suppress_compound_split_valid_words "
+            "'4+ syllables' predicate; keep in sync if that rule changes."
+        ),
+    )
+
+    # Skip-rule confidence gate.
+    # At word_validator.py the 4+syllable-all-valid-parts unconditional skip
+    # was added to suppress FPs on genuine compound/verb-chain merges. That
+    # rule also hid true-positive missing-asat / substitution typos whose
+    # fragmented form happens to produce all-valid syllables (canonical
+    # example: "စွမ်းဆောင်ရည" → ["စွမ်း", "ဆောင်", "ရ", "ည"], all dict-valid,
+    # but SymSpell finds "စွမ်းဆောင်ရည်" at ed=1 freq 48k). The confidence
+    # gate lets validation proceed when SymSpell has a strong top-1 candidate.
+    skip_rule_gate_max_ed: int = Field(
+        default=2,
+        ge=0,
+        le=3,
+        description=(
+            "Max SymSpell edit distance for the skip-rule confidence gate. "
+            "When the 4+syllable-all-valid skip predicate fires, validation "
+            "is allowed to proceed if SymSpell's top-1 candidate is within "
+            "this edit distance and clears skip_rule_gate_min_freq."
+        ),
+    )
+    skip_rule_gate_min_freq: int = Field(
+        default=1000,
+        ge=0,
+        description=(
+            "Min SymSpell top-1 candidate frequency for the skip-rule "
+            "confidence gate. The default threshold balances precision "
+            "against recall recovery; raising it tightens precision."
+        ),
+    )
+
     # Broken compound detection (wrongly split compound words)
     use_broken_compound_detection: bool = Field(
         default=True,
@@ -672,6 +894,198 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # Pre-segmenter raw-token SymSpell probe (priority 23, structural phase).
+    # Runs SymSpell.lookup(raw_token, level='word') on whitespace/punctuation-
+    # delimited tokens BEFORE they reach the segmenter. Recovers compound typos
+    # the segmenter would otherwise fragment into piecewise-valid subtokens
+    # (e.g. "စွမ်းဆောင်ရည" → ["စွမ်းဆောင်", "ရ", "ည"] hides the asat drop).
+    use_pre_segmenter_raw_probe: bool = Field(
+        default=True,
+        description=(
+            "Run SymSpell.lookup(raw_token, level='word') on unsegmented "
+            "whitespace-delimited tokens before segmentation. Catches typo'd "
+            "compounds whose segmenter fragmentation makes them invisible to "
+            "piecewise strategies."
+        ),
+    )
+    pre_segmenter_raw_probe_max_ed: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description=(
+            "Maximum SymSpell edit distance accepted for a raw-token probe hit. "
+            "Raising above 2 introduces a larger FP hit (real-word confusion) "
+            "than candidate-gen gain; keep at 2 unless a dedicated precision "
+            "effort has lowered that ceiling."
+        ),
+    )
+    pre_segmenter_raw_probe_min_freq: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum dictionary frequency for a SymSpell suggestion to be "
+            "emitted by the raw-token probe. Guards against swapping a rare "
+            "OOV compound with a homophone-like dict neighbour."
+        ),
+    )
+    pre_segmenter_raw_probe_max_length: int = Field(
+        default=15,
+        ge=1,
+        description=(
+            "Maximum character length for a raw token to be probed. Matches "
+            "SymSpell's default max_word_length; tokens beyond this are "
+            "excluded from SymSpell's index and cannot be recovered."
+        ),
+    )
+    pre_segmenter_raw_probe_max_length_diff: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Maximum absolute length difference between the raw token and the "
+            "suggested candidate. Larger differences usually indicate a wrong "
+            "compound join or phrase substitution rather than a typo."
+        ),
+    )
+    pre_segmenter_raw_probe_confidence: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence score emitted for raw-token probe errors. Calibrated "
+            "to survive the meta-classifier's learnt boundary for word-level "
+            "typos without displacing higher-priority structural emissions."
+        ),
+    )
+
+    # MLM-as-candidate-generator (priority 46).
+    # Wraps semantic-v2.4 RoBERTa span-masking as a production candidate
+    # generator — the existing MLM is already deployed for scoring at
+    # priorities 48 (ConfusableSemantic) and 70 (Semantic); this strategy
+    # adds a *generation* path. Disabled by default pending a benchmark
+    # gate that measures composite + FPR impact.
+    use_mlm_span_mask_candgen: bool = Field(
+        default=False,
+        description=(
+            "Enable MLMSpanMaskCandGenStrategy: use semantic-v2.4 span-masking "
+            "as a production candidate generator for real-word confusions. "
+            "Fires per Myanmar token, filters predictions by ED ≤ 2 + dict "
+            "membership, gates on score(candidate) − score(typo) ≥ margin. "
+            "Default-off pending benchmark gate."
+        ),
+    )
+    mlm_candgen_top_k: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description=(
+            "Number of MLM top predictions to decode per masked token. "
+            "Probe sweet spot: 10. Raising to 50 adds only ~3pp recall but "
+            "doubles the FP surface because more unrelated words survive "
+            "the ED filter."
+        ),
+    )
+    mlm_candgen_margin: float = Field(
+        default=2.0,
+        ge=0.0,
+        description=(
+            "Required ``score(candidate) − score(typo)`` margin. Higher = "
+            "fewer emissions, higher precision."
+        ),
+    )
+    mlm_candgen_max_ed: int = Field(
+        default=2,
+        ge=1,
+        le=3,
+        description=(
+            "Maximum edit distance accepted between the typo and the MLM "
+            "candidate. ED = 2 keeps the strategy on-task for typo repair; "
+            "widening to 3 admits whole-word semantic replacements outside "
+            "the intended scope of this strategy."
+        ),
+    )
+    mlm_candgen_skip_above_freq: int = Field(
+        default=50_000,
+        ge=0,
+        description=(
+            "Skip tokens whose own frequency already exceeds this value. "
+            "Prevents the MLM from second-guessing common words where "
+            "user intent is overwhelmingly the written form."
+        ),
+    )
+    mlm_candgen_min_token_length: int = Field(
+        default=2,
+        ge=1,
+        description=(
+            "Minimum token length probed by the MLM. Single-char tokens "
+            "produce very noisy MLM predictions; skipping them trades a "
+            "tiny amount of recall for a large FPR reduction."
+        ),
+    )
+    mlm_candgen_confidence: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence stamped on MLM-candgen errors. Calibrated below "
+            "the raw-token probe's 0.85 because real-word confusion carries "
+            "more context ambiguity than OOV recovery."
+        ),
+    )
+
+    # Tone-safety-net candidate generator (priority 22, structural phase).
+    # Targets real-word confusions where the gold form differs from the
+    # typo by a single trailing tone character {း, ့, ံ, ်}. Disabled by
+    # default pending a benchmark gate that measures composite + FPR
+    # impact.
+    use_tone_safety_net: bool = Field(
+        default=False,
+        description=(
+            "Enable ToneSafetyNetStrategy: probe trailing tone insert / delete "
+            "candidates for real-word confusions where both typo and gold are "
+            "valid dict words. Runs at priority 22 (before StatisticalConfusable "
+            "and BrokenCompound). Default-off pending benchmark gate."
+        ),
+    )
+    tone_safety_net_min_frequency: int = Field(
+        default=1000,
+        ge=0,
+        description=(
+            "Minimum dictionary frequency a tone-variant candidate must clear. "
+            "Calibrated higher than the raw-token probe (100) because real-word "
+            "confusion has an asymmetric FP cost — common tokens must stay "
+            "un-flagged unless the alternative is demonstrably more frequent."
+        ),
+    )
+    tone_safety_net_freq_ratio: float = Field(
+        default=10.0,
+        gt=0.0,
+        description=(
+            "Minimum ``freq(candidate) / freq(token)`` ratio required to emit "
+            "a correction. A value of 10 means the tone-variant must be at "
+            "least 10x more common than the token in the dictionary corpus. "
+            "Lowering this will widen coverage at the cost of FPR."
+        ),
+    )
+    tone_safety_net_skip_above_freq: int = Field(
+        default=50000,
+        ge=0,
+        description=(
+            "Do not probe tokens whose own frequency already exceeds this "
+            "value. Guards very common words (particles, pronouns, frequent "
+            "verbs) from being second-guessed by the tone-variant lookup."
+        ),
+    )
+    tone_safety_net_confidence: float = Field(
+        default=0.80,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence score emitted for tone-safety-net errors. Calibrated "
+            "below the raw-token probe's 0.85 because real-word confusion "
+            "carries more context ambiguity than OOV token recovery."
+        ),
+    )
+
     # Syllable-window OOV detection (priority 22, structural phase).
     # Disabled by default: requires per-process SymSpell caching to amortise
     # the per-window lookup cost before it is viable in production.
@@ -730,6 +1144,117 @@ class ValidationConfig(BaseModel):
         description="Maximum SymSpell edit distance accepted for the candidate.",
     )
 
+    # Mined confusable pair detection (priority 49, post-semantic).
+    # Enabled by default in v1.7.0+: mines 4K+ confusable pairs from the DB and
+    # uses semantic MLM margin to flag real-word confusable errors that SymSpell
+    # cannot surface (both forms are in-dictionary). Added to suppression
+    # immunity by default since pipeline suppression was observed to remove
+    # valid emissions.
+    use_mined_confusable_pair: bool = Field(
+        default=True,
+        description=(
+            "Enable MinedConfusablePairStrategy: flag real-word confusables using "
+            "mined ed-1 pair list with semantic MLM margin gate. Requires "
+            "semantic_checker to be configured. Runs at priority 49."
+        ),
+    )
+    mined_pair_yaml_path: str | None = Field(
+        default=None,
+        description=(
+            "Optional path to mined pairs YAML. If None, the strategy loads "
+            "the bundled `rules/mined_confusable_pairs.yaml`."
+        ),
+    )
+    mined_pair_low_freq_min: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Minimum frequency for the lower-frequency member of a pair to enter the partner map."
+        ),
+    )
+    mined_pair_freq_ratio: float = Field(
+        default=2.0,
+        ge=1.0,
+        description=(
+            "Minimum partner-freq / current-freq ratio for the strategy to consider "
+            "swapping. Prevents low-freq partners from dominating high-freq tokens."
+        ),
+    )
+    mined_pair_mlm_margin: float = Field(
+        default=2.5,
+        ge=0.0,
+        description=(
+            "Minimum MLM(partner) - MLM(current) margin at target position required "
+            "to emit a confusable error. Higher is more conservative."
+        ),
+    )
+    mined_pair_backend: str = Field(
+        default="mlm",
+        description=(
+            "Scoring backend for the strategy. 'mlm' uses the existing SemanticChecker "
+            "(conservative baseline). 'classifier' uses a dedicated fine-tuned "
+            "classifier (higher recall at the same FPR). Set 'classifier' and "
+            "provide `mined_pair_classifier_path` to load the model."
+        ),
+    )
+    mined_pair_classifier_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to a fine-tuned classifier checkpoint (HuggingFace-format) or an "
+            "ONNX model. Required when `mined_pair_backend == 'classifier'`."
+        ),
+    )
+
+    # ByT5 safety net (priority 80, after every other strategy)
+    # Runs only on sentences where the rest of the pipeline flagged nothing.
+    # Uses a fine-tuned ByT5-small seq2seq model to propose whole-sentence
+    # corrections; edits are gated by dict membership + MLM plausibility margin.
+    use_byt5_safety_net: bool = Field(
+        default=False,
+        description=(
+            "Enable ByT5SafetyNetStrategy (priority 80). Runs a fine-tuned "
+            "ByT5-small seq2seq model on sentences with zero pipeline "
+            "emissions, gated by dict membership + MLM margin. Requires "
+            "`byt5_safety_net_model_path` to point at an ONNX bundle or HF dir."
+        ),
+    )
+    byt5_safety_net_model_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to ByT5 model directory: either ONNX bundle "
+            "(encoder.onnx + decoder.onnx + onnx_meta.json) or a HuggingFace "
+            "checkpoint directory (for the PyTorch fallback)."
+        ),
+    )
+    byt5_safety_net_mlm_gate_margin: float = Field(
+        default=2.0,
+        ge=-20.0,
+        le=20.0,
+        description=(
+            "Minimum MLM(replacement) - MLM(original) margin at the masked "
+            "position required to emit a ByT5 safety-net edit."
+        ),
+    )
+    byt5_safety_net_min_typo_prone_chars: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Minimum typo-prone character count in the sentence before the "
+            "safety net fires. Filters sentences with no plausible typo source."
+        ),
+    )
+    byt5_safety_net_max_sentence_chars: int = Field(
+        default=400,
+        ge=1,
+        description="Skip sentences longer than this (byte-level inference cost).",
+    )
+    byt5_safety_net_confidence: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score for ByT5 safety-net errors.",
+    )
+
     # MLM post-filter for invalid_word / dangling_word FP suppression
     mlm_plausibility_threshold: float = Field(
         default=3.0,
@@ -749,6 +1274,15 @@ class ValidationConfig(BaseModel):
         description=(
             "Number of top MLM predictions to check when evaluating "
             "contextual plausibility for invalid_word/dangling_word errors."
+        ),
+    )
+
+    bypass_word_heuristic_suppression: bool = Field(
+        default=False,
+        description=(
+            "Bypass heuristic word-level suppression (dict-check, MLM plausibility, "
+            "compound-split). When True, all word-level errors flow directly to "
+            "the meta-classifier. Used for meta-classifier retraining."
         ),
     )
 

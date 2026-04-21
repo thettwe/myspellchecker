@@ -1,0 +1,252 @@
+version: 1.0.0
+description: >-
+  Mechanical mapping from (error_type, error_subtype) -> domain for
+  spelling-first benchmark reclassification (workstream: spelling-first-benchmark,
+  task: bench-relabel-01). Domains: spelling | grammar | both | ambiguous.
+  Ambiguous spans escalate to Gemini Flash 2.5 for LLM-assisted labeling.
+
+# Product-goal interpretation (see Product Goal - Spelling-First with 80-20 Benchmark):
+# - SPELLING covers: word-form errors, syllable errors, confusion errors
+#   (real-word confusables, homophones, compound confusions, hidden compounds,
+#   broken compounds, Zawgyi/encoding, orthographic form errors, loan-word forms).
+# - GRAMMAR covers: context/usage errors that require surrounding words to judge
+#   (particles, register, tense, aspect, negation, classifier, word order,
+#   omissions, redundancy, punctuation choice, logical contradictions).
+# - BOTH is reserved for spans where a single token is simultaneously a spelling
+#   form error AND a grammar usage error (rare).
+# - AMBIGUOUS forces Gemini review.
+
+# Resolution order:
+# 1. Look up `(error_type, error_subtype, erroneous_text, gold_correction)` in
+#    `text_overrides` (catches known particle-family pairs mislabeled at the
+#    subtype level). Highest priority.
+# 2. Look up (error_type, error_subtype) pair in `pairs`.
+# 3. Look up `error_subtype` in `subtype_override` (most specific type signal).
+# 4. Fall back to `error_type` in `by_error_type`.
+# 5. If still no match → mark `ambiguous`.
+
+by_error_type:
+  # SPELLING at the type level
+  wrong_word: spelling
+  invalid_syllable: spelling
+  orthography: spelling
+  orthography_error: spelling
+  spelling: spelling
+  spelling_error: spelling
+  lexical_error: spelling
+  word_error: spelling
+  spacing: spelling
+  ocr_error: spelling
+
+  # GRAMMAR at the type level
+  grammar_error: grammar
+  grammar: grammar
+  register_error: grammar
+  punctuation: grammar
+  punctuation_error: grammar
+  semantics: grammar
+
+  # Force subtype review for semantic_error — covers both contextual grammar and
+  # confusable-semantic spelling depending on the subtype.
+  semantic_error: ambiguous
+
+# subtype_override takes precedence over by_error_type. Used when the subtype is
+# a stronger signal than the type (e.g. a `wrong_word` with subtype
+# `word_order_error` is actually grammar).
+subtype_override:
+  # --- Spelling-family overrides ---
+  consonant_substitution: spelling
+  vowel_medial_substitution: spelling
+  tone_mark_error: spelling
+  tone_mark_placement: spelling
+  tone_error: spelling
+  aukmyit_confusion: spelling
+  aukmyit_omission: spelling
+  aukmyit_error: spelling
+  missing_visarga: spelling
+  missing_asat: spelling
+  missing_dot_below: spelling
+  missing_anusvara: spelling
+  missing_consonant: spelling
+  missing_character: spelling
+  missing_medial: spelling
+  medial_deletion: spelling
+  medial_insertion: spelling
+  medial_addition: spelling
+  medial_substitution: spelling
+  ha_htoe_deletion: spelling
+  vowel_sign_confusion: spelling
+  vowel_sign_substitution: spelling
+  vowel_sign_error: spelling
+  vowel_substitution: spelling
+  vowel_length_substitution: spelling
+  vowel_error: spelling
+  wrong_vowel: spelling
+  character_substitution: spelling
+  compound_vowel_substitution: spelling
+  syllable_error: spelling
+  stacking_error: spelling
+  non_word_typo: spelling
+  typo: spelling
+  complex_typo: spelling
+  misspelling: spelling
+  spelling: spelling
+  spelling_error: spelling
+  contextual_spelling: spelling
+  encoding_error: spelling
+
+  # Confusion-family (counts as spelling under product goal)
+  homophone_confusion: spelling
+  homophone_error: spelling
+  real_word_confusion: spelling
+  confusable_semantic: spelling
+  broken_compound: spelling
+  compound_confusion: spelling
+  hidden_compound_typo: spelling
+  ngram_unlikely: spelling   # bigram-level wrong-word signal, spelling by product goal
+
+  # Zawgyi / encoding family
+  zawgyi: spelling
+  zawgyi_encoding: spelling
+  zawgyi_contamination: spelling
+  zawgyi_conversion: spelling
+  zawgyi_conversion_error: spelling
+  zawgyi_vowel_confusion: spelling
+  zawgyi_vowel_error: spelling
+  zawgyi_artifact: spelling
+  zawgyi_unicode_mismatch: spelling
+  zawgyi_error: spelling
+  zero_width_chars: spelling
+
+  # Loan words
+  loan_word_misspelling: spelling
+  loanword_spelling: spelling
+
+  # Spacing / word-boundary orthography
+  spacing: spelling
+  spacing_error: spelling
+  word_boundary: spelling
+  extra_space: spelling
+  incorrect_word_segmentation: spelling
+
+  # Colloquial spelling variants = form-level (spelling)
+  colloquial_spelling: spelling
+  informal_spelling: spelling
+
+  # Particle spelling (literally the particle is misspelled)
+  particle_spelling: spelling
+
+  # --- Grammar-family overrides ---
+  particle_misuse: grammar
+  particle_error: grammar
+  particle_confusion: grammar
+  wrong_particle: grammar
+  invalid_particle_combination: grammar
+  informal_particle_in_formal_context: grammar
+  merged_word: grammar
+
+  verb_tense_agreement: grammar
+  aspect_error: grammar
+  negation_error: grammar
+  classifier_error: grammar
+  collocation_error: grammar
+
+  register_mismatch: grammar
+  colloquial_in_formal: grammar
+
+  word_order: grammar
+  word_order_error: grammar
+  wrong_word_in_context: grammar
+  contextual_error: grammar
+  contextual: grammar
+
+  missing_word: grammar
+  missing_words: grammar
+  missing_information: grammar
+  extraneous_word: grammar
+  omission: grammar
+  redundancy: grammar
+  repetition: grammar
+
+  illogical_usage: grammar
+  logical_contradiction: grammar
+
+  # Punctuation
+  wrong_comma: grammar
+  unnecessary_punctuation: grammar
+  ending_mark_error: grammar
+
+  # Sentence structure
+  incomplete_sentence: grammar
+
+  # --- Explicit ambiguous (force Gemini review) ---
+  multiple_errors_in_span: ambiguous
+  missing_syllable: ambiguous        # could be char-drop (spelling) or word-drop (grammar)
+  semantic_error: ambiguous           # generic subtype under semantic_error type
+
+# text_overrides: (error_type, error_subtype, erroneous_text, gold_correction)
+# 4-tuple overrides applied FIRST. Key format: "<type>|<subtype>|<erroneous>|<gold>".
+# Narrowly scoped to catch particle-family mislabels where the subtype alone
+# misrepresents the domain (e.g. aukmyit_confusion on a case-marker swap is
+# grammar, not spelling; homophone_confusion between two sentence-final
+# particles is particle usage, not form). Added 2026-04-18 from linguist
+# hand-check of v1.4.0. See 30_Audits/Benchmark/Spelling-Grammar Domain
+# Labeling 2026-04-18.md.
+text_overrides:
+  # --- aukmyit_confusion particle boundaries → grammar ---
+  # တွေ့ ↔ တွေ : meet verb vs plural marker (x4 in v1.4.0)
+  "wrong_word|aukmyit_confusion|တွေ့|တွေ": grammar
+  "wrong_word|aukmyit_confusion|တွေ|တွေ့": grammar
+  # ဖို ↔ ဖို့ : purposive particle with/without dot-below (x4 in v1.4.0)
+  "wrong_word|aukmyit_confusion|ဖို|ဖို့": grammar
+  "wrong_word|aukmyit_confusion|ဖို့|ဖို": grammar
+  # တွေက ↔ တွေကို : subject-case vs object-case at plural boundary (x2)
+  "wrong_word|aukmyit_confusion|တွေက|တွေကို": grammar
+  "wrong_word|aukmyit_confusion|တွေကို|တွေက": grammar
+  # နဲ ↔ နဲ့ : "with/and" particle form (x2)
+  "wrong_word|aukmyit_confusion|နဲ|နဲ့": grammar
+  "wrong_word|aukmyit_confusion|နဲ့|နဲ": grammar
+  # မယ် ↔ မယ့် : future tense vs relative-future (x1)
+  "wrong_word|aukmyit_confusion|မယ်|မယ့်": grammar
+  "wrong_word|aukmyit_confusion|မယ့်|မယ်": grammar
+  # ပဲ့ ↔ ပဲ : "only/just" particle (x1)
+  "wrong_word|aukmyit_confusion|ပဲ့|ပဲ": grammar
+  "wrong_word|aukmyit_confusion|ပဲ|ပဲ့": grammar
+
+  # --- homophone_confusion particle-family → grammar ---
+  # Sentence-final emphasis/degree particles with context-dependent choice.
+  "wrong_word|homophone_confusion|ပါဘဲ|ပါပဲ": grammar
+  "wrong_word|homophone_confusion|ပါပဲ|ပါဘဲ": grammar
+  "wrong_word|homophone_confusion|ဘဲ|ပဲ": grammar
+  "wrong_word|homophone_confusion|ပဲ|ဘဲ": grammar
+  # သာ / သား : "only" particle vs "son/flesh" (x2)
+  "wrong_word|homophone_confusion|သာ|သား": grammar
+  "wrong_word|homophone_confusion|သား|သာ": grammar
+  # ဖို / ဖို့ accidentally tagged homophone_confusion (x1) — same as aukmyit case
+  "wrong_word|homophone_confusion|ဖို|ဖို့": grammar
+  "wrong_word|homophone_confusion|ဖို့|ဖို": grammar
+  # Additional known particle-family homophones (proactive; 0 hits in v1.4.0
+  # but included so future spans are handled automatically).
+  "wrong_word|homophone_confusion|နဲ့|နှင့်": grammar
+  "wrong_word|homophone_confusion|နှင့်|နဲ့": grammar
+  "wrong_word|homophone_confusion|ဟု|ဟူ": grammar
+  "wrong_word|homophone_confusion|ဟူ|ဟု": grammar
+
+# pairs: (error_type, error_subtype) exact-match overrides applied BEFORE
+# subtype_override and by_error_type. Key format: "<error_type>|<error_subtype>".
+# Used when the subtype alone is too coarse (e.g. `missing_syllable` can be
+# within-word for wrong_word, or word-omission for grammar_error).
+pairs:
+  # Contextual real-word swaps (context-dependent; 11 spans in v1.3.0).
+  # The wrong word is correctly spelled and a real word — error needs context.
+  "semantic_error|semantic_error": grammar
+
+  # Missing-syllable variants. Under `wrong_word` the missing syllables are
+  # within the compound (compound truncation) — spelling. Under grammar_error
+  # they would be word-level omission — keep subtype_override=ambiguous for
+  # non-wrong_word cases.
+  "wrong_word|missing_syllable": spelling
+
+  # Multi-error spans under wrong_word are treated as spelling (usually broken
+  # compound + spacing combinations in v1.3.0 data).
+  "wrong_word|multiple_errors_in_span": spelling

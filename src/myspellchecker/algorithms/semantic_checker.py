@@ -221,6 +221,9 @@ class SemanticChecker:
             # Load Tokenizer - supports both formats
             self._load_tokenizer(tokenizer_path)
 
+            # Store model path for position embedding detection
+            self._model_path_str = model_path
+
             # Determine inference backend
             is_onnx_model = model_path.endswith(".onnx") and Path(model_path).exists()
 
@@ -271,9 +274,18 @@ class SemanticChecker:
         # Cache whether model expects attention_mask (avoids repeated get_inputs calls)
         self._has_attention_mask_input = len(session_inputs) > 1
 
-        # Detect max sequence length from model input shape if available,
-        # otherwise default to 512 (standard transformer limit).
-        self._max_seq_len = self._detect_max_seq_len(session_inputs)
+        # Detect max sequence length from model — checks position embedding
+        # table, then ONNX input shape, then falls back to 512.
+        # A config override takes priority when provided.
+        config_max = None
+        if semantic_config is not None:
+            config_max = getattr(semantic_config, "max_seq_len", None)
+        if config_max and config_max > 0:
+            self._max_seq_len = config_max
+            self.logger.debug("Using config-provided max_seq_len=%d", config_max)
+        else:
+            self._max_seq_len = self._detect_max_seq_len(session_inputs)
+        self.logger.info("Semantic model max_seq_len=%d", self._max_seq_len)
 
         # Myanmar-specific: track whether to use word-aligned masking
         self.use_word_alignment = True
@@ -658,28 +670,59 @@ class SemanticChecker:
     # --- Default max sequence length for pre-allocated buffers ---
     _DEFAULT_MAX_SEQ_LEN: int = 512
 
-    @staticmethod
-    def _detect_max_seq_len(session_inputs: list[Any]) -> int:
-        """Extract max sequence length from ONNX model input shape.
+    def _detect_max_seq_len(self, session_inputs: list[Any]) -> int:
+        """Detect max sequence length from the ONNX model.
 
-        ONNX models typically declare input shapes like ``[batch, seq_len]``
-        where ``seq_len`` may be a concrete integer (e.g. 512) or a dynamic
-        string symbol (e.g. ``"sequence"``).  When a concrete value is
-        available, use it; otherwise fall back to 512.
+        Checks multiple sources in priority order:
+        1. Position embedding initializer dimensions (most reliable for
+           models exported with dynamic input shapes).
+        2. Concrete integer in the ONNX input shape declaration.
+        3. Fallback to 512.
 
-        Args:
-            session_inputs: List of ONNX input descriptors from
-                ``session.get_inputs()``.
+        For RoBERTa models, position IDs are offset by ``padding_idx + 1``
+        (typically 2), so the safe input length is
+        ``max_position_embeddings - 2``.
 
         Returns:
-            Maximum sequence length for buffer pre-allocation.
+            Maximum safe input token count for this model.
         """
+        # --- Strategy 1: read position embedding table from ONNX graph ---
+        try:
+            model_path = getattr(self, "_model_path_str", None)
+            if model_path:
+                import onnx
+
+                model_obj = onnx.load(model_path, load_external_data=False)
+                for init in model_obj.graph.initializer:
+                    name_lower = init.name.lower()
+                    if "position" not in name_lower or "embed" not in name_lower:
+                        continue
+                    # Skip quantization scale/zero_point (empty or scalar dims)
+                    if len(init.dims) < 2:
+                        continue
+                    # Shape is [max_position_embeddings, hidden_size]
+                    max_pos = init.dims[0]
+                    # RoBERTa offset: positions start at padding_idx+1 = 2
+                    safe_len = max_pos - 2
+                    if safe_len > 0:
+                        self.logger.debug(
+                            "Detected max_position_embeddings=%d from %s -> safe max_seq_len=%d",
+                            max_pos,
+                            init.name,
+                            safe_len,
+                        )
+                        return safe_len
+        except Exception:
+            pass  # onnx not installed or model not accessible — fall through
+
+        # --- Strategy 2: concrete integer in ONNX input shape ---
         if session_inputs:
             shape = getattr(session_inputs[0], "shape", None)
             if isinstance(shape, (list, tuple)) and len(shape) >= 2:
                 seq_dim = shape[1]
                 if isinstance(seq_dim, int) and seq_dim > 0:
                     return seq_dim
+
         return SemanticChecker._DEFAULT_MAX_SEQ_LEN
 
     def _prepare_single_inference_inputs(
@@ -1172,6 +1215,15 @@ class SemanticChecker:
             if self.use_word_alignment and self._is_myanmar_text(word):
                 token_ids, start_idx, end_idx = self._get_word_token_alignment(sentence, word, occ)
                 if start_idx != -1 and end_idx != -1:
+                    # Truncate to model's max sequence length to prevent
+                    # position embedding overflow (GatherElements OOB).
+                    if len(token_ids) > self._max_seq_len:
+                        if end_idx > self._max_seq_len:
+                            # Mask region falls outside truncation window —
+                            # fall back to individual inference.
+                            fallback_items.append((orig_idx, word, occ))
+                            continue
+                        token_ids = token_ids[: self._max_seq_len]
                     masked_ids = list(token_ids)
                     mask_indices = []
                     for i in range(start_idx, end_idx):
@@ -1196,7 +1248,21 @@ class SemanticChecker:
             if self._has_attention_mask_input:
                 inputs["attention_mask"] = attention_mask
 
-            all_logits = self.session.run([self.output_name], inputs)[0]
+            try:
+                all_logits = self.session.run([self.output_name], inputs)[0]
+            except Exception as e:
+                self.logger.warning(
+                    "Batch ONNX inference failed (%d items, seq_len=%d): %s",
+                    len(batch_ids_list),
+                    len(batch_ids_list[0]) if batch_ids_list else 0,
+                    e,
+                )
+                # Fall back to individual inference for all items
+                for batch_i in range(len(batch_ids_list)):
+                    fallback_items.append(
+                        (batch_orig_indices[batch_i], batch_words[batch_i], batch_occs[batch_i])
+                    )
+                batch_ids_list = []
             # all_logits shape: (batch_size, seq_len, vocab_size)
 
             # Distribute results into cache — store per-item slice with batch dim.
@@ -1386,10 +1452,18 @@ class SemanticChecker:
         is_short_word = len(word) <= self._SHORT_WORD_MAX_LEN
 
         # Case 1: predicted compounds that start with the target word.
+        # Exclude predictions where the suffix starts with a morpheme boundary
+        # character (visarga း, dot below ့, asat ်).  When the MLM predicts a
+        # compound like "အတိုင်းအတာ" for target "အတိုင်", the suffix "းအတာ"
+        # begins with visarga — this signals a missing-visarga/asat error, not
+        # a legitimate prefix relationship.
+        morpheme_boundary_chars = frozenset({"\u1038", "\u1037", "\u103a"})  # း ့ ်
         prefix_scores = [
             float(score)
             for pred_word, score in top_preds
-            if pred_word.startswith(word) and pred_word != word
+            if pred_word.startswith(word)
+            and pred_word != word
+            and pred_word[len(word)] not in morpheme_boundary_chars
         ]
         if prefix_scores:
             best_prefix_score = max(prefix_scores)
@@ -1419,7 +1493,6 @@ class SemanticChecker:
             return False
 
         # Case 2: target word extends a predicted base token (BPE-like extension).
-        morpheme_boundary_chars = frozenset({"\u1038", "\u1037", "\u103a"})  # း ့ ်
         for pred_word, score in top_preds:
             if not pred_word or not word.startswith(pred_word):
                 continue

@@ -6,8 +6,8 @@ Thank you for your interest in contributing to mySpellChecker! We welcome contri
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/thettwe/my-spellchecker.git
-   cd my-spellchecker
+   git clone https://github.com/thettwe/myspellchecker.git
+   cd myspellchecker
    ```
 
 2. **Create a virtual environment:**

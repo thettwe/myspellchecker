@@ -273,3 +273,588 @@ class TestSuppressLowValueContextProbability:
         errors = [_make_error(error_type="context_probability")]
         mixin._suppress_low_value_context_probability(errors)
         assert len(errors) == 1
+
+
+class TestMLMWordSuppression:
+    """Tests for _suppress_invalid_word_via_mlm morpheme boundary filtering."""
+
+    def test_does_not_suppress_when_prefix_is_morpheme_boundary(self):
+        """MLM predicting 'အတိုင်းအတာ' should NOT suppress 'အတိုင်' (missing visarga)."""
+        semantic = MagicMock()
+        # MLM predicts a compound starting with the error word + visarga
+        semantic.predict_mask.return_value = [("အတိုင်းအတာ", 9.5)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="အတိုင်", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 1, "Should keep error — visarga boundary means missing-visarga"
+
+    def test_does_not_suppress_dot_below_boundary(self):
+        """MLM predicting 'ခွင့်ပြု' should NOT suppress 'ခွင်' (missing dot-below)."""
+        semantic = MagicMock()
+        semantic.predict_mask.return_value = [("ခွင့်ပြု", 9.0)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="ခွင်", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 1, "Should keep error — dot-below boundary"
+
+    def test_suppresses_legitimate_compound_prefix(self):
+        """MLM predicting 'ကျွန်တော်' should suppress 'ကျွန်' (valid prefix)."""
+        semantic = MagicMock()
+        # Consonant suffix — legitimate compound
+        semantic.predict_mask.return_value = [("ကျွန်တော်", 9.0)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="ကျွန်", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 0, "Should suppress — consonant suffix is legitimate prefix"
+
+    def test_suppresses_exact_word_match(self):
+        """MLM predicting the exact word should always suppress."""
+        semantic = MagicMock()
+        semantic.predict_mask.return_value = [("ကျောင်း", 9.0)]
+
+        mixin = _make_mixin()
+        mixin._semantic_checker = semantic
+        mixin.config.validation.mlm_plausibility_threshold = 5.0
+        mixin.config.validation.mlm_plausibility_top_k = 10
+
+        errors = [_make_error(text="ကျောင်း", error_type="invalid_word")]
+        mixin._suppress_invalid_word_via_mlm(errors, "test text")
+        assert len(errors) == 0, "Exact match should always suppress"
+
+
+# ---------------------------------------------------------------------------
+# Compound-split-valid-words suppression + skip-rule confidence gate
+# (ssr-implement-01 — seg-skip-rule-refactor workstream)
+# ---------------------------------------------------------------------------
+
+
+class TestSuppressCompoundSplitValidWords:
+    """Regression tests for the 4+syllable-all-valid suppression path."""
+
+    def _build_mixin(
+        self,
+        *,
+        max_ed: int = 2,
+        min_freq: int = 1000,
+        syllables: list[str],
+        valid_syllables: set[str] | None = None,
+        symspell_top1: tuple[str, float, int] | None = None,
+    ):
+        """Create a mixin with just enough wiring to exercise the suppressor.
+
+        The greedy reassembly in _suppress_compound_split_valid_words first
+        tries the whole word as one valid part, then shorter prefixes. For
+        the suppressor's "all_valid + len(parts)>=2" predicate to fire, the
+        whole word must NOT be a dict word while the individual syllables
+        MUST be. We model that by defaulting ``valid_syllables`` to the
+        syllable set and treating anything else as invalid.
+        """
+        mixin = _make_mixin()
+        if valid_syllables is None:
+            valid_syllables = set(syllables)
+        mixin.provider.is_valid_word = lambda w: w in valid_syllables
+        mixin.segmenter.segment_syllables.return_value = syllables
+
+        # Wire the skip-rule gate params.
+        mixin.config.validation.skip_rule_gate_max_ed = max_ed
+        mixin.config.validation.skip_rule_gate_min_freq = min_freq
+
+        # SymSpell mock.
+        if symspell_top1 is None:
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = []
+        else:
+            term, ed, freq = symspell_top1
+            cand = MagicMock()
+            cand.term = term
+            cand.edit_distance = ed
+            cand.frequency = freq
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = [cand]
+        return mixin
+
+    def test_suppresses_4_syllable_all_valid_without_candidate(self):
+        # No SymSpell candidate → skip rule must fire and suppress the error.
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=None,
+        )
+        errors = [_make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == []
+
+    def test_keeps_error_when_symspell_has_confident_candidate(self):
+        # SymSpell top-1 inside the gate → confidence says this is a real typo.
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("စွမ်းဆောင်ရည်", 1.0, 48_971),
+        )
+        err = _make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")
+        errors = [err]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == [err]
+
+    def test_suppresses_when_candidate_below_freq_gate(self):
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("စွမ်းဆောင်ရည်", 1.0, 500),  # below min_freq=1000
+        )
+        errors = [_make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == []
+
+    def test_suppresses_when_candidate_above_ed_gate(self):
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("some_far_word", 3.0, 50_000),  # ed=3 > max_ed=2
+        )
+        errors = [_make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == []
+
+    def test_skip_rule_helper_returns_false_when_candidate_matches_input(self):
+        # SymSpell echoing the input back is not a useful suggestion.
+        mixin = self._build_mixin(
+            syllables=["a", "b", "c", "d"],
+            symspell_top1=("WORD", 0.0, 9999),
+        )
+        assert mixin._skip_rule_has_confident_candidate("WORD") is False
+
+    def test_skip_rule_helper_tolerates_missing_symspell(self):
+        mixin = self._build_mixin(
+            syllables=["a", "b", "c", "d"],
+            symspell_top1=None,
+        )
+        mixin.symspell = None
+        assert mixin._skip_rule_has_confident_candidate("anything") is False
+
+    def test_does_not_suppress_short_word_even_without_candidate(self):
+        # len(word) < 4 is guarded earlier; should not be touched.
+        mixin = self._build_mixin(syllables=["a"], symspell_top1=None)
+        err = _make_error(text="abc", error_type="invalid_word")
+        errors = [err]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == [err]
+
+
+# ---------------------------------------------------------------------------
+# Structural-syllable early-exit (sse-implement-01)
+# ---------------------------------------------------------------------------
+
+
+class TestStructuralSyllableEarlyExit:
+    """Regression tests for the structural-syllable early-exit helper.
+
+    When syllable_rule_validator rejects a syllable (categorical Myanmar
+    violation) AND the enclosing segmenter token is OOV AND SymSpell has
+    a clean top-1 hit, the helper replaces the invalid_syllable with an
+    authoritative WordError on the enclosing span.
+    """
+
+    def _build_mixin(
+        self,
+        *,
+        enabled: bool = True,
+        max_ed: int = 1,
+        min_freq: int = 500,
+        rule_validator_returns: dict[str, bool] | None = None,
+        segmenter_tokens: list[str] | None = None,
+        dict_words: set[str] | None = None,
+        symspell_top1: tuple[str, float, int] | None = None,
+    ):
+        mixin = _make_mixin()
+        mixin.config.validation.structural_syllable_early_exit_enabled = enabled
+        mixin.config.validation.structural_syllable_early_exit_max_ed = max_ed
+        mixin.config.validation.structural_syllable_early_exit_min_freq = min_freq
+
+        # Rule validator mock — returns True for syllables that ARE structurally valid
+        rv = MagicMock()
+        rv_map = rule_validator_returns or {}
+
+        def rv_validate(s):
+            return rv_map.get(s, True)
+
+        rv.validate.side_effect = rv_validate
+        # Attach as attribute — the helper reads `self.syllable_rule_validator`
+        mixin.syllable_rule_validator = rv
+
+        # Segmenter
+        if segmenter_tokens is not None:
+            mixin.segmenter.segment_words.return_value = segmenter_tokens
+
+        # Provider is_valid_word
+        dw = dict_words or set()
+        mixin.provider.is_valid_word = lambda w: w in dw
+
+        # SymSpell mock
+        if symspell_top1 is None:
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = []
+        else:
+            term, ed, freq = symspell_top1
+            cand = MagicMock()
+            cand.term = term
+            cand.edit_distance = ed
+            cand.frequency = freq
+            mixin.symspell = MagicMock()
+            mixin.symspell.lookup.return_value = [cand]
+        return mixin
+
+    def test_fires_when_all_conditions_met(self):
+        # Sentence: "foo ကြုိး bar" where "ကြုိး" has a structural violation
+        # and the enclosing segmenter token IS "ကြုိး" (same span — standalone token).
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},  # gold is valid, target is not
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        text = "ကြုိး"
+        mixin._structural_syllable_early_exit(errors, text)
+        # Original invalid_syllable should be removed, replaced by WordError
+        assert len(errors) == 1
+        new_err = errors[0]
+        assert new_err.text == "ကြုိး"
+        assert new_err.error_type == "invalid_word"
+        assert new_err.confidence == 0.95
+        assert "ကြိုး" in [str(s) for s in (new_err.suggestions or [])]
+        assert getattr(new_err, "_structural_early_exit", False) is True
+
+    def test_no_fire_when_rule_validator_accepts(self):
+        # Syllable is structurally valid → skip
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": True},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        # No replacement
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_enclosing_is_dict_word(self):
+        # Enclosing token IS in the dictionary → not the right class of error
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြုိး", "ကြိုး"},  # errorful is ALSO dict-valid (pretend)
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_symspell_ed_exceeds(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 3.0, 52178),  # ed=3 > max_ed=1
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_symspell_freq_below_floor(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 100),  # freq 100 < min_freq 500
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_no_fire_when_disabled(self):
+        mixin = self._build_mixin(
+            enabled=False,
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_deduplicates_multiple_syllables_in_same_enclosing(self):
+        # Two invalid_syllables inside the same enclosing token → single rescue
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိ": False, "း": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        e1 = _make_error(text="ကြုိ", position=0, error_type="invalid_syllable")
+        e2 = _make_error(text="း", position=4, error_type="invalid_syllable")
+        errors = [e1, e2]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        # Both invalid_syllables removed, single WordError rescue emitted
+        rescues = [e for e in errors if getattr(e, "_structural_early_exit", False)]
+        assert len(rescues) == 1
+        # Original invalid_syllables removed
+        assert not any(getattr(e, "error_type", "") == "invalid_syllable" for e in errors)
+
+    def test_no_fire_without_symspell_hit(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=None,
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_empty_text_is_noop(self):
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_syllable")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "")
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_syllable"
+
+    def test_ignores_non_syllable_errors(self):
+        # Only targets invalid_syllable type
+        mixin = self._build_mixin(
+            rule_validator_returns={"ကြုိး": False},
+            segmenter_tokens=["ကြုိး"],
+            dict_words={"ကြိုး"},
+            symspell_top1=("ကြိုး", 1.0, 52178),
+        )
+        err = _make_error(text="ကြုိး", position=0, error_type="invalid_word")
+        errors = [err]
+        mixin._structural_syllable_early_exit(errors, "ကြုိး")
+        # Word-level error untouched
+        assert len(errors) == 1
+        assert errors[0].error_type == "invalid_word"
+        assert not getattr(errors[0], "_structural_early_exit", False)
+
+
+# ---------------------------------------------------------------------------
+# Compound-split confusable boost (ccb-implement-01)
+# ---------------------------------------------------------------------------
+
+
+class TestBoostInnerConfusableForCompoundSplits:
+    """Regression tests for the combined-signal boost helper.
+
+    The helper runs BEFORE _CONFIDENCE_THRESHOLDS filter and boosts inner
+    confusable_error confidence when both (a) compound-split-predicate fires
+    on an outer long token AND (b) an inner confusable at a sub-span is
+    below the ceiling.
+    """
+
+    def _build_mixin(
+        self,
+        *,
+        enabled: bool = True,
+        boost: float = 0.20,
+        ceiling: float = 0.75,
+        min_syllables: int = 4,
+        outer_syllables: list[str] | None = None,
+        outer_valid_syllables: set[str] | None = None,
+    ):
+        mixin = _make_mixin()
+        mixin.config.validation.compound_split_confusable_boost_enabled = enabled
+        mixin.config.validation.compound_split_confusable_boost = boost
+        mixin.config.validation.compound_split_confusable_boost_inner_conf_ceiling = ceiling
+        mixin.config.validation.compound_split_confusable_boost_min_syllables = min_syllables
+
+        if outer_syllables is not None:
+            mixin.segmenter.segment_syllables.return_value = outer_syllables
+            if outer_valid_syllables is None:
+                outer_valid_syllables = set(outer_syllables)
+            mixin.provider.is_valid_word = lambda w: w in outer_valid_syllables
+        return mixin
+
+    def test_boost_fires_when_conditions_met(self):
+        # Outer ET_WORD at [0, 24) containing inner confusable at [12, 18)
+        mixin = self._build_mixin(
+            outer_syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            outer_valid_syllables={"စွမ်း", "ဆောင်", "ရ", "ည"},
+        )
+        outer = _make_error(text="အသုံးပျုသူအား", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="ပျု",
+            position=5,
+            suggestions=["ပြု"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        # inner conf should have been boosted by 0.20 → 0.76
+        assert abs(inner.confidence - 0.76) < 1e-9
+
+    def test_no_boost_when_disabled(self):
+        mixin = self._build_mixin(
+            enabled=False,
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_no_boost_when_no_outer_compound_split_span(self):
+        # No invalid_word error at all → no outer span to trigger boost
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_no_boost_when_inner_outside_outer_span(self):
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        far_inner = _make_error(
+            text="xy",
+            position=100,  # far outside outer span
+            suggestions=["xz"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, far_inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert far_inner.confidence == 0.56
+
+    def test_no_boost_when_inner_already_above_ceiling(self):
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        high_conf_inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.90,
+        )
+        errors = [outer, high_conf_inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        # Above ceiling (0.75 default) → no boost needed
+        assert high_conf_inner.confidence == 0.90
+
+    def test_boost_bounded_at_1(self):
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+            boost=0.50,
+            ceiling=0.95,
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.70,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        # 0.70 + 0.50 = 1.20 → clipped to 1.0
+        assert inner.confidence == 1.0
+
+    def test_no_boost_when_outer_syllables_below_min(self):
+        # Only 3 syllables — doesn't meet the 4+ predicate
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c"],
+        )
+        outer = _make_error(text="abcdef", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_no_boost_when_outer_syllable_invalid(self):
+        # Compound-split predicate requires ALL syllables valid.
+        mixin = self._build_mixin(
+            outer_syllables=["a", "b", "c", "d"],
+            outer_valid_syllables={"a", "b", "c"},  # 'd' missing → predicate fails
+        )
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56
+
+    def test_tolerates_missing_segmenter_or_provider(self):
+        mixin = self._build_mixin(outer_syllables=["a", "b", "c", "d"])
+        mixin.segmenter = None
+        outer = _make_error(text="abcdefgh", position=0, error_type="invalid_word")
+        inner = _make_error(
+            text="bc",
+            position=1,
+            suggestions=["bd"],
+            error_type="confusable_error",
+            confidence=0.56,
+        )
+        errors = [outer, inner]
+        # Should not crash; no boost applied
+        mixin._boost_inner_confusable_for_compound_splits(errors)
+        assert inner.confidence == 0.56

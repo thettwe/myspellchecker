@@ -43,12 +43,19 @@ from myspellchecker.core.validation_strategies.hidden_compound_strategy import (
     HiddenCompoundStrategy,
 )
 from myspellchecker.core.validation_strategies.homophone_strategy import HomophoneValidationStrategy
+from myspellchecker.core.validation_strategies.loan_word_strategy import LoanWordValidationStrategy
+from myspellchecker.core.validation_strategies.mlm_span_mask_candgen_strategy import (
+    MLMSpanMaskCandGenStrategy,
+)
 from myspellchecker.core.validation_strategies.ngram_strategy import NgramContextValidationStrategy
 from myspellchecker.core.validation_strategies.orthography_strategy import (
     OrthographyValidationStrategy,
 )
 from myspellchecker.core.validation_strategies.pos_sequence_strategy import (
     POSSequenceValidationStrategy,
+)
+from myspellchecker.core.validation_strategies.pre_segmenter_raw_probe_strategy import (
+    PreSegmenterRawProbeStrategy,
 )
 from myspellchecker.core.validation_strategies.question_strategy import (
     QuestionStructureValidationStrategy,
@@ -61,7 +68,11 @@ from myspellchecker.core.validation_strategies.syllable_window_oov_strategy impo
     SyllableWindowOOVStrategy,
 )
 from myspellchecker.core.validation_strategies.syntactic_strategy import SyntacticValidationStrategy
+from myspellchecker.core.validation_strategies.tone_safety_net_strategy import (
+    ToneSafetyNetStrategy,
+)
 from myspellchecker.core.validation_strategies.tone_strategy import ToneValidationStrategy
+from myspellchecker.core.validation_strategies.visarga_strategy import VisargaStrategy
 
 __all__ = [
     "ErrorCandidate",
@@ -72,13 +83,18 @@ __all__ = [
     "SyntacticValidationStrategy",
     "StatisticalConfusableStrategy",
     "SyllableWindowOOVStrategy",
+    "ToneSafetyNetStrategy",
     "HiddenCompoundStrategy",
+    "PreSegmenterRawProbeStrategy",
     "BrokenCompoundStrategy",
     "POSSequenceValidationStrategy",
     "QuestionStructureValidationStrategy",
     "HomophoneValidationStrategy",
+    "LoanWordValidationStrategy",
+    "VisargaStrategy",
     "ConfusableCompoundClassifierStrategy",
     "ConfusableSemanticStrategy",
+    "MLMSpanMaskCandGenStrategy",
     "NgramContextValidationStrategy",
     "SemanticValidationStrategy",
 ]

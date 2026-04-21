@@ -16,7 +16,7 @@ from myspellchecker.core.constants import (
 from myspellchecker.core.detector_data import TEXT_DETECTOR_CONFIDENCES
 from myspellchecker.core.response import Error, SyllableError
 from myspellchecker.core.syllable_rules import SyllableRuleValidator
-from myspellchecker.core.validators.base import Validator
+from myspellchecker.core.validators.base import REGISTER_CRITICAL_PRONOUNS, Validator
 from myspellchecker.grammar.patterns import (
     get_medial_confusion_correction,
     get_particle_typo_correction,
@@ -28,10 +28,6 @@ from myspellchecker.utils.logging_utils import get_logger
 
 # Module logger
 logger = get_logger(__name__)
-
-# Informal pronouns that are register-critical — colloquial_info should still
-# be emitted for these even when high-frequency, since they signal informal register.
-_REGISTER_CRITICAL_PRONOUNS = frozenset({"ငါ"})
 
 
 class SyllableValidator(Validator):
@@ -187,7 +183,7 @@ class SyllableValidator(Validator):
                 if (
                     isinstance(syl_freq, (int, float))
                     and syl_freq >= threshold
-                    and text not in _REGISTER_CRITICAL_PRONOUNS
+                    and text not in REGISTER_CRITICAL_PRONOUNS
                 ):
                     return None
             return SyllableError(

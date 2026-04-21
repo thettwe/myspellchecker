@@ -19,6 +19,7 @@ DEFAULT_RULE_PRIORITIES: dict[str, int] = {
     "particle_typo": 85,
     "verb_particle_agreement": 70,
     "pos_sequence": 65,
+    "loan_word": 55,
     "config_pattern": 50,
     "classifier": 45,
     "merged_word": 42,
@@ -142,7 +143,7 @@ class GrammarEngineConfig(BaseModel):
             "Priority values for grammar rule conflict resolution. "
             "Higher value = higher priority (wins on overlap). "
             "Keys: sentence_boundary, medial_confusion, particle_typo, "
-            "verb_particle_agreement, pos_sequence, config_pattern, "
+            "verb_particle_agreement, pos_sequence, loan_word, config_pattern, "
             "classifier, merged_word, compound, register, aspect, negation."
         ),
     )

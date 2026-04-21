@@ -153,6 +153,9 @@ DEFAULT_TONE_RULES_PATH = Path(__file__).parent.parent / "rules" / "tone_rules.y
 DEFAULT_NEGATION_PATH = Path(__file__).parent.parent / "rules" / "negation.yaml"
 DEFAULT_MORPHOLOGY_PATH = Path(__file__).parent.parent / "rules" / "morphology.yaml"
 DEFAULT_MORPHOTACTICS_PATH = Path(__file__).parent.parent / "rules" / "morphotactics.yaml"
+DEFAULT_LOAN_WORD_CORRECTIONS_PATH = (
+    Path(__file__).parent.parent / "rules" / "loan_word_corrections.yaml"
+)
 
 
 class GrammarRuleConfig:
@@ -192,6 +195,7 @@ class GrammarRuleConfig:
         tone_rules_path: str | None = None,
         negation_path: str | None = None,
         morphology_path: str | None = None,
+        loan_word_corrections_path: str | None = None,
     ) -> None:
         """
         Initialize the grammar rule configuration.
@@ -223,6 +227,8 @@ class GrammarRuleConfig:
                           If not provided, uses default path.
             negation_path: Optional path to negation YAML config file.
                           If not provided, uses default path.
+            loan_word_corrections_path: Optional path to loan word corrections YAML.
+                          If not provided, uses default path.
         """
         self.particle_typos: dict[str, dict[str, Any]] = {}
         self.medial_confusions: dict[str, dict[str, str]] = {}
@@ -251,6 +257,7 @@ class GrammarRuleConfig:
         self.negation_config: dict[str, Any] = {}
         self.morphology_config: dict[str, Any] = {}
         self.morphotactics_config: dict[str, Any] = {}
+        self.loan_word_corrections: dict[str, dict[str, Any]] = {}
 
         # Grammar rules from grammar_rules.yaml
         self.particle_chains_valid: list[dict[str, Any]] = []
@@ -275,6 +282,7 @@ class GrammarRuleConfig:
             tone_rules_path,
             negation_path,
             morphology_path,
+            loan_word_corrections_path,
         )
 
     def _load_config(
@@ -293,6 +301,7 @@ class GrammarRuleConfig:
         tone_rules_path: str | None = None,
         negation_path: str | None = None,
         morphology_path: str | None = None,
+        loan_word_corrections_path: str | None = None,
     ) -> None:
         """Load all grammar and linguistic configurations."""
         grammar_path = Path(config_path) if config_path else DEFAULT_GRAMMAR_RULES_PATH
@@ -321,6 +330,11 @@ class GrammarRuleConfig:
         morphology_rules_path = (
             Path(morphology_path) if morphology_path else DEFAULT_MORPHOLOGY_PATH
         )
+        loan_word_corrections_rules_path = (
+            Path(loan_word_corrections_path)
+            if loan_word_corrections_path
+            else DEFAULT_LOAN_WORD_CORRECTIONS_PATH
+        )
         # Define config sources: (path, name, parser)
         config_sources = [
             (grammar_path, "grammar rules", self._parse_grammar_config),
@@ -338,6 +352,11 @@ class GrammarRuleConfig:
             (negation_rules_path, "negation rules", self._parse_negation_config),
             (morphology_rules_path, "morphology rules", self._parse_morphology_config),
             (DEFAULT_MORPHOTACTICS_PATH, "morphotactics", self._parse_morphotactics_config),
+            (
+                loan_word_corrections_rules_path,
+                "loan word corrections",
+                self._parse_loan_word_corrections_config,
+            ),
         ]
 
         # Load all config files
@@ -479,6 +498,17 @@ class GrammarRuleConfig:
         from myspellchecker.grammar.parsers.morphology_parser import parse_morphotactics_config
 
         self.morphotactics_config = parse_morphotactics_config(config)
+
+    def _parse_loan_word_corrections_config(self, config: dict[str, Any]) -> None:
+        """Parse loan_word_corrections.yaml configuration."""
+        from myspellchecker.grammar.parsers.loan_word_parser import (
+            parse_loan_word_corrections_config,
+        )
+
+        parse_loan_word_corrections_config(
+            config,
+            loan_word_corrections=self.loan_word_corrections,
+        )
 
     # ------------------------------------------------------------------ #
     # Default rules (fallback when no YAML files are found)
@@ -804,6 +834,17 @@ class GrammarRuleConfig:
                     # For patterns like "V-linker-V", the linker is parts[1]
                     linkers.add(parts[1])
         return linkers
+
+    def get_loan_word_correction(self, word: str) -> dict[str, Any] | None:
+        """Get loan word correction info for a word if it exists.
+
+        Args:
+            word: The word to check.
+
+        Returns:
+            Dict with correction info or None.
+        """
+        return self.loan_word_corrections.get(word)
 
     def get_clause_linkage_rule(self, linker: str) -> dict[str, Any] | None:
         """

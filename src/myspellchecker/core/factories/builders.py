@@ -451,6 +451,27 @@ def build_context_validation_strategies(
         )
         logger.debug("Added SyntacticValidationStrategy (priority 20)")
 
+    # Priority 16: Visarga/Aukmyit/Asat Corrections
+    from myspellchecker.core.validation_strategies.visarga_strategy import (
+        VisargaStrategy,
+    )
+
+    strategies.append(VisargaStrategy(provider=provider))
+    logger.debug("Added VisargaStrategy (priority 16)")
+
+    # Priority 18: Loan Word Transliteration Detection
+    if getattr(validation_config, "use_loan_word_detection", True):
+        from myspellchecker.core.validation_strategies.loan_word_strategy import (
+            LoanWordValidationStrategy,
+        )
+
+        strategies.append(
+            LoanWordValidationStrategy(
+                provider=provider,
+            )
+        )
+        logger.debug("Added LoanWordValidationStrategy (priority 18)")
+
     # Priority 25: Broken Compound Detection
     if validation_config.use_broken_compound_detection:
         strategies.append(
@@ -492,6 +513,54 @@ def build_context_validation_strategies(
         )
         logger.debug("Added SyllableWindowOOVStrategy (priority 22)")
 
+    # Priority 22: Tone Safety Net (missing / extra trailing tone marks).
+    # Probes trailing tone insert / delete candidates against the
+    # dictionary to recover real-word confusions the
+    # ``mined_confusable_pair`` strategy misses when its freq_ratio gate
+    # filters out rare-form pairs.
+    if validation_config.use_tone_safety_net:
+        from myspellchecker.core.validation_strategies.tone_safety_net_strategy import (
+            ToneSafetyNetStrategy,
+        )
+
+        strategies.append(
+            ToneSafetyNetStrategy(
+                provider=provider,
+                enabled=True,
+                min_frequency=validation_config.tone_safety_net_min_frequency,
+                freq_ratio=validation_config.tone_safety_net_freq_ratio,
+                skip_above_freq=validation_config.tone_safety_net_skip_above_freq,
+                confidence=validation_config.tone_safety_net_confidence,
+            )
+        )
+        logger.debug("Added ToneSafetyNetStrategy (priority 22)")
+
+    # Priority 23: Pre-Segmenter Raw-Token SymSpell Probe
+    # Runs SymSpell.lookup(raw_token, level='word') on unsegmented Myanmar spans
+    # BEFORE any segmentation-dependent strategy looks at the sentence. Catches
+    # compound typos the segmenter would otherwise fragment into piecewise-valid
+    # subtokens.
+    # Registered before HiddenCompoundStrategy so that on priority ties the
+    # probe fires first and HiddenCompound sees the already-claimed position.
+    if validation_config.use_pre_segmenter_raw_probe and symspell is not None:
+        from myspellchecker.core.validation_strategies.pre_segmenter_raw_probe_strategy import (
+            PreSegmenterRawProbeStrategy,
+        )
+
+        strategies.append(
+            PreSegmenterRawProbeStrategy(
+                symspell=symspell,
+                provider=provider,
+                enabled=True,
+                max_edit_distance=validation_config.pre_segmenter_raw_probe_max_ed,
+                min_frequency=validation_config.pre_segmenter_raw_probe_min_freq,
+                max_token_length=validation_config.pre_segmenter_raw_probe_max_length,
+                max_length_diff=validation_config.pre_segmenter_raw_probe_max_length_diff,
+                confidence=validation_config.pre_segmenter_raw_probe_confidence,
+            )
+        )
+        logger.debug("Added PreSegmenterRawProbeStrategy (priority 23)")
+
     # Priority 23: Hidden Compound Typo Detection
     # Runs before StatisticalConfusable (24) and BrokenCompound (25) in the
     # structural phase (priority <= 25 survives the fast-path cutoff).
@@ -519,7 +588,7 @@ def build_context_validation_strategies(
         logger.debug("Added HiddenCompoundStrategy (priority 23)")
 
     # Priority 30: POS Sequence Validation
-    if viterbi_tagger:
+    if viterbi_tagger and validation_config.use_pos_sequence:
         strategies.append(
             POSSequenceValidationStrategy(
                 viterbi_tagger=viterbi_tagger,
@@ -611,6 +680,30 @@ def build_context_validation_strategies(
         )
         logger.debug("Added ConfusableCompoundClassifierStrategy (priority 47)")
 
+    # Priority 46: MLM span-mask candidate generator.
+    # Wraps semantic-v2.4 as a candidate generator for real-word confusions.
+    # Must run before ConfusableCompoundClassifier so the MLM's proposal is
+    # seen by the classifier's downstream decision.
+    if semantic_checker and validation_config.use_mlm_span_mask_candgen:
+        from myspellchecker.core.validation_strategies.mlm_span_mask_candgen_strategy import (
+            MLMSpanMaskCandGenStrategy,
+        )
+
+        strategies.append(
+            MLMSpanMaskCandGenStrategy(
+                semantic_checker=semantic_checker,
+                provider=provider,
+                enabled=True,
+                top_k=validation_config.mlm_candgen_top_k,
+                margin=validation_config.mlm_candgen_margin,
+                max_edit_distance=validation_config.mlm_candgen_max_ed,
+                skip_above_freq=validation_config.mlm_candgen_skip_above_freq,
+                min_token_length=validation_config.mlm_candgen_min_token_length,
+                confidence=validation_config.mlm_candgen_confidence,
+            )
+        )
+        logger.debug("Added MLMSpanMaskCandGenStrategy (priority 46)")
+
     # Priority 48: Confusable Semantic Detection (MLM-enhanced)
     if semantic_checker and validation_config.use_confusable_semantic:
         # Load curated confusable pairs from YAML
@@ -643,8 +736,33 @@ def build_context_validation_strategies(
         )
         logger.debug("Added ConfusableSemanticStrategy (priority 48)")
 
+    # Priority 49: Mined Confusable Pair Strategy
+    # Flags real-word confusables via mined ed-1 pair list with MLM margin gate.
+    if validation_config.use_mined_confusable_pair and semantic_checker is not None:
+        from myspellchecker.core.validation_strategies.mined_confusable_pair_strategy import (
+            MinedConfusablePairStrategy,
+        )
+
+        strategies.append(
+            MinedConfusablePairStrategy(
+                provider=provider,
+                semantic_checker=semantic_checker,
+                enabled=True,
+                yaml_path=validation_config.mined_pair_yaml_path,
+                low_freq_min=validation_config.mined_pair_low_freq_min,
+                freq_ratio=validation_config.mined_pair_freq_ratio,
+                mlm_margin=validation_config.mined_pair_mlm_margin,
+                backend=validation_config.mined_pair_backend,
+                classifier_path=validation_config.mined_pair_classifier_path,
+            )
+        )
+        logger.debug(
+            "Added MinedConfusablePairStrategy (priority 49, backend=%s)",
+            validation_config.mined_pair_backend,
+        )
+
     # Priority 50: N-gram Context Validation
-    if context_checker and config.use_context_checker:
+    if context_checker and config.use_context_checker and validation_config.use_ngram_context:
         strategies.append(
             NgramContextValidationStrategy(
                 context_checker=context_checker,
@@ -671,6 +789,27 @@ def build_context_validation_strategies(
             )
         )
         logger.debug("Added SemanticValidationStrategy (priority 70)")
+
+    # Priority 80: ByT5 safety net (last-chance structural-typo rescue).
+    # Fires only when every other strategy declined; gated by MLM margin.
+    if validation_config.use_byt5_safety_net and validation_config.byt5_safety_net_model_path:
+        from myspellchecker.core.validation_strategies.byt5_safety_net_strategy import (
+            ByT5SafetyNetStrategy,
+        )
+
+        strategies.append(
+            ByT5SafetyNetStrategy(
+                provider=provider,
+                model_path=validation_config.byt5_safety_net_model_path,
+                semantic_checker=semantic_checker,
+                enabled=True,
+                mlm_gate_margin=validation_config.byt5_safety_net_mlm_gate_margin,
+                min_typo_prone_chars=validation_config.byt5_safety_net_min_typo_prone_chars,
+                max_sentence_chars=validation_config.byt5_safety_net_max_sentence_chars,
+                confidence=validation_config.byt5_safety_net_confidence,
+            )
+        )
+        logger.debug("Added ByT5SafetyNetStrategy (priority 80)")
 
     logger.info(
         f"Built {len(strategies)} validation strategies: "

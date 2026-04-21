@@ -217,6 +217,52 @@ def test_prefix_skip_uses_margin_not_binary_prefix_match():
     )
 
 
+def test_prefix_skip_ignores_morpheme_boundary_suffixes():
+    """Predictions differing by visarga/asat/dot-below should not count as prefix evidence.
+
+    When the MLM predicts a compound like "အတိုင်းအတာ" for target "အတိုင်",
+    the suffix "းအတာ" starts with visarga — this signals a missing-visarga
+    error, not a legitimate prefix relationship.
+    """
+    model = MagicMock()
+    model.get_inputs.return_value = [type("I", (), {"name": "input_ids"})()]
+    model.get_outputs.return_value = [type("O", (), {"name": "logits"})()]
+    tokenizer = MagicMock()
+    tokenizer.token_to_id.return_value = 99
+
+    with patch.object(SemanticChecker, "_validate_model_dimensions"):
+        checker = SemanticChecker(model=model, tokenizer=tokenizer)
+
+    # Visarga suffix: "အတိုင်းအတာ" starts with "အတိုင်" but suffix is "းအတာ"
+    # — should NOT skip (visarga boundary).
+    assert not checker._should_skip_due_to_prefix_evidence(
+        "အတိုင်",
+        [("အတိုင်းအတာ", 9.5), ("ပြောင်း", 7.0)],
+        top_n=5,
+    )
+
+    # Dot-below suffix: prediction differs by ့ — should NOT skip.
+    assert not checker._should_skip_due_to_prefix_evidence(
+        "ခွင်",
+        [("ခွင့်ပြု", 9.5), ("ဖွင့်", 7.0)],
+        top_n=5,
+    )
+
+    # Asat suffix: prediction differs by ် — should NOT skip.
+    assert not checker._should_skip_due_to_prefix_evidence(
+        "အကျိုး",
+        [("အကျိုး်ပြု", 9.5), ("ဖြေ", 7.0)],
+        top_n=5,
+    )
+
+    # Legitimate prefix (consonant suffix) should still skip when margin is close.
+    assert checker._should_skip_due_to_prefix_evidence(
+        "ကျွန်",
+        [("ကျွန်တော်", 9.2), ("ကွဲ", 8.0)],
+        top_n=5,
+    )
+
+
 def test_score_mask_candidates_scores_explicit_candidates():
     """Explicit candidate scoring should work even outside decode top-k."""
     model = MagicMock()

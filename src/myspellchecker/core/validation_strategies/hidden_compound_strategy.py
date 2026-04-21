@@ -397,8 +397,7 @@ class HiddenCompoundStrategy(ValidationStrategy):
         if confidence < self.confidence_floor:
             return None
 
-        # Format S — canonical single-token gold format
-        # (decided via /octo:debate Round 3, 2-1 vote):
+        # Format S — canonical single-token gold format.
         # Always emit the minimal-edit single-token variant as the primary
         # suggestion. The full compound is kept as the secondary for users
         # who want to see the context, but benchmark Top1 and user-facing
@@ -524,7 +523,11 @@ class HiddenCompoundStrategy(ValidationStrategy):
 
         pos_typo = context.word_positions[typo_idx]
         first_local = context.sentence.find(context.words[0]) if context.words else 0
-        sentence_base = context.word_positions[0] - max(first_local, 0)
+        # Clamp to 0 when the first word cannot be located in the sentence
+        # (a normalization mismatch between raw text and segmenter output);
+        # the outer ``max(0, ...)`` keeps ``sentence_base`` non-negative so
+        # a single mismatch cannot corrupt every downstream local offset.
+        sentence_base = max(0, context.word_positions[0] - max(first_local, 0))
         w_start = pos_typo - sentence_base
         w_end = w_start + len(context.words[typo_idx])
 

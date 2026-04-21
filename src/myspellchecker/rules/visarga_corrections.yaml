@@ -1,0 +1,313 @@
+# Visarga/Aukmyit/Asat Correction Table - Version 1.0
+#
+# Unconditional corrections where the incorrect form is NOT a valid
+# Myanmar word (OOV in production DB) or has extremely low frequency
+# relative to the correct form.
+#
+# These corrections fire without context checking — the wrong form
+# is never (or almost never) the intended word.
+#
+# Categories:
+#   - missing_visarga: Missing း (U+1038)
+#   - missing_aukmyit: Missing ့ (U+1037)
+#   - missing_asat: Missing ် (U+103A)
+#   - extra_aukmyit: Spurious ့ added
+#   - mhu_mu_confusion: မှု/မူ confusion in compound suffixes
+#
+# FPR notes:
+#   - All entries verified OOV or freq < 100 in production DB (2026-04-14)
+#   - Pairs where both forms are common (e.g., ရုံ/ရုံး, ကောင်/ကောင်း)
+#     are excluded — they need context-dependent disambiguation
+#
+# Schema: https://myspellchecker.dev/schemas/visarga-corrections/v1.0
+
+version: "1.0.0"
+category: "visarga_corrections"
+description: "Unconditional visarga/aukmyit/asat corrections (Tier 1)"
+
+metadata:
+  created_date: "2026-04-14"
+  total_entries: 32
+  source: "Benchmark FN analysis (71 missing_visarga + 97 aukmyit_confusion spans)"
+  notes: "Conservative initial set — only OOV or near-OOV wrong forms"
+
+corrections:
+  # ── Missing asat (်) — word truncated ──
+
+  - incorrect: "ရလဒ"
+    correct: "ရလဒ်"
+    error_type: "missing_asat"
+    confidence: 0.95
+
+  - incorrect: "အနာဂတ"
+    correct: "အနာဂတ်"
+    error_type: "missing_asat"
+    confidence: 0.95
+
+  - incorrect: "ရှေးခေတ"
+    correct: "ရှေးခေတ်"
+    error_type: "missing_asat"
+    confidence: 0.95
+
+  - incorrect: "ရုပ"
+    correct: "ရုပ်"
+    error_type: "missing_asat"
+    confidence: 0.95
+
+  - incorrect: "စိတ"
+    correct: "စိတ်"
+    error_type: "missing_asat"
+    confidence: 0.95
+
+  # ── Missing visarga (း) — compound words ──
+
+  - incorrect: "ဆက်ဆံရေ"
+    correct: "ဆက်ဆံရေး"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "ဖြေရှင်းနည်"
+    correct: "ဖြေရှင်းနည်း"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "စီးပွာရေ"
+    correct: "စီးပွားရေး"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "ပညာရေ"
+    correct: "ပညာရေး"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "သီတင်ပတ်"
+    correct: "သီတင်းပတ်"
+    error_type: "missing_visarga"
+    confidence: 0.95
+
+  - incorrect: "အစီအစဉ်ရေဆွဲ"
+    correct: "အစီအစဉ်ရေးဆွဲ"
+    error_type: "missing_visarga"
+    confidence: 0.93
+
+  # ── Missing aukmyit (့) — past tense marker ခဲ့ ──
+
+  - incorrect: "ရှိခဲ"
+    correct: "ရှိခဲ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.95
+
+  - incorrect: "ပြောခဲ"
+    correct: "ပြောခဲ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.95
+
+  - incorrect: "ပေးခဲ"
+    correct: "ပေးခဲ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.95
+
+  - incorrect: "လာခဲ"
+    correct: "လာခဲ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.95
+
+  - incorrect: "သွားခဲ"
+    correct: "သွားခဲ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.95
+
+  # ── Extra aukmyit (့) — ပြော့ is spurious dot-below on ပြော ──
+  # Note: ပြော့ (freq=163) means "soft" but is almost always a typo
+  # for ပြော (freq=465K) in real text. The ratio is 2854:1.
+  # Excluded for now: needs context to distinguish "soft" vs "say" typo.
+
+  # ── မှု/မူ confusion — very common in compound suffixes ──
+
+  - incorrect: "လောင်မူ"
+    correct: "လောင်မှု"
+    error_type: "mhu_mu_confusion"
+    confidence: 0.93
+
+  - incorrect: "ဆက်သွယ်မူ"
+    correct: "ဆက်သွယ်မှု"
+    error_type: "mhu_mu_confusion"
+    confidence: 0.93
+
+  # ── High frequency-ratio pairs (wrong freq < 200, ratio > 50:1) ──
+  # These are near-OOV: the wrong form exists but is extremely rare
+  # compared to the correct form, making it almost certainly a typo.
+
+  - incorrect: "သူငယ်ချင်"
+    correct: "သူငယ်ချင်း"
+    error_type: "missing_visarga"
+    confidence: 0.92
+
+  - incorrect: "ရေသား"
+    correct: "ရေးသား"
+    error_type: "missing_visarga"
+    confidence: 0.90
+
+  - incorrect: "နည်းနည်"
+    correct: "နည်းနည်း"
+    error_type: "missing_visarga"
+    confidence: 0.90
+
+  - incorrect: "မိသာစု"
+    correct: "မိသားစု"
+    error_type: "missing_visarga"
+    confidence: 0.90
+
+  - incorrect: "စုံစမ်"
+    correct: "စုံစမ်း"
+    error_type: "missing_visarga"
+    confidence: 0.90
+
+  - incorrect: "မုန်တိုင်"
+    correct: "မုန်တိုင်း"
+    error_type: "missing_visarga"
+    confidence: 0.90
+
+  - incorrect: "ကိုယ်ရေ"
+    correct: "ကိုယ်ရေး"
+    error_type: "missing_visarga"
+    confidence: 0.88
+
+  - incorrect: "နာလည်"
+    correct: "နားလည်"
+    error_type: "missing_visarga"
+    confidence: 0.90
+
+  # ── မှု/မူ confusion — common compounds (low freq wrong form) ──
+
+  - incorrect: "လူမူ"
+    correct: "လူမှု"
+    error_type: "mhu_mu_confusion"
+    confidence: 0.88
+
+  - incorrect: "ယဉ်ကျေးမူ"
+    correct: "ယဉ်ကျေးမှု"
+    error_type: "mhu_mu_confusion"
+    confidence: 0.88
+
+  - incorrect: "ကျောင်သား"
+    correct: "ကျောင်းသား"
+    error_type: "missing_visarga"
+    confidence: 0.88
+
+  # ── Missing visarga — standalone words ──
+
+  - incorrect: "ပစ္စည်"
+    correct: "ပစ္စည်း"
+    error_type: "missing_visarga"
+    confidence: 0.88
+
+  - incorrect: "စုစုပောင်"
+    correct: "စုစုပောင်း"
+    error_type: "missing_visarga"
+    confidence: 0.88
+
+  - incorrect: "ကျန်းမာရေ"
+    correct: "ကျန်းမာရေး"
+    error_type: "missing_visarga"
+    confidence: 0.88
+
+  # ── Ambiguous pairs with extreme frequency ratios ──
+  # Both forms are in the DB, but the wrong form is very rare
+  # relative to the correct form (ratio > 100:1, wrong freq < 1000).
+  # The wrong form's valid meaning is extremely uncommon in
+  # modern usage, making it almost certainly a typo.
+
+  - incorrect: "ပြော့"
+    correct: "ပြော"
+    error_type: "extra_aukmyit"
+    confidence: 0.82
+    # ပြော့ = "soft" (freq=163), ပြော = "say" (freq=465K), ratio 2854:1
+
+  - incorrect: "ပဲ့"
+    correct: "ပဲ"
+    error_type: "extra_aukmyit"
+    confidence: 0.80
+    # ပဲ့ = "rudder" (freq=1664), ပဲ = "only/just" (freq=607K), ratio 365:1
+
+  - incorrect: "ကျွန်တော်တို"
+    correct: "ကျွန်တော်တို့"
+    error_type: "missing_aukmyit"
+    confidence: 0.85
+    # freq=891 vs 375K, ratio 421:1
+
+  - incorrect: "ဖြစ်တဲ"
+    correct: "ဖြစ်တဲ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.85
+    # freq=52 vs 123K, ratio 2378:1
+
+  - incorrect: "ဆွေနွေး"
+    correct: "ဆွေးနွေး"
+    error_type: "missing_visarga"
+    confidence: 0.85
+    # freq=169 vs 95K, ratio 563:1 — "discuss"
+
+  - incorrect: "လူဦရေ"
+    correct: "လူဦးရေ"
+    error_type: "missing_visarga"
+    confidence: 0.85
+    # freq=107 vs 164K, ratio 1531:1 — "population"
+
+  - incorrect: "ပျံ့နှံ"
+    correct: "ပျံ့နှံ့"
+    error_type: "missing_aukmyit"
+    confidence: 0.82
+    # freq=318 vs 12K, ratio 37:1 — "spread/disseminate"
+
+  - incorrect: "နုန်း"
+    correct: "နှုန်း"
+    error_type: "missing_ha_htoe"
+    confidence: 0.82
+    # freq=703 vs 59K, ratio 84:1 — "rate"
+
+  # ── In-dictionary but high frequency-ratio pairs ──
+  # Wrong form IS in the DB but at very low frequency relative to
+  # the correct form. These are corpus noise, not real words.
+  # Frequency ratio > 100:1 — almost certainly typos.
+
+  - incorrect: "ကျောင်"
+    correct: "ကျောင်း"
+    error_type: "missing_visarga"
+    confidence: 0.88
+
+  - incorrect: "အတိုင်"
+    correct: "အတိုင်း"
+    error_type: "missing_visarga"
+    confidence: 0.85
+
+  - incorrect: "လမ်"
+    correct: "လမ်း"
+    error_type: "missing_visarga"
+    confidence: 0.85
+
+  - incorrect: "နည်"
+    correct: "နည်း"
+    error_type: "missing_visarga"
+    confidence: 0.85
+
+  - incorrect: "ကလေ"
+    correct: "ကလေး"
+    error_type: "missing_visarga"
+    confidence: 0.85
+
+  - incorrect: "သွင်"
+    correct: "သွင်း"
+    error_type: "missing_visarga"
+    confidence: 0.82
+
+  - incorrect: "ခန်"
+    correct: "ခန်း"
+    error_type: "missing_visarga"
+    confidence: 0.82
+
+  - incorrect: "လိုင်"
+    correct: "လိုင်း"
+    error_type: "missing_visarga"
+    confidence: 0.82

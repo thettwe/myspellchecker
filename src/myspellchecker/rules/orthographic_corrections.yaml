@@ -333,6 +333,63 @@ medial_confusion_contextual:
     meaning: "gratitude (ကျေးဇူး) — context: followed by ဇူး"
     confidence: 0.90
 
+  # --- Ha-htoe (ှ) / Wa-hswe (ွ) confusion ---
+
+  - incorrect: "ယွဉ်"
+    correct: "ယှဉ်"
+    meaning: "compare/compete (wa-hswe→ha-htoe: ယွဉ် never valid)"
+    confidence: 0.95
+
+  - incorrect: "ပညှာ"
+    correct: "ပညာ"
+    meaning: "education (extra ha-htoe: ပညှာ never valid)"
+    confidence: 0.95
+
+  - incorrect: "ပှင့်"
+    correct: "ပွင့်"
+    meaning: "bloom/open (ha-htoe→wa-hswe: ပှင့် never valid)"
+    confidence: 0.95
+
+  - incorrect: "နလုံး"
+    correct: "နှလုံး"
+    meaning: "heart (missing ha-htoe: freq=51 vs 27K)"
+    confidence: 0.90
+
+  - incorrect: "ငေ"
+    correct: "ငွေ"
+    meaning: "money (missing wa-hswe: freq=102 vs 163K)"
+    confidence: 0.90
+
+  - incorrect: "မျှန်မာ"
+    correct: "မြန်မာ"
+    meaning: "Myanmar (invalid double medial ျှ→ြ)"
+    confidence: 0.95
+
+  - incorrect: "ညွန်ကြား"
+    correct: "ညွှန်ကြား"
+    meaning: "direct/instruct (missing ha-htoe in compound)"
+    confidence: 0.90
+
+  - incorrect: "နလုံးသား"
+    correct: "နှလုံးသား"
+    meaning: "heart+son (missing ha-htoe in compound)"
+    confidence: 0.90
+
+  - incorrect: "လျောက်ထား"
+    correct: "လျှောက်ထား"
+    meaning: "apply (missing ha-htoe in compound)"
+    confidence: 0.90
+
+  - incorrect: "ယွဉ်ပြိုင်"
+    correct: "ယှဉ်ပြိုင်"
+    meaning: "compete (wa-hswe→ha-htoe in compound)"
+    confidence: 0.95
+
+  - incorrect: "နုန်း"
+    correct: "နှုန်း"
+    meaning: "rate (missing ha-htoe: freq=703 vs 59K)"
+    confidence: 0.90
+
 # ============================================================
 # AUKMYIT (DOT-BELOW) CONFUSION
 # Missing or extra dot-below (့) creates a valid but wrong word.

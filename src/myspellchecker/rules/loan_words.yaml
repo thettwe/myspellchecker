@@ -24,7 +24,7 @@ description: "Loan word transliteration variants for Myanmar spell checking"
 
 metadata:
   created_date: "2026-03-31"
-  total_entries: 186
+  total_entries: 197
   source: "Curated from common Myanmar loan word usage patterns"
   notes: "Covers English (125), Pali/Sanskrit (35), other sources (26), plus 17 transliteration patterns"
 
@@ -60,7 +60,7 @@ english:
 
   - standard: "ဆော့ဖ်ဝဲ"
     source: "software"
-    variants: ["ဆော့ဝဲ", "ဆော့ဖ်ဝဲလ်"]
+    variants: ["ဆော့ဝဲ", "ဆော့ဖ်ဝဲလ်", "ဆော့ဝဲလ်"]
     domain: "technology"
 
   - standard: "ဟာ့ဒ်ဝဲ"
@@ -90,7 +90,7 @@ english:
 
   - standard: "ပရိုဂရမ်"
     source: "program"
-    variants: ["ပရိုဂရမ့်", "ပရိုဂရမ်မ"]
+    variants: ["ပရိုဂရမ့်", "ပရိုဂရမ်မ", "ပရိုဂရန်", "ပရိုဂမ်"]
     domain: "technology"
 
   - standard: "အက်ပ်"
@@ -146,6 +146,61 @@ english:
   - standard: "အပ်လုဒ်"
     source: "upload"
     variants: ["အပ်လုတ်", "အတ်လုဒ်"]
+    domain: "technology"
+
+  - standard: "ဘရောက်ဆာ"
+    source: "browser"
+    variants: ["ဘရောက်စာ"]
+    domain: "technology"
+
+  - standard: "ဆိုက်"
+    source: "site"
+    variants: ["ဆိုဒ်"]
+    domain: "technology"
+
+  - standard: "ဒီဇိုင်နာ"
+    source: "designer"
+    variants: ["ဒီဇိုင်းနာ"]
+    domain: "technology"
+
+  - standard: "စတူဒီယို"
+    source: "studio"
+    variants: ["စတူဒယို"]
+    domain: "technology"
+
+  - standard: "ဂူဂဲလ်"
+    source: "Google"
+    variants: ["ဂူးဂဲလ်"]
+    domain: "technology"
+
+  - standard: "ဖရိမ်းဝပ်ခ်"
+    source: "framework"
+    variants: ["ဖရိန်းဝပ်"]
+    domain: "technology"
+
+  - standard: "ပါဖော်မန့်စ်"
+    source: "performance"
+    variants: ["ပါဖောမန့်"]
+    domain: "technology"
+
+  - standard: "ဒီပါ့တ်မန့်"
+    source: "department"
+    variants: ["ဒီပတ်မန့်"]
+    domain: "general"
+
+  - standard: "အင်ဂျင်နီယာ"
+    source: "engineer"
+    variants: ["အင်ဂျင်နယာ"]
+    domain: "technology"
+
+  - standard: "ဘီစကတ်"
+    source: "biscuit"
+    variants: ["ဘီစကက်"]
+    domain: "food"
+
+  - standard: "ဘက်ထရီ"
+    source: "battery"
+    variants: ["ဘတ်ထရီ"]
     domain: "technology"
 
   # ── Education ──
@@ -507,7 +562,7 @@ english:
 
   - standard: "မန်နေဂျာ"
     source: "manager"
-    variants: ["မန္နေဂျာ", "မနေဂျာ"]
+    variants: ["မန္နေဂျာ", "မနေဂျာ", "မန်နေဂျား"]
     domain: "finance"
 
   - standard: "အော်ဒါ"

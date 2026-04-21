@@ -43,45 +43,47 @@ composite = 0.30 * F1
 
 Where `latency_normalized = min(p95 / 500ms, 1.0)`.
 
-## Current Results (v1.5.0)
+## Current Results (v1.6.0)
 
 ### Run Configuration
 
-- **Database**: `mySpellChecker_production.db` (577 MB, 601K words, full POS + enrichment tables)
-- **Semantic model**: v2.3-final (ONNX, MLM-based)
+- **Database**: `mySpellChecker_production.db` (495 MB, flat-AA migrated, full POS + enrichment tables)
+- **Semantic model**: v2.4-final (ONNX, MLM-based)
 - **Validation level**: word
 - **Platform**: macOS (Apple Silicon)
-- **Benchmark suite**: 1,304 sentences (641 clean, 663 with errors, 670 in-scope error spans, `scope=spelling`)
+- **Benchmark suite**: 2,084 sentences (570 clean, 1,514 with errors, 1,716 expected error spans) — `myspellchecker_benchmark.yaml@v1.5.0`
 
 > **Note:** The dictionary database and semantic model used in these benchmarks are **not included** in the library. They were built from a proprietary corpus using the [data pipeline](https://docs.myspellchecker.com/data-pipeline/index) and [training pipeline](https://docs.myspellchecker.com/guides/training) respectively. Your results will vary depending on the dictionary database you build and the semantic model you train.
 
-### Overall Metrics (with semantic v2.3)
-
-| Metric | Value | vs v1.4.0 |
-|--------|------:|----------:|
-| **F1** | 77.1% | +6.0 pts |
-| **Precision** | 82.6% | +8.5 pts |
-| **Recall** | 72.2% | +4.0 pts |
-| FPR (clean sentences) | 10.8% | −7.8 pts |
-| Top-1 Suggestion Acc | 70.5% | +0.8 pts |
-| MRR | 0.7569 | +0.010 |
-| p95 latency | 409 ms | — |
-| Composite score | 0.7227 | — |
-
-### Baseline Metrics (no semantic model)
-
-For environments without the semantic model, the structural and context-aware strategies alone still deliver strong results at ~4× lower p95 latency:
+### Overall Metrics — full benchmark (spelling + grammar)
 
 | Metric | Value |
 |--------|------:|
-| **F1** | 75.6% |
-| **Precision** | 81.2% |
-| **Recall** | 70.8% |
+| **F1** | 62.2% |
+| **Precision** | 83.7% |
+| **Recall** | 49.5% |
 | FPR (clean sentences) | 11.1% |
-| Top-1 Suggestion Acc | 73.2% |
-| MRR | 0.7794 |
-| p95 latency | 97 ms |
-| Composite score | 0.7899 |
+| Top-1 Suggestion Acc | 44.4% |
+| MRR | 0.5481 |
+| p95 latency | 298 ms |
+| Composite score | 0.6267 |
+
+### Overall Metrics — spelling domain only (`--domain spelling`)
+
+Spelling-first is the v1.6.0 product priority. On the spelling-only subset (1,415 spelling error spans; grammar and ambiguous spans filtered out at evaluation time):
+
+| Metric | Value |
+|--------|------:|
+| **F1** | 64.6% |
+| **Precision** | 83.1% |
+| **Recall** | 52.9% |
+| FPR (clean sentences) | 9.8% |
+| Top-1 Suggestion Acc | 43.6% |
+| MRR | 0.5413 |
+| p95 latency | 292 ms |
+| Composite score | 0.6345 |
+
+Previous release rows (v1.5.0 at composite 0.7227 on the earlier spelling-scoped 1,304-sentence suite; v1.4.0 at 0.660) used a narrower, earlier benchmark — direct row-to-row composite comparison across releases is not apples-to-apples because the benchmark itself grew from 1,304 → 2,084 sentences with an added `domain` dimension. See `50_Metrics/Benchmark History.md` in the internal knowledge base for per-commit composite trajectories.
 
 ## How to Run
 

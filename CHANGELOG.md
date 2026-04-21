@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-04-21
+
+### Added
+
+- **MinedConfusablePairStrategy** (priority 49, enabled by default): Flags real-word confusables using a table of 23,970 edit-distance-1 pairs mined from the production dictionary. Both forms are dictionary-valid, so SymSpell cannot surface them on its own; the strategy gates emissions with a semantic MLM logit margin and a frequency ratio between the current word and its partner. Dedicated unit test suite covers constructor guards, partner-map symmetry, validate guards, happy path, margin threshold, and frequency cache.
+- **Compound-split confusable boost** (enabled by default): When `_suppress_compound_split_valid_words` would fire on a long OOV token whose syllables are all individually valid (4+ syllables), the same structural signal also boosts the confidence of any inner `confusable_error` emission inside the outer span. Combined-signal detections clear the downstream confidence gate and survive to the final response.
+- **Skip-rule confidence gate**: The pre-existing "skip tokens of 4+ valid syllables" rule now defers to SymSpell when the top-1 candidate clears a configurable edit-distance / frequency gate (`skip_rule_gate_max_ed`, `skip_rule_gate_min_freq`). Recovers missing-asat and substitution typos whose fragmented form happens to be all-valid syllables (e.g. `စွမ်းဆောင်ရည` → `စွမ်းဆောင်ရည်`).
+- **Pre-segmenter raw-token SymSpell probe** (priority 23, enabled by default): Runs `SymSpell.lookup(raw_token, level='word')` on unsegmented whitespace-delimited tokens before segmentation. Recovers compound typos the segmenter would otherwise fragment into piecewise-valid subtokens.
+- **Segmenter post-merge rescue** (left-cascade merge): New adjacent-pair merge pass probes variant-map / dictionary / dictionary+asat lookups on concatenated segmenter fragments. Off by default pending false-positive-rate calibration; opt in via `use_segmenter_post_merge_rescue`.
+- **Loan-word DB mining**: 54 curated transliteration variants mined from the confusable pairs table, plus a `WordValidator` short-circuit that emits the curated correction before SymSpell's edit-distance filter kicks in.
+- **Tone-Zawgyi normalization** (consonant-gated `normalize_e_vowel_tall_aa`): Targeted whitelist `{ပ, ခ, ဒ}` of consonants whose `ေ` + flat-AA + final sequences get rewritten to the classical `ေါ` form. Narrower than the classical MLC round-bottom set by design; the broader set would corrupt modern gold forms like `ဘောလုံး`, `သဘော`, `ရောဂါ`, `ဖော်`.
+- **Flat-AA dictionary migration**: 17,712 word keys + 68k N-gram foreign-key repoints + 1.5M probability re-normalizations to resolve the TALL_AA vs AA divergence on the consonant whitelist. Benchmark-validated and backed up.
+- **Spelling-first benchmark labeling**: Every gold error now carries a `domain` field (`spelling` / `grammar` / `ambiguous`), and `benchmarks/run_benchmark.py` accepts a `--domain` filter so spelling-only regression tests no longer need a sibling YAML. Benchmark YAML version bumped accordingly.
+- **Archival strategies** (shipped default-off): `ByT5SafetyNetStrategy`, `MLMSpanMaskCandGenStrategy`, `ToneSafetyNetStrategy`, `StructuralSyllableEarlyExit`, and a SymSpell-on-merged segmenter probe remain in the source tree behind feature flags for future benchmarking attempts. None are active at default configuration.
+
+### Changed
+
+- **Sentence-level honorific detector** now normalizes input at entry (`_detect_informal_with_honorific`) so direct detector calls receive the same normalized text as production-pipeline calls. Resolves silent miss on honorific-plus-casual-particle detection when callers pass unnormalized text.
+- **`REGISTER_CRITICAL_PRONOUNS` constant** consolidated into `validators/base`; `WordValidator` and `SyllableValidator` now import a single source of truth.
+- **Greedy syllable-reassembly loop** (used by compound-split suppression and the confusable boost) extracted into `_greedy_syllable_reassembly` module helper; removes a ~30-line copy-paste and prevents divergence between the two call sites.
+- **`error_suppression` imports** for `WordError` and `Suggestion` hoisted to the module top, matching the rest of the module and removing a per-call late import on the structural-syllable rescue path.
+
+### Fixed
+
+- **Honorific-plus-casual-particle regressions** (`ဒော်ခင်မာ လာပြီကွာ → ရှင်`, `ဒော်ခင်မာ ထမင်းစားပြီးပြီကွာ → ရှင့်`): the detector now normalizes input at entry so post-normalize `_HONORIFIC_TERMS` membership matches regardless of caller.
+- **Defensive bounds guards** on `context.word_positions` access in `LoanWordValidationStrategy` and `VisargaStrategy` mirror the pattern already used by `ToneSafetyNetStrategy`. The `ValidationContext` dataclass invariant makes these unreachable in practice, but the guards keep the three strategies consistent.
+
+### Removed
+
+- **Internal process references** (task IDs, workstream slugs, audit-document pointers, dated "Parked YYYY-MM-DD" notes, and one `/octo:debate` comment) stripped from shipped source code across `error_suppression`, `validation_configs`, `spellchecker`, `meta_fusion`, `word_validator`, the segmenter/strategy modules, and supporting factories. No runtime behaviour change; the technical rationale for each gate/guard is preserved in docstrings.
+
+### Benchmark
+
+- Spelling-only composite improved from `0.6161` (v1.5.0 baseline on the spelling-first benchmark) to approximately `0.6345`, driven primarily by the flat-AA migration, mined-confusable-pair strategy, skip-rule gate, and compound-split confusable boost. See `50_Metrics/Benchmark History.md` for per-commit deltas and per-bucket breakdowns.
+
 ## [1.5.0] - 2026-04-12
 
 ### Added

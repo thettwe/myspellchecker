@@ -961,7 +961,8 @@ class SpellChecker(
         # final candidate lists to avoid widening suppression scope.
         self._suppress_low_value_confusable_errors(errors, text=normalized_text)
         self._suppress_low_value_semantic_errors(errors, text=normalized_text)
-        self._suppress_low_value_word_errors(errors, text=normalized_text)
+        if not self.config.validation.bypass_word_heuristic_suppression:
+            self._suppress_low_value_word_errors(errors, text=normalized_text)
 
         # Confidence-gated output filter: suppress error types where the
         # system has low precision unless confidence exceeds a per-type
@@ -1007,12 +1008,16 @@ class SpellChecker(
 
         # MLM post-filter: suppress invalid_word/dangling_word FPs when the
         # semantic model confirms the word is contextually plausible.
-        if self._semantic_checker is not None:
+        if (
+            self._semantic_checker is not None
+            and not self.config.validation.bypass_word_heuristic_suppression
+        ):
             self._suppress_invalid_word_via_mlm(errors, normalized_text)
 
         # Post-validation compound splitting: suppress invalid_word errors
         # that greedily split into all-valid dictionary words.
-        self._suppress_compound_split_valid_words(errors)
+        if not self.config.validation.bypass_word_heuristic_suppression:
+            self._suppress_compound_split_valid_words(errors)
 
         # Post-validation meta-classifier filter: suppress likely FPs using
         # a learned model trained on per-error features.
@@ -1127,6 +1132,12 @@ class SpellChecker(
 
         # Layer 1: Syllable validation + cascade suppression
         self._validate_syllables(normalized_text, errors, layers_applied)
+        # Structural-syllable early-exit. Runs BEFORE cascade/pali/bare
+        # suppressors so categorical Myanmar syllable-structure violations
+        # with a confident SymSpell correction get rescued as authoritative
+        # word-level errors before any syllable suppressor can kill them.
+        # Guarded by ``structural_syllable_early_exit_enabled`` in config.
+        self._structural_syllable_early_exit(errors, normalized_text)
         self._suppress_cascade_syllable_errors(errors, normalized_text)
         self._suppress_pali_stacking_errors(errors, normalized_text)
 
@@ -1151,8 +1162,21 @@ class SpellChecker(
         self._inject_asat_visarga_candidates(normalized_text, errors)
         self._reconstruct_morpheme_in_compound(normalized_text, errors)
         self._inject_compound_confusion_candidates(errors)
+        # Combined-signal confidence boost. Must run BEFORE
+        # ``_dedup_errors_by_span`` since that step would remove the
+        # inner confusable_error (contained within the wider invalid_word).
+        self._boost_inner_confusable_for_compound_splits(errors)
         self._dedup_errors_by_position(errors)
         self._dedup_errors_by_span(errors)
+
+        # Protect immune strategy errors from suppression
+        immune = self.config.validation.suppression_immune_strategies
+        immune_errors: list[Error] = []
+        if immune:
+            immune_errors = [e for e in errors if e.source_strategy in immune]
+            for e in immune_errors:
+                errors.remove(e)
+
         self._suppress_tense_adjacent_syntax(errors)
         self._suppress_low_value_syllable_errors(errors, text=normalized_text)
         self._suppress_low_value_syntax_errors(errors, text=normalized_text)
@@ -1162,6 +1186,10 @@ class SpellChecker(
         self._suppress_low_value_semantic_errors(errors, text=normalized_text)
         self._suppress_known_entity_errors(errors, text=normalized_text)
         self._filter_ner_entities(errors, normalized_text)
+
+        # Restore immune errors
+        if immune_errors:
+            errors.extend(immune_errors)
 
         return errors, layers_applied
 
@@ -1225,13 +1253,14 @@ class SpellChecker(
         # further refine the n-gram-based order.
         self._apply_ngram_reranking(text, errors)
 
-        # Semantic re-ranking: use MLM to re-rank suggestions on existing errors.
-        # The semantic model masks each flagged word and checks which suggestion
-        # the model predicts — boosting it to the top of the suggestion list.
-        # This is additive-only: it never adds new errors, only improves suggestion order.
-        if effective_semantic_enabled and self.semantic_checker is not None:
-            self._apply_semantic_reranking(text, errors)
-            layers_applied.append("semantic")
+        # Semantic re-ranking: DISABLED.
+        # The MLM hard-sorts suggestions by raw logit, discarding edit distance,
+        # frequency, and n-gram signals. This hurts Top-1/MRR.
+        # Instead, the MLM logit is fed as a feature (slot 7) to the neural
+        # reranker, which learns the optimal blend from data.
+        # if effective_semantic_enabled and self.semantic_checker is not None:
+        #     self._apply_semantic_reranking(text, errors)
+        #     layers_applied.append("semantic")
 
         # Neural MLP re-ranking: final reranking step using a trained MLP.
         # Runs AFTER both n-gram and semantic reranking to get the final say.

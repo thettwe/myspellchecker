@@ -55,6 +55,15 @@ _UNTRAINED_ERROR_TYPES: frozenset[str] = frozenset(
     }
 )
 
+# Strategy sources that enforce their own confidence gates and should
+# bypass the meta-classifier regardless of their error_type.
+_BYPASS_META_STRATEGIES: frozenset[str] = frozenset(
+    {
+        "LoanWordValidationStrategy",
+        "VisargaStrategy",
+    }
+)
+
 _STRATEGY_NAMES = [
     "ToneValidationStrategy",
     "OrthographyValidationStrategy",
@@ -130,29 +139,29 @@ _KNOWN_SUFFIXES = frozenset(
 )
 
 _ERROR_TYPE_PRECISION = {
-    "invalid_word": 0.25,
-    "invalid_syllable": 0.45,
-    "confusable_error": 0.30,
-    "medial_confusion": 0.65,
+    "invalid_word": 0.46,
+    "invalid_syllable": 0.80,
+    "confusable_error": 0.54,
+    "medial_confusion": 0.92,
     "pos_sequence_error": 0.20,
-    "context_probability": 0.12,
-    "broken_compound": 0.35,
-    "tone_ambiguity": 0.18,
-    "homophone_error": 0.40,
-    "semantic_error": 0.20,
-    "particle_confusion": 0.22,
-    "syntax_error": 0.15,
-    "register_mixing": 0.30,
-    "question_structure": 0.25,
-    "missing_asat": 0.18,
-    "collocation_error": 0.20,
-    "ha_htoe_confusion": 0.55,
-    "medial_order_error": 0.60,
-    "aspect_adverb_conflict": 0.25,
-    "dangling_word": 0.10,
-    "merged_sfp_conjunction": 0.08,
-    "tense_mismatch": 0.15,
-    "missing_conjunction": 0.12,
+    "context_probability": 0.10,
+    "broken_compound": 0.38,
+    "tone_ambiguity": 0.09,
+    "homophone_error": 0.38,
+    "semantic_error": 0.36,
+    "particle_confusion": 0.38,
+    "syntax_error": 0.38,
+    "register_mixing": 0.06,
+    "question_structure": 0.20,
+    "missing_asat": 0.67,
+    "collocation_error": 0.12,
+    "ha_htoe_confusion": 0.67,
+    "medial_order_error": 1.00,
+    "aspect_adverb_conflict": 0.50,
+    "dangling_word": 0.08,
+    "merged_sfp_conjunction": 0.05,
+    "tense_mismatch": 0.42,
+    "missing_conjunction": 0.05,
 }
 
 
@@ -337,7 +346,12 @@ class MetaClassifierFusion:
             threshold = self._threshold
 
         trained_errors = [
-            e for e in errors if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
+            e
+            for e in errors
+            if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
+            and getattr(e, "source_strategy", "") not in _BYPASS_META_STRATEGIES
+            and not getattr(e, "_boosted_by_compound_split", False)
+            and not getattr(e, "_structural_early_exit", False)
         ]
         trained_count = len(trained_errors)
 
@@ -346,6 +360,22 @@ class MetaClassifierFusion:
         for error in errors:
             error_type = getattr(error, "error_type", "")
             if error_type in _UNTRAINED_ERROR_TYPES:
+                kept.append(error)
+                continue
+            # Combined-signal boost bypasses meta — its emission was already
+            # validated by the structural (compound-split would fire) AND
+            # inner-confusable cooccurrence signal. Similarly, the
+            # structural-syllable early-exit bypasses: syllable_rule_validator
+            # + enclosing-OOV + SymSpell hit is a definitive signal.
+            if getattr(error, "_boosted_by_compound_split", False) or getattr(
+                error, "_structural_early_exit", False
+            ):
+                kept.append(error)
+                continue
+
+            # Strategies with built-in confidence gates bypass the meta-classifier.
+            source = getattr(error, "source_strategy", "")
+            if source in _BYPASS_META_STRATEGIES:
                 kept.append(error)
                 continue
 
