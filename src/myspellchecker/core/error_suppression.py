@@ -170,6 +170,15 @@ _MORPHEME_BOUNDARY_CHARS = frozenset({"\u1038", "\u1037", "\u103a"})
 # Greedy dictionary-guided reassembly maximum span (syllables per part).
 _GREEDY_REASSEMBLY_MAX_SPAN = 4
 
+# Minimum syllables for the compound-split predicate. 4+ is the empirically
+# calibrated cutoff: 2- and 3-syllable tokens have high overlap with genuine
+# compound typos where each syllable happens to be a valid standalone word,
+# while 4+-syllable all-valid tokens are almost always segmenter over-merges
+# of legitimate compounds. Used by both ``_suppress_compound_split_valid_words``
+# and ``_boost_inner_confusable_for_compound_splits`` to keep the two call
+# sites from drifting.
+_COMPOUND_SPLIT_MIN_SYLLABLES = 4
+
 
 def _greedy_syllable_reassembly(
     syllables: Sequence[str],
@@ -202,6 +211,37 @@ def _greedy_syllable_reassembly(
         parts.append("".join(syllables[i : i + best_len]))
         i += best_len
     return parts, True
+
+
+def _compound_split_reassembly(
+    err_text: str,
+    provider,
+    segmenter,
+    min_syllables: int = _COMPOUND_SPLIT_MIN_SYLLABLES,
+) -> tuple[str, list[str], list[str]] | None:
+    """Shared predicate for compound-split suppression and confusable boost.
+
+    Returns ``(word, syllables, parts)`` when ``err_text`` is a long OOV
+    token whose syllables all reassemble into valid dictionary words, else
+    ``None``. Both ``_suppress_compound_split_valid_words`` and
+    ``_boost_inner_confusable_for_compound_splits`` route through this
+    helper so the two predicates cannot drift in their shared steps
+    (normalize → segment → greedy reassembly). The only caller-controlled
+    parameter is ``min_syllables``.
+    """
+    word = normalize(err_text)
+    if not word or len(word) < 4:
+        return None
+    try:
+        syllables = segmenter.segment_syllables(word)
+    except Exception:
+        return None
+    if len(syllables) < min_syllables:
+        return None
+    parts, all_valid = _greedy_syllable_reassembly(syllables, provider.is_valid_word)
+    if not (all_valid and len(parts) >= 2):
+        return None
+    return word, syllables, parts
 
 
 class ErrorSuppressionMixin:
@@ -846,33 +886,20 @@ class ErrorSuppressionMixin:
         for idx, err in enumerate(errors):
             if err.error_type != ET_WORD:
                 continue
-            word = normalize(err.text)
-            if not word or len(word) < 4:
+            # Shared predicate: the token has ≥_COMPOUND_SPLIT_MIN_SYLLABLES
+            # syllables AND greedy reassembly yields ≥2 all-valid parts.
+            # That combination is very likely a segmenter merge of valid
+            # words — not a real spelling error. Exception: don't suppress
+            # when SymSpell has a strong top-1 candidate
+            # (ed≤skip_rule_gate_max_ed, freq≥skip_rule_gate_min_freq).
+            # That signal distinguishes a missing-asat / substitution typo
+            # from a genuine merge.
+            result = _compound_split_reassembly(err.text, provider, segmenter)
+            if result is None:
                 continue
-
-            # Segment into syllables
-            try:
-                syllables = segmenter.segment_syllables(word)
-            except Exception:
-                continue
-            if len(syllables) < 2:
-                continue
-
-            # Greedy reassembly: longest valid dictionary word first.
-            parts, all_valid = _greedy_syllable_reassembly(syllables, provider.is_valid_word)
-
-            # If ALL parts are valid words AND the token has 3+ syllables,
-            # this is very likely a segmenter merge of valid words — not a
-            # real spelling error.  Require 3+ syllables because 2-syllable
-            # tokens have higher overlap with genuine compound typos where
-            # both syllables happen to be valid words individually.
-            # Exception: don't suppress when SymSpell has a strong top-1
-            # candidate (ed<=skip_rule_gate_max_ed,
-            # freq>=skip_rule_gate_min_freq). That signal distinguishes a
-            # missing-asat / substitution typo from a genuine merge.
-            if all_valid and len(parts) >= 2 and len(syllables) >= 4:
-                if not self._skip_rule_has_confident_candidate(word):
-                    to_remove.add(idx)
+            word, _syllables, _parts = result
+            if not self._skip_rule_has_confident_candidate(word):
+                to_remove.add(idx)
 
         if to_remove:
             errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
@@ -1035,27 +1062,23 @@ class ErrorSuppressionMixin:
         ceiling = float(
             getattr(validation, "compound_split_confusable_boost_inner_conf_ceiling", 0.75)
         )
-        min_syllables = int(getattr(validation, "compound_split_confusable_boost_min_syllables", 4))
+        min_syllables = int(
+            getattr(
+                validation,
+                "compound_split_confusable_boost_min_syllables",
+                _COMPOUND_SPLIT_MIN_SYLLABLES,
+            )
+        )
 
-        # Identify "compound-split-suppressible" outer spans. Mirrors the
-        # predicate in _suppress_compound_split_valid_words: ET_WORD errors
-        # whose text has ≥min_syllables, where a greedy dictionary reassembly
-        # produces parts that are ALL valid dictionary words.
+        # Identify "compound-split-suppressible" outer spans via the same
+        # ``_compound_split_reassembly`` predicate used by
+        # ``_suppress_compound_split_valid_words`` — the two call sites share
+        # the helper to prevent predicate drift.
         outer_spans: list[tuple[int, int]] = []
         for err in errors:
             if err.error_type != ET_WORD:
                 continue
-            word = normalize(err.text)
-            if not word or len(word) < 4:
-                continue
-            try:
-                syllables = segmenter.segment_syllables(word)
-            except Exception:
-                continue
-            if len(syllables) < min_syllables:
-                continue
-            parts, all_valid = _greedy_syllable_reassembly(syllables, provider.is_valid_word)
-            if not (all_valid and len(parts) >= 2):
+            if _compound_split_reassembly(err.text, provider, segmenter, min_syllables) is None:
                 continue
             span_start = err.position
             span_end = err.position + len(err.text)
