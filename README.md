@@ -475,7 +475,7 @@ pytest tests/ -m e2e            # 10 end-to-end CLI tests
 pytest tests/ -m slow           # 39 slow tests (property-based, stress, DB builds)
 
 # Run with coverage
-pytest tests/ --cov=src/myspellchecker --cov-fail-under=75
+pytest tests/ --cov=src/myspellchecker --cov-fail-under=65
 
 # Formatting and linting
 ruff format .

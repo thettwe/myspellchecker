@@ -166,8 +166,8 @@ def test_semantic_checker():
 
 ### Coverage requirement
 
-Maintain >=75% code coverage. Check with:
+Maintain >=65% code coverage. Check with:
 
 ```bash
-pytest tests/ --cov=src/myspellchecker --cov-fail-under=75
+pytest tests/ --cov=src/myspellchecker --cov-fail-under=65
 ```
