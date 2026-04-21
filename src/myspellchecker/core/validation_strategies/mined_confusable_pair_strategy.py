@@ -171,7 +171,14 @@ class MinedConfusablePairStrategy(ValidationStrategy):
             lo = entry.get("low")
             hi_f = int(entry.get("high_freq", 0))
             lo_f = int(entry.get("low_freq", 0))
-            if not hi or not lo or lo_f < self.low_freq_min:
+            if not hi or not lo:
+                continue
+            # Filter both directions symmetrically. A partner with freq
+            # below ``low_freq_min`` is dropped at query time by the
+            # ``threshold_freq`` gate in ``validate``, but inserting it
+            # into ``_partner_map`` wastes memory and complicates
+            # diagnostic counts of the loaded map.
+            if lo_f < self.low_freq_min or hi_f < self.low_freq_min:
                 continue
             self._partner_map.setdefault(hi, []).append((lo, lo_f))
             self._partner_map.setdefault(lo, []).append((hi, hi_f))
@@ -193,10 +200,24 @@ class MinedConfusablePairStrategy(ValidationStrategy):
         self._freq_cache[word] = freq
         return freq
 
-    def _score(self, sentence: str, word: str, candidates: list[str]) -> dict[str, float]:
-        """Dispatch to the active backend: classifier or MLM."""
+    def _score(
+        self,
+        sentence: str,
+        word: str,
+        candidates: list[str],
+        *,
+        local_position: int | None = None,
+    ) -> dict[str, float]:
+        """Dispatch to the active backend: classifier or MLM.
+
+        ``local_position`` (when provided) is the offset of ``word`` inside
+        ``sentence`` and anchors the classifier's mask site to the correct
+        occurrence when the same word appears multiple times.
+        """
         if self.backend == "classifier" and self._classifier_scorer is not None:
-            return self._classifier_scorer.score(sentence, word, candidates)
+            return self._classifier_scorer.score(
+                sentence, word, candidates, position=local_position
+            )
         # Default: MLM via SemanticChecker
         if self.semantic_checker is None:
             return {}
@@ -209,6 +230,8 @@ class MinedConfusablePairStrategy(ValidationStrategy):
             return []
         if not context.words:
             return []
+
+        sentence_base = self._resolve_sentence_base(context)
 
         errors: list[Error] = []
         for wi, word in enumerate(context.words):
@@ -232,8 +255,21 @@ class MinedConfusablePairStrategy(ValidationStrategy):
                 continue
             best_partner, _best_freq = max(usable, key=lambda x: x[1])
 
+            # Local offset of ``word`` inside ``context.sentence``; clamped
+            # to zero when the sentence / absolute positions disagree (e.g.
+            # a normalization mismatch between raw text and segmenter
+            # output). Anchors the classifier's mask site to the correct
+            # occurrence when ``word`` appears more than once in the
+            # sentence.
+            local_position = max(0, position - sentence_base)
+
             try:
-                scores = self._score(context.sentence, word, [best_partner, word])
+                scores = self._score(
+                    context.sentence,
+                    word,
+                    [best_partner, word],
+                    local_position=local_position,
+                )
             except Exception as e:
                 self.logger.debug("Scoring failed for %r: %s", word, e)
                 continue
@@ -259,6 +295,22 @@ class MinedConfusablePairStrategy(ValidationStrategy):
 
         return errors
 
+    @staticmethod
+    def _resolve_sentence_base(context: ValidationContext) -> int:
+        """Return the absolute offset of ``context.sentence`` in the full text.
+
+        Mirrors :meth:`PreSegmenterRawProbeStrategy._resolve_sentence_base`.
+        Defensive ``max(0, ...)`` clamp prevents a negative base when the
+        first word cannot be located inside ``context.sentence`` (a
+        normalization mismatch between raw text and the segmenter output).
+        """
+        if not context.words or not context.word_positions:
+            return 0
+        first_local = context.sentence.find(context.words[0]) if context.sentence else 0
+        if first_local < 0:
+            first_local = 0
+        return max(0, context.word_positions[0] - first_local)
+
     def __repr__(self) -> str:
         return (
             f"MinedConfusablePairStrategy(priority={self.priority()}, "
@@ -276,7 +328,11 @@ class _ClassifierScorer:
     """
 
     def __init__(self, model, tokenizer, device: str) -> None:
-        import torch  # local import — only required when backend='classifier'
+        # ``torch`` is imported lazily because the classifier backend is
+        # opt-in; importing at module top would force a ``torch`` runtime
+        # dependency on every install. Stored on ``self`` so ``score``
+        # avoids a second import.
+        import torch
 
         self._torch = torch
         self._model = model
@@ -285,8 +341,37 @@ class _ClassifierScorer:
         self._mask_str = tokenizer.mask_token or "[MASK]"
         self._mask_id = tokenizer.mask_token_id
 
-    def score(self, sentence: str, target_word: str, candidates: list[str]) -> dict[str, float]:
-        pos = sentence.find(target_word)
+    def score(
+        self,
+        sentence: str,
+        target_word: str,
+        candidates: list[str],
+        *,
+        position: int | None = None,
+    ) -> dict[str, float]:
+        """Score each candidate at the ``target_word`` mask site in ``sentence``.
+
+        ``position`` (when provided) is the expected offset of
+        ``target_word`` inside ``sentence``. When it matches, we use it
+        directly; otherwise we fall back to ``sentence.find(target_word,
+        position)`` which anchors the search at the expected offset and
+        returns the correct occurrence when ``target_word`` repeats
+        earlier in the sentence.
+        """
+        if (
+            position is not None
+            and 0 <= position <= len(sentence)
+            and sentence[position : position + len(target_word)] == target_word
+        ):
+            pos = position
+        else:
+            anchor = max(0, position) if position is not None else 0
+            pos = sentence.find(target_word, anchor)
+            if pos < 0 and anchor > 0:
+                # Anchor overshot — fall back to a full-sentence search so
+                # we at least score *some* occurrence rather than silently
+                # dropping the token.
+                pos = sentence.find(target_word)
         if pos < 0:
             return {}
         masked = sentence[:pos] + self._mask_str + sentence[pos + len(target_word) :]
@@ -312,6 +397,11 @@ class _ClassifierScorer:
 
     # Alias to match SemanticChecker interface
     def score_mask_candidates(
-        self, sentence: str, target_word: str, candidates: list[str]
+        self,
+        sentence: str,
+        target_word: str,
+        candidates: list[str],
+        *,
+        position: int | None = None,
     ) -> dict[str, float]:
-        return self.score(sentence, target_word, candidates)
+        return self.score(sentence, target_word, candidates, position=position)
