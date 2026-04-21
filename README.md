@@ -64,6 +64,8 @@
 
 Full documentation is available at **[docs.myspellchecker.com](https://docs.myspellchecker.com/)**.
 
+> **What's new in v1.6.0?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for new validation strategies (mined-confusable, pre-segmenter raw probe), the compound-split confusable boost, the skip-rule confidence gate, consonant-gated Tall-AA normalization, the flat-AA dictionary migration, and spelling-first benchmark labeling.
+
 ### Getting Started
 *   **[Introduction](https://docs.myspellchecker.com/introduction)**: Overview of the library and its architecture.
 *   **[Installation](https://docs.myspellchecker.com/guides/installation)**: Installation options and system requirements.
