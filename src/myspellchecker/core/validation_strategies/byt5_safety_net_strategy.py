@@ -273,14 +273,22 @@ class ByT5SafetyNetStrategy(ValidationStrategy):
         else:
             eos_set = {int(eos_id)}
 
-        decoder_ids = np.array([[dec_start]], dtype=np.int64)
+        # Preallocate the full decoder-id buffer once and grow a C-contiguous
+        # view each step, instead of ``np.concatenate`` on every iteration
+        # (which allocates a new array and copies the prefix each call —
+        # quadratic in the number of generated tokens). The feed to ONNX
+        # still pays O(length) per step for the runtime's own input copy,
+        # but we avoid one redundant numpy allocation and copy per token.
         max_new = input_ids.shape[1] + self.max_new_tokens_slack
+        decoder_buf = np.empty((1, max_new + 1), dtype=np.int64)
+        decoder_buf[0, 0] = dec_start
+        length = 1
         generated: list[int] = []
         for _ in range(max_new):
             logits = self._onnx_dec.run(
                 None,
                 {
-                    "decoder_input_ids": decoder_ids,
+                    "decoder_input_ids": np.ascontiguousarray(decoder_buf[:, :length]),
                     "encoder_hidden_states": enc_hidden,
                     "encoder_attention_mask": attn,
                 },
@@ -289,7 +297,8 @@ class ByT5SafetyNetStrategy(ValidationStrategy):
             if next_id in eos_set:
                 break
             generated.append(next_id)
-            decoder_ids = np.concatenate([decoder_ids, [[next_id]]], axis=1)
+            decoder_buf[0, length] = next_id
+            length += 1
         return self._tokenizer.decode(generated, skip_special_tokens=True)
 
     def _extract_edits(self, context: ValidationContext, corrected: str) -> list[_Edit]:
