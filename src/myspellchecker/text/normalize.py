@@ -339,6 +339,14 @@ def normalize_e_vowel_tall_aa(text: str) -> str:
     round-bottom set; see the ``_ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA``
     block comment for the rationale and the criterion to widen it.
 
+    Scope limit: the rewrite fires only on the bare pattern
+    ``consonant + ေ + {ာ, ါ}`` at adjacent positions. Medial or stacking
+    interpositions — e.g. ``ပ + ြ + ေ + ာ`` (``ပြော``) or ``ခ + ျ + ေ + ာ``
+    — are *not* matched and pass through unmodified. This is deliberate
+    (the round-bottom / tall-AA interaction with medials is still under
+    benchmark validation), so expanding the whitelist or the match pattern
+    without per-consonant verification is a regression risk.
+
     Args:
         text: Input Myanmar text.
 
