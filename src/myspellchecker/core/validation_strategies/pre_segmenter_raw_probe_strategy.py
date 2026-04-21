@@ -115,7 +115,7 @@ class PreSegmenterRawProbeStrategy(ValidationStrategy):
             local_end = match.end()
             abs_start = sentence_base + local_start
 
-            if not self._should_probe(raw_token, context, local_start, local_end):
+            if not self._should_probe(raw_token, context, local_start, local_end, sentence_base):
                 continue
             if abs_start in context.existing_errors:
                 continue
@@ -153,6 +153,7 @@ class PreSegmenterRawProbeStrategy(ValidationStrategy):
         context: ValidationContext,
         local_start: int,
         local_end: int,
+        sentence_base: int,
     ) -> bool:
         """Return True if ``raw_token`` is a viable probe target."""
         if not raw_token:
@@ -168,7 +169,7 @@ class PreSegmenterRawProbeStrategy(ValidationStrategy):
             return False
         # Skip tokens that overlap any name-masked word. We check overlap on
         # the segmented word positions the caller already computed.
-        if self._overlaps_name(context, local_start, local_end):
+        if self._overlaps_name(context, local_start, local_end, sentence_base):
             return False
         return True
 
@@ -216,24 +217,44 @@ class PreSegmenterRawProbeStrategy(ValidationStrategy):
         When ``context.words`` is empty we cannot derive the base and default
         to zero — callers without segmented words are exercised only by
         unit tests, where local and absolute positions coincide.
+
+        Defensive ``max(0, ...)`` clamp: if ``context.sentence.find(words[0])``
+        returns -1 (normalization mismatch between the raw sentence and the
+        segmenter output) ``first_local`` is clamped to 0, which would make
+        the returned base equal ``word_positions[0]`` and corrupt every
+        downstream local-to-absolute translation. The outer clamp forces a
+        conservative base of 0 in that case; ``abs_start`` then equals
+        ``local_start``, which is at worst a small offset error on the first
+        sentence rather than a document-wide position corruption. Logs a
+        warning so the root-cause mismatch is surfaced.
         """
         if not context.words or not context.word_positions:
             return 0
         first_local = context.sentence.find(context.words[0]) if context.sentence else 0
         if first_local < 0:
+            logger.warning(
+                "pre_segmenter_raw_probe: first word %r not found in sentence; "
+                "clamping sentence_base to 0",
+                context.words[0],
+            )
             first_local = 0
-        return context.word_positions[0] - first_local
+        return max(0, context.word_positions[0] - first_local)
 
     @staticmethod
     def _overlaps_name(
         context: ValidationContext,
         local_start: int,
         local_end: int,
+        sentence_base: int,
     ) -> bool:
-        """Return True if any name-masked word overlaps ``[local_start, local_end)``."""
+        """Return True if any name-masked word overlaps ``[local_start, local_end)``.
+
+        ``sentence_base`` is threaded in from the caller so we do not pay a
+        second ``_resolve_sentence_base`` walk (and do not risk diverging
+        from the caller's reference frame).
+        """
         if not context.is_name_mask:
             return False
-        sentence_base = PreSegmenterRawProbeStrategy._resolve_sentence_base(context)
         for idx, word in enumerate(context.words):
             if idx >= len(context.is_name_mask) or not context.is_name_mask[idx]:
                 continue
