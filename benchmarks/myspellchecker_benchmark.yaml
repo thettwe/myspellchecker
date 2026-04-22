@@ -1,4 +1,4 @@
-version: 1.5.0-bhv17-mislabeled-class
+version: 1.5.0-bhv17-root-cause
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -20935,6 +20935,7 @@ sentences:
       end: 28
     erroneous_text: ပွဲ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ပွဲ' (event/match/game) which creates an extremely unlikely bigram sequence 'ခံစားချက်က ပွဲ' in this context.
@@ -21062,6 +21063,7 @@ sentences:
       end: 15
     erroneous_text: ကြောင်
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word `ကြောင်` (cat) in an inappropriate place, creating an unlikely ngram `ရာထူးကနေ ကြောင် နုတ်ထွက်တဲ့အခါ`.
@@ -37124,6 +37126,7 @@ sentences:
       end: 27
     erroneous_text: ' ကား'
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ကား' (car) after 'လုပ်ပြီး' (having done), creating an extremely unlikely bigram 'လုပ်ပြီး ကား' (done car) that makes no sense in context.
