@@ -1,4 +1,4 @@
-version: 1.5.0-bhv17-m6-empty-gold
+version: 1.5.0-bhv17-mislabeled-class
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -7624,6 +7624,7 @@ sentences:
   - error_id: BM-EXT-E024-E1
     error_type: wrong_word
     error_subtype: loan_word_misspelling
+    fix_owner: dict
     detection_layer: word
     span:
       start: 8
@@ -13087,6 +13088,7 @@ sentences:
   - error_id: BM-EXP-E033-E1
     error_type: wrong_word
     error_subtype: compound_confusion
+    fix_owner: segmenter
     detection_layer: word
     span:
       start: 112
@@ -13318,6 +13320,7 @@ sentences:
   - error_id: BM-EXP-E044-E1
     error_type: wrong_word
     error_subtype: consonant_substitution
+    fix_owner: dict
     detection_layer: word
     span:
       start: 228
@@ -13339,6 +13342,7 @@ sentences:
   - error_id: BM-EXP-E045-E1
     error_type: wrong_word
     error_subtype: non_word_typo
+    fix_owner: dict
     detection_layer: word
     span:
       start: 24
@@ -21030,6 +21034,7 @@ sentences:
   - error_id: BM-1198-E1
     error_type: wrong_word
     error_subtype: aukmyit_confusion
+    fix_owner: asat
     detection_layer: context
     span:
       start: 19
@@ -22363,6 +22368,7 @@ sentences:
   - error_id: BM-1260-E2
     error_type: wrong_word
     error_subtype: complex_typo
+    fix_owner: dict
     detection_layer: word
     span:
       start: 38
@@ -22413,6 +22419,7 @@ sentences:
   - error_id: BM-1263-E1
     error_type: wrong_word
     error_subtype: real_word_confusion
+    fix_owner: dict
     detection_layer: context
     span:
       start: 27
@@ -24094,6 +24101,7 @@ sentences:
   - error_id: BM-1343-E1
     error_type: wrong_word
     error_subtype: missing_visarga
+    fix_owner: asat
     detection_layer: word
     span:
       start: 31
@@ -24653,6 +24661,7 @@ sentences:
   - error_id: BM-1369-E2
     error_type: wrong_word
     error_subtype: tone_mark_error
+    fix_owner: asat
     detection_layer: context
     span:
       start: 42
@@ -25451,6 +25460,7 @@ sentences:
   - error_id: BM-1406-E1
     error_type: wrong_word
     error_subtype: aukmyit_confusion
+    fix_owner: asat
     detection_layer: context
     span:
       start: 35
@@ -27354,6 +27364,7 @@ sentences:
   - error_id: BM-1500-E1
     error_type: grammar_error
     error_subtype: negation_error
+    fix_owner: dict
     detection_layer: grammar
     span:
       start: 74
@@ -27438,6 +27449,7 @@ sentences:
   - error_id: BM-1504-E1
     error_type: grammar_error
     error_subtype: verb_tense_agreement
+    fix_owner: dict
     detection_layer: grammar
     span:
       start: 42
@@ -27761,6 +27773,7 @@ sentences:
   - error_id: BM-1520-E1
     error_type: wrong_word
     error_subtype: real_word_confusion
+    fix_owner: dict
     detection_layer: context
     span:
       start: 50
@@ -31384,6 +31397,7 @@ sentences:
   - error_id: BM-1692-E2
     error_type: wrong_word
     error_subtype: aukmyit_confusion
+    fix_owner: asat
     detection_layer: context
     span:
       start: 80
@@ -34489,6 +34503,7 @@ sentences:
   - error_id: BM-1840-E1
     error_type: semantic_error
     error_subtype: ngram_unlikely
+    fix_owner: dict
     detection_layer: context
     span:
       start: 40
@@ -34730,6 +34745,7 @@ sentences:
   - error_id: BM-1852-E1
     error_type: wrong_word
     error_subtype: missing_visarga
+    fix_owner: asat
     detection_layer: word
     span:
       start: 61
@@ -34843,6 +34859,7 @@ sentences:
   - error_id: BM-1859-E1
     error_type: semantic_error
     error_subtype: collocation_error
+    fix_owner: dict
     detection_layer: context
     span:
       start: 34
@@ -36260,6 +36277,7 @@ sentences:
   - error_id: BM-1929-E1
     error_type: wrong_word
     error_subtype: real_word_confusion
+    fix_owner: dict
     detection_layer: context
     span:
       start: 10
@@ -36467,6 +36485,7 @@ sentences:
   - error_id: BM-1937-E2
     error_type: semantic_error
     error_subtype: semantic_error
+    fix_owner: dict
     detection_layer: context
     span:
       start: 39
@@ -36708,6 +36727,7 @@ sentences:
   - error_id: BM-1949-E1
     error_type: wrong_word
     error_subtype: broken_compound
+    fix_owner: segmenter
     detection_layer: word
     span:
       start: 13
@@ -38828,6 +38848,7 @@ sentences:
   - error_id: BM-2050-E1
     error_type: grammar_error
     error_subtype: particle_misuse
+    fix_owner: dict
     detection_layer: grammar
     span:
       start: 0
