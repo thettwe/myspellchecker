@@ -1,4 +1,4 @@
-version: 1.5.0-bhv17-compound-split
+version: 1.5.0-bhv17-m6-empty-gold
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -10839,6 +10839,7 @@ sentences:
       end: 44
     erroneous_text: ' . '
     gold_correction: ' '
+    detection_only: true
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
@@ -20866,6 +20867,7 @@ sentences:
       end: 32
     erroneous_text: စား
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the unrelated word 'စား' (eat) between 'နည်းပညာ' (technology) and 'အသစ်တွေကို' (new ones), creating an extremely unlikely bigram ('နည်းပညာ စား').
@@ -21687,6 +21689,7 @@ sentences:
       end: 17
     erroneous_text: စား
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'စား' (to eat) before 'အရမ်း' (very), creating a highly unlikely and nonsensical bigram 'စား အရမ်း' in the context of 'dog is loyal to master'.
@@ -24913,6 +24916,7 @@ sentences:
       end: 37
     erroneous_text: တစ်ခု
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'တစ်ခု' (one/a thing) between the object particle and the verb, creating an unlikely and grammatically awkward bigram sequence.
@@ -25220,6 +25224,7 @@ sentences:
       end: 40
     erroneous_text: 'ပန်းသီး '
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the semantically unrelated word 'ပန်းသီး' (apple) before 'အားတက်ပါ', creating an unlikely trigram.
@@ -26384,6 +26389,7 @@ sentences:
       end: 40
     erroneous_text: မြို့
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'မြို့' (city) in an unnatural position, creating an unlikely trigram sequence with 'ကျွမ်းကျင်တဲ့' and 'အလုပ်'.
@@ -32048,6 +32054,7 @@ sentences:
       end: 20
     erroneous_text: ကျောင်း
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ကျောင်း' (school) which creates an extremely unlikely bigram/trigram sequence and is semantically nonsensical in context.
@@ -33559,6 +33566,7 @@ sentences:
       end: 10
     erroneous_text: ' '
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: 'Inserted a space inside the compound word ''အိမ်တွင်းအလှဆင်ခြင်း'' (home decoration), separating ''အိမ်တွင်း'' and ''အလှဆင်ခြင်း''. [NEEDS_REVIEW: empty gold_correction]'
@@ -34169,6 +34177,7 @@ sentences:
       end: 22
     erroneous_text: ခွေး
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ခွေး' (dog) before 'မျှော်လင့်ချက်တွေက' (hopes), creating an extremely unlikely and nonsensical bigram 'ခွေး မျှော်လင့်ချက်' (dog hopes).
@@ -35305,6 +35314,7 @@ sentences:
       end: 29
     erroneous_text: စားပွဲ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the irrelevant word `စားပွဲ` (table) after `ဖြစ်ပွားပါက`, creating an extremely unlikely and nonsensical ngram.
@@ -35961,6 +35971,7 @@ sentences:
       end: 44
     erroneous_text: ' စားပွဲ'
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'စားပွဲ' (table) between 'စွမ်းအင်' (energy) and 'လို့' (particle), creating an unlikely bigram 'စွမ်းအင် စားပွဲ' (energy table).
@@ -37266,6 +37277,7 @@ sentences:
       end: 49
     erroneous_text: ထိုင်
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ထိုင်' (to sit) before 'ခံစားရပါတယ်' (experience), creating an unlikely and unnatural bigram sequence 'ထိုင် ခံစားရ' (sit and experience) in this context.
@@ -37528,6 +37540,7 @@ sentences:
       end: 32
     erroneous_text: ထမင်း
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ထမင်း' (cooked rice) into the phrase 'ရေရှည်မှာ ရေရှည်တည်တံ့အောင်' (for long-term sustainability), creating a semantically nonsensical and unlikely trigram.
@@ -38270,6 +38283,7 @@ sentences:
       end: 25
     erroneous_text: 'များ '
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'များ' (many/plural marker) which creates an extremely unlikely and grammatically incorrect bigram sequence 'တစ်ယောက်ကိုတစ်ယောက် များ'.
@@ -38333,6 +38347,7 @@ sentences:
       end: 26
     erroneous_text: ' ခုန်'
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ခုန်' (jump) which creates an extremely unlikely bigram/trigram sequence and is semantically nonsensical in context.
@@ -38678,6 +38693,7 @@ sentences:
       end: 26
     erroneous_text: ကျောင်း
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word `ကျောင်း` (school) after `လစာ` (salary), creating an extremely unlikely and semantically incoherent bigram `လစာကျောင်း` (salary school).
@@ -39254,6 +39270,7 @@ sentences:
       end: 40
     erroneous_text: ထူးဆန်းစွာ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ထူးဆန်းစွာ' (strangely) before 'တိုးပွားစေတယ်' (increases), creating an semantically unlikely ngram.
@@ -39317,6 +39334,7 @@ sentences:
       end: 32
     erroneous_text: ဆင်းရဲစွာ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ဆင်းရဲစွာ' (miserably) before 'စားကြတယ်' (eat), creating a semantically unlikely ngram for eating snacks.
