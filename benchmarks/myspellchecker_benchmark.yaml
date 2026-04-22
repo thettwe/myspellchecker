@@ -1,4 +1,4 @@
-version: 1.5.0-bhv17-root-cause
+version: 1.5.0-bhv17-byte-identical
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -9336,6 +9336,7 @@ sentences:
       end: 39
     erroneous_text: မည်သည့်
     gold_correction: မည်သည့်
+    detection_only: true
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
@@ -9450,6 +9451,7 @@ sentences:
       end: 17
     erroneous_text: ရှင့်လို
     gold_correction: ရှင့်လို
+    detection_only: true
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
@@ -32795,6 +32797,7 @@ sentences:
       end: 41
     erroneous_text: သင့်တယ်
     gold_correction: သင့်တယ်
+    detection_only: true
     edit_distance: 2
     context_required: false
     notes: Removed the `aukmyit` (့) tone mark from `သင့်တယ်` (should), changing it to `သင့်တယ်` which is grammatically incorrect in this context.
