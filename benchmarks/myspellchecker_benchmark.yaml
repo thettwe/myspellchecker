@@ -1,4 +1,4 @@
-version: 1.5.0
+version: 1.5.0-bhv17-compound-split
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -8402,7 +8402,7 @@ sentences:
   - error_id: BM-EXT-E062-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 0
       end: 14
@@ -9774,7 +9774,7 @@ sentences:
   - error_id: BM-EXP-C078-E1
     error_type: grammar_error
     error_subtype: spacing_error
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 30
       end: 57
@@ -9828,7 +9828,7 @@ sentences:
   - error_id: BM-EXP-C078-E5
     error_type: grammar_error
     error_subtype: spacing_error
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 233
       end: 258
@@ -10082,7 +10082,7 @@ sentences:
   - error_id: BM-EXP-C090-E1
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 21
       end: 39
@@ -10095,7 +10095,7 @@ sentences:
   - error_id: BM-EXP-C090-E2
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 126
       end: 143
@@ -10176,7 +10176,7 @@ sentences:
   - error_id: BM-EXP-C092-E4
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 251
       end: 271
@@ -10257,7 +10257,7 @@ sentences:
   - error_id: BM-EXP-C094-E1
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 13
       end: 32
@@ -10270,7 +10270,7 @@ sentences:
   - error_id: BM-EXP-C094-E2
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 13
       end: 32
@@ -10335,7 +10335,7 @@ sentences:
   - error_id: BM-EXP-C094-E7
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 141
       end: 162
@@ -10348,7 +10348,7 @@ sentences:
   - error_id: BM-EXP-C094-E8
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 141
       end: 162
@@ -10387,7 +10387,7 @@ sentences:
   - error_id: BM-EXP-C094-E11
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 370
       end: 400
@@ -10400,7 +10400,7 @@ sentences:
   - error_id: BM-EXP-C094-E12
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 370
       end: 400
@@ -11079,7 +11079,7 @@ sentences:
   - error_id: BM-EXP-C155-E1
     error_type: spacing
     error_subtype: extra_space
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 32
       end: 52
@@ -11321,7 +11321,7 @@ sentences:
   - error_id: BM-EXP-C167-E5
     error_type: orthography
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 210
       end: 223
@@ -12923,7 +12923,7 @@ sentences:
   - error_id: BM-EXP-E024-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 80
       end: 96
@@ -13491,7 +13491,7 @@ sentences:
   - error_id: BM-EXP-E051-E4
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 74
       end: 84
@@ -13553,7 +13553,7 @@ sentences:
   - error_id: BM-EXP-E054-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 71
       end: 102
@@ -13574,7 +13574,7 @@ sentences:
   - error_id: BM-EXP-E055-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 54
       end: 71
@@ -15110,7 +15110,7 @@ sentences:
   - error_id: BM-EXP-E127-E1
     error_type: grammar_error
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 48
       end: 59
@@ -15946,7 +15946,7 @@ sentences:
   - error_id: BM-EXP-E160-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 51
       end: 65
@@ -19240,7 +19240,7 @@ sentences:
   - error_id: BM-1115-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 34
@@ -19395,7 +19395,7 @@ sentences:
   - error_id: BM-1123-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 9
       end: 26
@@ -19683,7 +19683,7 @@ sentences:
   - error_id: BM-1136-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 32
@@ -19936,7 +19936,7 @@ sentences:
   - error_id: BM-1148-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 10
       end: 15
@@ -20537,7 +20537,7 @@ sentences:
   - error_id: BM-1174-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 47
@@ -21525,7 +21525,7 @@ sentences:
   - error_id: BM-1221-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 41
       end: 53
@@ -22200,7 +22200,7 @@ sentences:
   - error_id: BM-1253-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 14
       end: 31
@@ -22242,7 +22242,7 @@ sentences:
   - error_id: BM-1255-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 24
       end: 37
@@ -22704,7 +22704,7 @@ sentences:
   - error_id: BM-1277-E1
     error_type: grammar_error
     error_subtype: merged_word
-    detection_layer: grammar
+    detection_layer: tokenization
     span:
       start: 9
       end: 32
@@ -22817,7 +22817,7 @@ sentences:
   - error_id: BM-1283-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 29
       end: 46
@@ -22901,7 +22901,7 @@ sentences:
   - error_id: BM-1287-E1
     error_type: grammar_error
     error_subtype: merged_word
-    detection_layer: grammar
+    detection_layer: tokenization
     span:
       start: 19
       end: 31
@@ -23027,7 +23027,7 @@ sentences:
   - error_id: BM-1293-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 13
       end: 31
@@ -24435,7 +24435,7 @@ sentences:
   - error_id: BM-1360-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 23
       end: 36
@@ -25033,7 +25033,7 @@ sentences:
   - error_id: BM-1386-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 17
@@ -25517,7 +25517,7 @@ sentences:
   - error_id: BM-1410-E1
     error_type: grammar_error
     error_subtype: merged_word
-    detection_layer: grammar
+    detection_layer: tokenization
     span:
       start: 14
       end: 37
@@ -25664,7 +25664,7 @@ sentences:
   - error_id: BM-1417-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 34
       end: 40
@@ -26491,7 +26491,7 @@ sentences:
   - error_id: BM-1457-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 18
       end: 40
@@ -26898,7 +26898,7 @@ sentences:
   - error_id: BM-1477-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 26
       end: 33
@@ -26961,7 +26961,7 @@ sentences:
   - error_id: BM-1480-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 8
       end: 17
@@ -27650,7 +27650,7 @@ sentences:
   - error_id: BM-1515-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 11
       end: 22
@@ -27937,7 +27937,7 @@ sentences:
   - error_id: BM-1528-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 6
       end: 34
@@ -30411,7 +30411,7 @@ sentences:
   - error_id: BM-1647-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 21
@@ -30602,7 +30602,7 @@ sentences:
   - error_id: BM-1656-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 29
       end: 47
@@ -31175,7 +31175,7 @@ sentences:
   - error_id: BM-1682-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 34
@@ -31538,7 +31538,7 @@ sentences:
   - error_id: BM-1699-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 12
       end: 30
@@ -31761,7 +31761,7 @@ sentences:
   - error_id: BM-1709-E2
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 24
       end: 41
@@ -32753,7 +32753,7 @@ sentences:
   - error_id: BM-1758-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 9
       end: 30
@@ -33692,7 +33692,7 @@ sentences:
   - error_id: BM-1802-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 30
       end: 43
@@ -33949,7 +33949,7 @@ sentences:
   - error_id: BM-1813-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 3
@@ -34247,7 +34247,7 @@ sentences:
   - error_id: BM-1829-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 24
       end: 31
@@ -34289,7 +34289,7 @@ sentences:
   - error_id: BM-1831-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 13
@@ -35023,7 +35023,7 @@ sentences:
   - error_id: BM-1868-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 13
@@ -35044,7 +35044,7 @@ sentences:
   - error_id: BM-1869-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 11
       end: 28
@@ -35362,7 +35362,7 @@ sentences:
   - error_id: BM-1886-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 12
@@ -35412,7 +35412,7 @@ sentences:
   - error_id: BM-1889-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 41
@@ -37155,7 +37155,7 @@ sentences:
   - error_id: BM-1972-E2
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 25
       end: 36
@@ -37692,7 +37692,7 @@ sentences:
   - error_id: BM-1998-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 26
       end: 34
@@ -39620,7 +39620,7 @@ sentences:
   - error_id: BM-2089-E2
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 44
       end: 59
