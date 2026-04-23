@@ -184,3 +184,31 @@ class TestTopKEnumeration:
         baseline = viterbi(TWO_CHAR_CHUNK)
         assert len(topk) == 1
         assert topk[0] == baseline
+
+
+class TestWordTokenizerWrapper:
+    """cvt-02: _viterbi_topk_func must be exposed on WordTokenizer, parallel
+    to _viterbi_func. Under the conftest session mock, a `simple_viterbi_topk`
+    stub is substituted so callers can rely on the attribute existing without
+    paying for real mmap init in every test."""
+
+    def test_wordtokenizer_exposes_topk_func(self) -> None:
+        from myspellchecker.tokenizers.word import WordTokenizer
+
+        wt = WordTokenizer.__new__(WordTokenizer)
+        wt._using_mmap = False
+        wt._using_cython = False
+        wt._init_myword()
+
+        assert hasattr(wt, "_viterbi_topk_func"), (
+            "WordTokenizer._viterbi_topk_func not set after _init_myword()"
+        )
+        assert callable(wt._viterbi_topk_func), "_viterbi_topk_func must be callable"
+
+        # Roundtrip: must return the same list[(score, words)] shape as the real impl.
+        result = wt._viterbi_topk_func("မြန်မာ", 3)
+        assert isinstance(result, list) and len(result) >= 1
+        for score, words in result:
+            assert isinstance(score, float)
+            assert isinstance(words, list)
+            assert all(isinstance(w, str) for w in words)

@@ -324,12 +324,13 @@ class WordTokenizer(SyllableTokenizer):
         self._using_cython = False
 
         try:
-            from .cython.word_segment import initialize_mmap, viterbi
+            from .cython.word_segment import initialize_mmap, viterbi, viterbi_topk
 
             if initialize_mmap(str(mmap_path)):
                 # Debug level - avoid duplicate logging during model preload
                 logger.debug("Using mmap-based Viterbi (fork-safe via COW).")
                 self._viterbi_func = viterbi
+                self._viterbi_topk_func = viterbi_topk
                 self._using_mmap = True
                 self._using_cython = True
                 return

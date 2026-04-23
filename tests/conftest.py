@@ -137,7 +137,13 @@ def mock_resource_downloads_session():
         def simple_viterbi(text):
             return (0.0, _regex.segment_syllables(text) if text.strip() else [])
 
+        def simple_viterbi_topk(text, K, prev="<S>", maxlen=20):
+            # Mirrors simple_viterbi: returns a single-element list so any
+            # caller expecting the real viterbi_topk shape gets a sane stub.
+            return [(0.0, _regex.segment_syllables(text) if text.strip() else [])]
+
         self._viterbi_func = simple_viterbi
+        self._viterbi_topk_func = simple_viterbi_topk
 
     def mock_init_crf(self):
         mock_tagger = MagicMock()
