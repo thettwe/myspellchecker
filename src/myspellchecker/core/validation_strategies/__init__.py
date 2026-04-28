@@ -33,6 +33,9 @@ from myspellchecker.core.validation_strategies.base import (
 from myspellchecker.core.validation_strategies.broken_compound_strategy import (
     BrokenCompoundStrategy,
 )
+from myspellchecker.core.validation_strategies.compound_merge_probe_strategy import (
+    CompoundMergeProbeStrategy,
+)
 from myspellchecker.core.validation_strategies.confusable_compound_classifier_strategy import (
     ConfusableCompoundClassifierStrategy,
 )
@@ -87,6 +90,7 @@ __all__ = [
     "HiddenCompoundStrategy",
     "PreSegmenterRawProbeStrategy",
     "BrokenCompoundStrategy",
+    "CompoundMergeProbeStrategy",
     "POSSequenceValidationStrategy",
     "QuestionStructureValidationStrategy",
     "HomophoneValidationStrategy",

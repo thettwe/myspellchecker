@@ -535,6 +535,30 @@ def build_context_validation_strategies(
         )
         logger.debug("Added ToneSafetyNetStrategy (priority 22)")
 
+    # Priority 46: Compound Merge Probe
+    # Slides a token-level window across segmented words, concatenates
+    # adjacent tokens, and probes SymSpell for compound corrections.
+    if validation_config.use_compound_merge_probe and symspell is not None:
+        from myspellchecker.core.validation_strategies.compound_merge_probe_strategy import (
+            CompoundMergeProbeStrategy,
+        )
+
+        strategies.append(
+            CompoundMergeProbeStrategy(
+                symspell=symspell,
+                provider=provider,
+                enabled=True,
+                max_window_tokens=validation_config.compound_merge_probe_max_window,
+                max_span_length=validation_config.compound_merge_probe_max_span_length,
+                max_edit_distance=validation_config.compound_merge_probe_max_ed,
+                min_candidate_freq=validation_config.compound_merge_probe_min_freq,
+                fragment_freq_floor=validation_config.compound_merge_probe_fragment_freq_floor,
+                max_length_diff=validation_config.compound_merge_probe_max_length_diff,
+                confidence=validation_config.compound_merge_probe_confidence,
+            )
+        )
+        logger.debug("Added CompoundMergeProbeStrategy (priority 46)")
+
     # Priority 23: Pre-Segmenter Raw-Token SymSpell Probe
     # Runs SymSpell.lookup(raw_token, level='word') on unsegmented Myanmar spans
     # BEFORE any segmentation-dependent strategy looks at the sentence. Catches

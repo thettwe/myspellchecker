@@ -957,6 +957,60 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # Compound merge probe (priority 46, late detection phase).
+    # Slides a token-level window across segmented words, concatenates
+    # adjacent tokens, and probes SymSpell for compound corrections.
+    # Recovers over-split compounds invisible to per-word strategies.
+    use_compound_merge_probe: bool = Field(
+        default=True,
+        description=(
+            "Slide a window of 2–N adjacent segmented tokens, concatenate, "
+            "and probe SymSpell for compound corrections. Catches typo'd "
+            "compounds the segmenter fragments into valid subtokens."
+        ),
+    )
+    compound_merge_probe_max_window: int = Field(
+        default=3,
+        ge=2,
+        le=6,
+        description="Maximum number of adjacent tokens to merge in a single probe.",
+    )
+    compound_merge_probe_max_span_length: int = Field(
+        default=20,
+        ge=5,
+        description="Skip merged spans longer than this (chars).",
+    )
+    compound_merge_probe_max_ed: float = Field(
+        default=0.4,
+        ge=0.0,
+        le=3.0,
+        description="Maximum weighted edit distance accepted for a merge probe hit.",
+    )
+    compound_merge_probe_min_freq: int = Field(
+        default=5000,
+        ge=0,
+        description="Minimum dictionary frequency for a SymSpell candidate.",
+    )
+    compound_merge_probe_fragment_freq_floor: int = Field(
+        default=50_000,
+        ge=0,
+        description=(
+            "At least one token in the window must have frequency below this "
+            "threshold (or be OOV) to trigger the probe."
+        ),
+    )
+    compound_merge_probe_max_length_diff: int = Field(
+        default=1,
+        ge=0,
+        description="Maximum |len(candidate) - len(span_text)| allowed.",
+    )
+    compound_merge_probe_confidence: float = Field(
+        default=0.70,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score emitted for compound merge probe errors.",
+    )
+
     # MLM-as-candidate-generator (priority 46).
     # Wraps semantic-v2.4 RoBERTa span-masking as a production candidate
     # generator — the existing MLM is already deployed for scoring at
