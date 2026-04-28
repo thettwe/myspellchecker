@@ -22,6 +22,8 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
+    from myspellchecker.algorithms.symspell import SymSpell
+    from myspellchecker.core.config.algorithm_configs import LatticeDecoderConfig
     from myspellchecker.providers.interfaces import WordRepository
     from myspellchecker.tokenizers.transformer_word_segmenter import TransformerWordSegmenter
 
@@ -102,6 +104,11 @@ class DefaultSegmenter(Segmenter):
         # Injected after construction via set_word_repository() because the
         # provider is resolved after the segmenter in the dependency graph.
         self._word_repository: WordRepository | None = None
+        # Optional SymSpell + config for lattice-merge post-processing.
+        # Injected after construction via set_symspell() because
+        # SymSpell is resolved after the segmenter in the dependency graph.
+        self._symspell: SymSpell | None = None
+        self._lattice_config: LatticeDecoderConfig | None = None
         # Minimum syllable count to trigger reassembly fallback
         self._REASSEMBLY_MIN_SYLLABLES = 3
         # Maximum syllables to look ahead when merging
@@ -245,6 +252,19 @@ class DefaultSegmenter(Segmenter):
                 ``get_word_frequency()`` for dictionary lookups.
         """
         self._word_repository = word_repository
+
+    def set_symspell(
+        self,
+        symspell: "SymSpell",
+        lattice_config: "LatticeDecoderConfig",
+    ) -> None:
+        """Inject SymSpell and lattice-decoder config for merge post-processing.
+
+        Called after construction (SymSpell is resolved via validators, after
+        the segmenter in the DI graph).
+        """
+        self._symspell = symspell
+        self._lattice_config = lattice_config
 
     def _syllable_reassembly_fallback(self, token: str) -> list[str]:
         """Re-segment an oversized token using syllable boundaries + dictionary.
@@ -450,6 +470,38 @@ class DefaultSegmenter(Segmenter):
         }
     )
 
+    def _lattice_merge(self, chunk: str, tokens: list[str]) -> list[str]:
+        """Re-segment a chunk via lattice decoder to recover over-split compounds.
+
+        Only runs when the lattice decoder is configured and the baseline
+        segmentation produced 2+ tokens (single-token chunks cannot be
+        over-split). Falls back to the original tokens on any error.
+        """
+        if self._symspell is None or self._lattice_config is None or len(tokens) < 2:
+            return tokens
+
+        cfg = self._lattice_config
+        try:
+            from myspellchecker.segmenters.joint_decoder import decode
+
+            words, _score, meta = decode(
+                chunk,
+                K=cfg.k,
+                symspell=self._symspell,
+                merge_bonus=cfg.merge_bonus,
+                edit_penalty_weight=cfg.edit_penalty_weight,
+                merge_freq_floor=cfg.merge_freq_floor,
+                max_edit_distance=cfg.max_edit_distance,
+                min_edit_distance=cfg.min_edit_distance,
+                min_score_gain=cfg.min_score_gain,
+                require_fragment=cfg.require_fragment,
+            )
+            if meta.get("changed", False):
+                return words
+        except Exception:
+            pass
+        return tokens
+
     def _maybe_reassemble(self, tokens: list[str]) -> list[str]:
         """Apply syllable-reassembly fallback to oversized tokens.
 
@@ -625,10 +677,8 @@ class DefaultSegmenter(Segmenter):
             chunks = text.split()
             if len(chunks) <= 1:
                 tokens = cast(list[str], self.word_tokenizer.tokenize(text))
-                # Syllable-reassembly fallback: when Viterbi returns a single
-                # oversized token (3+ syllables, not a valid word), re-segment
-                # using syllable boundaries + dictionary lookup.
                 tokens = self._maybe_reassemble(tokens)
+                tokens = self._lattice_merge(text, tokens)
                 result = self._repair_orphan_vowel_fragments(tokens)
                 self._cache_word_seg(text, result)
                 return result
@@ -637,6 +687,7 @@ class DefaultSegmenter(Segmenter):
                 if chunk:
                     chunk_tokens = list(self.word_tokenizer.tokenize(chunk))
                     chunk_tokens = self._maybe_reassemble(chunk_tokens)
+                    chunk_tokens = self._lattice_merge(chunk, chunk_tokens)
                     all_tokens.extend(chunk_tokens)
             result = self._repair_orphan_vowel_fragments(all_tokens)
             self._cache_word_seg(text, result)
