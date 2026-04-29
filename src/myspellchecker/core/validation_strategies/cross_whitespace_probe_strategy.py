@@ -19,7 +19,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from myspellchecker.core.constants import ET_WORD
+from myspellchecker.core.constants import ET_BROKEN_COMPOUND
+from myspellchecker.core.constants.myanmar_constants import SKIPPED_CONTEXT_WORDS
 from myspellchecker.core.response import Error, Suggestion, WordError
 from myspellchecker.core.validation_strategies.base import (
     ValidationContext,
@@ -84,67 +85,76 @@ class CrossWhitespaceProbeStrategy(ValidationStrategy):
             return []
 
         errors: list[Error] = []
+        consumed: set[int] = set()
 
-        for i in range(len(spans) - 1):
-            span_a = spans[i]
-            span_b = spans[i + 1]
+        for width in (3, 2):
+            for i in range(len(spans) - width + 1):
+                if any(j in consumed for j in range(i, i + width)):
+                    continue
 
-            text_a = span_a.group(0)
-            text_b = span_b.group(0)
+                window = spans[i : i + width]
+                if not self._window_gaps_whitespace_only(sentence, window):
+                    continue
 
-            if len(text_a) > self.max_part_length or len(text_b) > self.max_part_length:
-                continue
+                parts = [s.group(0) for s in window]
+                if any(len(p) > self.max_part_length for p in parts):
+                    continue
 
-            gap = sentence[span_a.end() : span_b.start()]
-            if gap.strip():
-                continue
+                if any(p in SKIPPED_CONTEXT_WORDS for p in parts):
+                    continue
 
-            concat = text_a + text_b
-            if len(concat) > self.max_concat_length:
-                continue
+                concat = "".join(parts)
+                if len(concat) > self.max_concat_length:
+                    continue
 
-            abs_start = sentence_base + span_a.start()
-            if abs_start in context.existing_errors:
-                continue
+                abs_start = sentence_base + window[0].start()
+                if abs_start in context.existing_errors:
+                    continue
 
-            if not self._is_compound_split(text_a, text_b, concat):
-                continue
+                if not self._is_compound_split(parts, concat):
+                    continue
 
-            if self._overlaps_name(context, span_a.start(), span_b.end(), sentence_base):
-                continue
+                if self._overlaps_name(context, window[0].start(), window[-1].end(), sentence_base):
+                    continue
 
-            original_text = sentence[span_a.start() : span_b.end()]
-            error = WordError(
-                text=original_text,
-                position=abs_start,
-                error_type=ET_WORD,
-                suggestions=[Suggestion(text=concat, source="cross_whitespace_probe")],
-                confidence=self.confidence,
-            )
-            errors.append(error)
-            context.existing_errors[abs_start] = ET_WORD
-            context.existing_confidences[abs_start] = self.confidence
-            context.existing_suggestions[abs_start] = [concat]
-            logger.debug(
-                "cross_whitespace_probe: '%s' -> '%s' freq=%d",
-                original_text,
-                concat,
-                self.provider.get_word_frequency(concat) or 0,
-            )
+                original_text = sentence[window[0].start() : window[-1].end()]
+                error = WordError(
+                    text=original_text,
+                    position=abs_start,
+                    error_type=ET_BROKEN_COMPOUND,
+                    suggestions=[Suggestion(text=concat, source="cross_whitespace_probe")],
+                    confidence=self.confidence,
+                )
+                errors.append(error)
+                for j in range(i, i + width):
+                    consumed.add(j)
+                logger.debug(
+                    "cross_whitespace_probe: '%s' -> '%s' (width=%d, freq=%d)",
+                    original_text,
+                    concat,
+                    width,
+                    self.provider.get_word_frequency(concat) or 0,
+                )
 
         return errors
 
-    def _is_compound_split(self, part_a: str, part_b: str, concat: str) -> bool:
-        """Return True if the parts look like a split compound word."""
+    @staticmethod
+    def _window_gaps_whitespace_only(sentence: str, window: list[re.Match[str]]) -> bool:
+        for k in range(len(window) - 1):
+            gap = sentence[window[k].end() : window[k + 1].start()]
+            if gap.strip():
+                return False
+        return True
+
+    def _is_compound_split(self, parts: list[str], concat: str) -> bool:
         if not self.provider.is_valid_word(concat):
             return False
         concat_freq = self.provider.get_word_frequency(concat) or 0
         if concat_freq < self.min_concat_freq:
             return False
-        if not self.provider.is_valid_word(part_a):
-            return False
-        if not self.provider.is_valid_word(part_b):
-            return False
+        for part in parts:
+            if not self.provider.is_valid_word(part):
+                return False
         return True
 
     @staticmethod

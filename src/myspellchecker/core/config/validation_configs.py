@@ -970,11 +970,12 @@ class ValidationConfig(BaseModel):
         ),
     )
     cross_whitespace_probe_min_freq: int = Field(
-        default=50,
+        default=7000,
         ge=0,
         description=(
             "Minimum dictionary frequency for the concatenated compound to "
-            "be emitted as a correction."
+            "be emitted as a correction. Set high to avoid corpus-artifact "
+            "merges where both parts are valid standalone words."
         ),
     )
     cross_whitespace_probe_max_part_length: int = Field(
@@ -986,7 +987,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     cross_whitespace_probe_max_concat_length: int = Field(
-        default=40,
+        default=25,
         ge=1,
         description=("Maximum codepoint length for the concatenated compound form."),
     )

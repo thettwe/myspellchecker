@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 
 from myspellchecker.core.config import SpellCheckerConfig
-from myspellchecker.core.constants import ET_WORD
+from myspellchecker.core.constants import ET_BROKEN_COMPOUND
 from myspellchecker.core.factories.builders import build_context_validation_strategies
 from myspellchecker.core.validation_strategies.base import ValidationContext
 from myspellchecker.core.validation_strategies.cross_whitespace_probe_strategy import (
@@ -35,8 +35,11 @@ def provider() -> MemoryProvider:
     p.add_word("အိမ်ခြံမြေ", frequency=9_955)
     p.add_word("ကောင်း", frequency=300_000)
     p.add_word("မွန်", frequency=50_000)
-    # concat of ကောင်း + မွန် NOT in dict → should not fire
     p.add_word("မြန်မာ", frequency=120_000)
+    p.add_word("လူမှု", frequency=60_000)
+    p.add_word("မှု", frequency=100_000)
+    p.add_word("ရေး", frequency=200_000)
+    p.add_word("လူမှုရေး", frequency=30_000)
     return p
 
 
@@ -58,7 +61,7 @@ def _make_strategy(provider: MemoryProvider, **overrides) -> CrossWhitespaceProb
         "enabled": True,
         "min_concat_freq": 50,
         "max_part_length": 30,
-        "max_concat_length": 40,
+        "max_concat_length": 25,
         "confidence": 0.90,
     }
     defaults.update(overrides)
@@ -73,15 +76,15 @@ class TestHappyPath:
         assert len(errors) == 1
         assert errors[0].text == "အိမ်ခြံ မြေ"
         assert errors[0].suggestions[0].text == "အိမ်ခြံမြေ"
-        assert errors[0].error_type == ET_WORD
+        assert errors[0].error_type == ET_BROKEN_COMPOUND
 
-    def test_three_part_pairwise_detection(self, provider: MemoryProvider) -> None:
+    def test_three_part_compound_single_merge(self, provider: MemoryProvider) -> None:
         strategy = _make_strategy(provider)
         ctx = _context("လူ သွား လမ်း")
         errors = strategy.validate(ctx)
-        assert len(errors) >= 1
-        suggestions = [e.suggestions[0].text for e in errors]
-        assert "လူသွား" in suggestions
+        assert len(errors) == 1
+        assert errors[0].suggestions[0].text == "လူသွားလမ်း"
+        assert errors[0].text == "လူ သွား လမ်း"
 
     def test_confidence_and_source(self, provider: MemoryProvider) -> None:
         strategy = _make_strategy(provider, confidence=0.88)
@@ -90,11 +93,33 @@ class TestHappyPath:
         assert errors[0].confidence == 0.88
         assert errors[0].suggestions[0].source == "cross_whitespace_probe"
 
-    def test_position_claimed_in_context(self, provider: MemoryProvider) -> None:
+    def test_position_not_claimed_in_context(self, provider: MemoryProvider) -> None:
         strategy = _make_strategy(provider)
         ctx = _context("အိမ်ခြံ မြေ")
         strategy.validate(ctx)
-        assert 0 in ctx.existing_errors
+        assert 0 not in ctx.existing_errors
+
+
+class TestMultiPart:
+    def test_three_part_preferred_over_two(self, provider: MemoryProvider) -> None:
+        strategy = _make_strategy(provider)
+        ctx = _context("လူ မှု ရေး")
+        errors = strategy.validate(ctx)
+        assert len(errors) == 1
+        assert errors[0].suggestions[0].text == "လူမှုရေး"
+
+    def test_three_part_covers_full_span(self, provider: MemoryProvider) -> None:
+        strategy = _make_strategy(provider)
+        ctx = _context("အိမ်ခြံ မြေ")
+        errors = strategy.validate(ctx)
+        assert len(errors) == 1
+        assert errors[0].text == "အိမ်ခြံ မြေ"
+
+    def test_wider_merge_consumes_spans(self, provider: MemoryProvider) -> None:
+        strategy = _make_strategy(provider)
+        ctx = _context("လူ သွား လမ်း")
+        errors = strategy.validate(ctx)
+        assert len(errors) == 1, "3-part merge should consume all spans, no leftover 2-part"
 
 
 class TestGuards:
@@ -133,7 +158,7 @@ class TestGuards:
     def test_already_claimed_position_skipped(self, provider: MemoryProvider) -> None:
         strategy = _make_strategy(provider)
         ctx = _context("အိမ်ခြံ မြေ")
-        ctx.existing_errors[0] = ET_WORD
+        ctx.existing_errors[0] = ET_BROKEN_COMPOUND
         errors = strategy.validate(ctx)
         assert len(errors) == 0
 
@@ -161,6 +186,23 @@ class TestGuards:
         ctx = _context("အိမ်ခြံ123မြေ", words=["အိမ်ခြံ123မြေ"])
         errors = strategy.validate(ctx)
         assert len(errors) == 0
+
+    def test_particle_part_skipped(self, provider: MemoryProvider) -> None:
+        provider.add_word("ကို", frequency=500_000)
+        provider.add_word("အိမ်ခြံမြေကို", frequency=2_000)
+        strategy = _make_strategy(provider)
+        ctx = _context("အိမ်ခြံမြေ ကို")
+        errors = strategy.validate(ctx)
+        assert len(errors) == 0
+
+    def test_particle_excluded_from_three_part(self, provider: MemoryProvider) -> None:
+        provider.add_word("ကို", frequency=500_000)
+        provider.add_word("အိမ်ခြံမြေကို", frequency=2_000)
+        strategy = _make_strategy(provider)
+        ctx = _context("အိမ်ခြံ မြေ ကို")
+        errors = strategy.validate(ctx)
+        assert len(errors) == 1
+        assert errors[0].suggestions[0].text == "အိမ်ခြံမြေ"
 
 
 class TestConfig:
