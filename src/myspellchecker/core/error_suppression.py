@@ -51,6 +51,7 @@ from myspellchecker.core.constants.detector_thresholds import (
 from myspellchecker.core.correction_utils import (
     _PRESERVE_ERROR_TYPES,
     filter_syllable_errors_in_valid_words,
+    has_confident_symspell_candidate,
 )
 from myspellchecker.core.response import Error, Suggestion, SyllableError, WordError
 from myspellchecker.text.normalize import normalize
@@ -628,9 +629,7 @@ class ErrorSuppressionMixin:
             # boost has marked this error, R2's structural fragment checks
             # should skip — the outer compound-split signal is stronger
             # evidence than R2's self-suggest heuristic would have been.
-            if getattr(e, "_boosted_by_compound_split", False) or getattr(
-                e, "_structural_early_exit", False
-            ):
+            if e._boosted_by_compound_split or e._structural_early_exit:
                 filtered.append(e)
                 continue
 
@@ -1018,8 +1017,7 @@ class ErrorSuppressionMixin:
                 error_type=ET_WORD,
                 syllable_count=max(1, len(syl_text)),
             )
-            # Flag via setattr to keep the runtime marker off the static type.
-            setattr(rescue, "_structural_early_exit", True)  # noqa: B010
+            rescue._structural_early_exit = True
             new_errors.append(rescue)
             indices_to_remove.add(idx)
 
@@ -1111,38 +1109,17 @@ class ErrorSuppressionMixin:
                     break
 
     def _skip_rule_has_confident_candidate(self, word: str) -> bool:
-        """Return True if SymSpell has a top-1 candidate clearing the skip-rule gate.
-
-        Mirrors :meth:`WordValidator._has_confident_symspell_candidate` so the
-        pre-validation skip and the post-validation ``invalid_word``
-        suppression make the same decision.
-        """
-        symspell = getattr(self, "symspell", None)
+        """Return True if SymSpell has a top-1 candidate clearing the skip-rule gate."""
         config = getattr(self, "config", None)
-        if symspell is None or config is None:
-            return False
-        validation = getattr(config, "validation", None)
+        validation = getattr(config, "validation", None) if config else None
         if validation is None:
             return False
-        max_ed = getattr(validation, "skip_rule_gate_max_ed", None)
-        min_freq = getattr(validation, "skip_rule_gate_min_freq", None)
-        if max_ed is None or min_freq is None:
-            return False
-        try:
-            candidates = symspell.lookup(word, level="word", max_suggestions=1)
-        except (RuntimeError, ValueError, KeyError):
-            return False
-        if not candidates:
-            return False
-        top = candidates[0]
-        term = getattr(top, "term", None)
-        if term is None or term == word:
-            return False
-        if float(getattr(top, "edit_distance", 99)) > max_ed:
-            return False
-        if int(getattr(top, "frequency", 0) or 0) < min_freq:
-            return False
-        return True
+        return has_confident_symspell_candidate(
+            getattr(self, "symspell", None),
+            word,
+            max_ed=getattr(validation, "skip_rule_gate_max_ed", 2),
+            min_freq=getattr(validation, "skip_rule_gate_min_freq", 1000),
+        )
 
     def _suppress_low_value_semantic_errors(
         self,
@@ -1449,12 +1426,8 @@ class ErrorSuppressionMixin:
             # Exception: boosted-by-compound-split confusable DOES displace
             # the wider invalid_word — the combined structural signal is
             # strong enough.
-            _e_boosted = getattr(e, "_boosted_by_compound_split", False) or getattr(
-                e, "_structural_early_exit", False
-            )
-            _prev_boosted = getattr(prev, "_boosted_by_compound_split", False) or getattr(
-                prev, "_structural_early_exit", False
-            )
+            _e_boosted = e._boosted_by_compound_split or e._structural_early_exit
+            _prev_boosted = prev._boosted_by_compound_split or prev._structural_early_exit
             if (
                 e.error_type in _ROOT_CAUSE_NARROW_TYPES
                 and prev.error_type in _GENERIC_WIDE_TYPES
@@ -1590,10 +1563,7 @@ class ErrorSuppressionMixin:
                     _confusable_displaces_oov = (
                         e.error_type == ET_CONFUSABLE_ERROR
                         and k.error_type == ET_WORD
-                        and not (
-                            getattr(e, "_boosted_by_compound_split", False)
-                            or getattr(e, "_structural_early_exit", False)
-                        )
+                        and not (e._boosted_by_compound_split or e._structural_early_exit)
                     )
                     if (
                         e.error_type in _ROOT_CAUSE_NARROW_TYPES

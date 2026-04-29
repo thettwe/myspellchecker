@@ -16,14 +16,13 @@ from myspellchecker.core.constants import (
 from myspellchecker.core.detector_data import TEXT_DETECTOR_CONFIDENCES
 from myspellchecker.core.response import Error, SyllableError
 from myspellchecker.core.syllable_rules import SyllableRuleValidator
-from myspellchecker.core.validators.base import REGISTER_CRITICAL_PRONOUNS, Validator
+from myspellchecker.core.validators.base import Validator
 from myspellchecker.grammar.patterns import (
     get_medial_confusion_correction,
     get_particle_typo_correction,
 )
 from myspellchecker.providers.interfaces import SyllableRepository
 from myspellchecker.segmenters import Segmenter
-from myspellchecker.text.phonetic_data import get_standard_forms, is_colloquial_variant
 from myspellchecker.utils.logging_utils import get_logger
 
 # Module logger
@@ -136,67 +135,24 @@ class SyllableValidator(Validator):
         return None
 
     def _check_colloquial_variant(self, text: str, position: int) -> SyllableError | None:
-        """
-        Check if text is a colloquial spelling variant.
-
-        Handles colloquial variants based on the `colloquial_strictness` config:
-        - 'strict': Flag as error with standard forms as suggestions
-        - 'lenient': Return info note with low confidence
-        - 'off': No handling, return None
-
-        Args:
-            text: The syllable or word to check.
-            position: Position in the original text.
-
-        Returns:
-            SyllableError if colloquial variant detected (based on strictness),
-            None otherwise.
-        """
-        strictness = self.config.validation.colloquial_strictness
-
-        if strictness == "off":
+        """Check if text is a colloquial spelling variant."""
+        result = self._colloquial_check(text, self.repository)
+        if result is None:
             return None
-
-        if not is_colloquial_variant(text):
-            return None
-
-        standard_forms = sorted(get_standard_forms(text))
-        if not standard_forms:
-            return None
-
-        if strictness == "strict":
-            return SyllableError(
-                text=text,
-                position=position,
-                suggestions=standard_forms,
-                confidence=self.config.validation.syllable_error_confidence,
-                error_type=ET_COLLOQUIAL_VARIANT,
-            )
-        elif strictness == "lenient":
-            # Suppress informational notes for very high-frequency syllables.
-            # Exception: informal pronouns like ငါ are register-critical —
-            # they signal informal register even when high-frequency, so
-            # colloquial_info should still be emitted for them.
-            if hasattr(self.repository, "get_word_frequency"):
-                syl_freq = self.repository.get_word_frequency(text)
-                threshold = self.config.frequency_guards.colloquial_high_freq_suppression
-                if (
-                    isinstance(syl_freq, (int, float))
-                    and syl_freq >= threshold
-                    and text not in REGISTER_CRITICAL_PRONOUNS
-                ):
-                    return None
-            return SyllableError(
-                text=text,
-                position=position,
-                suggestions=standard_forms,
-                confidence=self.config.validation.colloquial_info_confidence,
-                error_type=ET_COLLOQUIAL_INFO,
-            )
-
-        # Explicit return for type safety - should not reach here due to Literal type
-        # constraint, but provides defensive programming and clear control flow
-        return None
+        strictness, standard_forms = result
+        conf = (
+            self.config.validation.syllable_error_confidence
+            if strictness == "strict"
+            else self.config.validation.colloquial_info_confidence
+        )
+        et = ET_COLLOQUIAL_VARIANT if strictness == "strict" else ET_COLLOQUIAL_INFO
+        return SyllableError(
+            text=text,
+            position=position,
+            suggestions=standard_forms,
+            confidence=conf,
+            error_type=et,
+        )
 
     def validate(self, text: str) -> list[Error]:
         """

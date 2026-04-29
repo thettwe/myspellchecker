@@ -174,6 +174,8 @@ class Error:
     error_type: str
     confidence: float = 1.0
     source_strategy: str = ""
+    _boosted_by_compound_split: bool = field(default=False, repr=False)
+    _structural_early_exit: bool = field(default=False, repr=False)
 
     def __post_init__(self) -> None:
         """Auto-convert plain strings to Suggestion objects."""
@@ -236,7 +238,7 @@ class Error:
                 'message': 'Invalid syllable'
             }
         """
-        d = asdict(self)
+        d = {k: v for k, v in asdict(self).items() if not k.startswith("_")}
         d["suggestions"] = [_suggestion_text(s) for s in self.suggestions]
         d["suggestions_detail"] = [_suggestion_detail(s) for s in self.suggestions]
         d["end"] = self.end

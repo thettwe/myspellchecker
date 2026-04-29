@@ -350,8 +350,8 @@ class MetaClassifierFusion:
             for e in errors
             if getattr(e, "error_type", "") not in _UNTRAINED_ERROR_TYPES
             and getattr(e, "source_strategy", "") not in _BYPASS_META_STRATEGIES
-            and not getattr(e, "_boosted_by_compound_split", False)
-            and not getattr(e, "_structural_early_exit", False)
+            and not e._boosted_by_compound_split
+            and not e._structural_early_exit
         ]
         trained_count = len(trained_errors)
 
@@ -367,9 +367,7 @@ class MetaClassifierFusion:
             # inner-confusable cooccurrence signal. Similarly, the
             # structural-syllable early-exit bypasses: syllable_rule_validator
             # + enclosing-OOV + SymSpell hit is a definitive signal.
-            if getattr(error, "_boosted_by_compound_split", False) or getattr(
-                error, "_structural_early_exit", False
-            ):
+            if error._boosted_by_compound_split or error._structural_early_exit:
                 kept.append(error)
                 continue
 
