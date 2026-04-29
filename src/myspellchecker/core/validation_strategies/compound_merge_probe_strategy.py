@@ -47,6 +47,8 @@ logger = get_logger(__name__)
 _PRIORITY = 46
 _NON_MYANMAR_RE = re.compile(r"[^က-႟၊-၏ꩠ-ꩿ]")
 _MYANMAR_PUNCT = frozenset("။၊")
+_BARE_CONSONANT_RE = re.compile(r"^[က-အ]$")
+_ASAT = "်"
 
 # Particles that should NEVER be part of a merge window. A window containing
 # any of these tokens is skipped — particles are standalone grammatical units,
@@ -194,6 +196,29 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                 if is_colloquial_variant(span_text):
                     continue
 
+                asat_result = self._try_asat_insertion(span_text, span_tokens)
+                if asat_result is not None:
+                    suggestion_text, cand_freq = asat_result
+                    error = WordError(
+                        text=span_text,
+                        position=span_start,
+                        error_type=ET_WORD,
+                        suggestions=[
+                            Suggestion(text=suggestion_text, source="compound_merge_asat")
+                        ],
+                        confidence=self.confidence,
+                    )
+                    errors.append(error)
+                    claimed_positions.add(span_start)
+                    logger.debug(
+                        "compound_merge_asat: %s (%d tokens) -> %s freq=%d",
+                        span_text,
+                        window_size,
+                        suggestion_text,
+                        cand_freq,
+                    )
+                    continue
+
                 candidate = self._best_candidate(span_text, span_tokens)
                 if candidate is None:
                     continue
@@ -236,6 +261,20 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
             if freq_val < self.fragment_freq_floor:
                 return True
         return False
+
+    def _try_asat_insertion(self, span_text: str, span_tokens: list[str]) -> tuple[str, int] | None:
+        """Fast path: if the last token is a bare consonant, try appending asat."""
+        last = span_tokens[-1]
+        if not _BARE_CONSONANT_RE.match(last):
+            return None
+        candidate = span_text + _ASAT
+        if not self.provider.is_valid_word(candidate):
+            return None
+        freq = self.provider.get_word_frequency(candidate) or 0
+        freq_val = int(freq) if isinstance(freq, (int, float)) else 0
+        if freq_val < self.min_candidate_freq:
+            return None
+        return candidate, freq_val
 
     def _best_candidate(
         self, span_text: str, span_tokens: list[str] | None = None

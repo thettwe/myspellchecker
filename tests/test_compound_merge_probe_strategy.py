@@ -306,6 +306,77 @@ def test_verbal_complement_not_excluded(provider: MemoryProvider) -> None:
     assert errors[0].suggestions[0].text == "သံကျား"
 
 
+# --- Asat-insertion fast path (cmlg-03) ---
+
+
+def test_asat_3token_bypasses_symspell(provider: MemoryProvider) -> None:
+    """cmlg-03: Bare ည at tail → asat appended → finds စွမ်းဆောင်ရည် without SymSpell."""
+    sym_empty = _FakeSymSpell({})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_empty,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("စွမ်းဆောင်ရည", ["စွမ်းဆောင်", "ရ", "ည"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "စွမ်းဆောင်ရည်"
+    assert errors[0].suggestions[0].source == "compound_merge_asat"
+
+
+def test_asat_2token_fires(provider: MemoryProvider) -> None:
+    """cmlg-03: 2-token [ပြ, ည] with bare consonant → asat finds ပြည်."""
+    provider.add_word("ပြည်", frequency=100_000)
+    provider.add_word("ပြ", frequency=30_000)
+    sym_empty = _FakeSymSpell({})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_empty,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("ပြည", ["ပြ", "ည"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "ပြည်"
+    assert errors[0].suggestions[0].source == "compound_merge_asat"
+
+
+def test_asat_no_fire_non_bare(provider: MemoryProvider, sym_2tok: _FakeSymSpell) -> None:
+    """cmlg-03: ဂါ has vowel → asat skipped → SymSpell handles."""
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_2tok,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].source == "compound_merge_probe"
+
+
+def test_asat_freq_below_threshold(provider: MemoryProvider) -> None:
+    """cmlg-03: Asat candidate exists but freq < min_candidate_freq → rejected."""
+    sym_empty = _FakeSymSpell({})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_empty,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=500,
+        fragment_freq_floor=50_000,
+    )
+    # ရည° has freq=40, below 500
+    ctx = _context("ရည", ["ရ", "ည"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 0
+
+
 # --- Config wiring ---
 
 
