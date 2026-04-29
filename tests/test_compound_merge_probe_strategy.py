@@ -377,6 +377,84 @@ def test_asat_freq_below_threshold(provider: MemoryProvider) -> None:
     assert len(errors) == 0
 
 
+# --- Compound affinity fragment-evidence gate (cmlg-05) ---
+
+
+def test_affinity_fires_for_high_affinity_token(provider: MemoryProvider) -> None:
+    """cmlg-05: High-affinity token triggers fragment evidence even at high freq."""
+    affinity = {"သံ": 0.81, "ဂါ": 0.97}
+    sym = _FakeSymSpell({"သံဂါ": ["သံဃာ"]})
+    provider.add_word("သံ", frequency=800_000)
+    provider.add_word("ဂါ", frequency=500_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+        compound_affinity=affinity,
+        affinity_threshold=0.6,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "သံဃာ"
+
+
+def test_affinity_blocks_low_affinity_pair(provider: MemoryProvider) -> None:
+    """cmlg-05: Both tokens below affinity threshold → no fragment evidence."""
+    affinity = {"ရန်": 0.10, "ကုန်": 0.15}
+    sym = _FakeSymSpell({"ရန်ကုန်": ["ရန်ကုန်"]})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        fragment_freq_floor=50_000,
+        compound_affinity=affinity,
+        affinity_threshold=0.6,
+    )
+    ctx = _context("ရန်ကုန်", ["ရန်", "ကုန်"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 0
+
+
+def test_affinity_fallback_when_token_not_in_data(provider: MemoryProvider) -> None:
+    """cmlg-05: Token missing from affinity data → fallback to freq floor."""
+    affinity = {"သံ": 0.81}
+    sym = _FakeSymSpell({"သံဂါ": ["သံဃာ"]})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+        compound_affinity=affinity,
+        affinity_threshold=0.6,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+
+
+def test_affinity_none_preserves_old_behavior(provider: MemoryProvider) -> None:
+    """cmlg-05: compound_affinity=None → uses freq floor as before."""
+    sym = _FakeSymSpell({"သံဂါ": ["သံဃာ"]})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+        compound_affinity=None,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+
+
 # --- Config wiring ---
 
 

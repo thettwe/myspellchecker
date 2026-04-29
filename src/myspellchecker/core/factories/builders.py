@@ -59,6 +59,27 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+def _load_compound_affinity(config: SpellCheckerConfig) -> dict[str, float] | None:
+    """Load pre-computed compound affinity scores from JSON, if available."""
+    import json
+    from pathlib import Path
+
+    db_path = getattr(config, "db_path", None) or ""
+    data_dir = Path(db_path).parent if db_path else Path("data")
+    affinity_path = data_dir / "compound_affinity.json"
+    if not affinity_path.exists():
+        return None
+    try:
+        with open(affinity_path, encoding="utf-8") as f:
+            raw = json.load(f)
+        result = {k: v["affinity"] for k, v in raw.items() if "affinity" in v}
+        logger.debug("Loaded %d compound affinity scores from %s", len(result), affinity_path)
+        return result
+    except Exception:
+        logger.warning("Failed to load compound affinity from %s", affinity_path, exc_info=True)
+        return None
+
+
 # =============================================================================
 # SymSpell Builder
 # =============================================================================
@@ -543,6 +564,8 @@ def build_context_validation_strategies(
             CompoundMergeProbeStrategy,
         )
 
+        compound_affinity = _load_compound_affinity(config)
+
         strategies.append(
             CompoundMergeProbeStrategy(
                 symspell=symspell,
@@ -555,6 +578,8 @@ def build_context_validation_strategies(
                 fragment_freq_floor=validation_config.compound_merge_probe_fragment_freq_floor,
                 max_length_diff=validation_config.compound_merge_probe_max_length_diff,
                 confidence=validation_config.compound_merge_probe_confidence,
+                compound_affinity=compound_affinity,
+                affinity_threshold=validation_config.compound_merge_probe_affinity_threshold,
             )
         )
         logger.debug("Added CompoundMergeProbeStrategy (priority 46)")

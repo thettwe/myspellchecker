@@ -135,6 +135,8 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
         max_length_diff: int = 1,
         confidence: float = 0.70,
         max_suggestions: int = 5,
+        compound_affinity: dict[str, float] | None = None,
+        affinity_threshold: float = 0.6,
     ) -> None:
         self.symspell = symspell
         self.provider = provider
@@ -147,6 +149,8 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
         self.max_length_diff = max_length_diff
         self.confidence = confidence
         self.max_suggestions = max_suggestions
+        self.compound_affinity = compound_affinity
+        self.affinity_threshold = affinity_threshold
 
     def priority(self) -> int:
         return _PRIORITY
@@ -247,15 +251,18 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
         return errors
 
     def _has_fragment_evidence(self, tokens: list[str]) -> bool:
-        """All tokens must be valid AND high-frequency to skip (evidence = false).
+        """Return True if any token looks like a compound fragment rather than standalone.
 
-        When every token is a common, standalone word above the freq floor,
-        there's no evidence of fragmentation — the segmenter's split is
-        intentional.
+        Uses compound_affinity scores when loaded (preferred); falls back to
+        frequency-floor heuristic for tokens without affinity data.
         """
         for token in tokens:
             if not self.provider.is_valid_word(token):
                 return True
+            if self.compound_affinity is not None and token in self.compound_affinity:
+                if self.compound_affinity[token] > self.affinity_threshold:
+                    return True
+                continue
             freq = self.provider.get_word_frequency(token)
             freq_val = int(freq) if isinstance(freq, (int, float)) else 0
             if freq_val < self.fragment_freq_floor:
