@@ -48,6 +48,56 @@ _PRIORITY = 46
 _NON_MYANMAR_RE = re.compile(r"[^က-႟၊-၏ꩠ-ꩿ]")
 _MYANMAR_PUNCT = frozenset("။၊")
 
+# Particles that should NEVER be part of a merge window. A window containing
+# any of these tokens is skipped — particles are standalone grammatical units,
+# not fragments of a broken compound.
+# NOTE: verbal complements (ကျ, ပြ, ချ) are intentionally EXCLUDED — they
+# CAN be fragments of compound words.
+_NEVER_MERGE_PARTICLES: frozenset[str] = frozenset(
+    {
+        # Subject / topic markers
+        "က",
+        "သည်",
+        "ဟာ",
+        # Object marker
+        "ကို",
+        # Locative
+        "မှာ",
+        "တွင်",
+        "၌",
+        # Ablative
+        "မှ",
+        # Genitive
+        "ရဲ့",
+        "၏",
+        # Comitative
+        "နဲ့",
+        "နှင့်",
+        # Plural
+        "များ",
+        # Question particles
+        "လား",
+        "လဲ",
+        # Sentence-final particles
+        "တယ်",
+        "ပါတယ်",
+        "ပြီ",
+        # Politeness
+        "ပါ",
+        # Modal / emphasis
+        "ပဲ",
+        "ပေါ့",
+        "တော့",
+        "ပြီး",
+        # Classifiers after numerals
+        "ခု",
+        "ယောက်",
+        "လုံး",
+        "ကောင်",
+        "စု",
+    }
+)
+
 
 class CompoundMergeProbeStrategy(ValidationStrategy):
     """Probe SymSpell on concatenations of adjacent segmented tokens.
@@ -122,6 +172,9 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                     continue
 
                 if self._has_punctuation(span_tokens):
+                    continue
+
+                if any(t in _NEVER_MERGE_PARTICLES for t in span_tokens):
                     continue
 
                 span_text = "".join(span_tokens)

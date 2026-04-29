@@ -233,6 +233,79 @@ def test_priority_is_22(provider: MemoryProvider, sym_3tok: _FakeSymSpell) -> No
     assert strategy.priority() == 46
 
 
+# --- Particle exclusion gate (cmlg-02) ---
+
+
+def test_particle_in_window_skipped(provider: MemoryProvider) -> None:
+    """Window containing a never-merge particle is skipped entirely."""
+    sym = _FakeSymSpell({"သံကို": ["သံကို"]})
+    provider.add_word("သံကို", frequency=60_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=100_000,
+    )
+    ctx = _context("သံကို", ["သံ", "ကို"])
+    assert strategy.validate(ctx) == []
+    assert len(sym.calls) == 0
+
+
+def test_multiple_particles_all_skipped(provider: MemoryProvider) -> None:
+    """Every particle type in a sentence prevents its window from probing."""
+    sym = _FakeSymSpell({})
+    provider.add_word("တယ်", frequency=500_000)
+    provider.add_word("ပါ", frequency=400_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=100_000,
+    )
+    ctx = _context("သံတယ်ပါ", ["သံ", "တယ်", "ပါ"])
+    assert strategy.validate(ctx) == []
+
+
+def test_non_particle_window_still_probes(
+    provider: MemoryProvider, sym_2tok: _FakeSymSpell
+) -> None:
+    """Windows with non-particle tokens are not affected by the gate."""
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_2tok,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "သံဃာ"
+
+
+def test_verbal_complement_not_excluded(provider: MemoryProvider) -> None:
+    """Verbal complements (ကျ, ပြ, ချ) are NOT particles — they can be fragments."""
+    sym = _FakeSymSpell({"သံကျ": ["သံကျား"]})
+    provider.add_word("သံကျား", frequency=20_000)
+    provider.add_word("ကျ", frequency=30_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        max_length_diff=3,
+        fragment_freq_floor=100_000,
+    )
+    ctx = _context("သံကျ", ["သံ", "ကျ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "သံကျား"
+
+
 # --- Config wiring ---
 
 
