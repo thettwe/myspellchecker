@@ -13390,6 +13390,24 @@ mandatory_compounds:
   - ပညာပေး
   - ခြင်း
   compound: ပညာပေးခြင်း
+- compound: မြန်မာနိုင်ငံ
+  parts:
+  - မြန်မာ
+  - နိုင်ငံ
+  type: proper_noun
+  meaning: Myanmar country
+- compound: ပညာရေး
+  parts:
+  - ပညာ
+  - ရေး
+  type: noun_suffix
+  meaning: education (knowledge + affairs)
+- compound: သတင်းစာ
+  parts:
+  - သတင်း
+  - စာ
+  type: noun_noun
+  meaning: newspaper (news + text)
 compound_patterns:
 - pattern_id: a_prefix_nominalization
   prefix: အ
@@ -13860,10 +13878,6 @@ false_compounds:
   - မယ်
   reason: verb + future particle
 - parts:
-  - မြန်မာ
-  - နိုင်ငံ
-  reason: proper noun + noun (Myanmar country)
-- parts:
   - ပြည်
   - ထောင်စု
   reason: compound noun (Union/Federal) — written separately
@@ -13883,10 +13897,6 @@ false_compounds:
   - လွှတ်တော်
   - ကိုယ်စားလှယ်
   reason: noun + noun (parliament + representative)
-- parts:
-  - သတင်း
-  - စာ
-  reason: noun + noun (newspaper — often written separately)
 - parts:
   - ရေး
   - သား
@@ -13911,10 +13921,6 @@ false_compounds:
   - စီး
   - ပွား
   reason: verb + complement (economy/business — written separately)
-- parts:
-  - ပညာ
-  - ရေး
-  reason: noun + suffix (education)
 - parts:
   - လုံ
   - ခြုံ
