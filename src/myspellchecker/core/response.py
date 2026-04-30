@@ -250,6 +250,7 @@ class Error:
     @staticmethod
     def _add_action(d: dict[str, Any], error: "Error") -> dict[str, Any]:
         """Add computed fields and flatten suggestions. Used by subclasses."""
+        d = {k: v for k, v in d.items() if not k.startswith("_")}
         d["suggestions"] = [_suggestion_text(s) for s in error.suggestions]
         d["suggestions_detail"] = [_suggestion_detail(s) for s in error.suggestions]
         d["end"] = error.end
