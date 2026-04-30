@@ -47,6 +47,58 @@ logger = get_logger(__name__)
 _PRIORITY = 46
 _NON_MYANMAR_RE = re.compile(r"[^က-႟၊-၏ꩠ-ꩿ]")
 _MYANMAR_PUNCT = frozenset("။၊")
+_BARE_CONSONANT_RE = re.compile(r"^[က-အ]$")
+_ASAT = "်"
+
+# Particles that should NEVER be part of a merge window. A window containing
+# any of these tokens is skipped — particles are standalone grammatical units,
+# not fragments of a broken compound.
+# NOTE: verbal complements (ကျ, ပြ, ချ) are intentionally EXCLUDED — they
+# CAN be fragments of compound words.
+_NEVER_MERGE_PARTICLES: frozenset[str] = frozenset(
+    {
+        # Subject / topic markers
+        "က",
+        "သည်",
+        "ဟာ",
+        # Object marker
+        "ကို",
+        # Locative
+        "မှာ",
+        "တွင်",
+        "၌",
+        # Ablative
+        "မှ",
+        # Genitive
+        "ရဲ့",
+        "၏",
+        # Comitative
+        "နဲ့",
+        "နှင့်",
+        # Plural
+        "များ",
+        # Question particles
+        "လား",
+        "လဲ",
+        # Sentence-final particles
+        "တယ်",
+        "ပါတယ်",
+        "ပြီ",
+        # Politeness
+        "ပါ",
+        # Modal / emphasis
+        "ပဲ",
+        "ပေါ့",
+        "တော့",
+        "ပြီး",
+        # Classifiers after numerals
+        "ခု",
+        "ယောက်",
+        "လုံး",
+        "ကောင်",
+        "စု",
+    }
+)
 
 
 class CompoundMergeProbeStrategy(ValidationStrategy):
@@ -83,6 +135,8 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
         max_length_diff: int = 1,
         confidence: float = 0.70,
         max_suggestions: int = 5,
+        compound_affinity: dict[str, float] | None = None,
+        affinity_threshold: float = 0.6,
     ) -> None:
         self.symspell = symspell
         self.provider = provider
@@ -95,6 +149,8 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
         self.max_length_diff = max_length_diff
         self.confidence = confidence
         self.max_suggestions = max_suggestions
+        self.compound_affinity = compound_affinity
+        self.affinity_threshold = affinity_threshold
 
     def priority(self) -> int:
         return _PRIORITY
@@ -124,6 +180,9 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                 if self._has_punctuation(span_tokens):
                     continue
 
+                if any(t in _NEVER_MERGE_PARTICLES for t in span_tokens):
+                    continue
+
                 span_text = "".join(span_tokens)
 
                 if len(span_text) > self.max_span_length:
@@ -141,6 +200,30 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                 if is_colloquial_variant(span_text):
                     continue
 
+                asat_result = self._try_asat_insertion(span_text, span_tokens)
+                if asat_result is not None:
+                    suggestion_text, cand_freq = asat_result
+                    error = WordError(
+                        text=span_text,
+                        position=span_start,
+                        error_type=ET_WORD,
+                        suggestions=[
+                            Suggestion(text=suggestion_text, source="compound_merge_asat")
+                        ],
+                        confidence=self.confidence,
+                    )
+                    error.source_strategy = "CompoundMergeProbeStrategy"
+                    errors.append(error)
+                    claimed_positions.add(span_start)
+                    logger.debug(
+                        "compound_merge_asat: %s (%d tokens) -> %s freq=%d",
+                        span_text,
+                        window_size,
+                        suggestion_text,
+                        cand_freq,
+                    )
+                    continue
+
                 candidate = self._best_candidate(span_text, span_tokens)
                 if candidate is None:
                     continue
@@ -154,6 +237,7 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                     suggestions=[Suggestion(text=suggestion_text, source="compound_merge_probe")],
                     confidence=self.confidence,
                 )
+                error.source_strategy = "CompoundMergeProbeStrategy"
                 errors.append(error)
                 claimed_positions.add(span_start)
 
@@ -169,20 +253,37 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
         return errors
 
     def _has_fragment_evidence(self, tokens: list[str]) -> bool:
-        """All tokens must be valid AND high-frequency to skip (evidence = false).
+        """Return True if any token looks like a compound fragment rather than standalone.
 
-        When every token is a common, standalone word above the freq floor,
-        there's no evidence of fragmentation — the segmenter's split is
-        intentional.
+        Uses compound_affinity scores when loaded (preferred); falls back to
+        frequency-floor heuristic for tokens without affinity data.
         """
         for token in tokens:
             if not self.provider.is_valid_word(token):
                 return True
+            if self.compound_affinity is not None and token in self.compound_affinity:
+                if self.compound_affinity[token] > self.affinity_threshold:
+                    return True
+                continue
             freq = self.provider.get_word_frequency(token)
             freq_val = int(freq) if isinstance(freq, (int, float)) else 0
             if freq_val < self.fragment_freq_floor:
                 return True
         return False
+
+    def _try_asat_insertion(self, span_text: str, span_tokens: list[str]) -> tuple[str, int] | None:
+        """Fast path: if the last token is a bare consonant, try appending asat."""
+        last = span_tokens[-1]
+        if not _BARE_CONSONANT_RE.match(last):
+            return None
+        candidate = span_text + _ASAT
+        if not self.provider.is_valid_word(candidate):
+            return None
+        freq = self.provider.get_word_frequency(candidate) or 0
+        freq_val = int(freq) if isinstance(freq, (int, float)) else 0
+        if freq_val < self.min_candidate_freq:
+            return None
+        return candidate, freq_val
 
     def _best_candidate(
         self, span_text: str, span_tokens: list[str] | None = None

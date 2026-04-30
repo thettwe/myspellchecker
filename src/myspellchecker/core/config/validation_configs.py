@@ -1010,6 +1010,16 @@ class ValidationConfig(BaseModel):
         le=1.0,
         description="Confidence score emitted for compound merge probe errors.",
     )
+    compound_merge_probe_affinity_threshold: float = Field(
+        default=0.6,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Compound affinity score above which a token is treated as a "
+            "likely compound fragment (bypasses the frequency-floor heuristic). "
+            "Only effective when compound_affinity.json is available."
+        ),
+    )
 
     # MLM-as-candidate-generator (priority 46).
     # Wraps semantic-v2.4 RoBERTa span-masking as a production candidate

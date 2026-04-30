@@ -211,12 +211,14 @@ class BrokenCompoundStrategy(ValidationStrategy):
                 if pos_i in context.existing_errors or pos_next in context.existing_errors:
                     continue
 
-                # Skip names
-                if context.is_name_mask[i] or context.is_name_mask[i + 1]:
-                    continue
-
                 w1 = context.words[i]
                 w2 = context.words[i + 1]
+
+                # Skip names — unless morphology confirms a mandatory compound
+                if context.is_name_mask[i] or context.is_name_mask[i + 1]:
+                    morpho_override = self._check_morphology(w1, w2)
+                    if morpho_override is None or morpho_override == "false_compound":
+                        continue
 
                 # Skip Pali/Sanskrit stacking fragments (virama U+1039)
                 # The segmenter splits stacking words like ဗုဒ္ဓ into fragments
@@ -252,7 +254,6 @@ class BrokenCompoundStrategy(ValidationStrategy):
                     # Known verb+particle or similar — skip entirely
                     continue
                 if morpho_result is not None:
-                    # morpho_result is the compound string from mandatory list
                     error = self._build_error(
                         context, i, w1, w2, morpho_result, self._MORPHOLOGY_CONFIDENCE
                     )

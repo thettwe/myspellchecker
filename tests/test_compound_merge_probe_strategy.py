@@ -233,6 +233,228 @@ def test_priority_is_22(provider: MemoryProvider, sym_3tok: _FakeSymSpell) -> No
     assert strategy.priority() == 46
 
 
+# --- Particle exclusion gate (cmlg-02) ---
+
+
+def test_particle_in_window_skipped(provider: MemoryProvider) -> None:
+    """Window containing a never-merge particle is skipped entirely."""
+    sym = _FakeSymSpell({"သံကို": ["သံကို"]})
+    provider.add_word("သံကို", frequency=60_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=100_000,
+    )
+    ctx = _context("သံကို", ["သံ", "ကို"])
+    assert strategy.validate(ctx) == []
+    assert len(sym.calls) == 0
+
+
+def test_multiple_particles_all_skipped(provider: MemoryProvider) -> None:
+    """Every particle type in a sentence prevents its window from probing."""
+    sym = _FakeSymSpell({})
+    provider.add_word("တယ်", frequency=500_000)
+    provider.add_word("ပါ", frequency=400_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=100_000,
+    )
+    ctx = _context("သံတယ်ပါ", ["သံ", "တယ်", "ပါ"])
+    assert strategy.validate(ctx) == []
+
+
+def test_non_particle_window_still_probes(
+    provider: MemoryProvider, sym_2tok: _FakeSymSpell
+) -> None:
+    """Windows with non-particle tokens are not affected by the gate."""
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_2tok,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "သံဃာ"
+
+
+def test_verbal_complement_not_excluded(provider: MemoryProvider) -> None:
+    """Verbal complements (ကျ, ပြ, ချ) are NOT particles — they can be fragments."""
+    sym = _FakeSymSpell({"သံကျ": ["သံကျား"]})
+    provider.add_word("သံကျား", frequency=20_000)
+    provider.add_word("ကျ", frequency=30_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        max_length_diff=3,
+        fragment_freq_floor=100_000,
+    )
+    ctx = _context("သံကျ", ["သံ", "ကျ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "သံကျား"
+
+
+# --- Asat-insertion fast path (cmlg-03) ---
+
+
+def test_asat_3token_bypasses_symspell(provider: MemoryProvider) -> None:
+    """cmlg-03: Bare ည at tail → asat appended → finds စွမ်းဆောင်ရည် without SymSpell."""
+    sym_empty = _FakeSymSpell({})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_empty,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("စွမ်းဆောင်ရည", ["စွမ်းဆောင်", "ရ", "ည"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "စွမ်းဆောင်ရည်"
+    assert errors[0].suggestions[0].source == "compound_merge_asat"
+
+
+def test_asat_2token_fires(provider: MemoryProvider) -> None:
+    """cmlg-03: 2-token [ပြ, ည] with bare consonant → asat finds ပြည်."""
+    provider.add_word("ပြည်", frequency=100_000)
+    provider.add_word("ပြ", frequency=30_000)
+    sym_empty = _FakeSymSpell({})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_empty,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("ပြည", ["ပြ", "ည"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "ပြည်"
+    assert errors[0].suggestions[0].source == "compound_merge_asat"
+
+
+def test_asat_no_fire_non_bare(provider: MemoryProvider, sym_2tok: _FakeSymSpell) -> None:
+    """cmlg-03: ဂါ has vowel → asat skipped → SymSpell handles."""
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_2tok,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].source == "compound_merge_probe"
+
+
+def test_asat_freq_below_threshold(provider: MemoryProvider) -> None:
+    """cmlg-03: Asat candidate exists but freq < min_candidate_freq → rejected."""
+    sym_empty = _FakeSymSpell({})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym_empty,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=500,
+        fragment_freq_floor=50_000,
+    )
+    # ရည° has freq=40, below 500
+    ctx = _context("ရည", ["ရ", "ည"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 0
+
+
+# --- Compound affinity fragment-evidence gate (cmlg-05) ---
+
+
+def test_affinity_fires_for_high_affinity_token(provider: MemoryProvider) -> None:
+    """cmlg-05: High-affinity token triggers fragment evidence even at high freq."""
+    affinity = {"သံ": 0.81, "ဂါ": 0.97}
+    sym = _FakeSymSpell({"သံဂါ": ["သံဃာ"]})
+    provider.add_word("သံ", frequency=800_000)
+    provider.add_word("ဂါ", frequency=500_000)
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+        compound_affinity=affinity,
+        affinity_threshold=0.6,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+    assert errors[0].suggestions[0].text == "သံဃာ"
+
+
+def test_affinity_blocks_low_affinity_pair(provider: MemoryProvider) -> None:
+    """cmlg-05: Both tokens below affinity threshold → no fragment evidence."""
+    affinity = {"ရန်": 0.10, "ကုန်": 0.15}
+    sym = _FakeSymSpell({"ရန်ကုန်": ["ရန်ကုန်"]})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        fragment_freq_floor=50_000,
+        compound_affinity=affinity,
+        affinity_threshold=0.6,
+    )
+    ctx = _context("ရန်ကုန်", ["ရန်", "ကုန်"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 0
+
+
+def test_affinity_fallback_when_token_not_in_data(provider: MemoryProvider) -> None:
+    """cmlg-05: Token missing from affinity data → fallback to freq floor."""
+    affinity = {"သံ": 0.81}
+    sym = _FakeSymSpell({"သံဂါ": ["သံဃာ"]})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+        compound_affinity=affinity,
+        affinity_threshold=0.6,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+
+
+def test_affinity_none_preserves_old_behavior(provider: MemoryProvider) -> None:
+    """cmlg-05: compound_affinity=None → uses freq floor as before."""
+    sym = _FakeSymSpell({"သံဂါ": ["သံဃာ"]})
+    strategy = CompoundMergeProbeStrategy(
+        symspell=sym,
+        provider=provider,
+        enabled=True,
+        min_candidate_freq=100,
+        max_edit_distance=2,
+        fragment_freq_floor=50_000,
+        compound_affinity=None,
+    )
+    ctx = _context("သံဂါ", ["သံ", "ဂါ"])
+    errors = strategy.validate(ctx)
+    assert len(errors) == 1
+
+
 # --- Config wiring ---
 
 
