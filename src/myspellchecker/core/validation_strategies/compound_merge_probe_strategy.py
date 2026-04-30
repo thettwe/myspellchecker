@@ -212,6 +212,7 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                         ],
                         confidence=self.confidence,
                     )
+                    error.source_strategy = "CompoundMergeProbeStrategy"
                     errors.append(error)
                     claimed_positions.add(span_start)
                     logger.debug(
@@ -236,6 +237,7 @@ class CompoundMergeProbeStrategy(ValidationStrategy):
                     suggestions=[Suggestion(text=suggestion_text, source="compound_merge_probe")],
                     confidence=self.confidence,
                 )
+                error.source_strategy = "CompoundMergeProbeStrategy"
                 errors.append(error)
                 claimed_positions.add(span_start)
 
