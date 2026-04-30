@@ -29,6 +29,7 @@ STRATEGY_RELIABILITY: dict[str, float] = {
     "HiddenCompoundStrategy": 0.80,  # contextual, freq-verified compound detection
     "BrokenCompoundStrategy": 0.80,
     "CrossWhitespaceProbeStrategy": 0.85,
+    "CompoundMergeProbeStrategy": 0.80,
     # Tier 3: Contextual -- precision varies with context quality
     "POSSequenceValidationStrategy": 0.60,
     "QuestionStructureValidationStrategy": 0.55,
