@@ -11,6 +11,7 @@ from myspellchecker.core.constants import (
     contains_myanmar,
 )
 from myspellchecker.core.response import Error
+from myspellchecker.text.phonetic_data import get_standard_forms, is_colloquial_variant
 from myspellchecker.text.validator import validate_word
 
 # Informal pronouns that are register-critical -- colloquial_info should still
@@ -190,3 +191,32 @@ class Validator(ABC):
             return match_start, ti
 
         return None, start
+
+    def _colloquial_check(
+        self, text: str, freq_repo: object | None = None
+    ) -> tuple[str, list[str]] | None:
+        """Shared colloquial-variant decision logic.
+
+        Returns ``(strictness, standard_forms)`` when the variant should be
+        flagged, or ``None`` when it should be suppressed or is not a variant.
+        Subclasses call this and construct their specific error type from the
+        result.
+        """
+        strictness = self.config.validation.colloquial_strictness
+        if strictness == "off":
+            return None
+        if not is_colloquial_variant(text):
+            return None
+        standard_forms = sorted(get_standard_forms(text))
+        if not standard_forms:
+            return None
+        if strictness == "lenient" and freq_repo and hasattr(freq_repo, "get_word_frequency"):
+            freq = freq_repo.get_word_frequency(text)
+            threshold = self.config.frequency_guards.colloquial_high_freq_suppression
+            if (
+                isinstance(freq, (int, float))
+                and freq >= threshold
+                and text not in REGISTER_CRITICAL_PRONOUNS
+            ):
+                return None
+        return (strictness, standard_forms)

@@ -332,3 +332,33 @@ def filter_syllable_errors_in_valid_words(
             filtered_errors.append(err)
 
     return filtered_errors
+
+
+def has_confident_symspell_candidate(
+    symspell: object | None,
+    word: str,
+    max_ed: float,
+    min_freq: int,
+) -> bool:
+    """Return True if SymSpell has a top-1 candidate clearing the confidence gate.
+
+    Used by both the pre-validation skip rule (WordValidator) and the
+    post-validation compound-split suppression (ErrorSuppressionMixin).
+    """
+    if symspell is None:
+        return False
+    try:
+        candidates = symspell.lookup(word, level="word", max_suggestions=1)  # type: ignore[union-attr]
+    except (RuntimeError, ValueError, KeyError):
+        return False
+    if not candidates:
+        return False
+    top = candidates[0]
+    term = getattr(top, "term", None)
+    if term is None or term == word:
+        return False
+    if float(getattr(top, "edit_distance", 99)) > max_ed:
+        return False
+    if int(getattr(top, "frequency", 0) or 0) < min_freq:
+        return False
+    return True

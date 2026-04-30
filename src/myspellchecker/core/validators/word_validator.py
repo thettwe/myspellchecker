@@ -19,14 +19,14 @@ from myspellchecker.algorithms.suggestion_strategy import (
 )
 from myspellchecker.core.config import SpellCheckerConfig
 from myspellchecker.core.constants import ET_COLLOQUIAL_INFO, ET_COLLOQUIAL_VARIANT
+from myspellchecker.core.correction_utils import has_confident_symspell_candidate
 from myspellchecker.core.loan_word_variants import get_loan_word_standard
 from myspellchecker.core.response import Error, WordError
 from myspellchecker.core.token_refinement import build_validation_token_paths
-from myspellchecker.core.validators.base import REGISTER_CRITICAL_PRONOUNS, Validator
+from myspellchecker.core.validators.base import Validator
 from myspellchecker.providers.interfaces import SyllableRepository, WordRepository
 from myspellchecker.segmenters import Segmenter
 from myspellchecker.text.morphology import WordAnalysis, analyze_word
-from myspellchecker.text.phonetic_data import get_standard_forms, is_colloquial_variant
 from myspellchecker.utils.logging_utils import get_logger
 
 # Module logger
@@ -314,33 +314,13 @@ class WordValidator(Validator):
         return out
 
     def _has_confident_symspell_candidate(self, word: str) -> bool:
-        """Return True if SymSpell has a top-1 candidate clearing the confidence gate.
-
-        Gate parameters: ``skip_rule_gate_max_ed`` and
-        ``skip_rule_gate_min_freq`` in :class:`ValidationConfig`. Used by
-        the 4+syllable-all-valid skip at ``_validate_token_path`` to
-        distinguish recoverable typos (whose fragmented form happens to
-        be all-valid syllables) from genuine compound/verb-chain merges.
-        """
-        if self.symspell is None:
-            return False
-        max_ed = self.config.validation.skip_rule_gate_max_ed
-        min_freq = self.config.validation.skip_rule_gate_min_freq
-        try:
-            candidates = self.symspell.lookup(word, level="word", max_suggestions=1)
-        except (RuntimeError, ValueError, KeyError):
-            return False
-        if not candidates:
-            return False
-        top = candidates[0]
-        term = getattr(top, "term", None)
-        if term is None or term == word:
-            return False
-        if float(getattr(top, "edit_distance", 99)) > max_ed:
-            return False
-        if int(getattr(top, "frequency", 0) or 0) < min_freq:
-            return False
-        return True
+        """Return True if SymSpell has a top-1 candidate clearing the confidence gate."""
+        return has_confident_symspell_candidate(
+            self.symspell,
+            word,
+            max_ed=self.config.validation.skip_rule_gate_max_ed,
+            min_freq=self.config.validation.skip_rule_gate_min_freq,
+        )
 
     def _is_valid_compound(self, word: str) -> bool:
         """Check if word is a valid compound (splits into valid parts with no edits).
@@ -566,70 +546,26 @@ class WordValidator(Validator):
         return result.terms
 
     def _check_colloquial_variant(self, word: str, position: int) -> WordError | None:
-        """
-        Check if word is a colloquial spelling variant.
-
-        Handles colloquial variants based on the `colloquial_strictness` config:
-        - 'strict': Flag as error with standard forms as suggestions
-        - 'lenient': Return info note with low confidence
-        - 'off': No handling, return None
-
-        Args:
-            word: The word to check.
-            position: Position in the original text.
-
-        Returns:
-            WordError if colloquial variant detected (based on strictness),
-            None otherwise.
-        """
-        strictness = self.config.validation.colloquial_strictness
-
-        if strictness == "off":
+        """Check if word is a colloquial spelling variant."""
+        result = self._colloquial_check(word, self.word_repository)
+        if result is None:
             return None
-
-        if not is_colloquial_variant(word):
-            return None
-
-        standard_forms = sorted(get_standard_forms(word))
-        if not standard_forms:
-            return None
-
+        strictness, standard_forms = result
         syllables = self.segmenter.segment_syllables(word)
-
-        if strictness == "strict":
-            # Flag as error with standard forms as suggestions
-            return WordError(
-                text=word,
-                position=position,
-                suggestions=standard_forms,
-                confidence=self.config.validation.word_error_confidence,
-                error_type=ET_COLLOQUIAL_VARIANT,
-                syllable_count=len(syllables),
-            )
-        elif strictness == "lenient":
-            # Suppress informational notes for very high-frequency words.
-            # Words like မင်း (185K) are ubiquitous informal forms; flagging
-            # them as colloquial_info is noise, not useful.
-            # Exception: informal pronouns like ငါ are register-critical.
-            if hasattr(self.word_repository, "get_word_frequency"):
-                word_freq = self.word_repository.get_word_frequency(word)
-                threshold = self.config.frequency_guards.colloquial_high_freq_suppression
-                if (
-                    isinstance(word_freq, (int, float))
-                    and word_freq >= threshold
-                    and word not in REGISTER_CRITICAL_PRONOUNS
-                ):
-                    return None
-            return WordError(
-                text=word,
-                position=position,
-                suggestions=standard_forms,
-                confidence=self.config.validation.colloquial_info_confidence,
-                error_type=ET_COLLOQUIAL_INFO,
-                syllable_count=len(syllables),
-            )
-
-        return None
+        conf = (
+            self.config.validation.word_error_confidence
+            if strictness == "strict"
+            else self.config.validation.colloquial_info_confidence
+        )
+        et = ET_COLLOQUIAL_VARIANT if strictness == "strict" else ET_COLLOQUIAL_INFO
+        return WordError(
+            text=word,
+            position=position,
+            suggestions=standard_forms,
+            confidence=conf,
+            error_type=et,
+            syllable_count=len(syllables),
+        )
 
     def validate(self, text: str) -> list[Error]:
         """

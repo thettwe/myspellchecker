@@ -20,6 +20,7 @@ FPR mitigations:
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -77,6 +78,7 @@ class MinedConfusablePairStrategy(ValidationStrategy):
 
         self._partner_map: dict[str, list[tuple[str, int]]] = {}
         self._freq_cache: dict[str, int] = {}
+        self._freq_cache_lock = threading.Lock()
         self._classifier_scorer = None  # Lazy-loaded when backend='classifier'
 
         if not self.enabled:
@@ -190,14 +192,16 @@ class MinedConfusablePairStrategy(ValidationStrategy):
         )
 
     def _unigram_freq(self, word: str) -> int:
-        """Cached provider unigram frequency lookup."""
-        if word in self._freq_cache:
-            return self._freq_cache[word]
+        """Cached provider unigram frequency lookup (thread-safe)."""
+        with self._freq_cache_lock:
+            if word in self._freq_cache:
+                return self._freq_cache[word]
         try:
             freq = int(self.provider.get_word_frequency(word) or 0)
         except Exception:
             freq = 0
-        self._freq_cache[word] = freq
+        with self._freq_cache_lock:
+            self._freq_cache[word] = freq
         return freq
 
     def _score(
