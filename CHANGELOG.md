@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-04-30
+
+### Added
+
+- **CompoundMergeProbeStrategy** (priority 46, default off): Slides a window of 2–N adjacent segmented tokens, concatenates their raw text, and probes SymSpell for a high-frequency dictionary match at edit distance ≤ 2. Recovers compound typos like `စွမ်းဆောင်ရည` (missing asat) where each fragment is individually valid. Includes particle exclusion, asat-insertion fast path, name-mask guard, compound affinity scoring, and morphology peek gates.
+- **CrossWhitespaceProbeStrategy** (priority 47, default off): Recovers broken compounds split by whitespace insertion. Probes SymSpell on concatenations of adjacent whitespace-delimited tokens when fragments are low-frequency and the merged form is a high-frequency dictionary word.
+- **Lattice decoder**: Joint decoder for the segmentation pipeline that evaluates multiple segmentation hypotheses simultaneously. Wired into the default segmenter as an opt-in alternative to greedy left-to-right segmentation.
+- **Cython Viterbi top-K**: K-best path extraction for the word tokenizer, accelerated via Cython. Enables downstream strategies to evaluate alternative segmentations.
+- **Benchmark row reclassification**: 100+ benchmark rows reclassified across five hygiene passes — 58 compound-split tokenization rows, 18 empty-gold detection-only rows, 21 mislabeled M3/M4 rows, 3 byte-identical duplicates, and root-cause empty-gold checks. Added `_is_scorable` runner predicate to exclude non-scorable rows from composite calculation.
+
+### Changed
+
+- **`_has_confident_symspell_candidate`** deduplicated across `word_validator.py` and `error_suppression.py` into shared `correction_utils.py`.
+- **`_check_colloquial_variant`** lifted from `SyllableValidator` and `WordValidator` into the `Validator` base class, eliminating ~80 lines of duplication.
+- **`_boosted_by_compound_split` and `_structural_early_exit`** replaced monkey-patched boolean flags with proper dataclass fields on the `Error` class.
+- **Thread-safety lock** added to `MinedConfusablePairStrategy._freq_cache`.
+- **Dependency audit workflow** switched from system-install `pip-audit` to `uv export | pip-audit -r`, scoping the audit to project dependencies only.
+
+### Fixed
+
+- **`Error.to_dict()`** now strips private `_`-prefixed dataclass fields, preventing internal state from leaking to API consumers.
+- **`source_strategy`** attribute set on errors emitted by `CompoundMergeProbeStrategy` and `CrossWhitespaceProbeStrategy` for meta-fusion scoring.
+- **Fusion registry** updated: both new strategies registered in `STRATEGY_TIER`, `STRATEGY_RELIABILITY`, and `INDEPENDENCE_CLUSTERS`.
+- **Test suite segfault and streaming timeout** eliminated.
+
+### Benchmark
+
+- Spelling-only composite rebased from `0.6345` to `0.6292`. This is a measurement correction from the benchmark row reclassification, not a regression — the pipeline is behaviorally identical to v1.6.0.
+
 ## [1.6.0] - 2026-04-21
 
 ### Added
