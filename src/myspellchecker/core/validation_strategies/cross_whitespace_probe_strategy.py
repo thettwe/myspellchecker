@@ -125,6 +125,7 @@ class CrossWhitespaceProbeStrategy(ValidationStrategy):
                     suggestions=[Suggestion(text=concat, source="cross_whitespace_probe")],
                     confidence=self.confidence,
                 )
+                error.source_strategy = "CrossWhitespaceProbeStrategy"
                 errors.append(error)
                 for j in range(i, i + width):
                     consumed.add(j)
