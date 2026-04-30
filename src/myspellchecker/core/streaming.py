@@ -89,6 +89,7 @@ class StreamingConfig:
     enable_cross_sentence_context: bool = True
     progress_interval: int = 1000
     timeout_per_chunk: float = 30.0
+    memory_check_interval: int = 100
 
     def __post_init__(self) -> None:
         """Validate configuration."""
@@ -100,6 +101,8 @@ class StreamingConfig:
             raise ValueError("progress_interval must be >= 1")
         if self.timeout_per_chunk <= 0:
             raise ValueError("timeout_per_chunk must be > 0")
+        if self.memory_check_interval < 1:
+            raise ValueError("memory_check_interval must be >= 1")
         try:
             re.compile(self.sentence_boundary_pattern)
         except re.error as e:
@@ -279,10 +282,11 @@ class StreamingChecker:
             if not line_text.strip():
                 continue
 
-            # Check memory usage
-            stats.current_memory_mb = self._get_memory_usage_mb()
-            if stats.current_memory_mb > self.config.max_memory_mb:
-                self._apply_backpressure()
+            # Sample memory check periodically (not every line)
+            if line_number % self.config.memory_check_interval == 0:
+                stats.current_memory_mb = self._get_memory_usage_mb()
+                if stats.current_memory_mb > self.config.max_memory_mb:
+                    self._apply_backpressure()
 
             # Process the line
             try:
@@ -388,10 +392,11 @@ class StreamingChecker:
             if not line_text.strip():
                 continue
 
-            # Check memory
-            stats.current_memory_mb = self._get_memory_usage_mb()
-            if stats.current_memory_mb > self.config.max_memory_mb:
-                await asyncio.sleep(0.01)  # Async backpressure
+            # Sample memory check periodically (not every line)
+            if line_number % self.config.memory_check_interval == 0:
+                stats.current_memory_mb = self._get_memory_usage_mb()
+                if stats.current_memory_mb > self.config.max_memory_mb:
+                    await asyncio.sleep(0.01)  # Async backpressure
 
             # Run CPU-bound check in thread pool
             try:

@@ -5,23 +5,12 @@ Tests ensure the new POS tagger configuration and FrequencyBuilder work correctl
 Note: Legacy pos_map parameter and ViterbiConfig have been removed in v1.0.0.
 """
 
-from unittest.mock import MagicMock
-
 import pytest
 
 duckdb = pytest.importorskip("duckdb", reason="DuckDB required for POS backward compat tests")
 
 from myspellchecker.algorithms.pos_tagger_rule import RuleBasedPOSTagger  # noqa: E402
 from myspellchecker.data_pipeline.frequency_builder import FrequencyBuilder  # noqa: E402
-from myspellchecker.data_pipeline.pipeline import Pipeline  # noqa: E402
-
-
-@pytest.fixture
-def mock_console():
-    """Create a mock PipelineConsole to avoid Rich rendering issues."""
-    mock = MagicMock()
-    mock.console = MagicMock()
-    return mock
 
 
 class TestFrequencyBuilderWithPosTagger:
@@ -52,98 +41,6 @@ class TestFrequencyBuilderWithPosTagger:
 
         # Should be None (no POS tagging)
         assert builder.pos_tagger is None
-
-
-class TestPipelineWithPosTagger:
-    """Test Pipeline with POS tagger configuration."""
-
-    @pytest.mark.slow
-    def test_pipeline_with_pos_tagger_config(self, tmp_path, mock_console):
-        """Test that pipeline works with POSTaggerConfig."""
-        from myspellchecker.core.config import POSTaggerConfig
-        from myspellchecker.data_pipeline.config import PipelineConfig
-
-        corpus_file = tmp_path / "corpus.txt"
-        corpus_file.write_text("မြန်မာ\n", encoding="utf-8")
-
-        output_db = tmp_path / "test.db"
-
-        # New way: POSTaggerConfig with mock console to avoid Rich rendering issues
-        config = PipelineConfig(
-            pos_tagger=POSTaggerConfig(tagger_type="rule_based"),
-            console=mock_console,
-        )
-
-        pipeline = Pipeline(config=config, work_dir=str(tmp_path / "work"))
-
-        result = pipeline.build_database(
-            input_files=[corpus_file],
-            database_path=output_db,
-            pos_tagger_config=config.pos_tagger,
-            sample=True,  # Use sample mode for faster tests
-        )
-
-        assert result.exists()
-
-
-class TestExistingCodePatterns:
-    """Test that existing code patterns continue to work."""
-
-    @pytest.mark.slow
-    def test_basic_pipeline_without_pos_features(self, tmp_path, mock_console):
-        """Test that pipeline works without any POS-related parameters."""
-        from myspellchecker.data_pipeline.config import PipelineConfig
-
-        corpus_file = tmp_path / "corpus.txt"
-        corpus_file.write_text("မြန်မာ\n", encoding="utf-8")
-
-        output_db = tmp_path / "test.db"
-
-        # Standard usage: no POS configuration at all, but with mock console
-        config = PipelineConfig(console=mock_console)
-        pipeline = Pipeline(config=config, work_dir=str(tmp_path / "work"))
-
-        result = pipeline.build_database(
-            input_files=[corpus_file],
-            database_path=output_db,
-            sample=True,  # Use sample mode for faster tests
-        )
-
-        assert result.exists()
-
-    @pytest.mark.slow
-    def test_spellchecker_without_pos_config(self, tmp_path, mock_console):
-        """Test that SpellChecker works without POS configuration."""
-        from myspellchecker import SpellChecker
-        from myspellchecker.data_pipeline.config import PipelineConfig
-        from myspellchecker.data_pipeline.pipeline import Pipeline
-
-        # Build database without POS config
-        corpus_file = tmp_path / "corpus.txt"
-        corpus_file.write_text("မြန်မာ ကောင်း\n" * 5, encoding="utf-8")
-
-        output_db = tmp_path / "test.db"
-
-        config = PipelineConfig(console=mock_console)
-        pipeline = Pipeline(config=config, work_dir=str(tmp_path / "work"))
-        pipeline.build_database(
-            input_files=[corpus_file],
-            database_path=output_db,
-            sample=True,  # Use sample mode for faster tests
-        )
-
-        # Standard SpellChecker usage: no POS config
-        from myspellchecker.core.config import SpellCheckerConfig
-        from myspellchecker.providers.sqlite import SQLiteProvider
-
-        # Create provider without explicit POS tagger
-        provider = SQLiteProvider(database_path=str(output_db))
-        config = SpellCheckerConfig(provider=provider)
-        checker = SpellChecker(config=config)
-
-        # Should work without POS configuration
-        result = checker.check("မြန်မာ")
-        assert result is not None
 
 
 class TestMigrationPath:

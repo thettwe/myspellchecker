@@ -957,6 +957,51 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # Cross-whitespace compound probe (priority 21, early structural phase).
+    # Concatenates adjacent whitespace-delimited Myanmar spans and checks
+    # whether the result is a known dictionary compound. Recovers compound
+    # words that users split with spaces (e.g., "လူ သွား လမ်း" → "လူသွားလမ်း").
+    use_cross_whitespace_probe: bool = Field(
+        default=True,
+        description=(
+            "Concatenate adjacent whitespace-delimited Myanmar spans and "
+            "check the dictionary for a compound word. Detects space-insertion "
+            "errors invisible to segmentation-dependent strategies."
+        ),
+    )
+    cross_whitespace_probe_min_freq: int = Field(
+        default=7000,
+        ge=0,
+        description=(
+            "Minimum dictionary frequency for the concatenated compound to "
+            "be emitted as a correction. Set high to avoid corpus-artifact "
+            "merges where both parts are valid standalone words."
+        ),
+    )
+    cross_whitespace_probe_max_part_length: int = Field(
+        default=30,
+        ge=1,
+        description=(
+            "Maximum codepoint length per individual whitespace-delimited "
+            "part. Prevents probing excessively long chunks."
+        ),
+    )
+    cross_whitespace_probe_max_concat_length: int = Field(
+        default=25,
+        ge=1,
+        description=("Maximum codepoint length for the concatenated compound form."),
+    )
+    cross_whitespace_probe_confidence: float = Field(
+        default=0.90,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence score for cross-whitespace compound corrections. "
+            "Set high (0.90) because space-insertion errors have strong "
+            "signal when both parts are valid words and concat is in dict."
+        ),
+    )
+
     # Compound merge probe (priority 46, late detection phase).
     # Slides a token-level window across segmented words, concatenates
     # adjacent tokens, and probes SymSpell for compound corrections.

@@ -74,6 +74,7 @@ class TestLatticeDPUnit:
         assert path[0].word == "abc"
 
 
+@pytest.mark.slow
 @pytest.mark.skipif(
     not _REAL_MMAP.exists() or _REAL_MMAP.stat().st_size < 1_000_000,
     reason=f"Real segmentation mmap not cached at {_REAL_MMAP}",

@@ -556,6 +556,26 @@ def build_context_validation_strategies(
         )
         logger.debug("Added ToneSafetyNetStrategy (priority 22)")
 
+    # Priority 21: Cross-Whitespace Compound Probe
+    # Concatenates adjacent whitespace-delimited Myanmar spans and checks
+    # the dictionary for compound words split by user-inserted spaces.
+    if validation_config.use_cross_whitespace_probe:
+        from myspellchecker.core.validation_strategies.cross_whitespace_probe_strategy import (
+            CrossWhitespaceProbeStrategy,
+        )
+
+        strategies.append(
+            CrossWhitespaceProbeStrategy(
+                provider=provider,
+                enabled=True,
+                min_concat_freq=validation_config.cross_whitespace_probe_min_freq,
+                max_part_length=validation_config.cross_whitespace_probe_max_part_length,
+                max_concat_length=validation_config.cross_whitespace_probe_max_concat_length,
+                confidence=validation_config.cross_whitespace_probe_confidence,
+            )
+        )
+        logger.debug("Added CrossWhitespaceProbeStrategy (priority 21)")
+
     # Priority 46: Compound Merge Probe
     # Slides a token-level window across segmented words, concatenates
     # adjacent tokens, and probes SymSpell for compound corrections.
