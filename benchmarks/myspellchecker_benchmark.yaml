@@ -1,4 +1,4 @@
-version: 1.5.0
+version: 1.5.0-bhv17-byte-identical
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -7624,6 +7624,7 @@ sentences:
   - error_id: BM-EXT-E024-E1
     error_type: wrong_word
     error_subtype: loan_word_misspelling
+    fix_owner: dict
     detection_layer: word
     span:
       start: 8
@@ -8402,7 +8403,7 @@ sentences:
   - error_id: BM-EXT-E062-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 0
       end: 14
@@ -9335,6 +9336,7 @@ sentences:
       end: 39
     erroneous_text: မည်သည့်
     gold_correction: မည်သည့်
+    detection_only: true
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
@@ -9449,6 +9451,7 @@ sentences:
       end: 17
     erroneous_text: ရှင့်လို
     gold_correction: ရှင့်လို
+    detection_only: true
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
@@ -9774,7 +9777,7 @@ sentences:
   - error_id: BM-EXP-C078-E1
     error_type: grammar_error
     error_subtype: spacing_error
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 30
       end: 57
@@ -9828,7 +9831,7 @@ sentences:
   - error_id: BM-EXP-C078-E5
     error_type: grammar_error
     error_subtype: spacing_error
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 233
       end: 258
@@ -10082,7 +10085,7 @@ sentences:
   - error_id: BM-EXP-C090-E1
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 21
       end: 39
@@ -10095,7 +10098,7 @@ sentences:
   - error_id: BM-EXP-C090-E2
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 126
       end: 143
@@ -10176,7 +10179,7 @@ sentences:
   - error_id: BM-EXP-C092-E4
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 251
       end: 271
@@ -10257,7 +10260,7 @@ sentences:
   - error_id: BM-EXP-C094-E1
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 13
       end: 32
@@ -10270,7 +10273,7 @@ sentences:
   - error_id: BM-EXP-C094-E2
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 13
       end: 32
@@ -10335,7 +10338,7 @@ sentences:
   - error_id: BM-EXP-C094-E7
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 141
       end: 162
@@ -10348,7 +10351,7 @@ sentences:
   - error_id: BM-EXP-C094-E8
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 141
       end: 162
@@ -10387,7 +10390,7 @@ sentences:
   - error_id: BM-EXP-C094-E11
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 370
       end: 400
@@ -10400,7 +10403,7 @@ sentences:
   - error_id: BM-EXP-C094-E12
     error_type: spacing
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 370
       end: 400
@@ -10839,6 +10842,7 @@ sentences:
       end: 44
     erroneous_text: ' . '
     gold_correction: ' '
+    detection_only: true
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
@@ -11079,7 +11083,7 @@ sentences:
   - error_id: BM-EXP-C155-E1
     error_type: spacing
     error_subtype: extra_space
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 32
       end: 52
@@ -11321,7 +11325,7 @@ sentences:
   - error_id: BM-EXP-C167-E5
     error_type: orthography
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 210
       end: 223
@@ -12923,7 +12927,7 @@ sentences:
   - error_id: BM-EXP-E024-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 80
       end: 96
@@ -13086,6 +13090,7 @@ sentences:
   - error_id: BM-EXP-E033-E1
     error_type: wrong_word
     error_subtype: compound_confusion
+    fix_owner: segmenter
     detection_layer: word
     span:
       start: 112
@@ -13317,6 +13322,7 @@ sentences:
   - error_id: BM-EXP-E044-E1
     error_type: wrong_word
     error_subtype: consonant_substitution
+    fix_owner: dict
     detection_layer: word
     span:
       start: 228
@@ -13338,6 +13344,7 @@ sentences:
   - error_id: BM-EXP-E045-E1
     error_type: wrong_word
     error_subtype: non_word_typo
+    fix_owner: dict
     detection_layer: word
     span:
       start: 24
@@ -13491,7 +13498,7 @@ sentences:
   - error_id: BM-EXP-E051-E4
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 74
       end: 84
@@ -13553,7 +13560,7 @@ sentences:
   - error_id: BM-EXP-E054-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 71
       end: 102
@@ -13574,7 +13581,7 @@ sentences:
   - error_id: BM-EXP-E055-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 54
       end: 71
@@ -15110,7 +15117,7 @@ sentences:
   - error_id: BM-EXP-E127-E1
     error_type: grammar_error
     error_subtype: spacing
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 48
       end: 59
@@ -15946,7 +15953,7 @@ sentences:
   - error_id: BM-EXP-E160-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: context
+    detection_layer: tokenization
     span:
       start: 51
       end: 65
@@ -19240,7 +19247,7 @@ sentences:
   - error_id: BM-1115-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 34
@@ -19395,7 +19402,7 @@ sentences:
   - error_id: BM-1123-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 9
       end: 26
@@ -19683,7 +19690,7 @@ sentences:
   - error_id: BM-1136-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 32
@@ -19936,7 +19943,7 @@ sentences:
   - error_id: BM-1148-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 10
       end: 15
@@ -20537,7 +20544,7 @@ sentences:
   - error_id: BM-1174-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 47
@@ -20866,6 +20873,7 @@ sentences:
       end: 32
     erroneous_text: စား
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the unrelated word 'စား' (eat) between 'နည်းပညာ' (technology) and 'အသစ်တွေကို' (new ones), creating an extremely unlikely bigram ('နည်းပညာ စား').
@@ -20929,6 +20937,7 @@ sentences:
       end: 28
     erroneous_text: ပွဲ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ပွဲ' (event/match/game) which creates an extremely unlikely bigram sequence 'ခံစားချက်က ပွဲ' in this context.
@@ -21028,6 +21037,7 @@ sentences:
   - error_id: BM-1198-E1
     error_type: wrong_word
     error_subtype: aukmyit_confusion
+    fix_owner: asat
     detection_layer: context
     span:
       start: 19
@@ -21055,6 +21065,7 @@ sentences:
       end: 15
     erroneous_text: ကြောင်
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word `ကြောင်` (cat) in an inappropriate place, creating an unlikely ngram `ရာထူးကနေ ကြောင် နုတ်ထွက်တဲ့အခါ`.
@@ -21525,7 +21536,7 @@ sentences:
   - error_id: BM-1221-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 41
       end: 53
@@ -21687,6 +21698,7 @@ sentences:
       end: 17
     erroneous_text: စား
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'စား' (to eat) before 'အရမ်း' (very), creating a highly unlikely and nonsensical bigram 'စား အရမ်း' in the context of 'dog is loyal to master'.
@@ -22200,7 +22212,7 @@ sentences:
   - error_id: BM-1253-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 14
       end: 31
@@ -22242,7 +22254,7 @@ sentences:
   - error_id: BM-1255-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 24
       end: 37
@@ -22360,6 +22372,7 @@ sentences:
   - error_id: BM-1260-E2
     error_type: wrong_word
     error_subtype: complex_typo
+    fix_owner: dict
     detection_layer: word
     span:
       start: 38
@@ -22410,6 +22423,7 @@ sentences:
   - error_id: BM-1263-E1
     error_type: wrong_word
     error_subtype: real_word_confusion
+    fix_owner: dict
     detection_layer: context
     span:
       start: 27
@@ -22704,7 +22718,7 @@ sentences:
   - error_id: BM-1277-E1
     error_type: grammar_error
     error_subtype: merged_word
-    detection_layer: grammar
+    detection_layer: tokenization
     span:
       start: 9
       end: 32
@@ -22817,7 +22831,7 @@ sentences:
   - error_id: BM-1283-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 29
       end: 46
@@ -22901,7 +22915,7 @@ sentences:
   - error_id: BM-1287-E1
     error_type: grammar_error
     error_subtype: merged_word
-    detection_layer: grammar
+    detection_layer: tokenization
     span:
       start: 19
       end: 31
@@ -23027,7 +23041,7 @@ sentences:
   - error_id: BM-1293-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 13
       end: 31
@@ -24091,6 +24105,7 @@ sentences:
   - error_id: BM-1343-E1
     error_type: wrong_word
     error_subtype: missing_visarga
+    fix_owner: asat
     detection_layer: word
     span:
       start: 31
@@ -24435,7 +24450,7 @@ sentences:
   - error_id: BM-1360-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 23
       end: 36
@@ -24650,6 +24665,7 @@ sentences:
   - error_id: BM-1369-E2
     error_type: wrong_word
     error_subtype: tone_mark_error
+    fix_owner: asat
     detection_layer: context
     span:
       start: 42
@@ -24913,6 +24929,7 @@ sentences:
       end: 37
     erroneous_text: တစ်ခု
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'တစ်ခု' (one/a thing) between the object particle and the verb, creating an unlikely and grammatically awkward bigram sequence.
@@ -25033,7 +25050,7 @@ sentences:
   - error_id: BM-1386-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 17
@@ -25220,6 +25237,7 @@ sentences:
       end: 40
     erroneous_text: 'ပန်းသီး '
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the semantically unrelated word 'ပန်းသီး' (apple) before 'အားတက်ပါ', creating an unlikely trigram.
@@ -25446,6 +25464,7 @@ sentences:
   - error_id: BM-1406-E1
     error_type: wrong_word
     error_subtype: aukmyit_confusion
+    fix_owner: asat
     detection_layer: context
     span:
       start: 35
@@ -25517,7 +25536,7 @@ sentences:
   - error_id: BM-1410-E1
     error_type: grammar_error
     error_subtype: merged_word
-    detection_layer: grammar
+    detection_layer: tokenization
     span:
       start: 14
       end: 37
@@ -25664,7 +25683,7 @@ sentences:
   - error_id: BM-1417-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 34
       end: 40
@@ -26384,6 +26403,7 @@ sentences:
       end: 40
     erroneous_text: မြို့
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'မြို့' (city) in an unnatural position, creating an unlikely trigram sequence with 'ကျွမ်းကျင်တဲ့' and 'အလုပ်'.
@@ -26491,7 +26511,7 @@ sentences:
   - error_id: BM-1457-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 18
       end: 40
@@ -26898,7 +26918,7 @@ sentences:
   - error_id: BM-1477-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 26
       end: 33
@@ -26961,7 +26981,7 @@ sentences:
   - error_id: BM-1480-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 8
       end: 17
@@ -27348,6 +27368,7 @@ sentences:
   - error_id: BM-1500-E1
     error_type: grammar_error
     error_subtype: negation_error
+    fix_owner: dict
     detection_layer: grammar
     span:
       start: 74
@@ -27432,6 +27453,7 @@ sentences:
   - error_id: BM-1504-E1
     error_type: grammar_error
     error_subtype: verb_tense_agreement
+    fix_owner: dict
     detection_layer: grammar
     span:
       start: 42
@@ -27650,7 +27672,7 @@ sentences:
   - error_id: BM-1515-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 11
       end: 22
@@ -27755,6 +27777,7 @@ sentences:
   - error_id: BM-1520-E1
     error_type: wrong_word
     error_subtype: real_word_confusion
+    fix_owner: dict
     detection_layer: context
     span:
       start: 50
@@ -27937,7 +27960,7 @@ sentences:
   - error_id: BM-1528-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 6
       end: 34
@@ -30411,7 +30434,7 @@ sentences:
   - error_id: BM-1647-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 21
@@ -30602,7 +30625,7 @@ sentences:
   - error_id: BM-1656-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 29
       end: 47
@@ -31175,7 +31198,7 @@ sentences:
   - error_id: BM-1682-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 34
@@ -31378,6 +31401,7 @@ sentences:
   - error_id: BM-1692-E2
     error_type: wrong_word
     error_subtype: aukmyit_confusion
+    fix_owner: asat
     detection_layer: context
     span:
       start: 80
@@ -31538,7 +31562,7 @@ sentences:
   - error_id: BM-1699-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 12
       end: 30
@@ -31761,7 +31785,7 @@ sentences:
   - error_id: BM-1709-E2
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 24
       end: 41
@@ -32048,6 +32072,7 @@ sentences:
       end: 20
     erroneous_text: ကျောင်း
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ကျောင်း' (school) which creates an extremely unlikely bigram/trigram sequence and is semantically nonsensical in context.
@@ -32753,7 +32778,7 @@ sentences:
   - error_id: BM-1758-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 9
       end: 30
@@ -32772,6 +32797,7 @@ sentences:
       end: 41
     erroneous_text: သင့်တယ်
     gold_correction: သင့်တယ်
+    detection_only: true
     edit_distance: 2
     context_required: false
     notes: Removed the `aukmyit` (့) tone mark from `သင့်တယ်` (should), changing it to `သင့်တယ်` which is grammatically incorrect in this context.
@@ -33559,6 +33585,7 @@ sentences:
       end: 10
     erroneous_text: ' '
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: 'Inserted a space inside the compound word ''အိမ်တွင်းအလှဆင်ခြင်း'' (home decoration), separating ''အိမ်တွင်း'' and ''အလှဆင်ခြင်း''. [NEEDS_REVIEW: empty gold_correction]'
@@ -33692,7 +33719,7 @@ sentences:
   - error_id: BM-1802-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 30
       end: 43
@@ -33949,7 +33976,7 @@ sentences:
   - error_id: BM-1813-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 3
@@ -34169,6 +34196,7 @@ sentences:
       end: 22
     erroneous_text: ခွေး
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ခွေး' (dog) before 'မျှော်လင့်ချက်တွေက' (hopes), creating an extremely unlikely and nonsensical bigram 'ခွေး မျှော်လင့်ချက်' (dog hopes).
@@ -34247,7 +34275,7 @@ sentences:
   - error_id: BM-1829-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 24
       end: 31
@@ -34289,7 +34317,7 @@ sentences:
   - error_id: BM-1831-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 13
@@ -34480,6 +34508,7 @@ sentences:
   - error_id: BM-1840-E1
     error_type: semantic_error
     error_subtype: ngram_unlikely
+    fix_owner: dict
     detection_layer: context
     span:
       start: 40
@@ -34721,6 +34750,7 @@ sentences:
   - error_id: BM-1852-E1
     error_type: wrong_word
     error_subtype: missing_visarga
+    fix_owner: asat
     detection_layer: word
     span:
       start: 61
@@ -34834,6 +34864,7 @@ sentences:
   - error_id: BM-1859-E1
     error_type: semantic_error
     error_subtype: collocation_error
+    fix_owner: dict
     detection_layer: context
     span:
       start: 34
@@ -35023,7 +35054,7 @@ sentences:
   - error_id: BM-1868-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 13
@@ -35044,7 +35075,7 @@ sentences:
   - error_id: BM-1869-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 11
       end: 28
@@ -35305,6 +35336,7 @@ sentences:
       end: 29
     erroneous_text: စားပွဲ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the irrelevant word `စားပွဲ` (table) after `ဖြစ်ပွားပါက`, creating an extremely unlikely and nonsensical ngram.
@@ -35362,7 +35394,7 @@ sentences:
   - error_id: BM-1886-E1
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 0
       end: 12
@@ -35412,7 +35444,7 @@ sentences:
   - error_id: BM-1889-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 17
       end: 41
@@ -35961,6 +35993,7 @@ sentences:
       end: 44
     erroneous_text: ' စားပွဲ'
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'စားပွဲ' (table) between 'စွမ်းအင်' (energy) and 'လို့' (particle), creating an unlikely bigram 'စွမ်းအင် စားပွဲ' (energy table).
@@ -36249,6 +36282,7 @@ sentences:
   - error_id: BM-1929-E1
     error_type: wrong_word
     error_subtype: real_word_confusion
+    fix_owner: dict
     detection_layer: context
     span:
       start: 10
@@ -36456,6 +36490,7 @@ sentences:
   - error_id: BM-1937-E2
     error_type: semantic_error
     error_subtype: semantic_error
+    fix_owner: dict
     detection_layer: context
     span:
       start: 39
@@ -36697,6 +36732,7 @@ sentences:
   - error_id: BM-1949-E1
     error_type: wrong_word
     error_subtype: broken_compound
+    fix_owner: segmenter
     detection_layer: word
     span:
       start: 13
@@ -37093,6 +37129,7 @@ sentences:
       end: 27
     erroneous_text: ' ကား'
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ကား' (car) after 'လုပ်ပြီး' (having done), creating an extremely unlikely bigram 'လုပ်ပြီး ကား' (done car) that makes no sense in context.
@@ -37155,7 +37192,7 @@ sentences:
   - error_id: BM-1972-E2
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 25
       end: 36
@@ -37266,6 +37303,7 @@ sentences:
       end: 49
     erroneous_text: ထိုင်
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ထိုင်' (to sit) before 'ခံစားရပါတယ်' (experience), creating an unlikely and unnatural bigram sequence 'ထိုင် ခံစားရ' (sit and experience) in this context.
@@ -37528,6 +37566,7 @@ sentences:
       end: 32
     erroneous_text: ထမင်း
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'ထမင်း' (cooked rice) into the phrase 'ရေရှည်မှာ ရေရှည်တည်တံ့အောင်' (for long-term sustainability), creating a semantically nonsensical and unlikely trigram.
@@ -37692,7 +37731,7 @@ sentences:
   - error_id: BM-1998-E1
     error_type: wrong_word
     error_subtype: word_boundary
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 26
       end: 34
@@ -38270,6 +38309,7 @@ sentences:
       end: 25
     erroneous_text: 'များ '
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word 'များ' (many/plural marker) which creates an extremely unlikely and grammatically incorrect bigram sequence 'တစ်ယောက်ကိုတစ်ယောက် များ'.
@@ -38333,6 +38373,7 @@ sentences:
       end: 26
     erroneous_text: ' ခုန်'
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ခုန်' (jump) which creates an extremely unlikely bigram/trigram sequence and is semantically nonsensical in context.
@@ -38678,6 +38719,7 @@ sentences:
       end: 26
     erroneous_text: ကျောင်း
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted the word `ကျောင်း` (school) after `လစာ` (salary), creating an extremely unlikely and semantically incoherent bigram `လစာကျောင်း` (salary school).
@@ -38812,6 +38854,7 @@ sentences:
   - error_id: BM-2050-E1
     error_type: grammar_error
     error_subtype: particle_misuse
+    fix_owner: dict
     detection_layer: grammar
     span:
       start: 0
@@ -39254,6 +39297,7 @@ sentences:
       end: 40
     erroneous_text: ထူးဆန်းစွာ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ထူးဆန်းစွာ' (strangely) before 'တိုးပွားစေတယ်' (increases), creating an semantically unlikely ngram.
@@ -39317,6 +39361,7 @@ sentences:
       end: 32
     erroneous_text: ဆင်းရဲစွာ
     gold_correction: ''
+    detection_only: true
     edit_distance: 0
     context_required: true
     notes: Inserted 'ဆင်းရဲစွာ' (miserably) before 'စားကြတယ်' (eat), creating a semantically unlikely ngram for eating snacks.
@@ -39620,7 +39665,7 @@ sentences:
   - error_id: BM-2089-E2
     error_type: wrong_word
     error_subtype: broken_compound
-    detection_layer: word
+    detection_layer: tokenization
     span:
       start: 44
       end: 59
