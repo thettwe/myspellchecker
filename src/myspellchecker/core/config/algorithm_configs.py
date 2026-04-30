@@ -295,6 +295,68 @@ class SymSpellConfig(BaseModel):
     )
 
 
+class LatticeDecoderConfig(BaseModel):
+    """Configuration for the lattice-merge segmentation decoder.
+
+    When enabled, augments the Viterbi word segmenter with SymSpell merge
+    edges to recover over-split compound words. Only runs on chunks whose
+    baseline segmentation produces 2+ tokens.
+    """
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        frozen=False,
+        extra="forbid",
+    )
+
+    enabled: bool = Field(
+        default=True,
+        description="Enable lattice-merge post-processing in the segmenter",
+    )
+    k: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Number of K-best Viterbi paths to explore",
+    )
+    min_score_gain: float = Field(
+        default=12.0,
+        ge=0.0,
+        description="Minimum lattice-vs-baseline score improvement to accept a merge path",
+    )
+    merge_bonus: float = Field(
+        default=0.1,
+        ge=0.0,
+        description="Bonus added to merge-edge scores in the lattice",
+    )
+    edit_penalty_weight: float = Field(
+        default=0.5,
+        ge=0.0,
+        description="Penalty weight per unit of edit distance on merge edges",
+    )
+    merge_freq_floor: int = Field(
+        default=500,
+        ge=0,
+        description="Minimum dictionary frequency for a merge candidate",
+    )
+    max_edit_distance: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description="Maximum edit distance for SymSpell merge-edge candidates",
+    )
+    min_edit_distance: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description="Minimum edit distance for merge edges (1 = skip exact-match compound merges)",
+    )
+    require_fragment: bool = Field(
+        default=True,
+        description=("Only merge when at least one source token is not a single LM word"),
+    )
+
+
 class NgramContextConfig(BaseModel):
     """
     Configuration for N-gram context checker.
@@ -1621,6 +1683,7 @@ from myspellchecker.core.config.text_configs import (  # noqa: E402
 __all__ = [
     # Core algorithm configs (defined in this file)
     "SymSpellConfig",
+    "LatticeDecoderConfig",
     "NgramContextConfig",
     "PhoneticConfig",
     "SemanticConfig",

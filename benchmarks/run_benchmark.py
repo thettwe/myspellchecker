@@ -963,6 +963,23 @@ def run_benchmark(
             return False
         return err_domain == _domain_norm
 
+    def _is_scorable(err: dict) -> bool:
+        """Return False if a gold error carries a bench-hygiene skip flag.
+
+        Skip flags introduced by bench-hygiene-v17:
+          - detection_only: true  — empty-gold annotations; no correction target.
+          - detection_layer == 'tokenization' — tokenization-layer annotations;
+            do not score against word-level detection.
+
+        Non-scorable rows stay in the matching universe so system detections that
+        land on them still absorb (not counted as FP), same pattern as out-of-scope.
+        """
+        if err.get("detection_only") is True:
+            return False
+        if err.get("detection_layer") == "tokenization":
+            return False
+        return True
+
     # Run benchmark
     results: list[SentenceResult] = []
     rerank_rule_telemetry: dict[str, dict[str, int]] = {}
@@ -971,16 +988,35 @@ def run_benchmark(
     total_start = time.perf_counter()
     total_out_of_scope = 0
     total_out_of_domain = 0
+    total_detection_only = 0
+    total_tokenization_layer = 0
 
     for sentence in sentences:
         input_text = sentence["input"]
         is_clean = sentence["is_clean"]
         all_gold_errors = sentence.get("expected_errors", [])
-        in_scope_errors = [e for e in all_gold_errors if _in_scope(e) and _in_domain(e)]
-        out_of_scope_errors = [e for e in all_gold_errors if not (_in_scope(e) and _in_domain(e))]
+        in_scope_errors = [
+            e for e in all_gold_errors if _in_scope(e) and _in_domain(e) and _is_scorable(e)
+        ]
+        out_of_scope_errors = [
+            e for e in all_gold_errors if not (_in_scope(e) and _in_domain(e) and _is_scorable(e))
+        ]
         total_out_of_scope += sum(1 for e in all_gold_errors if not _in_scope(e))
         total_out_of_domain += sum(1 for e in all_gold_errors if _in_scope(e) and not _in_domain(e))
-        # For matching, use ALL gold errors so out-of-scope matches
+        total_detection_only += sum(
+            1
+            for e in all_gold_errors
+            if _in_scope(e) and _in_domain(e) and e.get("detection_only") is True
+        )
+        total_tokenization_layer += sum(
+            1
+            for e in all_gold_errors
+            if _in_scope(e)
+            and _in_domain(e)
+            and e.get("detection_only") is not True
+            and e.get("detection_layer") == "tokenization"
+        )
+        # For matching, use ALL gold errors so out-of-scope / skip-flagged matches
         # absorb system detections (not counted as FP).
         gold_errors = all_gold_errors
         # Sentences with no in-scope errors are "spelling-clean" for FPR.
@@ -1132,6 +1168,8 @@ def run_benchmark(
         total_out_of_scope=total_out_of_scope,
         domain=_domain_norm,
         total_out_of_domain=total_out_of_domain,
+        total_detection_only=total_detection_only,
+        total_tokenization_layer=total_tokenization_layer,
     )
     report["config"]["targeted_rerank_hints"] = targeted_rerank_hints
     report["config"]["targeted_candidate_injections"] = targeted_candidate_injections
@@ -1155,6 +1193,8 @@ def compute_report(
     total_out_of_scope: int = 0,
     domain: str = "all",
     total_out_of_domain: int = 0,
+    total_detection_only: int = 0,
+    total_tokenization_layer: int = 0,
 ) -> dict:
     """Compute all metrics and produce the final report."""
 
@@ -1276,6 +1316,8 @@ def compute_report(
             "out_of_scope_errors_excluded": total_out_of_scope,
             "domain": domain,
             "out_of_domain_errors_excluded": total_out_of_domain,
+            "detection_only_excluded": total_detection_only,
+            "tokenization_layer_excluded": total_tokenization_layer,
         },
         "overall_metrics": {
             "detection": {

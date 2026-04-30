@@ -26,8 +26,7 @@
 # ── Category 2: Optional dependency not installed ──
 # Remediation: Install the missing package.
 #
-# test_pos_integration.py (3 tests) - transformers not installed
-#     Remediation: pip install 'myspellchecker[transformers]'
+# (test_pos_integration.py removed — segfault source on Python 3.14)
 # test_grammar_rules_schema_validation.py::TestSchemaValidation - jsonschema not installed
 #     Remediation: pip install jsonschema
 # test_training_components.py (5 skipif + 5 runtime skips) - torch not installed
@@ -45,11 +44,7 @@
 #     Remediation: Only testable when PyYAML is absent; consider mocking sys.modules
 #
 # ── Category 3: transformers mocked by another test module ──
-# Remediation: Run these tests in isolation or fix test ordering.
-#
-# test_pos_integration.py (3 runtime skips) - transformers is mocked by another test module
-#     These tests check `_is_transformers_mocked()` at runtime because another test module
-#     patches the transformers import at collection time.
+# (test_pos_integration.py removed — was the only affected file)
 #
 # ── Category 4: SpellChecker not available (integration tests) ──
 # These tests try `SpellChecker.create_default()` which needs a built DB or provider.
@@ -137,7 +132,13 @@ def mock_resource_downloads_session():
         def simple_viterbi(text):
             return (0.0, _regex.segment_syllables(text) if text.strip() else [])
 
+        def simple_viterbi_topk(text, K, prev="<S>", maxlen=20):
+            # Mirrors simple_viterbi: returns a single-element list so any
+            # caller expecting the real viterbi_topk shape gets a sane stub.
+            return [(0.0, _regex.segment_syllables(text) if text.strip() else [])]
+
         self._viterbi_func = simple_viterbi
+        self._viterbi_topk_func = simple_viterbi_topk
 
     def mock_init_crf(self):
         mock_tagger = MagicMock()

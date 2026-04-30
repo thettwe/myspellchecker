@@ -631,3 +631,285 @@ cpdef tuple viterbi(str text, str prev="<S>", int maxlen=20):
         
     words.reverse()
     return best_score, words
+
+
+# ---------------------------------------------------------------------------
+# Top-K Viterbi (cython-viterbi-topk workstream, cvt-01)
+# ---------------------------------------------------------------------------
+#
+# Eppstein-style backtrack-trellis K-best extraction over the same bigram DP
+# used by `viterbi` above. At every (end-char j, last-word-start i) we keep
+# up to K_MAX sorted candidate paths instead of a single best, each carrying
+# a back-pointer into the predecessor state. On completion we sort the
+# per-end-state entries globally and backtrack the top-K to reconstruct
+# segmentations.
+#
+# K=1 parity: at K=1 each vector holds one entry and the algorithm reduces
+# to the original Viterbi. Enforced by cvt-01 fixtures + cvt-03 regression.
+
+cdef struct TKEntry:
+    double score
+    int prev_k      # start-char index of the previous word (-1 for <S>)
+    int prev_rank   # index into dp_topk[curr_word_start_j][prev_k], 0 for <S>
+
+
+cpdef list viterbi_topk(str text, int K, str prev="<S>", int maxlen=20):
+    """Return up to K (score, words) tuples sorted descending by score.
+
+    Args:
+        text: Input string (Myanmar or any unicode). Empty → ``[(0.0, [])]``.
+        K: Maximum number of segmentations to return. Must be >= 1.
+        prev: Previous-word sentinel for bigram scoring. Default ``"<S>"``.
+        maxlen: Max word length in chars. Default 20 (matches ``viterbi``).
+
+    Returns:
+        List of ``(score, [word0, word1, ...])`` tuples. Length <= K.
+        Ordered from highest score to lowest. At K=1 byte-identical to
+        ``viterbi(text, prev, maxlen)`` wrapped in a single-element list.
+    """
+    if K < 1:
+        raise ValueError("K must be >= 1")
+
+    if not text:
+        return [(0.0, [])]
+
+    cdef string text_bytes = text.encode('utf-8')
+    cdef string prev_bytes = prev.encode('utf-8')
+
+    cdef int N_bytes = text_bytes.length()
+
+    cdef vector[int] char_to_byte
+    char_to_byte.reserve(N_bytes + 1)
+
+    cdef int b_idx = 0
+    cdef int c
+    char_to_byte.push_back(0)
+
+    while b_idx < N_bytes:
+        c = <unsigned char> text_bytes[b_idx]
+        if (c & 0x80) == 0:
+            b_idx += 1
+        elif (c & 0xE0) == 0xC0:
+            b_idx += 2
+        elif (c & 0xF0) == 0xE0:
+            b_idx += 3
+        elif (c & 0xF8) == 0xF0:
+            b_idx += 4
+        else:
+            b_idx += 1
+        char_to_byte.push_back(b_idx)
+
+    cdef int total_chars = char_to_byte.size() - 1
+
+    # dp_topk[j][i] = up to K sorted TKEntry values representing top-K paths
+    # whose last word is chars[i..j].
+    cdef vector[unordered_map[int, vector[TKEntry]]] dp_topk
+    dp_topk.resize(total_chars + 1)
+
+    # Base: single "path" reaching char 0 with score 0, previous-state sentinel.
+    cdef TKEntry base_entry
+    base_entry.score = 0.0
+    base_entry.prev_k = -2  # matches existing viterbi convention (unused back-walk stop)
+    base_entry.prev_rank = 0
+    dp_topk[0][-1].push_back(base_entry)
+
+    cdef int i, j, rank
+    cdef int start_min
+    cdef double log_prob, prev_score, total_score
+    cdef int b_start, b_end, b_prev_start, b_prev_end, prev_k_key
+    cdef TKEntry cand, prev_entry
+    cdef vector[TKEntry] merged
+    cdef vector[TKEntry] candidates
+    cdef size_t r
+
+    # State-count pruning: at each j, cap the number of distinct word-start
+    # keys (i-values). Raise the ceiling with K so top-K doesn't lose mass
+    # to the original MAX_STATES=3 cap when K>3.
+    cdef int MAX_STATES_TOPK = 3 if K < 3 else K
+    cdef double PRUNE_THRESHOLD = 6.0
+    cdef double best_score_at_j
+    cdef vector[int] keys_to_remove
+    cdef double prune_cutoff
+    cdef unordered_map[int, vector[TKEntry]].iterator state_it
+    cdef unordered_map[int, vector[TKEntry]].iterator state_end
+    cdef int k_idx
+
+    # Forward pass
+    for j in range(1, total_chars + 1):
+        start_min = 0
+        if j > maxlen:
+            start_min = j - maxlen
+
+        b_end = char_to_byte[j]
+
+        for i in range(start_min, j):
+            if dp_topk[i].empty():
+                continue
+
+            b_start = char_to_byte[i]
+
+            # Gather candidate extensions from every (prev_k, rank) at state i.
+            candidates.clear()
+            state_it = dp_topk[i].begin()
+            state_end = dp_topk[i].end()
+            while state_it != state_end:
+                prev_k_key = deref(state_it).first
+
+                if prev_k_key != -1:
+                    b_prev_start = char_to_byte[prev_k_key]
+                    b_prev_end = b_start
+                else:
+                    b_prev_start = -1
+                    b_prev_end = -1
+
+                log_prob = get_transition_log_prob_indices(
+                    text_bytes,
+                    b_start,
+                    b_end - b_start,
+                    b_prev_start,
+                    b_prev_end - b_prev_start if b_prev_start != -1 else 0,
+                    prev_bytes
+                )
+
+                for r in range(deref(state_it).second.size()):
+                    prev_score = deref(state_it).second[r].score
+                    total_score = prev_score + log_prob
+                    cand.score = total_score
+                    cand.prev_k = prev_k_key
+                    cand.prev_rank = <int> r
+                    candidates.push_back(cand)
+
+                preincrement(state_it)
+
+            if candidates.empty():
+                continue
+
+            # Merge candidates with whatever already exists at dp_topk[j][i]
+            # (in case two predecessor states share the same i-key). Then
+            # truncate to top K by score.
+            merged = dp_topk[j][i]
+            for r in range(candidates.size()):
+                merged.push_back(candidates[r])
+
+            _sort_desc_topk(merged, K)
+            dp_topk[j][i] = merged
+
+        # State pruning — same shape as `viterbi` but K-aware.
+        if dp_topk[j].size() > <size_t>MAX_STATES_TOPK:
+            best_score_at_j = -1e100
+            state_it = dp_topk[j].begin()
+            state_end = dp_topk[j].end()
+            while state_it != state_end:
+                if (not deref(state_it).second.empty()
+                        and deref(state_it).second[0].score > best_score_at_j):
+                    best_score_at_j = deref(state_it).second[0].score
+                preincrement(state_it)
+
+            prune_cutoff = best_score_at_j - PRUNE_THRESHOLD
+
+            keys_to_remove.clear()
+            state_it = dp_topk[j].begin()
+            while state_it != state_end:
+                if (deref(state_it).second.empty()
+                        or deref(state_it).second[0].score < prune_cutoff):
+                    keys_to_remove.push_back(deref(state_it).first)
+                preincrement(state_it)
+
+            for k_idx in range(keys_to_remove.size()):
+                dp_topk[j].erase(keys_to_remove[k_idx])
+
+    # No path reaches the end → single fallback path covering the whole text.
+    if dp_topk[total_chars].empty():
+        return [(-float('inf'), [text])]
+
+    # Collect every end-state entry, tagged with its word-start key.
+    # Shape: (score, word_start_char_idx, prev_k, prev_rank).
+    cdef list end_entries = []
+    state_it = dp_topk[total_chars].begin()
+    state_end = dp_topk[total_chars].end()
+    cdef int end_start_key
+    while state_it != state_end:
+        end_start_key = deref(state_it).first
+        for r in range(deref(state_it).second.size()):
+            prev_entry = deref(state_it).second[r]
+            end_entries.append((
+                prev_entry.score,
+                end_start_key,
+                prev_entry.prev_k,
+                prev_entry.prev_rank,
+            ))
+        preincrement(state_it)
+
+    # Sort globally by score desc (tuple comparison falls through to
+    # start-key/prev-k tiebreakers; ties on continuous scores are
+    # astronomically unlikely) and take top K.
+    end_entries.sort(reverse=True)
+    if len(end_entries) > K:
+        end_entries = end_entries[:K]
+
+    cdef list results = []
+    cdef list words
+    cdef int curr_end_char, curr_start_char, next_start_char, next_rank
+    cdef int prev_k_lookup, next_prev_rank, next_prev_k
+    cdef double score
+
+    for entry_tuple in end_entries:
+        score = entry_tuple[0]
+        curr_end_char = total_chars
+        curr_start_char = entry_tuple[1]
+        prev_k_lookup = entry_tuple[2]
+        next_prev_rank = entry_tuple[3]
+
+        words = []
+        while curr_end_char > 0:
+            b_end = char_to_byte[curr_end_char]
+            b_start = char_to_byte[curr_start_char]
+            word_bytes = text_bytes.substr(b_start, b_end - b_start)
+            words.append(word_bytes.decode('utf-8'))
+
+            if curr_start_char == 0:
+                break
+
+            prev_entry = dp_topk[curr_start_char][prev_k_lookup][next_prev_rank]
+            next_start_char = prev_k_lookup
+            next_rank = prev_entry.prev_rank
+            next_prev_k = prev_entry.prev_k
+
+            curr_end_char = curr_start_char
+            curr_start_char = next_start_char
+            prev_k_lookup = next_prev_k
+            next_prev_rank = next_rank
+
+        words.reverse()
+        results.append((score, words))
+
+    return results
+
+
+cdef void _sort_desc_topk(vector[TKEntry]& entries, int K) noexcept:
+    """Sort `entries` by score descending and truncate to K in place.
+
+    Uses selection sort over at most ~K*C entries (C = predecessor fan-in,
+    typically <= MAX_STATES_TOPK). For production K (<= 5) this is faster
+    than std::sort due to constant-factor overhead.
+    """
+    cdef int n = <int> entries.size()
+    cdef int target = n if n < K else K
+    cdef int i, j, best_idx
+    cdef double best_score
+    cdef TKEntry tmp
+
+    for i in range(target):
+        best_idx = i
+        best_score = entries[i].score
+        for j in range(i + 1, n):
+            if entries[j].score > best_score:
+                best_score = entries[j].score
+                best_idx = j
+        if best_idx != i:
+            tmp = entries[i]
+            entries[i] = entries[best_idx]
+            entries[best_idx] = tmp
+
+    if n > K:
+        entries.resize(K)

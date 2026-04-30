@@ -957,6 +957,115 @@ class ValidationConfig(BaseModel):
         ),
     )
 
+    # Cross-whitespace compound probe (priority 21, early structural phase).
+    # Concatenates adjacent whitespace-delimited Myanmar spans and checks
+    # whether the result is a known dictionary compound. Recovers compound
+    # words that users split with spaces (e.g., "လူ သွား လမ်း" → "လူသွားလမ်း").
+    use_cross_whitespace_probe: bool = Field(
+        default=True,
+        description=(
+            "Concatenate adjacent whitespace-delimited Myanmar spans and "
+            "check the dictionary for a compound word. Detects space-insertion "
+            "errors invisible to segmentation-dependent strategies."
+        ),
+    )
+    cross_whitespace_probe_min_freq: int = Field(
+        default=7000,
+        ge=0,
+        description=(
+            "Minimum dictionary frequency for the concatenated compound to "
+            "be emitted as a correction. Set high to avoid corpus-artifact "
+            "merges where both parts are valid standalone words."
+        ),
+    )
+    cross_whitespace_probe_max_part_length: int = Field(
+        default=30,
+        ge=1,
+        description=(
+            "Maximum codepoint length per individual whitespace-delimited "
+            "part. Prevents probing excessively long chunks."
+        ),
+    )
+    cross_whitespace_probe_max_concat_length: int = Field(
+        default=25,
+        ge=1,
+        description=("Maximum codepoint length for the concatenated compound form."),
+    )
+    cross_whitespace_probe_confidence: float = Field(
+        default=0.90,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence score for cross-whitespace compound corrections. "
+            "Set high (0.90) because space-insertion errors have strong "
+            "signal when both parts are valid words and concat is in dict."
+        ),
+    )
+
+    # Compound merge probe (priority 46, late detection phase).
+    # Slides a token-level window across segmented words, concatenates
+    # adjacent tokens, and probes SymSpell for compound corrections.
+    # Recovers over-split compounds invisible to per-word strategies.
+    use_compound_merge_probe: bool = Field(
+        default=True,
+        description=(
+            "Slide a window of 2–N adjacent segmented tokens, concatenate, "
+            "and probe SymSpell for compound corrections. Catches typo'd "
+            "compounds the segmenter fragments into valid subtokens."
+        ),
+    )
+    compound_merge_probe_max_window: int = Field(
+        default=3,
+        ge=2,
+        le=6,
+        description="Maximum number of adjacent tokens to merge in a single probe.",
+    )
+    compound_merge_probe_max_span_length: int = Field(
+        default=20,
+        ge=5,
+        description="Skip merged spans longer than this (chars).",
+    )
+    compound_merge_probe_max_ed: float = Field(
+        default=0.4,
+        ge=0.0,
+        le=3.0,
+        description="Maximum weighted edit distance accepted for a merge probe hit.",
+    )
+    compound_merge_probe_min_freq: int = Field(
+        default=5000,
+        ge=0,
+        description="Minimum dictionary frequency for a SymSpell candidate.",
+    )
+    compound_merge_probe_fragment_freq_floor: int = Field(
+        default=50_000,
+        ge=0,
+        description=(
+            "At least one token in the window must have frequency below this "
+            "threshold (or be OOV) to trigger the probe."
+        ),
+    )
+    compound_merge_probe_max_length_diff: int = Field(
+        default=1,
+        ge=0,
+        description="Maximum |len(candidate) - len(span_text)| allowed.",
+    )
+    compound_merge_probe_confidence: float = Field(
+        default=0.70,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score emitted for compound merge probe errors.",
+    )
+    compound_merge_probe_affinity_threshold: float = Field(
+        default=0.6,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Compound affinity score above which a token is treated as a "
+            "likely compound fragment (bypasses the frequency-floor heuristic). "
+            "Only effective when compound_affinity.json is available."
+        ),
+    )
+
     # MLM-as-candidate-generator (priority 46).
     # Wraps semantic-v2.4 RoBERTa span-masking as a production candidate
     # generator — the existing MLM is already deployed for scoring at

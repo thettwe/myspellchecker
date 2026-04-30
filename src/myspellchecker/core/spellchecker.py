@@ -281,6 +281,7 @@ class SpellChecker(
         # 2. Initialize subsystems
         self._init_provider(provider, segmenter, factory)
         self._init_validators(syllable_validator, word_validator, context_validator)
+        self._inject_lattice_decoder()
         self._init_context()
         self._init_detectors()
 
@@ -390,6 +391,16 @@ class SpellChecker(
         self._thread_local = threading.local()
         self._rerank_telemetry_lock = threading.Lock()
         self._last_rerank_rule_telemetry: dict[str, dict[str, int]] = {}
+
+    def _inject_lattice_decoder(self) -> None:
+        """Wire SymSpell + lattice config into the segmenter for merge post-processing."""
+        if (
+            self.config.lattice_decoder.enabled
+            and isinstance(self.segmenter, DefaultSegmenter)
+            and hasattr(self.segmenter, "set_symspell")
+            and self.symspell is not None
+        ):
+            self.segmenter.set_symspell(self.symspell, self.config.lattice_decoder)
 
     def _init_context(self) -> None:
         """Load detection rules from YAML (shadows class-level hardcoded dicts)."""

@@ -437,7 +437,7 @@ class TestMemoryManagement:
 
     def test_backpressure_applied(self, mock_checker):
         """Test that backpressure is applied when memory limit exceeded."""
-        config = StreamingConfig(max_memory_mb=1)  # Very low limit
+        config = StreamingConfig(max_memory_mb=1, memory_check_interval=1)
         streaming = StreamingChecker(mock_checker, config=config)
 
         # Mock high memory usage
@@ -664,7 +664,7 @@ class TestBackpressureHandling:
 
     def test_sync_backpressure_gc_called(self, mock_checker):
         """Test that GC is called during backpressure."""
-        config = StreamingConfig(max_memory_mb=1)
+        config = StreamingConfig(max_memory_mb=1, memory_check_interval=1)
         streaming = StreamingChecker(mock_checker, config=config)
 
         with patch.object(streaming, "_get_memory_usage_mb", return_value=100):
@@ -675,7 +675,7 @@ class TestBackpressureHandling:
 
     def test_async_backpressure_sleep(self, mock_checker):
         """Test that async backpressure applies sleep."""
-        config = StreamingConfig(max_memory_mb=1)
+        config = StreamingConfig(max_memory_mb=1, memory_check_interval=1)
         streaming = StreamingChecker(mock_checker, config=config)
 
         async def async_lines():
@@ -693,7 +693,8 @@ class TestBackpressureHandling:
 
     def test_backpressure_memory_tracking(self, mock_checker):
         """Test that memory usage is tracked in stats."""
-        streaming = StreamingChecker(mock_checker)
+        config = StreamingConfig(memory_check_interval=1)
+        streaming = StreamingChecker(mock_checker, config=config)
         stats = StreamingStats()
 
         # Mock high memory usage
@@ -705,7 +706,7 @@ class TestBackpressureHandling:
 
     def test_backpressure_not_applied_under_limit(self, mock_checker):
         """Test that backpressure is not applied when under memory limit."""
-        config = StreamingConfig(max_memory_mb=100)
+        config = StreamingConfig(max_memory_mb=100, memory_check_interval=1)
         streaming = StreamingChecker(mock_checker, config=config)
 
         with patch.object(streaming, "_get_memory_usage_mb", return_value=50):
@@ -734,7 +735,7 @@ class TestBackpressureHandling:
 
     def test_async_slow_consumer_with_backpressure(self, mock_checker):
         """Test async streaming with slow consumer under memory pressure."""
-        config = StreamingConfig(max_memory_mb=1)
+        config = StreamingConfig(max_memory_mb=1, memory_check_interval=1)
         streaming = StreamingChecker(mock_checker, config=config)
 
         async def async_lines():
@@ -776,7 +777,7 @@ class TestBackpressureHandling:
 
     def test_backpressure_recovery(self, mock_checker):
         """Test that processing continues normally after backpressure."""
-        config = StreamingConfig(max_memory_mb=50)
+        config = StreamingConfig(max_memory_mb=50, memory_check_interval=1)
         streaming = StreamingChecker(mock_checker, config=config)
         stats = StreamingStats()
 

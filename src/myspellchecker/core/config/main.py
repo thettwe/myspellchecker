@@ -17,6 +17,7 @@ from myspellchecker.core.config.algorithm_configs import (
     BrokenCompoundStrategyConfig,
     CompoundResolverConfig,
     FrequencyGuardConfig,
+    LatticeDecoderConfig,
     NeuralRerankerConfig,
     NgramContextConfig,
     PhoneticConfig,
@@ -242,6 +243,10 @@ class SpellCheckerConfig(BaseModel):
     frequency_guards: FrequencyGuardConfig = Field(
         default_factory=FrequencyGuardConfig,
         description="Centralized frequency thresholds for validators and strategies",
+    )
+    lattice_decoder: LatticeDecoderConfig = Field(
+        default_factory=LatticeDecoderConfig,
+        description="Lattice-merge segmentation decoder configuration",
     )
     compound_resolver: CompoundResolverConfig = Field(
         default_factory=CompoundResolverConfig,

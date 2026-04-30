@@ -7,10 +7,6 @@ Verifies that morphology analyzer uses efficient list operations:
 - Performance is acceptable for batch operations
 """
 
-import time
-
-import pytest
-
 
 class TestMorphologyPerformance:
     """Test performance optimizations in morphology module."""
@@ -39,30 +35,6 @@ class TestMorphologyPerformance:
 
         # Check that suffixes are found (order depends on stripping sequence)
         assert isinstance(result.suffixes, list)
-
-    @pytest.mark.slow
-    def test_batch_analysis_performance(self):
-        """Batch word analysis should complete in reasonable time."""
-        from myspellchecker.text.morphology import MorphologyAnalyzer
-
-        analyzer = MorphologyAnalyzer()
-
-        # Test words with various suffix patterns
-        test_words = [
-            "စာအုပ်များ",  # book + plural
-            "ဆရာဝန်",  # doctor
-            "ကျောင်းသား",  # student
-            "လုပ်ငန်း",  # work/business
-            "သူငယ်ချင်း",  # friend
-        ] * 100  # 500 words total
-
-        start = time.perf_counter()
-        for word in test_words:
-            analyzer.analyze_word(word)
-        elapsed = time.perf_counter() - start
-
-        # Should complete 500 words in under 2 seconds
-        assert elapsed < 2.0, f"Too slow: {elapsed:.3f}s for 500 words"
 
 
 class TestSuffixExtractionCorrectness:

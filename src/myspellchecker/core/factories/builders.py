@@ -59,6 +59,27 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+def _load_compound_affinity(config: SpellCheckerConfig) -> dict[str, float] | None:
+    """Load pre-computed compound affinity scores from JSON, if available."""
+    import json
+    from pathlib import Path
+
+    db_path = getattr(config, "db_path", None) or ""
+    data_dir = Path(db_path).parent if db_path else Path("data")
+    affinity_path = data_dir / "compound_affinity.json"
+    if not affinity_path.exists():
+        return None
+    try:
+        with open(affinity_path, encoding="utf-8") as f:
+            raw = json.load(f)
+        result = {k: v["affinity"] for k, v in raw.items() if "affinity" in v}
+        logger.debug("Loaded %d compound affinity scores from %s", len(result), affinity_path)
+        return result
+    except Exception:
+        logger.warning("Failed to load compound affinity from %s", affinity_path, exc_info=True)
+        return None
+
+
 # =============================================================================
 # SymSpell Builder
 # =============================================================================
@@ -534,6 +555,54 @@ def build_context_validation_strategies(
             )
         )
         logger.debug("Added ToneSafetyNetStrategy (priority 22)")
+
+    # Priority 21: Cross-Whitespace Compound Probe
+    # Concatenates adjacent whitespace-delimited Myanmar spans and checks
+    # the dictionary for compound words split by user-inserted spaces.
+    if validation_config.use_cross_whitespace_probe:
+        from myspellchecker.core.validation_strategies.cross_whitespace_probe_strategy import (
+            CrossWhitespaceProbeStrategy,
+        )
+
+        strategies.append(
+            CrossWhitespaceProbeStrategy(
+                provider=provider,
+                enabled=True,
+                min_concat_freq=validation_config.cross_whitespace_probe_min_freq,
+                max_part_length=validation_config.cross_whitespace_probe_max_part_length,
+                max_concat_length=validation_config.cross_whitespace_probe_max_concat_length,
+                confidence=validation_config.cross_whitespace_probe_confidence,
+            )
+        )
+        logger.debug("Added CrossWhitespaceProbeStrategy (priority 21)")
+
+    # Priority 46: Compound Merge Probe
+    # Slides a token-level window across segmented words, concatenates
+    # adjacent tokens, and probes SymSpell for compound corrections.
+    if validation_config.use_compound_merge_probe and symspell is not None:
+        from myspellchecker.core.validation_strategies.compound_merge_probe_strategy import (
+            CompoundMergeProbeStrategy,
+        )
+
+        compound_affinity = _load_compound_affinity(config)
+
+        strategies.append(
+            CompoundMergeProbeStrategy(
+                symspell=symspell,
+                provider=provider,
+                enabled=True,
+                max_window_tokens=validation_config.compound_merge_probe_max_window,
+                max_span_length=validation_config.compound_merge_probe_max_span_length,
+                max_edit_distance=validation_config.compound_merge_probe_max_ed,
+                min_candidate_freq=validation_config.compound_merge_probe_min_freq,
+                fragment_freq_floor=validation_config.compound_merge_probe_fragment_freq_floor,
+                max_length_diff=validation_config.compound_merge_probe_max_length_diff,
+                confidence=validation_config.compound_merge_probe_confidence,
+                compound_affinity=compound_affinity,
+                affinity_threshold=validation_config.compound_merge_probe_affinity_threshold,
+            )
+        )
+        logger.debug("Added CompoundMergeProbeStrategy (priority 46)")
 
     # Priority 23: Pre-Segmenter Raw-Token SymSpell Probe
     # Runs SymSpell.lookup(raw_token, level='word') on unsegmented Myanmar spans
