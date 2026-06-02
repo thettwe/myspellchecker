@@ -400,6 +400,7 @@ def build_context_validation_strategies(
     4. SyllableWindowOOVStrategy (priority 22, needs symspell)
     5. HiddenCompoundStrategy (priority 23)
     6. StatisticalConfusableStrategy (priority 24)
+       ProbeBoostedCompoundStrategy (priority 24, optional)
     7. BrokenCompoundStrategy (priority 25)
     8. POSSequenceValidationStrategy (priority 30)
     9. QuestionStructureValidationStrategy (priority 40)
@@ -408,6 +409,8 @@ def build_context_validation_strategies(
     12. ConfusableSemanticStrategy (priority 48)
     13. NgramContextValidationStrategy (priority 50)
     14. SemanticValidationStrategy (priority 70)
+    15. GECToRValidationStrategy (priority 85, optional)
+        ProbeValidationStrategy (priority 85, optional)
 
     This is the canonical strategy building logic used by both
     DI factories and ComponentFactory.
@@ -879,6 +882,92 @@ def build_context_validation_strategies(
             )
         )
         logger.debug("Added ByT5SafetyNetStrategy (priority 80)")
+
+    # Priority 85: GECToR neural corrector (safety-net).
+    # Only fires on sentences where the rule pipeline found zero errors.
+    if validation_config.use_gector and validation_config.gector_model_path:
+        from myspellchecker.algorithms.gector_corrector import GECToRCorrector
+        from myspellchecker.core.validation_strategies.gector_strategy import (
+            GECToRValidationStrategy,
+        )
+
+        gector_corrector = GECToRCorrector(validation_config.gector_model_path)
+        strategies.append(
+            GECToRValidationStrategy(
+                corrector=gector_corrector,
+                enabled=True,
+                min_confidence=validation_config.gector_min_confidence,
+                confidence=validation_config.gector_confidence,
+                max_existing_errors=validation_config.gector_max_existing_errors,
+            )
+        )
+        logger.debug("Added GECToRValidationStrategy (priority 85)")
+
+    # Priority 24/26/85: probe-based syllable-span detection (v1.7.x neural).
+    # Frozen GKLMIP-BERT + thin Linear head. Three strategies share one engine:
+    # - ProbeBoostedCompoundStrategy at priority 24 (whitespace compound boost)
+    # - ProbeSegmenterRescueStrategy at priority 26 (no-whitespace over-seg rescue)
+    # - ProbeValidationStrategy at priority 85 (replaces v3 GECToR)
+    # See `30_Audits/Probe Hybrid Ships at +0.0067 2026-05-03.md` and
+    # `30_Audits/Probe Phase 2A Ships at +0.0111 2026-05-04.md`.
+    needs_probe = (
+        validation_config.use_probe_corrector
+        or validation_config.use_probe_compound
+        or validation_config.use_probe_segmenter_rescue
+    )
+    if needs_probe and validation_config.probe_model_path:
+        from myspellchecker.algorithms.probe.syllable_span_probe import (
+            ProbeInferenceEngine,
+        )
+
+        probe_engine = ProbeInferenceEngine(validation_config.probe_model_path)
+
+        if validation_config.use_probe_compound:
+            from myspellchecker.core.validation_strategies.probe_boosted_compound_strategy import (
+                ProbeBoostedCompoundStrategy,
+            )
+
+            strategies.append(
+                ProbeBoostedCompoundStrategy(
+                    engine=probe_engine,
+                    provider=provider,
+                    threshold=validation_config.probe_compound_threshold,
+                    compound_min_freq=validation_config.probe_compound_min_freq,
+                    max_existing_errors=validation_config.probe_max_existing_errors,
+                )
+            )
+            logger.debug("Added ProbeBoostedCompoundStrategy (priority 24)")
+
+        if validation_config.use_probe_segmenter_rescue and symspell is not None:
+            from myspellchecker.core.validation_strategies.probe_segmenter_rescue_strategy import (
+                ProbeSegmenterRescueStrategy,
+            )
+
+            strategies.append(
+                ProbeSegmenterRescueStrategy(
+                    engine=probe_engine,
+                    provider=provider,
+                    symspell=symspell,
+                    threshold=validation_config.probe_rescue_threshold,
+                    min_freq=validation_config.probe_rescue_min_freq,
+                    max_existing_errors=validation_config.probe_max_existing_errors,
+                )
+            )
+            logger.debug("Added ProbeSegmenterRescueStrategy (priority 26)")
+
+        if validation_config.use_probe_corrector:
+            from myspellchecker.core.validation_strategies.probe_strategy import (
+                ProbeValidationStrategy,
+            )
+
+            strategies.append(
+                ProbeValidationStrategy(
+                    engine=probe_engine,
+                    threshold=validation_config.probe_corrector_threshold,
+                    max_existing_errors=validation_config.probe_max_existing_errors,
+                )
+            )
+            logger.debug("Added ProbeValidationStrategy (priority 85)")
 
     logger.info(
         f"Built {len(strategies)} validation strategies: "
