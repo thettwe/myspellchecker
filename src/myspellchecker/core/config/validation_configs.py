@@ -1364,6 +1364,144 @@ class ValidationConfig(BaseModel):
         description="Confidence score for ByT5 safety-net errors.",
     )
 
+    # GECToR neural corrector (priority 85, after all rule-based strategies)
+    # Runs a fine-tuned ModernBERT token classifier as a parallel corrector.
+    # Predicts edit tags per word and emits corrections for positions not
+    # already flagged by earlier strategies.
+    use_gector: bool = Field(
+        default=False,
+        description=(
+            "Enable GECToRValidationStrategy (priority 85). Runs a fine-tuned "
+            "ModernBERT token classifier that predicts edit tags per word. "
+            "Requires `gector_model_path` to point at a model directory."
+        ),
+    )
+    gector_model_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to GECToR model directory containing config.json, "
+            "model.safetensors, tag_vocab.json, and tokenizer files."
+        ),
+    )
+    gector_min_confidence: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Minimum tag confidence to consider a GECToR prediction.",
+    )
+    gector_confidence: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score cap for GECToR-emitted errors.",
+    )
+    gector_max_existing_errors: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Maximum number of existing errors (from earlier strategies) "
+            "allowed before GECToR fires. 0 means safety-net only; higher "
+            "values let GECToR fire even when the pipeline found errors."
+        ),
+    )
+
+    # Probe-based syllable-span detection (v1.7.x neural enhancement).
+    # Frozen GKLMIP-BERT + thin Linear head. Two strategies share one model:
+    # - ProbeValidationStrategy at priority 85 (replaces v3 GECToR)
+    # - ProbeBoostedCompoundStrategy at priority 24 (boosts BrokenCompoundStrategy)
+    # See `30_Audits/Probe Hybrid Ships at +0.0067 2026-05-03.md`.
+    use_probe_corrector: bool = Field(
+        default=False,
+        description=(
+            "Enable ProbeValidationStrategy (priority 85). Uses a probe model "
+            "(frozen encoder + thin head) instead of the v3 GECToR corrector. "
+            "Requires `probe_model_path` to point at a probe artifact "
+            "directory (head.pt + config.json)."
+        ),
+    )
+    use_probe_compound: bool = Field(
+        default=False,
+        description=(
+            "Enable ProbeBoostedCompoundStrategy (priority 24). Pre-filter "
+            "before BrokenCompoundStrategy: emits broken_compound errors when "
+            "the probe scores a whitespace syllable highly AND the merged "
+            "compound exists in the dictionary at sufficient frequency."
+        ),
+    )
+    probe_model_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to probe model directory containing head.pt + config.json. "
+            "Used by both ProbeValidationStrategy and ProbeBoostedCompoundStrategy."
+        ),
+    )
+    probe_corrector_threshold: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Per-syllable confidence threshold for ProbeValidationStrategy. "
+            "Optimal sweet spot is 0.75 (per benchmark sweep)."
+        ),
+    )
+    probe_compound_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Whitespace-syllable confidence threshold for "
+            "ProbeBoostedCompoundStrategy. Optimal value is 0.7 — lower "
+            "values add FPs faster than TPs."
+        ),
+    )
+    probe_compound_min_freq: int = Field(
+        default=50,
+        ge=0,
+        description=(
+            "Minimum corpus frequency for a merged compound to be suggested "
+            "by ProbeBoostedCompoundStrategy. Filters out rare compound "
+            "candidates that may be noisy."
+        ),
+    )
+    probe_max_existing_errors: int = Field(
+        default=100,
+        ge=0,
+        description=(
+            "Maximum existing-errors count allowed before either probe "
+            "strategy fires. Default 100 = effectively no gate (probe runs "
+            "regardless). Lower values restrict probes to safety-net mode."
+        ),
+    )
+    use_probe_segmenter_rescue: bool = Field(
+        default=False,
+        description=(
+            "Enable ProbeSegmenterRescueStrategy (priority 26). Targets the "
+            "no-whitespace over-segmentation residual: when the segmenter "
+            "splits a typo into adjacent dict-valid tokens, the probe "
+            "scores the merge boundary and SymSpell ed=1 lookup on the "
+            "merged form rescues a high-frequency dict word as the "
+            "broken_compound suggestion."
+        ),
+    )
+    probe_rescue_threshold: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Probe per-syllable threshold for ProbeSegmenterRescueStrategy. "
+            "Optimal sweep value 0.75 (paired with min_freq=2000)."
+        ),
+    )
+    probe_rescue_min_freq: int = Field(
+        default=2000,
+        ge=0,
+        description=(
+            "Minimum corpus frequency for the SymSpell ed=1 candidate to be "
+            "emitted by ProbeSegmenterRescueStrategy. Higher values reduce "
+            "FPs from low-confidence dict matches; 2000 is the sweep optimum."
+        ),
+    )
+
     # MLM post-filter for invalid_word / dangling_word FP suppression
     mlm_plausibility_threshold: float = Field(
         default=3.0,

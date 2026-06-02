@@ -899,6 +899,85 @@ def run_benchmark(
         existing_immune.add("ByT5SafetyNetStrategy")
         config.validation.suppression_immune_strategies = frozenset(existing_immune)
 
+    # GECToR neural corrector overrides
+    gector_env = _os.environ.get("MSC_USE_GECTOR", "").strip().lower()
+    gector_path_env = _os.environ.get("MSC_GECTOR_MODEL_PATH", "").strip()
+    gector_min_conf_env = _os.environ.get("MSC_GECTOR_MIN_CONFIDENCE", "").strip()
+    gector_conf_env = _os.environ.get("MSC_GECTOR_CONFIDENCE", "").strip()
+    gector_max_existing_env = _os.environ.get("MSC_GECTOR_MAX_EXISTING_ERRORS", "").strip()
+    if gector_env in ("1", "true", "yes", "on"):
+        config.validation.use_gector = True
+        print("  use_gector: True")
+    if gector_path_env:
+        config.validation.gector_model_path = gector_path_env
+        print(f"  gector_model_path: {gector_path_env}")
+    if gector_min_conf_env:
+        config.validation.gector_min_confidence = float(gector_min_conf_env)
+        print(f"  gector_min_confidence: {gector_min_conf_env}")
+    if gector_conf_env:
+        config.validation.gector_confidence = float(gector_conf_env)
+        print(f"  gector_confidence: {gector_conf_env}")
+    if gector_max_existing_env:
+        config.validation.gector_max_existing_errors = int(gector_max_existing_env)
+        print(f"  gector_max_existing_errors: {gector_max_existing_env}")
+    if config.validation.use_gector:
+        existing_immune = set(config.validation.suppression_immune_strategies or ())
+        existing_immune.add("GECToRValidationStrategy")
+        config.validation.suppression_immune_strategies = frozenset(existing_immune)
+
+    # Probe-based syllable-span detection overrides (v1.7.x neural enhancement).
+    # Three strategies share one probe model; toggle each independently.
+    probe_corr_env = _os.environ.get("MSC_USE_PROBE_CORRECTOR", "").strip().lower()
+    probe_comp_env = _os.environ.get("MSC_USE_PROBE_COMPOUND", "").strip().lower()
+    probe_rescue_env = _os.environ.get("MSC_USE_PROBE_RESCUE", "").strip().lower()
+    probe_path_env = _os.environ.get("MSC_PROBE_MODEL_PATH", "").strip()
+    probe_corr_thr_env = _os.environ.get("MSC_PROBE_CORRECTOR_THRESHOLD", "").strip()
+    probe_comp_thr_env = _os.environ.get("MSC_PROBE_COMPOUND_THRESHOLD", "").strip()
+    probe_comp_freq_env = _os.environ.get("MSC_PROBE_COMPOUND_MIN_FREQ", "").strip()
+    probe_rescue_thr_env = _os.environ.get("MSC_PROBE_RESCUE_THRESHOLD", "").strip()
+    probe_rescue_freq_env = _os.environ.get("MSC_PROBE_RESCUE_MIN_FREQ", "").strip()
+    probe_max_existing_env = _os.environ.get("MSC_PROBE_MAX_EXISTING_ERRORS", "").strip()
+    if probe_corr_env in ("1", "true", "yes", "on"):
+        config.validation.use_probe_corrector = True
+        print("  use_probe_corrector: True")
+    if probe_comp_env in ("1", "true", "yes", "on"):
+        config.validation.use_probe_compound = True
+        print("  use_probe_compound: True")
+    if probe_rescue_env in ("1", "true", "yes", "on"):
+        config.validation.use_probe_segmenter_rescue = True
+        print("  use_probe_segmenter_rescue: True")
+    if probe_path_env:
+        config.validation.probe_model_path = probe_path_env
+        print(f"  probe_model_path: {probe_path_env}")
+    if probe_corr_thr_env:
+        config.validation.probe_corrector_threshold = float(probe_corr_thr_env)
+        print(f"  probe_corrector_threshold: {probe_corr_thr_env}")
+    if probe_comp_thr_env:
+        config.validation.probe_compound_threshold = float(probe_comp_thr_env)
+        print(f"  probe_compound_threshold: {probe_comp_thr_env}")
+    if probe_comp_freq_env:
+        config.validation.probe_compound_min_freq = int(probe_comp_freq_env)
+        print(f"  probe_compound_min_freq: {probe_comp_freq_env}")
+    if probe_rescue_thr_env:
+        config.validation.probe_rescue_threshold = float(probe_rescue_thr_env)
+        print(f"  probe_rescue_threshold: {probe_rescue_thr_env}")
+    if probe_rescue_freq_env:
+        config.validation.probe_rescue_min_freq = int(probe_rescue_freq_env)
+        print(f"  probe_rescue_min_freq: {probe_rescue_freq_env}")
+    if probe_max_existing_env:
+        config.validation.probe_max_existing_errors = int(probe_max_existing_env)
+        print(f"  probe_max_existing_errors: {probe_max_existing_env}")
+    # Auto-register ProbeValidationStrategy as suppression-immune (it uses the
+    # GECToRValidationStrategy class label so the downstream filters treat it
+    # the same as the legacy GECToR strategy for fusion / meta-classifier
+    # bypass purposes). ProbeBoostedCompoundStrategy is NOT added to this set
+    # — its dictionary-gated suggestions need to flow through the normal
+    # suppression cascade (verified empirically: adding it costs +25 FP).
+    if config.validation.use_probe_corrector:
+        existing_immune = set(config.validation.suppression_immune_strategies or ())
+        existing_immune.add("GECToRValidationStrategy")
+        config.validation.suppression_immune_strategies = frozenset(existing_immune)
+
     # Initialize checker with specified database
     provider = SQLiteProvider(database_path=str(db_path))
     checker = SpellChecker(config=config, provider=provider)
