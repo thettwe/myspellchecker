@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-06-02
+
+### Added
+
+- **Syllable-span probe (opt-in neural enhancement).** A frozen-encoder probe that improves detection recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model (~430 MB) with a single inference per sentence:
+  - `ProbeBoostedCompoundStrategy` (priority 24) — combines neural span scoring with dictionary lookup to flag whitespace-broken compounds.
+  - `ProbeSegmenterRescueStrategy` (priority 26) — rescues typos the segmenter splits into adjacent dictionary-valid tokens by scoring the boundary and recovering a high-frequency merged-form candidate.
+  - `ProbeValidationStrategy` (priority 85) — a compact frozen-architecture replacement for the legacy token-classification corrector.
+- **Probe configuration.** Opt-in via `use_probe_corrector`, `use_probe_compound`, and `use_probe_segmenter_rescue` config flags (or the `MSC_USE_PROBE_*` environment variables), with tunable confidence thresholds and dictionary-frequency floors. All default off.
+
+### Changed
+
+- The probe strategies are registered as suppression-immune so their detections survive the downstream filter cascade.
+
+### Benchmark
+
+- With the probe enabled (all flags), spelling composite improves `0.6436` → `0.6561` (**+0.0125**): +47 true positives, recall +3.2pp, top-1 accuracy +1.7pp, clean false-positive sentences 84 → 92. Default behavior (probe off) is unchanged.
+
+### Compatibility
+
+- No change to default behavior; existing deployments are unaffected unless the probe flags are enabled. Adds three public strategy classes in `myspellchecker.core.validation_strategies`. The probe model artifact is required at runtime only when the flags are enabled.
+
 ## [1.7.0] - 2026-04-30
 
 ### Added
