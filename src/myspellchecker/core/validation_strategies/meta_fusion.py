@@ -61,6 +61,9 @@ _BYPASS_META_STRATEGIES: frozenset[str] = frozenset(
     {
         "LoanWordValidationStrategy",
         "VisargaStrategy",
+        "GECToRValidationStrategy",
+        "ProbeBoostedCompoundStrategy",
+        "ProbeSegmenterRescueStrategy",
     }
 )
 
