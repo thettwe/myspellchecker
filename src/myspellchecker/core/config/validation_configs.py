@@ -779,6 +779,15 @@ class ValidationConfig(BaseModel):
             "against recall recovery; raising it tightens precision."
         ),
     )
+    compound_split_ortho_insertion_rescue: bool = Field(
+        default=False,
+        description=(
+            "Carve-out: keep (do not suppress) compound-split tokens whose ed=1 "
+            "SymSpell top-1 is a single in-syllable diacritic INSERTION "
+            "(asat/visarga/dot-below/ha-htoe/ya-medial), non-Latin. Recovers "
+            "orthographic-insertion typos the skip-rule freq gate kills."
+        ),
+    )
 
     # Broken compound detection (wrongly split compound words)
     use_broken_compound_detection: bool = Field(

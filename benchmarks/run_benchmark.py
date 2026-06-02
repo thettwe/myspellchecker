@@ -330,14 +330,20 @@ def _is_token_boundary_hidden(target_text: str, words: list[str]) -> bool:
     return False
 
 
-def classify_false_negative_reason(
+def _classify_fn_raw(
     *,
     checker: Any,
     input_text: str,
     gold_error: dict[str, Any],
     segmented_words: list[str],
 ) -> str:
-    """Classify likely cause for one false negative."""
+    """Semantic-MLM heuristic for one false negative (raw verdict).
+
+    NOTE: this consults only the semantic checker, so it cannot distinguish a
+    true generation gap from a candidate that the word-path generated and
+    suppression/ranking later killed. The :func:`classify_false_negative_reason`
+    wrapper refines the ``candidate_not_generated`` verdict using SymSpell.
+    """
     span = gold_error.get("span", {})
     start = int(span.get("start", -1))
     end = int(span.get("end", -1))
@@ -410,6 +416,69 @@ def classify_false_negative_reason(
         return "candidate_not_generated"
 
     return "candidate_not_generated"
+
+
+def _symspell_can_generate(checker: Any, target_text: str, gold_correction: Any) -> bool:
+    """True when the word-candidate path (SymSpell) can produce the gold for
+    ``target_text`` — i.e. a candidate WAS generatable, so a false negative
+    here is a surfacing / suppression / ranking failure, not a generation gap.
+    Used to split the conflated ``candidate_not_generated`` bucket honestly.
+    """
+    symspell = getattr(checker, "symspell", None)
+    if symspell is None or not target_text:
+        return False
+    try:
+        candidates = symspell.lookup(target_text, level="word", max_suggestions=10)
+    except Exception:
+        return False
+    if not candidates:
+        return False
+    norm_gold = gold_correction.strip() if isinstance(gold_correction, str) else ""
+    for cand in candidates:
+        term = getattr(cand, "term", None)
+        if not term:
+            continue
+        if norm_gold:
+            if term == norm_gold:
+                return True
+        elif float(getattr(cand, "edit_distance", 99)) <= 2:
+            return True
+    return False
+
+
+def classify_false_negative_reason(
+    *,
+    checker: Any,
+    input_text: str,
+    gold_error: dict[str, Any],
+    segmented_words: list[str],
+) -> str:
+    """Classify the likely cause of one false negative (honest split).
+
+    Wraps the semantic-MLM heuristic (:func:`_classify_fn_raw`) and refines its
+    ``candidate_not_generated`` verdict: when the word-candidate path (SymSpell)
+    CAN produce the gold but it did not reach the final response, the candidate
+    was generated-then-killed → ``candidate_suppressed``. Only when NEITHER the
+    MLM heuristic NOR SymSpell can produce the gold is it a true
+    ``candidate_not_generated`` (Stage-0 generation gap). This stops the bucket
+    from conflating the ~88% true-gap with the generated-then-suppressed slice.
+    """
+    raw = _classify_fn_raw(
+        checker=checker,
+        input_text=input_text,
+        gold_error=gold_error,
+        segmented_words=segmented_words,
+    )
+    if raw != "candidate_not_generated":
+        return raw
+    span = gold_error.get("span", {})
+    start = int(span.get("start", -1))
+    end = int(span.get("end", -1))
+    if 0 <= start < end <= len(input_text):
+        target_text = input_text[start:end]
+        if _symspell_can_generate(checker, target_text, gold_error.get("gold_correction")):
+            return "candidate_suppressed"
+    return raw
 
 
 def merge_strategy_debug_telemetry(
@@ -681,6 +750,9 @@ def run_benchmark(
     if _os.environ.get("MSC_USE_SEGMENTER_MERGE_RESCUE", "").lower() in ("1", "true", "yes"):
         config.validation.use_segmenter_post_merge_rescue = True
         print("  use_segmenter_post_merge_rescue: ENABLED (via MSC_USE_SEGMENTER_MERGE_RESCUE)")
+    if _os.environ.get("MSC_USE_ORTHO_RESCUE", "").lower() in ("1", "true", "yes", "on"):
+        config.validation.compound_split_ortho_insertion_rescue = True
+        print("  compound_split_ortho_insertion_rescue: ENABLED (via MSC_USE_ORTHO_RESCUE)")
     sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
     if sme_bigram_env:
         try:
@@ -945,8 +1017,21 @@ def run_benchmark(
         return err.get("scope", "spelling") in _scope_set
 
     # Domain filtering — spelling-first (benchmark v1.4.0+).
+    # 'lexical' is 'spelling' minus whitespace-only subtypes — used by the v1.11
+    # FN-conditioned training pipeline which delegates spacing to the segmenter
+    # pre-pass and trains the corrector on lexical-only positions.
+    _LEXICAL_EXCLUDED_SUBTYPES = frozenset(
+        {
+            "spacing",
+            "spacing_error",
+            "extra_space",
+            "word_boundary",
+            "incorrect_word_segmentation",
+        }
+    )
+
     _domain_norm = domain.strip().lower() if domain else "all"
-    if _domain_norm not in {"spelling", "grammar", "both", "all"}:
+    if _domain_norm not in {"spelling", "grammar", "both", "all", "lexical"}:
         print(
             f"WARNING: unknown --domain {_domain_norm!r}; falling back to 'all'",
             file=sys.stderr,
@@ -961,6 +1046,11 @@ def run_benchmark(
         if err_domain is None:
             # v1.3.x benchmarks or hand-added spans without a label — pass only for 'all'.
             return False
+        if _domain_norm == "lexical":
+            # Lexical = spelling AND not a whitespace-only subtype.
+            if err_domain != "spelling":
+                return False
+            return err.get("error_subtype") not in _LEXICAL_EXCLUDED_SUBTYPES
         return err_domain == _domain_norm
 
     def _is_scorable(err: dict) -> bool:
@@ -1911,13 +2001,15 @@ def main():
     parser.add_argument(
         "--domain",
         type=str,
-        choices=["spelling", "grammar", "both", "all"],
+        choices=["spelling", "grammar", "both", "all", "lexical"],
         default="all",
         help=(
             "Spelling-first domain filter (benchmark v1.4.0+). Reads the per-span "
             "`domain` field assigned by scripts/label_benchmark_domains.py. "
             "Combined with --scope as AND. Errors without a `domain` field are "
-            "excluded from non-'all' runs. (default: all)"
+            "excluded from non-'all' runs. 'lexical' is 'spelling' minus "
+            "whitespace-only subtypes (spacing/extra_space/word_boundary/etc.) — "
+            "use this for word-level lexical correction evaluation. (default: all)"
         ),
     )
 
@@ -1972,7 +2064,10 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     db_name = args.db.stem
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Microsecond resolution makes the output filename collision-proof for
+    # concurrent runs writing to the same --output dir (per-second timestamps
+    # collided and interleaved two json.dump writes into one corrupt file).
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     semantic_tag = "_semantic" if args.semantic else ""
     ner_tag = "_ner" if args.ner else ""
     targeted_tags = ""
