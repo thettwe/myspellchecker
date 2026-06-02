@@ -33,6 +33,7 @@
 *   **Suffix-Aware Re-Segmentation**: DefaultSegmenter post-processes oversized tokens and colloquial-locative merges (e.g. `ရန်ကုန်မာ` → `[ရန်, ကုန်, မာ]`) for cleaner downstream validation.
 *   **Compound & Morpheme Handling**: DP-based compound resolution, ternary compound splits in morpheme correction, productive reduplication validation.
 *   **AI Semantic Checking (Optional)**: ONNX masked language model for context-aware validation.
+*   **Syllable-Span Probe (opt-in, v1.7.1)**: A frozen-encoder neural probe that improves recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model; default-off, enabled via `use_probe_*` config flags or `MSC_USE_PROBE_*` environment variables.
 *   **Named Entity Recognition**: Heuristic and Transformer-based NER to reduce false positives on names and places.
 
 ### Dictionary Building Pipeline
@@ -64,7 +65,7 @@
 
 Full documentation is available at **[docs.myspellchecker.com](https://docs.myspellchecker.com/)**.
 
-> **What's new in v1.6.0?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for new validation strategies (mined-confusable, pre-segmenter raw probe), the compound-split confusable boost, the skip-rule confidence gate, consonant-gated Tall-AA normalization, the flat-AA dictionary migration, and spelling-first benchmark labeling.
+> **What's new in v1.7.1?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for the opt-in **syllable-span probe** — a frozen-encoder neural enhancement (three default-off strategies sharing one small model) that improves recall on broken-compound, over-segmentation, and consonant-substitution errors (+0.0125 composite when enabled). Earlier v1.7.x work added mined-confusable detection, the cross-whitespace and compound-merge probes, the skip-rule confidence gate, and benchmark-hygiene reclassification.
 
 ### Getting Started
 *   **[Introduction](https://docs.myspellchecker.com/introduction)**: Overview of the library and its architecture.
