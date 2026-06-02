@@ -180,6 +180,24 @@ _GREEDY_REASSEMBLY_MAX_SPAN = 4
 # sites from drifting.
 _COMPOUND_SPLIT_MIN_SYLLABLES = 4
 
+# In-syllable diacritic characters whose single INSERTION (gold = typo + 1
+# codepoint) marks an orthographic-insertion typo, distinguished from the
+# deletion / whole-word-swap shapes that the compound-split suppressor must
+# keep killing. Members: asat (U+103A), visarga (U+1038), dot-below (U+1037),
+# ha-htoe pair (U+103D/U+103E), ya-medial pair (U+103B/U+103C). Used by
+# ``_is_orthographic_insertion_typo`` as the SHAPE gate — never a freq/ed gate.
+_ORTHO_INSERTION_CHARS = frozenset(
+    {
+        chr(0x103A),  # asat (killer / virama-marker)
+        chr(0x1038),  # visarga
+        chr(0x1037),  # dot below
+        chr(0x103D),  # medial wa / ha-htoe
+        chr(0x103E),  # medial ha
+        chr(0x103B),  # medial ya
+        chr(0x103C),  # medial ra
+    }
+)
+
 
 def _greedy_syllable_reassembly(
     syllables: Sequence[str],
@@ -881,6 +899,11 @@ class ErrorSuppressionMixin:
         if provider is None or segmenter is None:
             return
 
+        # Config flag for the orthographic-insertion carve-out (default off).
+        config = getattr(self, "config", None)
+        validation = getattr(config, "validation", None) if config else None
+        ortho_rescue = bool(getattr(validation, "compound_split_ortho_insertion_rescue", False))
+
         to_remove: set[int] = set()
         for idx, err in enumerate(errors):
             if err.error_type != ET_WORD:
@@ -897,8 +920,28 @@ class ErrorSuppressionMixin:
             if result is None:
                 continue
             word, _syllables, _parts = result
-            if not self._skip_rule_has_confident_candidate(word):
-                to_remove.add(idx)
+            # Keep (do not suppress) when either:
+            #   (a) the existing skip-rule freq/ed gate has a confident top-1, OR
+            #   (b) the ortho-rescue flag is on AND the token's ed=1 top-1 is a
+            #       single in-syllable diacritic INSERTION (asat/visarga/
+            #       dot-below/ha-htoe/ya-medial), non-Latin, non-Latin-adjacent.
+            # The (b) carve-out is a pure SHAPE gate — it does not relax any
+            # freq/ed threshold; it recovers orthographic-insertion typos that
+            # the freq gate kills because TP and FP overlap in SymSpell freq.
+            if self._skip_rule_has_confident_candidate(word):
+                continue
+            if ortho_rescue:
+                detail = self._ortho_insertion_detail(word)
+                if detail is not None:
+                    # Keep — and narrow the emission to the affected syllable
+                    # with the corrected syllable as rank-1 suggestion, so the
+                    # benchmark credits top-1/MRR (gold is the narrow syllable,
+                    # not the whole merged token). Only when offset-clean
+                    # (word == err.text) so positions map 1:1; else keep wide.
+                    if word == err.text:
+                        self._narrow_ortho_insertion_error(err, detail)
+                    continue
+            to_remove.add(idx)
 
         if to_remove:
             errors[:] = [e for i, e in enumerate(errors) if i not in to_remove]
@@ -1120,6 +1163,137 @@ class ErrorSuppressionMixin:
             max_ed=getattr(validation, "skip_rule_gate_max_ed", 2),
             min_freq=getattr(validation, "skip_rule_gate_min_freq", 1000),
         )
+
+    def _is_orthographic_insertion_typo(self, word: str) -> bool:
+        """SHAPE gate: True iff the token's ed=1 SymSpell top-1 is a single
+        in-syllable diacritic INSERTION (gold = typo + 1 codepoint).
+
+        Recovers orthographic-insertion typos (e.g. ``ရုပ`` → ``ရုပ်`` with an
+        asat inserted) that ``_suppress_compound_split_valid_words`` kills.
+        This is a *shape* gate only — it never relaxes a freq/ed threshold;
+        the FP-class and TP-class overlap in SymSpell frequency, so only the
+        correction shape (length-diff + identity of the inserted codepoint)
+        separates them.
+
+        Returns True iff ALL of:
+          * ``word`` contains no ASCII/Latin codepoint (loanword grey-zone
+            guard — 'algorithm'+la / 'website'+asat share this shape but are
+            clean-text FPs);
+          * SymSpell returns a top-1 at edit_distance <= 1;
+          * ``len(top1) == len(word) + 1`` (insertion shape — deletions
+            (len_diff <= 0) and whole-word swaps (len_diff == 0) are the
+            FP-class shape and stay suppressed);
+          * removing the single divergent codepoint from ``top1`` reproduces
+            ``word`` exactly (a genuine single insertion, not a same-length
+            offset swap);
+          * that inserted codepoint is in ``_ORTHO_INSERTION_CHARS``.
+
+        Defensive against a missing SymSpell handle, ``None``/empty top-1,
+        and length edge cases.
+        """
+        return self._ortho_insertion_detail(word) is not None
+
+    def _ortho_insertion_detail(self, word: str) -> tuple[int, str, str] | None:
+        """Detail variant of :meth:`_is_orthographic_insertion_typo`.
+
+        Returns ``(insert_index, inserted_char, corrected_top1)`` when the
+        token's ed=1 SymSpell top-1 is a single in-syllable-diacritic
+        insertion, else ``None``. ``insert_index`` is the offset in ``word``
+        at which ``inserted_char`` is added to yield ``corrected_top1``. Pure
+        SHAPE gate — never relaxes a freq/ed threshold.
+        """
+        if not word:
+            return None
+        # Loanword grey-zone guard: any ASCII/Latin char in the token (or
+        # Latin-adjacency, which for a single OOV token reduces to "contains
+        # a Latin codepoint") disqualifies the rescue. Re-admitting these
+        # would resurrect clean-FP BM-EXT-C137 / BM-EXT-E026.
+        if any(ch.isascii() and ch.isalpha() for ch in word):
+            return None
+
+        symspell = getattr(self, "symspell", None)
+        if symspell is None:
+            return None
+        try:
+            candidates = symspell.lookup(word, level="word", max_suggestions=1)
+        except (RuntimeError, ValueError, KeyError):
+            return None
+        if not candidates:
+            return None
+        top = candidates[0]
+        top1 = getattr(top, "term", None)
+        if not top1 or top1 == word:
+            return None
+        # SHAPE, not freq: only edit_distance is gated (<= 1) — never freq.
+        if float(getattr(top, "edit_distance", 99)) > 1:
+            return None
+        # Insertion shape: gold is exactly one codepoint longer than the typo.
+        if len(top1) != len(word) + 1:
+            return None
+
+        # Locate the single inserted codepoint via the left-divergence point.
+        i = 0
+        n = len(word)
+        while i < n and word[i] == top1[i]:
+            i += 1
+        # `i` is the first divergent index; the inserted char is top1[i].
+        inserted = top1[i]
+        # Confirm this is a true single insertion: deleting top1[i] must
+        # reproduce the typo exactly (guards same-length-offset swaps that
+        # merely happen to differ by one codepoint here and there).
+        if top1[:i] + top1[i + 1 :] != word:
+            return None
+        if inserted not in _ORTHO_INSERTION_CHARS:
+            return None
+        return i, inserted, top1
+
+    def _narrow_ortho_insertion_error(self, err: "Error", detail: tuple[int, str, str]) -> None:
+        """Narrow a kept compound-split ortho-insertion error to the affected
+        syllable, carrying the corrected syllable as the sole rank-1
+        suggestion. Mutates ``err`` in place and marks it to survive
+        downstream filters. The benchmark scores top-1/MRR against the NARROW
+        gold correction (the corrected syllable, not the whole merged token),
+        so a wide-span suggestion never matches; narrowing recovers the
+        suggestion credit for the +TP this carve-out keeps. Safe no-op when
+        syllable segmentation does not line up (keeps the wide emission).
+        """
+        i, inserted, _top1 = detail
+        segmenter = getattr(self, "segmenter", None)
+        if segmenter is None or i <= 0:
+            return
+        try:
+            syllables = segmenter.segment_syllables(err.text)
+        except Exception:
+            return
+        if not syllables or "".join(syllables) != err.text:
+            return
+        # The inserted diacritic attaches to the syllable containing index
+        # i-1 (the char immediately before the insertion point).
+        start = 0
+        target: tuple[int, int, str] | None = None
+        for syl in syllables:
+            end = start + len(syl)
+            if start <= i - 1 < end:
+                target = (start, end, syl)
+                break
+            start = end
+        if target is None:
+            return
+        s_start, _s_end, syl = target
+        local = i - s_start  # insertion offset within the syllable
+        if not (0 < local <= len(syl)):
+            return
+        corrected = syl[:local] + inserted + syl[local:]
+        err.position = err.position + s_start
+        err.text = syl
+        err.suggestions = [
+            Suggestion(
+                text=corrected,
+                confidence=0.9,
+                source="ortho_insertion_rescue",
+            )
+        ]
+        err._structural_early_exit = True
 
     def _suppress_low_value_semantic_errors(
         self,
