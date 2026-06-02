@@ -37,6 +37,9 @@ benchmarks/_tmp/
 *.db
 data/
 
+# Model artifacts (local only — symlinked to external storage; never committed)
+models/
+
 # N-gram checkpoint (pipeline resume state)
 ngram_checkpoint/
 
