@@ -1,4 +1,4 @@
-version: 1.5.0-bhv17-byte-identical
+version: 1.5.0-v18b-clean-audit
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -5245,12 +5245,25 @@ sentences:
   notes: Annotated sentence with 1 error(s). logical_contradiction span removed (reclassified as writing_quality, not a spelling error).
 - id: BM-424
   input: တက္ကသိုလ်မှာ ဝိဇ်ဇာဘာသာရပ်ကို အထူးပြု တက်ခဲ့ပါတယ်။
-  is_clean: true
+  is_clean: false
   domain: academic
   register: formal
   difficulty_tier: 2
-  expected_errors: []
-  notes: Natural sentence with planted spelling error.
+  expected_errors:
+  - error_id: BM-424-E1
+    error_type: wrong_word
+    error_subtype: stacking_error
+    detection_layer: word
+    span:
+      start: 13
+      end: 26
+    erroneous_text: ဝိဇ်ဇာဘာသာရပ်
+    gold_correction: ဝိဇ္ဇာဘာသာရပ်
+    edit_distance: 1
+    context_required: false
+    notes: 'Broken stacking: first ဇ joined with asat U+103A instead of stacking virama U+1039 (vijja must stack as ဝိဇ္ဇာ).'
+    domain: spelling
+  notes: 'WS-0b reclassified from clean (was mislabeled): Broken stacking: first ဇ joined with asat U+103A instead of stacking virama U+1039 (vijja must stack as ဝိဇ္ဇာ).'
 - id: BM-426
   input: အင်ဂလိပ် ဘက်ထရီအကြောင်း ရှာကြည့်နေတယ်။
   is_clean: false
@@ -7659,11 +7672,25 @@ sentences:
   notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
 - id: BM-EXT-E026
   input: ဝက်ဘဆိုက်ရဲ့ ပါဖောမန့်ကို တိုင်းတာပါ။
-  is_clean: true
+  is_clean: false
   domain: technical
   register: formal
   difficulty_tier: 2
-  notes: Annotated sentence with 1 error(s). Error can be detected without surrounding context.
+  notes: "WS-0b reclassified from clean (was mislabeled): Loan 'website': syllable-final stop ဘ missing its asat U+103A (ဝက်ဘ်ဆိုက်)."
+  expected_errors:
+  - error_id: BM-EXT-E026-E1
+    error_type: wrong_word
+    error_subtype: missing_asat
+    detection_layer: word
+    span:
+      start: 0
+      end: 9
+    erroneous_text: ဝက်ဘဆိုက်
+    gold_correction: ဝက်ဘ်ဆိုက်
+    edit_distance: 1
+    context_required: false
+    notes: "Loan 'website': syllable-final stop ဘ missing its asat U+103A (ဝက်ဘ်ဆိုက်)."
+    domain: spelling
 - id: BM-EXT-E027
   input: ဒီပရောဂျက်ကို ဖရိန်းဝပ် သုံးပြီး ဆောက်မယ်။
   is_clean: false
@@ -9167,7 +9194,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-c4-dataset.txt (27 words).
 - id: BM-EXP-C030
-  input: ပထမဆုံး စပြောရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒော်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေး ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ကသိုလ် အပတ်စဉ် က ဖြစ်ပါတယ်။
+  input: ပထမဆုံး စပြောရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒေါ်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေး ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ကသိုလ် အပတ်စဉ် က ဖြစ်ပါတယ်။
   is_clean: true
   domain: technical
   register: formal
@@ -9474,7 +9501,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (9 words).
 - id: BM-EXP-C050
-  input: တကယ်လို့ အမေဟာ ဒီလို စိတ်ဓာတ် ပြင်းထန်သူမျိုး မဟုတ်ဘဲ နူးညံ့တဲ့ စိတ်သဘောထား ရှိသူမျိုး ဖြစ်ရင်တောင် အမေဟာ သူ့ရဲ့ အနာဂတ် သူရဲကောင်း၊ သူ့ရဲ့ အိပ်မက်ထဲက ဟီးရိုးကို သူ့ရဲ့ လက်ရှိအားနွဲ့တဲ့ ကလေးဘဝ၊ တစ်နည်းပြောရရင် အမေ့ အပော်မှာ မှီခိုနေရတဲ့ ဘဝကို ပြန်ပြီး သတိရသွားအောင် ကလေးကို ဆက်ဆံ ပြတတ်ပါတယ်။
+  input: တကယ်လို့ အမေဟာ ဒီလို စိတ်ဓာတ် ပြင်းထန်သူမျိုး မဟုတ်ဘဲ နူးညံ့တဲ့ စိတ်သဘောထား ရှိသူမျိုး ဖြစ်ရင်တောင် အမေဟာ သူ့ရဲ့ အနာဂတ် သူရဲကောင်း၊ သူ့ရဲ့ အိပ်မက်ထဲက ဟီးရိုးကို သူ့ရဲ့ လက်ရှိအားနွဲ့တဲ့ ကလေးဘဝ၊ တစ်နည်းပြောရရင် အမေ့ အပေါ်မှာ မှီခိုနေရတဲ့ ဘဝကို ပြန်ပြီး သတိရသွားအောင် ကလေးကို ဆက်ဆံ ပြတတ်ပါတယ်။
   is_clean: true
   domain: literary
   register: formal
@@ -9482,7 +9509,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-literature-corpus.txt (30 words).
 - id: BM-EXP-C051
-  input: “ကိုယ်က အနုပညာအလုပ်တွေလည်း လုပ်နေတဲ့လူ ဆေးကျောင်းက ဘွဲ့ရတဲ့အချိန်မှာတော့ ဆေးကောင်စီက ခော်ပြောတယ် အလုပ် ခုထဲက တစ်ခုပဲ လုပ်ရမယ်ဆိုပြီးတော့ ရွေးတဲ့အချိန်မှာ ညီမက ဆရာဝန်ဘက်ကို ရွေးလိုက်တော့ အဲဒီတုန်းကတည်းက ဆရာဝန်ပဲလုပ်ဖြစ်နေတာပါ။ ဆေးကျောင်းတက်ရင်း အနုပညာအလုပ်တွေ လုပ်နေရတုန်းက တစ်ချိန်ချိန်မှာ အခုလို ရွေးရမယ်ဆိုတာ သိနေခဲ့တယ်။ ဆရာဝန်အလုပ် လုပ်ဖြစ်မယ်ဆိုတာလည်း သိနေတယ်။ ဒါပေမယ့် တကယ်တမ်း ရွေးရမယ့်အချိန်မှာ တော်တော် ခက်ခဲခဲ့ပါတယ်။ စိတ်ညစ်ခဲ့ရတဲ့ အချိန်တွေလည်းရှိပါတယ်” လို့ ဆိုပါတယ်။
+  input: “ကိုယ်က အနုပညာအလုပ်တွေလည်း လုပ်နေတဲ့လူ ဆေးကျောင်းက ဘွဲ့ရတဲ့အချိန်မှာတော့ ဆေးကောင်စီက ခေါ်ပြောတယ် အလုပ် ခုထဲက တစ်ခုပဲ လုပ်ရမယ်ဆိုပြီးတော့ ရွေးတဲ့အချိန်မှာ ညီမက ဆရာဝန်ဘက်ကို ရွေးလိုက်တော့ အဲဒီတုန်းကတည်းက ဆရာဝန်ပဲလုပ်ဖြစ်နေတာပါ။ ဆေးကျောင်းတက်ရင်း အနုပညာအလုပ်တွေ လုပ်နေရတုန်းက တစ်ချိန်ချိန်မှာ အခုလို ရွေးရမယ်ဆိုတာ သိနေခဲ့တယ်။ ဆရာဝန်အလုပ် လုပ်ဖြစ်မယ်ဆိုတာလည်း သိနေတယ်။ ဒါပေမယ့် တကယ်တမ်း ရွေးရမယ့်အချိန်မှာ တော်တော် ခက်ခဲခဲ့ပါတယ်။ စိတ်ညစ်ခဲ့ရတဲ့ အချိန်တွေလည်းရှိပါတယ်” လို့ ဆိုပါတယ်။
   is_clean: true
   domain: technical
   register: formal
@@ -9499,7 +9526,7 @@ sentences:
   notes: Clean control sentence from tipitaka_myanmar_translation_books.txt (42 words).
   note: 'Re-labeled: contains formatting issues (hyphens/ASCII commas/no-space-after-fullstop/numbers-attached)'
 - id: BM-EXP-C053
-  input: ၁၄-၁၅။ အလုံးစုံ တန်ဆာတို့ဖြင့် တန်ဆာဆင်အပ်ကုန်သော အမျိုးအားဖြင့် အာဇာနည် မျိုးဖြစ်ကုန်သော လျင်မြန်စွာ ဝန်ကို ဆောင်တတ်ကုန်သော သက်တင်ရေးနှင့် တူသော လေးကို ဆောင်ကုန်သော မြင်းစီးသူရဲတို့သည် တက်စီးအပ်ကုန်သော သိန္ဓောမြင်းပောင်း ခြောက်သောင်းတို့သည် ဤသူကို အမြဲ ခြံရံကုန်လတ္တံ့။ ဤသို့ ဖြစ်ရခြင်းသည် ဘုရားကို ပူဇော်ရခြင်း၏ အကျိုးပေတည်း။
+  input: ၁၄-၁၅။ အလုံးစုံ တန်ဆာတို့ဖြင့် တန်ဆာဆင်အပ်ကုန်သော အမျိုးအားဖြင့် အာဇာနည် မျိုးဖြစ်ကုန်သော လျင်မြန်စွာ ဝန်ကို ဆောင်တတ်ကုန်သော သက်တင်ရေးနှင့် တူသော လေးကို ဆောင်ကုန်သော မြင်းစီးသူရဲတို့သည် တက်စီးအပ်ကုန်သော သိန္ဓောမြင်းပေါင်း ခြောက်သောင်းတို့သည် ဤသူကို အမြဲ ခြံရံကုန်လတ္တံ့။ ဤသို့ ဖြစ်ရခြင်းသည် ဘုရားကို ပူဇော်ရခြင်း၏ အကျိုးပေတည်း။
   is_clean: true
   domain: religious
   register: informal
@@ -9582,7 +9609,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-literature-corpus.txt (8 words).
 - id: BM-EXP-C060
-  input: စာမေးပွဲတွေပြီးလို့ နွေကျောင်းပိတ်ရက် ရောက်လာတော့ ကျွန်တော် အိမ်ခဏ ပြန်ရမယ်ပော့ဗျာ။ ဒါပေမဲ့ ဒော်လေးမြတ် အိမ်မှာက အဖော်ရှိတာ မဟုတ်တော့ အကြာကြီး ပြန်လို့ မရဘူးပော့။ ဒီတစ်ခါ ဒော်လေးမြတ်က သူလည်း ကျွန်တော်တို့ မြို့ကို လိုက်လည်မယ်တဲ့။ ဇော်မင်းအောင်ကို အိမ်စောင့်ဖို့ ထားခဲ့ပြီး ကျွန်တော်တို့ တူအရီး နှစ်ယောက်ပဲ ထွက်လာခဲ့ကြတာပော့။
+  input: စာမေးပွဲတွေပြီးလို့ နွေကျောင်းပိတ်ရက် ရောက်လာတော့ ကျွန်တော် အိမ်ခဏ ပြန်ရမယ်ပေါ့ဗျာ။ ဒါပေမဲ့ ဒေါ်လေးမြတ် အိမ်မှာက အဖော်ရှိတာ မဟုတ်တော့ အကြာကြီး ပြန်လို့ မရဘူးပေါ့။ ဒီတစ်ခါ ဒေါ်လေးမြတ်က သူလည်း ကျွန်တော်တို့ မြို့ကို လိုက်လည်မယ်တဲ့။ ဇော်မင်းအောင်ကို အိမ်စောင့်ဖို့ ထားခဲ့ပြီး ကျွန်တော်တို့ တူအရီး နှစ်ယောက်ပဲ ထွက်လာခဲ့ကြတာပေါ့။
   is_clean: true
   domain: technical
   register: informal
@@ -9646,7 +9673,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-xnli_sentence2_my.txt (6 words).
 - id: BM-EXP-C068
-  input: ဆိုပြီး ထီပောက်တဲ့အကြောင်းကို တင်ထားတာ ဖြစ်ပါတယ် ဦးကံပွင့်ကတော့ သူထိုးထားတဲ့ ထီ(၁၀) စောင်တွဲကနေ တစ်သိန်းဆုတစ်ဆုကို ဆွတ်ခူးရရှိသွားတာပဲ ဖြစ်ပါတယ်နော်။
+  input: ဆိုပြီး ထီပေါက်တဲ့အကြောင်းကို တင်ထားတာ ဖြစ်ပါတယ် ဦးကံပွင့်ကတော့ သူထိုးထားတဲ့ ထီ(၁၀) စောင်တွဲကနေ တစ်သိန်းဆုတစ်ဆုကို ဆွတ်ခူးရရှိသွားတာပဲ ဖြစ်ပါတယ်နော်။
   is_clean: true
   domain: general
   register: colloquial
@@ -9686,7 +9713,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-cc100-dataset.txt (7 words).
 - id: BM-EXP-C073
-  input: ဟိုဘက်ရက်တွေတုန်းက ကျော်အထိ တက်သွားတဲ့ အောက်တိန်း ဆီဈေးက ဒော်လာကို ဗဟိုဘဏ်က ထိန်းချုပ်လိုက်ပြီးတဲ့ နောက်မှာတော့ ဆိုပြီး ဆီဆိုင်တွေက အယ်လ်အီးဒီဘုတ်တွေမှာ တွေ့လာရတယ်။
+  input: ဟိုဘက်ရက်တွေတုန်းက ကျော်အထိ တက်သွားတဲ့ အောက်တိန်း ဆီဈေးက ဒေါ်လာကို ဗဟိုဘဏ်က ထိန်းချုပ်လိုက်ပြီးတဲ့ နောက်မှာတော့ ဆိုပြီး ဆီဆိုင်တွေက အယ်လ်အီးဒီဘုတ်တွေမှာ တွေ့လာရတယ်။
   is_clean: true
   domain: conversational
   register: colloquial
@@ -10642,7 +10669,7 @@ sentences:
   expected_errors: []
   notes: Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word 'စုစုပောင်း' uses U+102C (ာ) instead of U+102B (ါ). It should be 'စုစုပေါင်း'. This is a common Zawgyi-to-Unicode conversion issue..  The word 'ပောင်း' uses U+102C (ာ) instead of U+102B (ါ). It should be 'ပေါင်း'. This is a common Zawgyi-to-Unicode conversion issue..  The word 'စုစုပောင်း' uses U+102C (ာ) instead of U+102B (ါ). It should be 'စုစုပေါင်း'. This is a common Zawgyi-to-Unicode conversion issue..  The word 'ပောင်း' uses U+102C (ာ) instead of U+102B (ါ). It should be 'ပေါင်း'. This is a common Zawgyi-to-Unicode conversion issue.. Clean control sentence from myanmar-c4-dataset.txt (30 words).
 - id: BM-EXP-C118
-  input: ကျွန်တော်တို့နှစ်ဦးစလုံး၏ အပောင်းအသင်းများကလည်း အခါ အခွင့်သင့်တိုင်း ကျွန်တော်တို့နှစ်ယောက်၏ မတူညီမှုများကို ပြောပြတတ် ကြသည်။
+  input: ကျွန်တော်တို့နှစ်ဦးစလုံး၏ အပေါင်းအသင်းများကလည်း အခါ အခွင့်သင့်တိုင်း ကျွန်တော်တို့နှစ်ယောက်၏ မတူညီမှုများကို ပြောပြတတ် ကြသည်။
   is_clean: true
   domain: literary
   register: polite
@@ -10740,7 +10767,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-culturax-dataset.txt (13 words).
 - id: BM-EXP-C130
-  input: အလောင်းမင်းတရားလက်ထက် မေ တွင် ရန်ကုန်မြို့တော်ကို တည်ခဲ့သည်။ တောအုပ်ထူထပ်လှသဖြင့် မြေတိုင်းတာရာ၌ အခက်အခဲအချို့ ကြုံတွေ့ခဲ့ရ၏။ တစ်ခါတစ်ရံ ရေအိုင်များအတွင်းသို့ ဖြတ်သန်းတိုင်းတာရသည်လည်း ရှိသည်။ ထိုစဉ်က ကျုံးကို လက်ဝဲသုန္ဒရ (ဦးမြတ်သာနေ)နှင့် ဝေဠုရာဇာတို့ စီစဉ်ဆောင်ရွက်ခဲ့ရကြောင်း အလောင်းမင်းတရား အရေးတော်ပုံ ရာဇဝင်၌ တွေ့ရှိရ၏။ ဝေးလံခောင်ဖျားဒေသ ဖြစ်သည့်အပြင် စစ်ရေးအတွက်ပါ အရေးတကြီးပြင်ဆင်နေချိန်ဖြစ်သဖြင့် ရန်ကုန်မြို့ ကျုံးတူးဖော်ရေး၌ ပါဝင်ခဲ့ခြင်း မရှိပေ။
+  input: အလောင်းမင်းတရားလက်ထက် မေ တွင် ရန်ကုန်မြို့တော်ကို တည်ခဲ့သည်။ တောအုပ်ထူထပ်လှသဖြင့် မြေတိုင်းတာရာ၌ အခက်အခဲအချို့ ကြုံတွေ့ခဲ့ရ၏။ တစ်ခါတစ်ရံ ရေအိုင်များအတွင်းသို့ ဖြတ်သန်းတိုင်းတာရသည်လည်း ရှိသည်။ ထိုစဉ်က ကျုံးကို လက်ဝဲသုန္ဒရ (ဦးမြတ်သာနေ)နှင့် ဝေဠုရာဇာတို့ စီစဉ်ဆောင်ရွက်ခဲ့ရကြောင်း အလောင်းမင်းတရား အရေးတော်ပုံ ရာဇဝင်၌ တွေ့ရှိရ၏။ ဝေးလံခေါင်ဖျားဒေသ ဖြစ်သည့်အပြင် စစ်ရေးအတွက်ပါ အရေးတကြီးပြင်ဆင်နေချိန်ဖြစ်သဖြင့် ရန်ကုန်မြို့ ကျုံးတူးဖော်ရေး၌ ပါဝင်ခဲ့ခြင်း မရှိပေ။
   is_clean: true
   domain: academic
   register: informal
@@ -11137,7 +11164,7 @@ sentences:
   expected_errors: []
   notes: Marked clean during benchmark audit 2026-04-15.
 - id: BM-EXP-C158
-  input: ဆရာမင်းလူ ရသ အစွမ်းနဲ့ တည်ဆောက်ခဲ့တဲ့ ဝတ္ထုထဲက မြို့မကျ၊ လူ့အဖွဲ့အစည်း တခုဟာ တကယ်တော့ ဗမာပြည် တပြည်လုံးကို ကိုယ်စားပြုတယ်။ အခြေခံလူတန်းစား တခု ကို အခြေခံပြီး တိုင်းပြည်မှာ အခြေတည်သင့်၊ ကျင့်သုံးသင့် တဲ့ အကျင့်၊ အကြံ၊ အတွေးအခော်၊ အယူအဆ၊ သဘောတရားတွေကို ရသပညာ နဲ့ သွတ်သွင်း ဖန်တီး လမ်းညွှန် ပြထားခြင်း ဖြစ်တယ်။
+  input: ဆရာမင်းလူ ရသ အစွမ်းနဲ့ တည်ဆောက်ခဲ့တဲ့ ဝတ္ထုထဲက မြို့မကျ၊ လူ့အဖွဲ့အစည်း တခုဟာ တကယ်တော့ ဗမာပြည် တပြည်လုံးကို ကိုယ်စားပြုတယ်။ အခြေခံလူတန်းစား တခု ကို အခြေခံပြီး တိုင်းပြည်မှာ အခြေတည်သင့်၊ ကျင့်သုံးသင့် တဲ့ အကျင့်၊ အကြံ၊ အတွေးအခေါ်၊ အယူအဆ၊ သဘောတရားတွေကို ရသပညာ နဲ့ သွတ်သွင်း ဖန်တီး လမ်းညွှန် ပြထားခြင်း ဖြစ်တယ်။
   is_clean: true
   domain: general
   register: colloquial
@@ -12149,7 +12176,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from alpaca_myanmar_burmese_taco.txt (30 words).
 - id: BM-EXP-C209
-  input: ဗီယက်နမ် နိုင်ငံရဲ့ ပထမဆုံး နျူကလီးယား ဓာတ်ပောင်းဖိုကို ခုနှစ် မတိုင်မီ လုပ်ငန်း စတင် လည်ပတ်မှာ ဖြစ်ပြီး စွမ်းအင် မီဂါဝပ် တစ်သောင်း ခုနစ်ရာ ထုတ်လုပ်နိုင်မှာ ဖြစ်ပါတယ်။
+  input: ဗီယက်နမ် နိုင်ငံရဲ့ ပထမဆုံး နျူကလီးယား ဓာတ်ပေါင်းဖိုကို ခုနှစ် မတိုင်မီ လုပ်ငန်း စတင် လည်ပတ်မှာ ဖြစ်ပြီး စွမ်းအင် မီဂါဝပ် တစ်သောင်း ခုနစ်ရာ ထုတ်လုပ်နိုင်မှာ ဖြစ်ပါတယ်။
   is_clean: true
   domain: conversational
   register: formal
@@ -12173,7 +12200,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (12 words).
 - id: BM-EXP-C212
-  input: “ကျွန်တော့်ကို ခုနှစ် စက်တင်ဘာ အရေးအခင်းပြီးကတည်းက ဇာတ်ကားရိုက်ကူးခွင့် ပိတ်ထား တာပါ။ နောက်ပိုင်း ရိုက်ခွင့်ပြုတော့လည်း ကျွန်တော် ပြန်မရိုက်တော့ဘူး။ ပရဟိတ လုပ်ငန်းတွေနဲ့ပဲ ဘဝကို ဖြတ်သန်းနေတယ်။ ဦးသုခတို့လို ပြည်သူကို အကျိုးပြုတဲ့ ဇာတ်လမ်းမျိုးဆို ရိုက်မယ်လို့ ဆုံးဖြတ်ထားတာ။ ဒီကားက ဆရာကြီး မင်းသိင်္ခရဲ့ ဇာတ်လည်းဖြစ်တော့ ဆရာကြီးကိုလည်း ဂါရဝပြုချင် တယ်။ ဒါရိုက်တာ ခင်စောမျိုး ဆိုတာကလည်း ကျွန်တော်နဲ့ လက်တွဲဖူးတဲ့အတွက် သူ့ကို ကူညီချင်တာလည်း ပါပါတယ်” ဟု ဇာတ်ကားရိုက်ကူးမှုများ ပရော်ဖက်ဆာ ဒောက်တာဆိတ်ဖွား ရုပ်ရှင်ဇာတ် ကားကို လက်ခံရိုက်ကူးဖြစ်ပုံကို ထပ်လောင်းပြောကြားသည်။
+  input: “ကျွန်တော့်ကို ခုနှစ် စက်တင်ဘာ အရေးအခင်းပြီးကတည်းက ဇာတ်ကားရိုက်ကူးခွင့် ပိတ်ထား တာပါ။ နောက်ပိုင်း ရိုက်ခွင့်ပြုတော့လည်း ကျွန်တော် ပြန်မရိုက်တော့ဘူး။ ပရဟိတ လုပ်ငန်းတွေနဲ့ပဲ ဘဝကို ဖြတ်သန်းနေတယ်။ ဦးသုခတို့လို ပြည်သူကို အကျိုးပြုတဲ့ ဇာတ်လမ်းမျိုးဆို ရိုက်မယ်လို့ ဆုံးဖြတ်ထားတာ။ ဒီကားက ဆရာကြီး မင်းသိင်္ခရဲ့ ဇာတ်လည်းဖြစ်တော့ ဆရာကြီးကိုလည်း ဂါရဝပြုချင် တယ်။ ဒါရိုက်တာ ခင်စောမျိုး ဆိုတာကလည်း ကျွန်တော်နဲ့ လက်တွဲဖူးတဲ့အတွက် သူ့ကို ကူညီချင်တာလည်း ပါပါတယ်” ဟု ဇာတ်ကားရိုက်ကူးမှုများ ပရော်ဖက်ဆာ ဒေါက်တာဆိတ်ဖွား ရုပ်ရှင်ဇာတ် ကားကို လက်ခံရိုက်ကူးဖြစ်ပုံကို ထပ်လောင်းပြောကြားသည်။
   is_clean: true
   domain: news
   register: polite
@@ -12215,7 +12242,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (27 words).
 - id: BM-EXP-C217
-  input: အာဆာအကြမ်းဖက်အဖွဲ့သည် နိုင်ငံတကာအကြမ်းဖက်အဖွဲ့များဖြစ်သည့် Al-Qaeda ISIL နှင့် Tehrik-e-Taliban Pakistan (TTP) တို့၏ ကူညီပံ့ပိုးမှုများ ရရှိနေကြောင်း၊ မကြာသေးမီက နိုင်ငံခြားသား အကြမ်းဖက်သမားများက အိမ်နီးချင်းနိုင်ငံ တစ်နိုင်ငံမှတစ်ဆင့် မြန်မာနိုင်ငံအတွင်းသို့ ဝင်ရောက်၍ အာဆာအဖွဲ့အား ပူးပောင်းကူညီရန် ကြိုးစားခဲ့သည့် သာဓကရှိကြောင်း၊
+  input: အာဆာအကြမ်းဖက်အဖွဲ့သည် နိုင်ငံတကာအကြမ်းဖက်အဖွဲ့များဖြစ်သည့် Al-Qaeda ISIL နှင့် Tehrik-e-Taliban Pakistan (TTP) တို့၏ ကူညီပံ့ပိုးမှုများ ရရှိနေကြောင်း၊ မကြာသေးမီက နိုင်ငံခြားသား အကြမ်းဖက်သမားများက အိမ်နီးချင်းနိုင်ငံ တစ်နိုင်ငံမှတစ်ဆင့် မြန်မာနိုင်ငံအတွင်းသို့ ဝင်ရောက်၍ အာဆာအဖွဲ့အား ပူးပေါင်းကူညီရန် ကြိုးစားခဲ့သည့် သာဓကရှိကြောင်း၊
   is_clean: true
   domain: news
   register: informal
@@ -12420,7 +12447,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from myanmar-literature-corpus.txt (6 words).
 - id: BM-EXP-C229
-  input: ၆၉၁.၆ မီတာ ရှည်ပြီး လာအိုဘက် ချဉ်းကပ်လမ်း မီတာ၊ မြန်မာဘက် ချဉ်းကပ်လမ်း မီတာ ရှိသည်။ ဒော်လာ မီလီယံ သုံးခဲ့ပြီး ခု၊ ဖေဖော်ဝါရီလ ရက်တွင် စဆောက်သည်။ လ အပြီးဆောက်ရန် မှန်းထားသော်လည်း လနှင့် ပြီးသည်။ တန် ဝန် ခံနိုင်သည်။
+  input: ၆၉၁.၆ မီတာ ရှည်ပြီး လာအိုဘက် ချဉ်းကပ်လမ်း မီတာ၊ မြန်မာဘက် ချဉ်းကပ်လမ်း မီတာ ရှိသည်။ ဒေါ်လာ မီလီယံ သုံးခဲ့ပြီး ခု၊ ဖေဖော်ဝါရီလ ရက်တွင် စဆောက်သည်။ လ အပြီးဆောက်ရန် မှန်းထားသော်လည်း လနှင့် ပြီးသည်။ တန် ဝန် ခံနိုင်သည်။
   is_clean: true
   domain: academic
   register: formal
@@ -12453,7 +12480,7 @@ sentences:
   expected_errors: []
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (9 words).
 - id: BM-EXP-C233
-  input: အမေရိကန်တပ်ဖွဲ့တွေရဲ့ ပူးတွဲ စစ်ဦးစီးချုပ် ဥက္ကဌအဖြစ် သမ္မတ ဒော်နယ်ထရမ့်က အဆိုပြုထားသူ ကြည်းတပ် ဗိုလ်ချုပ်ကြီး က အမေရိကန်တပ်ဖွဲ့တွေကို အာဖဂန် နစ္စတန်ကနေ အချိန်မတိုင်ခင် ရုပ်သိမ်းမယ်ဆိုရင် မဟာဗျူဟာ အမှားတစ်ခု ဖြစ်လိမ့်မယ်လို့ ဆိုပါတယ်။
+  input: အမေရိကန်တပ်ဖွဲ့တွေရဲ့ ပူးတွဲ စစ်ဦးစီးချုပ် ဥက္ကဌအဖြစ် သမ္မတ ဒေါ်နယ်ထရမ့်က အဆိုပြုထားသူ ကြည်းတပ် ဗိုလ်ချုပ်ကြီး က အမေရိကန်တပ်ဖွဲ့တွေကို အာဖဂန် နစ္စတန်ကနေ အချိန်မတိုင်ခင် ရုပ်သိမ်းမယ်ဆိုရင် မဟာဗျူဟာ အမှားတစ်ခု ဖြစ်လိမ့်မယ်လို့ ဆိုပါတယ်။
   is_clean: true
   domain: conversational
   register: polite
@@ -13031,7 +13058,7 @@ sentences:
     domain: spelling
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E030
-  input: '''''ဘယ်လိုဖြစ်သွားလဲ ဆို တော့ ကလေးရဲ့ သဘောသဘာဝ က သူတို့တစ်ခုခုလိုချင်ရင် မိဘ ကို တစ်နည်းနည်းနဲ့ပြပြီးတောင်း တာ။ ပေါက်ကွဲပြပြီး တောင်းတဲ့ လူကြီးကလိုက်လျော လို့ရှိရင် ကလေးစိတ်ထဲမှာ ငါ ကောင်းကောင်းမွန်မွန်တောင်း တုန်းကတော့ မပေးဘူး။ လိုချင်တာရ တယ်ဆိုပြီး နောက်အခါတွေမှာ ပေါက်ကွဲတဲ့အပြုအမူတွေ လုပ်ပြီး တောင်းတာ။ အဲဒီလိုနဲ့ တချို့ ကလေးတွေမှာ ဝုန်းဒိုင်းကြဲပြီး ပေါက်ကွဲတဲ့ ကလေးလေးတွေ ဖြစ်လာတာပေါ့'''' ဟု ကလေးငယ် များ၏ အပြုအမူပိုင်းဆိုင်ရာ အဆင့်စီမံခန့်ခွဲပေးသော ဒောက်တာ ဌေးဌေး (စိတ်ပညာ) ကဆိုသည်။'
+  input: '''''ဘယ်လိုဖြစ်သွားလဲ ဆို တော့ ကလေးရဲ့ သဘောသဘာဝ က သူတို့တစ်ခုခုလိုချင်ရင် မိဘ ကို တစ်နည်းနည်းနဲ့ပြပြီးတောင်း တာ။ ပေါက်ကွဲပြပြီး တောင်းတဲ့ လူကြီးကလိုက်လျော လို့ရှိရင် ကလေးစိတ်ထဲမှာ ငါ ကောင်းကောင်းမွန်မွန်တောင်း တုန်းကတော့ မပေးဘူး။ လိုချင်တာရ တယ်ဆိုပြီး နောက်အခါတွေမှာ ပေါက်ကွဲတဲ့အပြုအမူတွေ လုပ်ပြီး တောင်းတာ။ အဲဒီလိုနဲ့ တချို့ ကလေးတွေမှာ ဝုန်းဒိုင်းကြဲပြီး ပေါက်ကွဲတဲ့ ကလေးလေးတွေ ဖြစ်လာတာပေါ့'''' ဟု ကလေးငယ် များ၏ အပြုအမူပိုင်းဆိုင်ရာ အဆင့်စီမံခန့်ခွဲပေးသော ဒေါက်တာ ဌေးဌေး (စိတ်ပညာ) ကဆိုသည်။'
   is_clean: true
   domain: general
   register: formal
@@ -13138,7 +13165,7 @@ sentences:
       start: 206
       end: 216
     erroneous_text: စုဆုပောင်း
-    gold_correction: စုစုပောင်း
+    gold_correction: စုစုပေါင်း
     edit_distance: 1
     context_required: false
     notes: Injected consonant_substitution error.
@@ -13328,7 +13355,7 @@ sentences:
       start: 228
       end: 251
     erroneous_text: ကပ်သောသိပောက်မျှကိုလည်း
-    gold_correction: ကပ်သောဆီပောက်မျှကိုလည်း
+    gold_correction: ကပ်သောဆီပေါက်မျှကိုလည်း
     edit_distance: 1
     context_required: false
     notes: Injected compound_confusion error.
@@ -13413,7 +13440,7 @@ sentences:
       start: 11
       end: 25
     erroneous_text: ကိုခော င်းကြီး
-    gold_correction: ကိုခောင်းကြီး
+    gold_correction: ကိုခေါင်းကြီး
     edit_distance: 1
     context_required: true
     notes: Injected broken_compound error.
@@ -13726,7 +13753,7 @@ sentences:
     domain: spelling
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E063
-  input: တောင်း။ အဲဒီတော့ ကိုဆွေဝင်းကို သြဂုတ်လ ရက်နေ့မှာ ရုံးချိန်းပြန်ခော်ထားတယ်ဆိုတော့ ကိုဆွေဝင်းက ဆက်သွားပြီး အမှုရင်ဆိုင်ရမှာပော့နော်။
+  input: တောင်း။ အဲဒီတော့ ကိုဆွေဝင်းကို သြဂုတ်လ ရက်နေ့မှာ ရုံးချိန်းပြန်ခေါ်ထားတယ်ဆိုတော့ ကိုဆွေဝင်းက ဆက်သွားပြီး အမှုရင်ဆိုင်ရမှာပေါ့နော်။
   is_clean: true
   domain: general
   register: colloquial
@@ -14111,7 +14138,7 @@ sentences:
       start: 203
       end: 214
     erroneous_text: စုစု ပောင်း
-    gold_correction: စုစုပောင်း
+    gold_correction: စုစုပေါင်း
     edit_distance: 1
     context_required: true
     notes: Injected broken_compound error.
@@ -14775,7 +14802,7 @@ sentences:
       start: 17
       end: 36
     erroneous_text: ကောင်းဆောင်ကြီးများ
-    gold_correction: ခောင်းဆောင်ကြီးများ
+    gold_correction: ခေါင်းဆောင်ကြီးများ
     edit_distance: 1
     context_required: false
     notes: Injected compound_confusion error.
@@ -15853,7 +15880,7 @@ sentences:
       start: 203
       end: 212
     erroneous_text: စုစုပောင်
-    gold_correction: စုစုပောင်း
+    gold_correction: စုစုပေါင်း
     edit_distance: 1
     context_required: false
     notes: Injected missing_visarga error.
@@ -16042,7 +16069,7 @@ sentences:
       start: 245
       end: 271
     erroneous_text: သားသမီးအပော်ပြော့ရေးဆိုရေး
-    gold_correction: သားသမီးအပော်ပြောရေးဆိုရေး
+    gold_correction: သားသမီးအပေါ်ပြောရေးဆိုရေး
     edit_distance: 1
     context_required: false
     notes: Injected aukmyit_confusion error.
@@ -19900,7 +19927,7 @@ sentences:
   expected_errors:
   - error_id: BM-1146-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 7
@@ -20740,7 +20767,7 @@ sentences:
     domain: spelling
   - error_id: BM-1184-E2
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 25
@@ -20973,7 +21000,7 @@ sentences:
   expected_errors:
   - error_id: BM-1195-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 39
@@ -21797,7 +21824,7 @@ sentences:
   expected_errors:
   - error_id: BM-1234-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 37
@@ -23326,7 +23353,7 @@ sentences:
   expected_errors:
   - error_id: BM-1306-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 22
@@ -25661,7 +25688,7 @@ sentences:
   expected_errors:
   - error_id: BM-1416-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 20
@@ -25947,7 +25974,7 @@ sentences:
   expected_errors:
   - error_id: BM-1429-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 14
@@ -26833,7 +26860,7 @@ sentences:
   expected_errors:
   - error_id: BM-1473-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 33
@@ -26875,7 +26902,7 @@ sentences:
   expected_errors:
   - error_id: BM-1475-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 30
@@ -27241,7 +27268,7 @@ sentences:
   expected_errors:
   - error_id: BM-1494-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 46
@@ -27346,7 +27373,7 @@ sentences:
   expected_errors:
   - error_id: BM-1499-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 70
@@ -27474,7 +27501,7 @@ sentences:
   expected_errors:
   - error_id: BM-1505-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 69
@@ -27692,7 +27719,7 @@ sentences:
   expected_errors:
   - error_id: BM-1516-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 15
@@ -27755,7 +27782,7 @@ sentences:
   expected_errors:
   - error_id: BM-1519-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 11
@@ -28107,7 +28134,7 @@ sentences:
   expected_errors:
   - error_id: BM-1535-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 35
@@ -28217,7 +28244,7 @@ sentences:
     domain: spelling
   - error_id: BM-1539-E2
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 35
@@ -28259,7 +28286,7 @@ sentences:
   expected_errors:
   - error_id: BM-1541-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 40
@@ -28540,7 +28567,7 @@ sentences:
   expected_errors:
   - error_id: BM-1555-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 41
@@ -28721,7 +28748,7 @@ sentences:
   expected_errors:
   - error_id: BM-1563-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 23
@@ -28742,7 +28769,7 @@ sentences:
   expected_errors:
   - error_id: BM-1564-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 28
@@ -28784,7 +28811,7 @@ sentences:
   expected_errors:
   - error_id: BM-1566-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 0
@@ -28978,7 +29005,7 @@ sentences:
   expected_errors:
   - error_id: BM-1574-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 38
@@ -29251,7 +29278,7 @@ sentences:
   expected_errors:
   - error_id: BM-1587-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 38
@@ -29658,7 +29685,7 @@ sentences:
   expected_errors:
   - error_id: BM-1607-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 11
@@ -30947,7 +30974,7 @@ sentences:
   expected_errors:
   - error_id: BM-1672-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 37
@@ -32108,7 +32135,7 @@ sentences:
   expected_errors:
   - error_id: BM-1725-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 21
@@ -33439,7 +33466,7 @@ sentences:
   expected_errors:
   - error_id: BM-1790-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 16
@@ -34465,7 +34492,7 @@ sentences:
   expected_errors:
   - error_id: BM-1838-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 32
@@ -35158,7 +35185,7 @@ sentences:
   expected_errors:
   - error_id: BM-1873-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 41
@@ -35624,7 +35651,7 @@ sentences:
   expected_errors:
   - error_id: BM-1898-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 31
@@ -37882,7 +37909,7 @@ sentences:
     domain: spelling
   - error_id: BM-2004-E2
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 40
@@ -38734,7 +38761,7 @@ sentences:
   expected_errors:
   - error_id: BM-2045-E1
     error_type: wrong_word
-    error_subtype: confusable_semantic
+    error_subtype: synonym_substitution
     detection_layer: context
     span:
       start: 43
