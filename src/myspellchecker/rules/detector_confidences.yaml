@@ -19,6 +19,7 @@ confidences:
   # Pre-normalization errors
   zawgyi_detected: 0.95
   zero_width_chars: 0.95
+  aw_vowel_unmask: 0.95
 
   # Diacritic / structural errors
   missing_asat: 0.90

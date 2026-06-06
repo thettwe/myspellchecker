@@ -96,6 +96,20 @@ class ValidationConfig(BaseModel):
         le=1.0,
         description="Confidence score for medial confusion corrections (ျ vs ြ)",
     )
+    detect_aw_vowel_unmask: bool = Field(
+        default=False,
+        description=(
+            "Enable the pre-normalization aw-vowel un-mask detector. The "
+            "pre-lookup normalizer silently repairs aw-vowel typos "
+            "(flat ော → tall ေါ after {ပ,ခ,ဒ}; stray ေါ → ော after other "
+            "bases) before the validator judges the token, masking genuine "
+            "spelling errors like ခော်. When True, a raw-text detector "
+            "emits a confusable error with the canonical form as the single "
+            "suggestion for tokens that are dictionary-OOV as typed but "
+            "valid after the aw-vowel repair. Loanword bases {ဂ,င,ဝ} are "
+            "excluded from the tall→flat direction. Default-off."
+        ),
+    )
     raise_on_strategy_error: bool = Field(
         default=False,
         description=(
