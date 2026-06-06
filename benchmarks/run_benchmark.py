@@ -753,6 +753,9 @@ def run_benchmark(
     if _os.environ.get("MSC_USE_ORTHO_RESCUE", "").lower() in ("1", "true", "yes", "on"):
         config.validation.compound_split_ortho_insertion_rescue = True
         print("  compound_split_ortho_insertion_rescue: ENABLED (via MSC_USE_ORTHO_RESCUE)")
+    if _os.environ.get("MSC_DETECT_AW_VOWEL_UNMASK", "").lower() in ("1", "true", "yes", "on"):
+        config.validation.detect_aw_vowel_unmask = True
+        print("  detect_aw_vowel_unmask: ENABLED (via MSC_DETECT_AW_VOWEL_UNMASK)")
     sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
     if sme_bigram_env:
         try:

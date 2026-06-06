@@ -151,6 +151,41 @@ class TestMidCompound:
         assert normalize_e_vowel_tall_aa(flat) == expected
 
 
+class TestMedialClusterContract:
+    """Medial-bearing clusters always take flat AA — the scan keys on the
+    medial sign in the base slot and flattens stray ေါ deliberately.
+
+    Pins the documented contract (previously the docstring claimed medial
+    clusters pass through unmodified, which was false): the complement
+    branch firing on medials is intentional and orthographically correct.
+    """
+
+    @pytest.mark.parametrize(
+        "wrong,expected",
+        [
+            ("ကျေါင်း", "ကျောင်း"),  # stray tall after medial ျ → flatten
+            ("ကြေါ", "ကြော"),  # stray tall after medial ြ → flatten
+            ("ပျေါ်", "ပျော်"),  # whitelist base ပ + medial: cluster takes flat
+        ],
+    )
+    def test_stray_tall_after_medial_flattened(self, wrong: str, expected: str) -> None:
+        assert normalize_e_vowel_tall_aa(wrong) == expected
+
+    @pytest.mark.parametrize(
+        "word",
+        [
+            "ပျော်",  # "fun" — flat AA canonical despite whitelist base ပ
+            "ပြော",  # "speak"
+            "ကျော",  # "back"
+            "ခြောက်",  # "six / dry" — whitelist base ခ + medial ြ stays flat
+        ],
+    )
+    def test_medial_cluster_flat_aa_preserved(self, word: str) -> None:
+        """The round-bottom repair must never fire through a medial: the
+        char before ေ is the medial, not the whitelist consonant."""
+        assert normalize_e_vowel_tall_aa(word) == word
+
+
 class TestPassthrough:
     """Non-targeted inputs must be untouched."""
 

@@ -339,13 +339,16 @@ def normalize_e_vowel_tall_aa(text: str) -> str:
     round-bottom set; see the ``_ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA``
     block comment for the rationale and the criterion to widen it.
 
-    Scope limit: the rewrite fires only on the bare pattern
-    ``consonant + ေ + {ာ, ါ}`` at adjacent positions. Medial or stacking
-    interpositions — e.g. ``ပ + ြ + ေ + ာ`` (``ပြော``) or ``ခ + ျ + ေ + ာ``
-    — are *not* matched and pass through unmodified. This is deliberate
-    (the round-bottom / tall-AA interaction with medials is still under
-    benchmark validation), so expanding the whitelist or the match pattern
-    without per-consonant verification is a regression risk.
+    Medial clusters: the scan keys on the character immediately before
+    ``ေ``, which for a medial-bearing cluster is the *medial sign* (ျ ြ ွ ှ),
+    not the base consonant. Medials are never in the round-bottom whitelist,
+    so such clusters always take the complement branch and flatten stray
+    ``ေါ`` to ``ော`` (e.g. ``ကျေါင်း → ကျောင်း``). This is deliberate and
+    orthographically correct: a medial changes the glyph bottom, so
+    medial-bearing clusters take flat AA regardless of the base consonant
+    (``ပျော``, ``ပြော``, ``ကျော``, ...) — even when the base consonant alone
+    would take TALL AA. Canonical forms like ``ပျော်`` already use flat AA
+    and pass through unchanged.
 
     Args:
         text: Input Myanmar text.
@@ -365,6 +368,10 @@ def normalize_e_vowel_tall_aa(text: str) -> str:
         'ကောင်း'
         >>> normalize_e_vowel_tall_aa("ဖော်")   # ဖ is outside whitelist
         'ဖော်'
+        >>> normalize_e_vowel_tall_aa("ကျေါင်း")  # wrongly tall after medial ျ
+        'ကျောင်း'
+        >>> normalize_e_vowel_tall_aa("ပျော်")   # medial cluster keeps flat AA
+        'ပျော်'
 
     Sources:
         - Myanmar Language Commission, *မြန်မာ သတ်ပုံ ကျမ်း* (1978 rev. 2003).
@@ -383,9 +390,20 @@ def normalize_e_vowel_tall_aa(text: str) -> str:
     n = len(text)
     while i < n:
         ch = text[i]
-        # Looking for consonant + ေ + {ာ, ါ} at positions i, i+1, i+2.
+        # Looking for <base> + ေ + {ာ, ါ} at positions i, i+1, i+2, where
+        # <base> is whatever character precedes the e-vowel: the consonant
+        # for a bare cluster, or the last medial sign (ျ ြ ွ ှ) for a
+        # medial-bearing cluster.
         if i + 2 < n and text[i + 1] == _E_VOWEL and text[i + 2] in (_AA, _TALL_AA):
-            target_aw = _TALL_AA if ch in _ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA else _AA
+            if ch in _ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA:
+                # Bare round-bottom consonant: TALL AA is canonical.
+                target_aw = _TALL_AA
+            else:
+                # Complement branch — every other base, INCLUDING medials.
+                # Medial-bearing clusters always take flat AA (ကျော, ပြော),
+                # so flattening stray ေါ after a medial (ကျေါင်း → ကျောင်း)
+                # is the canonical repair, not an accident of the scan.
+                target_aw = _AA
             out.append(ch)
             out.append(_E_VOWEL)
             out.append(target_aw)

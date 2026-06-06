@@ -1,9 +1,10 @@
 """Pre-normalization text-level detectors.
 
 These detectors run on the raw (un-normalized) text to catch errors that
-normalization would silently fix, destroying the evidence.  They all
-return ``list[SyllableError]`` — the caller merges them into the main
-error list after normalization.
+normalization would silently fix, destroying the evidence.  They return
+``list[SyllableError]`` (or ``list[WordError]`` for the aw-vowel un-mask
+detector) — the caller merges them into the main error list after
+normalization.
 
 Extracted from ``spellchecker.py`` to reduce file size while preserving
 the exact same method signatures and behaviour.
@@ -11,10 +12,12 @@ the exact same method signatures and behaviour.
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 from myspellchecker.core.constants import (
     ET_BROKEN_VIRAMA,
+    ET_CONFUSABLE_ERROR,
     ET_INCOMPLETE_STACKING,
     ET_LEADING_VOWEL_E,
     ET_MEDIAL_ORDER_ERROR,
@@ -22,6 +25,7 @@ from myspellchecker.core.constants import (
     ET_VOWEL_AFTER_ASAT,
     ET_ZAWGYI_ENCODING,
     MEDIALS,
+    SKIPPED_CONTEXT_WORDS,
     VOWEL_SIGNS,
 )
 
@@ -30,7 +34,8 @@ if TYPE_CHECKING:
     from myspellchecker.providers.base import DictionaryProvider
 from myspellchecker.core.detector_data import TEXT_DETECTOR_CONFIDENCES
 from myspellchecker.core.detectors.utils import iter_occurrences
-from myspellchecker.core.response import Error, SyllableError
+from myspellchecker.core.response import Error, Suggestion, SyllableError, WordError
+from myspellchecker.text.normalize import _ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA, normalize
 from myspellchecker.text.zawgyi_support import convert_zawgyi_to_unicode, get_zawgyi_detector
 
 
@@ -44,6 +49,7 @@ class PreNormalizationDetectorsMixin:
     # --- Type stubs for attributes provided by SpellChecker ---
     config: "SpellCheckerConfig"
     provider: "DictionaryProvider"
+    segmenter: Any
     logger: Any
 
     # ------------------------------------------------------------------ #
@@ -108,6 +114,47 @@ class PreNormalizationDetectorsMixin:
         "ကေါင်း": ["ကောင်း", "ခေါင်း"],
         "ေကာင်း": ["ကောင်း"],
     }
+
+    # --- Aw-vowel (ော ↔ ေါ) un-mask detector data -------------------------
+    # Prefilter for potential aw-vowel canonicalization targets: either a
+    # flat AA after a round-bottom whitelist consonant ({ပ,ခ,ဒ} + ေ + ာ) or
+    # a stray TALL AA after any other base character (<base> + ေ + ါ).
+    _AW_VOWEL_VIOLATION_RE = re.compile(
+        "[ပခဒ]ော"  # {ပ,ခ,ဒ} + ေ + flat ာ
+        "|[^ပခဒ]ေါ"  # other base + ေ + tall ါ
+    )
+    # Classical round-bottom consonants deliberately EXCLUDED from the narrow
+    # normalizer whitelist (see _ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA): the
+    # post-flat-AA-migration dictionary keys these words FLAT, but modern
+    # loanwords are legitimately written with TALL AA after them (ဝေါလ်
+    # "Wall", ဂေါ ...), so the tall→flat unmask direction must not fire on
+    # them — they are exactly the clean-text false-positive risk measured in
+    # the unmask-probe-01 kill-gate (2 clean flips, both in this set).
+    _AW_TALL_AA_AMBIGUOUS_BASES: frozenset[str] = frozenset(
+        {
+            "ဂ",  # ဂ  GA
+            "င",  # င  NGA
+            "ဝ",  # ဝ  WA
+        }
+    )
+
+    # Particles/function words that glue onto a typo word inside a
+    # whitespace chunk. A chunk containing one of these as a segmenter
+    # token is a syntactic phrase, not a lexical compound, so the
+    # whole-chunk emission granularity is suppressed for it.
+    # SKIPPED_CONTEXT_WORDS (the context-validator particle set) plus glue
+    # particles it lacks (colloquial plural/topic/attributive/directional).
+    _AW_CHUNK_PARTICLES: frozenset[str] = frozenset(SKIPPED_CONTEXT_WORDS) | frozenset(
+        {
+            "တွေ",  # plural (colloquial)
+            "ဟာ",  # topic marker (colloquial)
+            "တဲ့",  # attributive (colloquial)
+            "သို့",  # directional (formal)
+            "မယ့်",  # future attributive (colloquial)
+            "ပေါ်",  # locative postposition ("on")
+            "အပေါ်",  # locative postposition ("upon/towards")
+        }
+    )
 
     # Vowel signs that may appear wrongly before a medial sign.
     # Canonical Myanmar order: consonant + medials + vowels, so vowel-before-medial
@@ -524,6 +571,222 @@ class PreNormalizationDetectorsMixin:
                 i += 1
 
         return errors
+
+    def _detect_aw_vowel_unmask_errors(self, text: str) -> list[WordError]:
+        """Detect aw-vowel (ော ↔ ေါ) typos that normalization silently repairs.
+
+        ``normalize_e_vowel_tall_aa`` canonicalizes the aw-vowel by the shape
+        of the preceding base character ({ပ,ခ,ဒ} → tall ါ, everything else →
+        flat ာ) BEFORE the validator ever judges the token, so a genuine
+        spelling error like ``ခော်`` (flat AA after round-bottom ခ) is
+        rewritten to the dictionary-valid ``ခေါ်`` and never flagged. This
+        detector runs on the raw text and emits the silently-applied repair
+        as an explicit confusable error.
+
+        Gates (all must hold per emitted span):
+        - every raw↔canonical difference inside the span is a guarded
+          aw-vowel substitution (any other normalization diff → skip);
+        - flat→tall direction requires the base in the round-bottom
+          whitelist {ပ,ခ,ဒ}; tall→flat requires the base OUTSIDE
+          ``_AW_TALL_AA_AMBIGUOUS_BASES`` ({ဂ,င,ဝ} — loanword guard) and a
+          Myanmar consonant or medial sign;
+        - the canonical form is dictionary-valid (it IS the suggestion);
+        - the raw form is dictionary-OOV.
+
+        Span policy (one emission per typo, see _aw_vowel_candidate_spans):
+        the covering segmenter word by default; the whole whitespace chunk
+        when it is a multi-word compound of CONTENT words (no glued
+        particles/postpositions — ကျောင်းမှာ emits ကျောင်း, but the lexical
+        compound စိတ်ပေါက် emits whole); the violated syllable only as a
+        fallback when the covering word fails the dictionary gates.
+
+        Chunks containing a ``_VOWEL_REORDER_ERRORS`` key are skipped — that
+        detector owns those forms and emits an ambiguity-aware suggestion
+        list (e.g. ကေါင်း may be a ခ→က consonant typo whose correction is
+        NOT the aw-canonical form).
+
+        The suggestion is constructed deterministically from the normalizer
+        (not SymSpell ranking), so top-1 is the canonical form by design.
+        Emitted errors carry ``_structural_early_exit`` so downstream
+        dedup/meta filters preserve them.
+
+        Must run BEFORE normalization, which destroys the evidence.
+        Gated by ``config.validation.detect_aw_vowel_unmask`` (default off)
+        at the ``_prepare_text`` call site.
+        """
+        if not text or self._AW_VOWEL_VIOLATION_RE.search(text) is None:
+            return []
+
+        errors: list[WordError] = []
+        confidence = TEXT_DETECTOR_CONFIDENCES.get("aw_vowel_unmask", 0.95)
+        current_idx = 0
+        for chunk in text.split():
+            idx = text.find(chunk, current_idx)
+            if idx >= 0:
+                current_idx = idx + len(chunk)
+            else:
+                continue
+            if self._AW_VOWEL_VIOLATION_RE.search(chunk) is None:
+                continue
+            # Defer to the dedicated vowel-reorder detector for its known
+            # ambiguous forms (ကေါင်း can be a ခ→က consonant typo): emitting
+            # here would displace its multi-candidate suggestion list.
+            if any(key in chunk for key in self._VOWEL_REORDER_ERRORS):
+                continue
+            canon_chunk = normalize(chunk)
+            # Positions must map 1:1 onto the raw chunk; any length-changing
+            # normalization step (Zawgyi conversion, char dedup) voids that,
+            # so skip the chunk entirely — other detectors own those cases.
+            if len(canon_chunk) != len(chunk) or canon_chunk == chunk:
+                continue
+            # Cheap chunk-level guard BEFORE any provider/segmenter work:
+            # every diff must be a guarded aw-vowel swap. This also rejects
+            # the legitimately-tall ဂ/ဝ/င words (ဝေါဟာရ, ဂေါက်) that the
+            # complement flattening rewrites, avoiding a wasted
+            # segmentation pass on clean text.
+            if not self._aw_vowel_diffs_guarded(chunk, canon_chunk):
+                continue
+            diff_pos = [
+                i for i, (a, b) in enumerate(zip(chunk, canon_chunk, strict=True)) if a != b
+            ]
+
+            for start, end in self._aw_vowel_candidate_spans(chunk, canon_chunk, diff_pos):
+                error = WordError(
+                    text=chunk[start:end],
+                    position=idx + start,
+                    suggestions=[
+                        Suggestion(
+                            canon_chunk[start:end],
+                            confidence=confidence,
+                            source="aw_vowel_unmask",
+                        )
+                    ],
+                    confidence=confidence,
+                    error_type=ET_CONFUSABLE_ERROR,
+                )
+                error._structural_early_exit = True
+                errors.append(error)
+        return errors
+
+    def _aw_vowel_candidate_spans(
+        self, chunk: str, canon_chunk: str, diff_pos: list[int]
+    ) -> list[tuple[int, int]]:
+        """Choose ONE gated emission span per aw-vowel violation.
+
+        Spans derive from the CANONICAL chunk (where the repaired word
+        segments exactly as the pipeline will later see it). Policy:
+
+        1. If the chunk is a multi-word compound of CONTENT words (no
+           particles/postpositions) whose canonical whole form passes the
+           dictionary gates, the typo unit is the whole compound
+           (စိတ်ပေါက ်-class) — emit the chunk.
+        2. Otherwise emit each diff-covering segmenter word that passes the
+           gates (particle glue stays out of the span: ကျောင်းမှာ → ကျောင်း).
+        3. If a covering word fails the gates (noisy segmentation, OOV
+           canonical), fall back to the violated syllable(s) inside it.
+
+        A span passes the gates iff its raw and canonical slices differ, all
+        differences are guarded aw-vowel swaps, the canonical slice is
+        dictionary-valid and the raw slice is dictionary-OOV.
+        """
+
+        def _walk(parts: list[str]) -> list[tuple[int, int]]:
+            out: list[tuple[int, int]] = []
+            cursor = 0
+            for part in parts:
+                start = canon_chunk.find(part, cursor)
+                if start < 0:
+                    continue
+                cursor = start + len(part)
+                out.append((start, cursor))
+            return out
+
+        def _gated(start: int, end: int) -> bool:
+            raw_tok = chunk[start:end]
+            canon_tok = canon_chunk[start:end]
+            if raw_tok == canon_tok:
+                return False
+            if not self._aw_vowel_diffs_guarded(raw_tok, canon_tok):
+                return False
+            if not self.provider.is_valid_word(canon_tok):
+                return False
+            return not self.provider.is_valid_word(raw_tok)
+
+        try:
+            tok_spans = _walk(self.segmenter.segment_words(canon_chunk))
+        except Exception:  # pragma: no cover - segmenter backend unavailable
+            tok_spans = []
+
+        if not tok_spans:
+            # Segmenter unavailable/empty — fall back to the whole chunk.
+            return [(0, len(chunk))] if _gated(0, len(chunk)) else []
+
+        whole = (0, len(chunk))
+        if (
+            len(tok_spans) > 1
+            and tok_spans[0][0] == 0
+            and tok_spans[-1][1] == len(canon_chunk)
+            and all(canon_chunk[s:e] not in self._AW_CHUNK_PARTICLES for s, e in tok_spans)
+            and _gated(*whole)
+        ):
+            # All-content multi-word compound (e.g. စိတ်ပေါက်): the
+            # orthographic typo unit is the whole compound.
+            return [whole]
+
+        spans: list[tuple[int, int]] = []
+        syl_spans: list[tuple[int, int]] | None = None
+        for start, end in tok_spans:
+            if not any(start <= i < end for i in diff_pos):
+                continue
+            if _gated(start, end):
+                spans.append((start, end))
+                continue
+            # Covering word failed the gates — violated-syllable fallback.
+            if syl_spans is None:
+                try:
+                    syl_spans = _walk(self.segmenter.segment_syllables(canon_chunk))
+                except Exception:  # pragma: no cover - segmenter backend unavailable
+                    syl_spans = []
+            for s, e in syl_spans:
+                if s >= start and e <= end and any(s <= i < e for i in diff_pos) and _gated(s, e):
+                    spans.append((s, e))
+        return spans
+
+    def _aw_vowel_diffs_guarded(self, raw_tok: str, canon_tok: str) -> bool:
+        """True iff every raw↔canonical difference is a guarded aw-vowel swap.
+
+        Each differing position must be an ာ/ါ ↔ ါ/ာ substitution in the
+        aw-vowel rime (preceded by ေ), with the direction allowed by the
+        base character one position earlier:
+
+        - flat ာ → tall ါ: base must be in the round-bottom whitelist
+          ({ပ,ခ,ဒ}) — the only direction the normalizer repairs that way;
+        - tall ါ → flat ာ: base must NOT be in the loanword-ambiguous set
+          ({ဂ,င,ဝ}) and must be a Myanmar consonant (U+1000–U+1021) or
+          medial sign (U+103B–U+103E).
+        """
+        aw_pair = ("ာ", "ါ")  # ာ AA, ါ TALL AA
+        diffs = [i for i, (a, b) in enumerate(zip(raw_tok, canon_tok, strict=True)) if a != b]
+        if not diffs:
+            return False
+        for i in diffs:
+            raw_ch, canon_ch = raw_tok[i], canon_tok[i]
+            if raw_ch not in aw_pair or canon_ch not in aw_pair:
+                return False
+            if i < 2 or raw_tok[i - 1] != "ေ":  # ေ
+                return False
+            base = raw_tok[i - 2]
+            if raw_ch == "ာ":
+                # flat → tall: only valid after the round-bottom whitelist.
+                if base not in _ROUND_BOTTOM_CONSONANTS_FOR_TALL_AA:
+                    return False
+            else:
+                # tall → flat: loanword guard + structural base check.
+                if base in self._AW_TALL_AA_AMBIGUOUS_BASES:
+                    return False
+                if not ("က" <= base <= "အ" or "ျ" <= base <= "ှ"):
+                    return False
+        return True
 
     def _detect_incomplete_stacking(self, text: str) -> list[SyllableError]:
         """Detect incomplete Pali/Sanskrit stacking (virama present, stacked consonant missing).
