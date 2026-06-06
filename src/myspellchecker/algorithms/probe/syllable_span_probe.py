@@ -16,6 +16,7 @@ See ``30_Audits/Probe Hybrid Ships at +0.0067 2026-05-03.md``.
 from __future__ import annotations
 
 import json
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -142,6 +143,12 @@ class ProbeInferenceEngine:
         self.model.eval()
         self.max_length = max_length
         self.segmenter = RegexSegmenter()
+        # Memo of score_sentence results. The probe is frozen and inference
+        # is deterministic per text, and the three probe strategies share
+        # one engine — on the p95 latency tail ~69% of score_sentence calls
+        # within a single check() are duplicates of the same sentence text.
+        self._score_cache: OrderedDict[str, tuple[list[float], list[_SyllableSpan]]] = OrderedDict()
+        self._SCORE_CACHE_MAX = 256
         logger.info(
             "ProbeInferenceEngine loaded: encoder=%s head=%s device=%s",
             encoder_path,
@@ -150,7 +157,23 @@ class ProbeInferenceEngine:
         )
 
     def score_sentence(self, text: str) -> tuple[list[float], list[_SyllableSpan]]:
-        """Return (per-syllable probability list, syllable span list)."""
+        """Return (per-syllable probability list, syllable span list).
+
+        Results are memoized per text (LRU, behavior-identical: the frozen
+        probe is deterministic). The outer lists are copied per call so a
+        caller mutating its result cannot poison the cache.
+        """
+        cached = self._score_cache.get(text)
+        if cached is not None:
+            self._score_cache.move_to_end(text)
+            return list(cached[0]), list(cached[1])
+        probs, spans = self._score_sentence_uncached(text)
+        if len(self._score_cache) >= self._SCORE_CACHE_MAX:
+            self._score_cache.popitem(last=False)
+        self._score_cache[text] = (probs, spans)
+        return list(probs), list(spans)
+
+    def _score_sentence_uncached(self, text: str) -> tuple[list[float], list[_SyllableSpan]]:
         if not text:
             return [], []
 
