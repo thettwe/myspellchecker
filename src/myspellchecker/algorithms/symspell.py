@@ -455,6 +455,17 @@ class SymSpell:
         # Track which levels have been indexed
         self._indexed_levels: set[str] = set()
 
+        # Memo of dictionary-VALID nasal variants per indexed term, shared
+        # across lookups. Validity of an in-dictionary term's nasal variants
+        # is stable for the provider's lifetime (the same assumption the
+        # long-lived delete index makes), so this is instance-level, not a
+        # per-check session cache. Without it, _find_similar_terms
+        # re-validates the same variants once per delete-bucket hit — tens
+        # of millions of is_valid_word calls on long sentences (p95 tail).
+        # Benign data race under threads: values are idempotent.
+        self._nasal_variant_cache: dict[tuple[str, str], frozenset[str]] = {}
+        self._NASAL_VARIANT_CACHE_MAX = 150_000
+
         # RLock for thread-safe index access
         # Uses RLock (reentrant) so the same thread can acquire multiple times.
         # Both reads and writes are protected to prevent race conditions between
@@ -964,18 +975,12 @@ class SymSpell:
                 for original_term, _ in self._deletes[delete_var]:
                     similar.add(original_term)
                     # Add nasal variants for better matching —
-                    # only expand when the term actually contains nasal endings
+                    # only expand when the term actually contains nasal endings.
+                    # Validity per (term, level) is memoized: the same indexed
+                    # term reappears in many delete buckets, and re-validating
+                    # its variants dominated the p95 latency tail.
                     if _has_nasal_ending(original_term):
-                        nasal_vars = get_nasal_variants(original_term)
-                        for variant in nasal_vars:
-                            if variant == original_term:
-                                continue  # skip self-variant (already added)
-                            if level == ValidationLevel.SYLLABLE.value:
-                                if self.provider.is_valid_syllable(variant):
-                                    similar.add(variant)
-                            else:
-                                if self.provider.is_valid_word(variant):
-                                    similar.add(variant)
+                        similar.update(self._valid_nasal_variants(original_term, level))
 
             # 2. Fallback for unindexed terms (e.g. if build_index wasn't called)
             # This handles simple deletion errors where the delete_var IS the word
@@ -991,6 +996,33 @@ class SymSpell:
                     similar.add(delete_var)
 
         return similar
+
+    def _valid_nasal_variants(self, original_term: str, level: str) -> frozenset[str]:
+        """Dictionary-valid nasal variants of an indexed term, memoized.
+
+        The enum/level dispatch and the provider validity probes are hoisted
+        out of the delete-bucket hot loop into this memo. The cache is
+        instance-level because variant validity only changes if the
+        underlying dictionary changes — the same lifetime assumption as the
+        delete index itself.
+        """
+        key = (original_term, level)
+        cached = self._nasal_variant_cache.get(key)
+        if cached is not None:
+            return cached
+        if level == ValidationLevel.SYLLABLE.value:
+            is_valid = self.provider.is_valid_syllable
+        else:
+            is_valid = self.provider.is_valid_word
+        valid = frozenset(
+            variant
+            for variant in get_nasal_variants(original_term)
+            if variant != original_term and is_valid(variant)
+        )
+        if len(self._nasal_variant_cache) >= self._NASAL_VARIANT_CACHE_MAX:
+            self._nasal_variant_cache.clear()
+        self._nasal_variant_cache[key] = valid
+        return valid
 
     def _collect_candidates(
         self,
