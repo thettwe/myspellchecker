@@ -600,10 +600,12 @@ class PreNormalizationDetectorsMixin:
         compound စိတ်ပေါက် emits whole); the violated syllable only as a
         fallback when the covering word fails the dictionary gates.
 
-        Chunks containing a ``_VOWEL_REORDER_ERRORS`` key are skipped — that
+        Spans overlapping a ``_VOWEL_REORDER_ERRORS`` key are deferred — that
         detector owns those forms and emits an ambiguity-aware suggestion
         list (e.g. ကေါင်း may be a ခ→က consonant typo whose correction is
-        NOT the aw-canonical form).
+        NOT the aw-canonical form). The deferral is per span, so an
+        independent aw-typo glued to a reorder-key form in the same chunk
+        still fires.
 
         The suggestion is constructed deterministically from the normalizer
         (not SymSpell ranking), so top-1 is the canonical form by design.
@@ -628,11 +630,6 @@ class PreNormalizationDetectorsMixin:
                 continue
             if self._AW_VOWEL_VIOLATION_RE.search(chunk) is None:
                 continue
-            # Defer to the dedicated vowel-reorder detector for its known
-            # ambiguous forms (ကေါင်း can be a ခ→က consonant typo): emitting
-            # here would displace its multi-candidate suggestion list.
-            if any(key in chunk for key in self._VOWEL_REORDER_ERRORS):
-                continue
             canon_chunk = normalize(chunk)
             # Positions must map 1:1 onto the raw chunk; any length-changing
             # normalization step (Zawgyi conversion, char dedup) voids that,
@@ -650,7 +647,16 @@ class PreNormalizationDetectorsMixin:
                 i for i, (a, b) in enumerate(zip(chunk, canon_chunk, strict=True)) if a != b
             ]
 
+            # Defer to the dedicated vowel-reorder detector ONLY for spans that
+            # overlap a _VOWEL_REORDER_ERRORS form (it owns those ambiguous
+            # forms' multi-candidate suggestion list, e.g. ကေါင်း may be a ခ→က
+            # consonant typo whose correction is NOT the aw-canonical form).
+            # Scoping per span — rather than skipping the whole chunk — lets an
+            # independent aw-typo glued to a reorder-key form still fire.
+            reorder_ranges = self._vowel_reorder_ranges(chunk)
             for start, end in self._aw_vowel_candidate_spans(chunk, canon_chunk, diff_pos):
+                if any(start < r_end and r_start < end for r_start, r_end in reorder_ranges):
+                    continue
                 error = WordError(
                     text=chunk[start:end],
                     position=idx + start,
@@ -667,6 +673,20 @@ class PreNormalizationDetectorsMixin:
                 error._structural_early_exit = True
                 errors.append(error)
         return errors
+
+    def _vowel_reorder_ranges(self, chunk: str) -> list[tuple[int, int]]:
+        """Char ranges in ``chunk`` occupied by a ``_VOWEL_REORDER_ERRORS`` key.
+
+        Aw-vowel candidate spans overlapping any of these are deferred to the
+        dedicated vowel-reorder detector; non-overlapping spans still fire.
+        """
+        ranges: list[tuple[int, int]] = []
+        for key in self._VOWEL_REORDER_ERRORS:
+            start = chunk.find(key)
+            while start != -1:
+                ranges.append((start, start + len(key)))
+                start = chunk.find(key, start + 1)
+        return ranges
 
     def _aw_vowel_candidate_spans(
         self, chunk: str, canon_chunk: str, diff_pos: list[int]

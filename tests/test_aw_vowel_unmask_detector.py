@@ -217,6 +217,19 @@ class TestDirectionTallToFlat:
         assert det._detect_aw_vowel_unmask_errors("ကေါင်းလောင်း") == []
         assert det._detect_aw_vowel_unmask_errors("ကေါင်း") == []
 
+    def test_independent_aw_typo_glued_to_reorder_key_still_fires(self) -> None:
+        """A recoverable aw-typo (ခော်) glued to a reorder-key form (ကေါင်း) in
+        the same chunk still fires for the typo; only the reorder-key span is
+        deferred. The old whole-chunk substring defer dropped both."""
+        det = _Harness(
+            _DICT,
+            segments={"ခေါ်ကောင်း": ["ခေါ်", "ကောင်း"]},
+            syllables={"ခေါ်ကောင်း": ["ခေါ်", "ကောင်း"]},
+        )
+        errors = det._detect_aw_vowel_unmask_errors("ခော်ကေါင်း")
+        assert [e.text for e in errors] == ["ခော်"]
+        assert [str(e.suggestions[0]) for e in errors] == ["ခေါ်"]
+
 
 class TestLoanwordGuard:
     """The {ဂ,င,ဝ} bases — classical round-bottom consonants excluded from
