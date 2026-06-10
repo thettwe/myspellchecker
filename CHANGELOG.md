@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-06-10
+
+### Added
+
+- **Aw-vowel un-mask detector (opt-in).** A pre-normalization detector that surfaces a class of Myanmar spelling errors the normalizer previously masked — flat/tall *aa* swaps in the aw-vowel rime (ော ↔ ေါ), e.g. `ခော်` → `ခေါ်`. Each violation emits one gated correction with a deterministic canonical suggestion. Opt-in via the `detect_aw_vowel_unmask` config flag or the `MSC_DETECT_AW_VOWEL_UNMASK` environment variable; default off.
+
+### Changed
+
+- **Hot-path latency reduced ~40% (default, behavior-identical).** Memoized SymSpell nasal-variant validation (instance-level cache keyed by term and level) and the syllable-span probe's per-sentence scoring (LRU). p95 latency drops from 658 ms to 401 ms and mean per-sentence time by ~43%, with byte-identical detections.
+
+### Fixed
+
+- **Concurrent batch checking.** The shared probe score cache is now lock-guarded, so concurrent `check_batch_async` workers can no longer raise a `KeyError` under load.
+- Orthographic-insertion-rescue corrections now carry an explicit confidence so a recovered correction is not silently withheld, and the aw-vowel detector defers only the overlapping span (not the whole token) to the vowel-reorder detector. Plus internal comment, dead-code, and test-coverage cleanups.
+
+### Benchmark
+
+- With the aw-vowel detector enabled, spelling composite improves `0.6520` → `0.6870` (**+0.0350**) on the v1.8.0 benchmark: +98 true positives at zero added false positives, top-1 accuracy 92% on the un-masked corrections, clean false-positive sentences within cap (91/779), p95 382 ms. The benchmark's clean/error annotations were also corrected this release (67 previously-unannotated planted typos). Default behavior (detector off) is unchanged.
+
 ## [1.7.1] - 2026-06-02
 
 ### Added
