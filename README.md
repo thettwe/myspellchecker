@@ -33,8 +33,8 @@
 *   **Suffix-Aware Re-Segmentation**: DefaultSegmenter post-processes oversized tokens and colloquial-locative merges (e.g. `ရန်ကုန်မာ` → `[ရန်, ကုန်, မာ]`) for cleaner downstream validation.
 *   **Compound & Morpheme Handling**: DP-based compound resolution, ternary compound splits in morpheme correction, productive reduplication validation.
 *   **AI Semantic Checking (Optional)**: ONNX masked language model for context-aware validation.
-*   **Syllable-Span Probe (opt-in, v1.7.1)**: A frozen-encoder neural probe that improves recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model; default-off, enabled via `use_probe_*` config flags or `MSC_USE_PROBE_*` environment variables.
-*   **Aw-Vowel Un-Mask Detector (opt-in, v1.8.0)**: Surfaces a class of Myanmar aw-vowel spelling errors — flat/tall *aa* swaps in the aw-vowel rime (ော ↔ ေါ, e.g. `ခော်` → `ခေါ်`) — that pre-normalization would otherwise silently repair before validation. Default-off, enabled via the `detect_aw_vowel_unmask` config flag or `MSC_DETECT_AW_VOWEL_UNMASK`.
+*   **Syllable-Span Probe (default-on since v1.9.0)**: A frozen-encoder neural probe that improves recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model and activate when `probe_model_path` points at a probe artifact (without it, the rule-based pipeline runs unchanged). Opt out via `use_probe_*` config flags or `MSC_USE_PROBE_*=0` environment variables.
+*   **Aw-Vowel Un-Mask Detector (default-on since v1.9.0)**: Surfaces a class of Myanmar aw-vowel spelling errors — flat/tall *aa* swaps in the aw-vowel rime (ော ↔ ေါ, e.g. `ခော်` → `ခေါ်`) — that pre-normalization would otherwise silently repair before validation. Opt out via the `detect_aw_vowel_unmask` config flag or `MSC_DETECT_AW_VOWEL_UNMASK=0`.
 *   **Named Entity Recognition**: Heuristic and Transformer-based NER to reduce false positives on names and places.
 
 ### Dictionary Building Pipeline

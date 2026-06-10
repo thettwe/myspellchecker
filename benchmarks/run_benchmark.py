@@ -750,12 +750,22 @@ def run_benchmark(
     if _os.environ.get("MSC_USE_SEGMENTER_MERGE_RESCUE", "").lower() in ("1", "true", "yes"):
         config.validation.use_segmenter_post_merge_rescue = True
         print("  use_segmenter_post_merge_rescue: ENABLED (via MSC_USE_SEGMENTER_MERGE_RESCUE)")
-    if _os.environ.get("MSC_USE_ORTHO_RESCUE", "").lower() in ("1", "true", "yes", "on"):
+    # Default-on since v1.9.0; envs are tri-state (truthy / falsy / unset).
+    _ortho_env = _os.environ.get("MSC_USE_ORTHO_RESCUE", "").lower()
+    if _ortho_env in ("1", "true", "yes", "on"):
         config.validation.compound_split_ortho_insertion_rescue = True
-        print("  compound_split_ortho_insertion_rescue: ENABLED (via MSC_USE_ORTHO_RESCUE)")
-    if _os.environ.get("MSC_DETECT_AW_VOWEL_UNMASK", "").lower() in ("1", "true", "yes", "on"):
+    elif _ortho_env in ("0", "false", "no", "off"):
+        config.validation.compound_split_ortho_insertion_rescue = False
+    print(
+        "  compound_split_ortho_insertion_rescue: "
+        f"{config.validation.compound_split_ortho_insertion_rescue}"
+    )
+    _aw_env = _os.environ.get("MSC_DETECT_AW_VOWEL_UNMASK", "").lower()
+    if _aw_env in ("1", "true", "yes", "on"):
         config.validation.detect_aw_vowel_unmask = True
-        print("  detect_aw_vowel_unmask: ENABLED (via MSC_DETECT_AW_VOWEL_UNMASK)")
+    elif _aw_env in ("0", "false", "no", "off"):
+        config.validation.detect_aw_vowel_unmask = False
+    print(f"  detect_aw_vowel_unmask: {config.validation.detect_aw_vowel_unmask}")
     sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
     if sme_bigram_env:
         try:
@@ -1012,18 +1022,37 @@ def run_benchmark(
     probe_rescue_thr_env = _os.environ.get("MSC_PROBE_RESCUE_THRESHOLD", "").strip()
     probe_rescue_freq_env = _os.environ.get("MSC_PROBE_RESCUE_MIN_FREQ", "").strip()
     probe_max_existing_env = _os.environ.get("MSC_PROBE_MAX_EXISTING_ERRORS", "").strip()
-    if probe_corr_env in ("1", "true", "yes", "on"):
+    # Flags default-on since v1.9.0; envs are tri-state (truthy / falsy / unset).
+    _TRUTHY = ("1", "true", "yes", "on")
+    _FALSY = ("0", "false", "no", "off")
+    if probe_corr_env in _TRUTHY:
         config.validation.use_probe_corrector = True
-        print("  use_probe_corrector: True")
-    if probe_comp_env in ("1", "true", "yes", "on"):
+    elif probe_corr_env in _FALSY:
+        config.validation.use_probe_corrector = False
+    if probe_comp_env in _TRUTHY:
         config.validation.use_probe_compound = True
-        print("  use_probe_compound: True")
-    if probe_rescue_env in ("1", "true", "yes", "on"):
+    elif probe_comp_env in _FALSY:
+        config.validation.use_probe_compound = False
+    if probe_rescue_env in _TRUTHY:
         config.validation.use_probe_segmenter_rescue = True
-        print("  use_probe_segmenter_rescue: True")
+    elif probe_rescue_env in _FALSY:
+        config.validation.use_probe_segmenter_rescue = False
     if probe_path_env:
         config.validation.probe_model_path = probe_path_env
-        print(f"  probe_model_path: {probe_path_env}")
+    _probe_flags_on = (
+        config.validation.use_probe_corrector
+        or config.validation.use_probe_compound
+        or config.validation.use_probe_segmenter_rescue
+    )
+    _probe_inert = _probe_flags_on and not config.validation.probe_model_path
+    _inert_suffix = " (INERT — probe_model_path not set)" if _probe_inert else ""
+    print(f"  use_probe_corrector: {config.validation.use_probe_corrector}{_inert_suffix}")
+    print(f"  use_probe_compound: {config.validation.use_probe_compound}{_inert_suffix}")
+    print(
+        f"  use_probe_segmenter_rescue: "
+        f"{config.validation.use_probe_segmenter_rescue}{_inert_suffix}"
+    )
+    print(f"  probe_model_path: {config.validation.probe_model_path}")
     if probe_corr_thr_env:
         config.validation.probe_corrector_threshold = float(probe_corr_thr_env)
         print(f"  probe_corrector_threshold: {probe_corr_thr_env}")

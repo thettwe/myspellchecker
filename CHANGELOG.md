@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Detection features are now ON by default.** The aw-vowel un-mask detector (`detect_aw_vowel_unmask`), the orthographic-insertion rescue (`compound_split_ortho_insertion_rescue`), and the three syllable-span probe strategies (`use_probe_corrector`, `use_probe_compound`, `use_probe_segmenter_rescue`) ship enabled. The probe strategies additionally require `probe_model_path` to point at a probe artifact; without it they degrade gracefully to the rule-based pipeline and log a warning. Opt out per feature via the existing config flags or environment variables (`MSC_DETECT_AW_VOWEL_UNMASK=0`, `MSC_USE_ORTHO_RESCUE=0`, `MSC_USE_PROBE_CORRECTOR=0`, `MSC_USE_PROBE_COMPOUND=0`, `MSC_USE_PROBE_RESCUE=0`).
+- The benchmark's gold annotations were normalized to the checker's emission granularity, deletion semantics were made explicit, and the error-subtype vocabulary was consolidated and closed (benchmark version `1.5.0-v19-granularity-normalization`). Corrected sentences are unchanged; top-1/MRR accounting no longer penalizes correct fixes annotated at a different span width.
+
+### Benchmark
+
+- Default configuration improves from composite `0.7301` to `0.7646` (no probe artifact) or `0.7791` (probe artifact present) on the normalized benchmark — up to +127 true positives — with clean false-positive sentences within cap (91/779) and p95 latency ≤ 391 ms.
+
 ## [1.8.0] - 2026-06-10
 
 ### Added
