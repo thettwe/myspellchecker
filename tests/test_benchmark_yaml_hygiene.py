@@ -81,3 +81,84 @@ def test_benchmark_version_is_populated(benchmark_data: dict) -> None:
         "Benchmark YAML must carry a non-empty `version:` field. Every change to "
         "the YAML bumps the version (feedback_single_benchmark_file)."
     )
+
+
+def test_span_text_matches_erroneous_text(benchmark_data: dict) -> None:
+    """G4 (v1.9 granularity rules): the annotated span must slice exactly to
+    `erroneous_text`, otherwise span-based TP matching and `gold_correction`
+    splicing silently diverge."""
+    offenders: list[str] = []
+    for sentence in benchmark_data.get("sentences", []):
+        text = sentence.get("input") or ""
+        for error in sentence.get("expected_errors", []):
+            span = error.get("span") or {}
+            start, end = span.get("start"), span.get("end")
+            expected = error.get("erroneous_text")
+            if start is None or end is None or expected is None:
+                continue
+            if text[start:end] != expected:
+                offenders.append(
+                    f"{error.get('error_id', '<no-id>')} (sentence {sentence.get('id')})"
+                )
+    assert not offenders, (
+        "Benchmark YAML has spans that do not slice to their `erroneous_text`: "
+        + ", ".join(offenders)
+    )
+
+
+CANONICAL_SUBTYPES = {
+    "consonant_substitution",
+    "vowel_medial_substitution",
+    "broken_compound",
+    "compound_confusion",
+    "tone_mark_error",
+    "aukmyit_confusion",
+    "loan_word_misspelling",
+    "real_word_confusion",
+    "non_word_typo",
+    "homophone_confusion",
+    "zawgyi_conversion_error",
+    "zawgyi_encoding",
+    "word_boundary",
+    "missing_visarga",
+    "missing_asat",
+    "register_mismatch",
+    "particle_misuse",
+    "syllable_error",
+    "hidden_compound_typo",
+    "synonym_substitution",
+    "stacking_error",
+    "verb_tense_agreement",
+    "spacing",
+    "word_order",
+    "collocation_error",
+    "ngram_unlikely",
+    "colloquial_in_formal",
+    "classifier_error",
+    "semantic_error",
+    "negation_error",
+    "aspect_error",
+    "merged_word",
+    "question_structure",
+    "zero_width_chars",
+    "missing_information",
+    "missing_word",
+    "incomplete_sentence",
+    "invalid_syllable",
+}
+
+
+def test_error_subtype_in_canonical_vocabulary(benchmark_data: dict) -> None:
+    """G6 (v1.9 granularity rules): `error_subtype` is a closed vocabulary.
+    The 62-label long tail was consolidated in bp-03 (2026-06-10); new labels
+    require a deliberate vocabulary addition here, not ad-hoc invention."""
+    offenders: list[str] = []
+    for sentence in benchmark_data.get("sentences", []):
+        for error in sentence.get("expected_errors", []):
+            subtype = error.get("error_subtype")
+            if subtype is not None and subtype not in CANONICAL_SUBTYPES:
+                offenders.append(f"{error.get('error_id', '<no-id>')}: {subtype}")
+    assert not offenders, (
+        "Benchmark YAML uses non-canonical `error_subtype` labels (G6 closed "
+        "vocabulary, bp-03 2026-06-10): " + ", ".join(sorted(set(offenders)))
+    )
