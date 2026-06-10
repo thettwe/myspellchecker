@@ -217,6 +217,19 @@ class TestDirectionTallToFlat:
         assert det._detect_aw_vowel_unmask_errors("ကေါင်းလောင်း") == []
         assert det._detect_aw_vowel_unmask_errors("ကေါင်း") == []
 
+    def test_independent_aw_typo_glued_to_reorder_key_still_fires(self) -> None:
+        """A recoverable aw-typo (ခော်) glued to a reorder-key form (ကေါင်း) in
+        the same chunk still fires for the typo; only the reorder-key span is
+        deferred. The old whole-chunk substring defer dropped both."""
+        det = _Harness(
+            _DICT,
+            segments={"ခေါ်ကောင်း": ["ခေါ်", "ကောင်း"]},
+            syllables={"ခေါ်ကောင်း": ["ခေါ်", "ကောင်း"]},
+        )
+        errors = det._detect_aw_vowel_unmask_errors("ခော်ကေါင်း")
+        assert [e.text for e in errors] == ["ခော်"]
+        assert [str(e.suggestions[0]) for e in errors] == ["ခေါ်"]
+
 
 class TestLoanwordGuard:
     """The {ဂ,င,ဝ} bases — classical round-bottom consonants excluded from
@@ -296,3 +309,47 @@ class TestDiffGuardUnit:
 
     def test_multiple_aw_diffs_all_guarded(self, det: _Harness) -> None:
         assert det._aw_vowel_diffs_guarded("ပော်ပောက်", "ပေါ်ပေါက်") is True
+
+    def test_no_base_before_aw_rejected(self, det: _Harness) -> None:
+        # Diff at index 1 — no base two positions back (the i < 2 guard).
+        assert det._aw_vowel_diffs_guarded("ေါ", "ော") is False
+
+    def test_non_myanmar_base_rejected(self, det: _Harness) -> None:
+        # tall→flat requires a Myanmar consonant / medial base; Latin rejected.
+        assert det._aw_vowel_diffs_guarded("Aေါ", "Aော") is False
+
+    def test_mixed_valid_and_invalid_diffs_rejected(self, det: _Harness) -> None:
+        # One guarded aw-swap (ပ: ော→ေါ) plus a non-aw diff (မ→န): the
+        # all-diffs-must-pass contract must reject the whole token.
+        assert det._aw_vowel_diffs_guarded("ပော်ခမ်", "ပေါ်ခန်") is False
+
+
+class TestSpanFallbacksAndPositions:
+    """Defensive span-selection branches + duplicate-chunk position tracking."""
+
+    def test_segmenter_empty_falls_back_to_whole_chunk(self) -> None:
+        # segment_words returns [] for the canonical chunk → whole-chunk gate
+        # is the fallback emission (non-default / unavailable segmenter).
+        det = _Harness(_DICT, segments={"ခေါ်": []})
+        errors = det._detect_aw_vowel_unmask_errors("ခော်")
+        assert [e.text for e in errors] == ["ခော်"]
+        assert [str(e.suggestions[0]) for e in errors] == ["ခေါ်"]
+
+    def test_walk_skips_untraceable_segmenter_part(self) -> None:
+        # A segmenter part that is not a substring of the canonical chunk
+        # (non-tiling backend) is skipped without derailing the emission.
+        det = _Harness(_DICT, segments={"ခေါ်": ["ခေါ်", "ZZZ"]})
+        errors = det._detect_aw_vowel_unmask_errors("ခော်")
+        assert [e.text for e in errors] == ["ခော်"]
+
+    def test_duplicate_typo_chunk_distinct_positions(self) -> None:
+        # The same typo chunk repeated must anchor to start-advanced offsets,
+        # not collapse both onto the first occurrence.
+        text = "ခော် ခော်"
+        det = _Harness(_DICT)
+        errors = det._detect_aw_vowel_unmask_errors(text)
+        assert len(errors) == 2
+        assert [e.position for e in errors] == [
+            text.index("ခော်"),
+            text.rindex("ခော်"),
+        ]

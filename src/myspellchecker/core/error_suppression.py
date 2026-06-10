@@ -184,14 +184,15 @@ _COMPOUND_SPLIT_MIN_SYLLABLES = 4
 # codepoint) marks an orthographic-insertion typo, distinguished from the
 # deletion / whole-word-swap shapes that the compound-split suppressor must
 # keep killing. Members: asat (U+103A), visarga (U+1038), dot-below (U+1037),
-# ha-htoe pair (U+103D/U+103E), ya-medial pair (U+103B/U+103C). Used by
-# ``_is_orthographic_insertion_typo`` as the SHAPE gate — never a freq/ed gate.
+# medial-wa/medial-ha pair (U+103D/U+103E), medial-ya/medial-ra pair
+# (U+103B/U+103C). Used by ``_ortho_insertion_detail`` as the SHAPE gate —
+# never a freq/ed gate.
 _ORTHO_INSERTION_CHARS = frozenset(
     {
         chr(0x103A),  # asat (killer / virama-marker)
         chr(0x1038),  # visarga
         chr(0x1037),  # dot below
-        chr(0x103D),  # medial wa / ha-htoe
+        chr(0x103D),  # medial wa
         chr(0x103E),  # medial ha
         chr(0x103B),  # medial ya
         chr(0x103C),  # medial ra
@@ -1164,9 +1165,14 @@ class ErrorSuppressionMixin:
             min_freq=getattr(validation, "skip_rule_gate_min_freq", 1000),
         )
 
-    def _is_orthographic_insertion_typo(self, word: str) -> bool:
-        """SHAPE gate: True iff the token's ed=1 SymSpell top-1 is a single
-        in-syllable diacritic INSERTION (gold = typo + 1 codepoint).
+    def _ortho_insertion_detail(self, word: str) -> tuple[int, str, str] | None:
+        """SHAPE gate: detect a single in-syllable-diacritic INSERTION typo.
+
+        Returns ``(insert_index, inserted_char, corrected_top1)`` when the
+        token's ed=1 SymSpell top-1 differs from ``word`` by exactly one
+        inserted in-syllable diacritic (gold = typo + 1 codepoint), else
+        ``None``. ``insert_index`` is the offset in ``word`` at which
+        ``inserted_char`` is added to yield ``corrected_top1``.
 
         Recovers orthographic-insertion typos (e.g. ``ရုပ`` → ``ရုပ်`` with an
         asat inserted) that ``_suppress_compound_split_valid_words`` kills.
@@ -1175,7 +1181,7 @@ class ErrorSuppressionMixin:
         correction shape (length-diff + identity of the inserted codepoint)
         separates them.
 
-        Returns True iff ALL of:
+        Returns non-``None`` iff ALL of:
           * ``word`` contains no ASCII/Latin codepoint (loanword grey-zone
             guard — 'algorithm'+la / 'website'+asat share this shape but are
             clean-text FPs);
@@ -1190,17 +1196,6 @@ class ErrorSuppressionMixin:
 
         Defensive against a missing SymSpell handle, ``None``/empty top-1,
         and length edge cases.
-        """
-        return self._ortho_insertion_detail(word) is not None
-
-    def _ortho_insertion_detail(self, word: str) -> tuple[int, str, str] | None:
-        """Detail variant of :meth:`_is_orthographic_insertion_typo`.
-
-        Returns ``(insert_index, inserted_char, corrected_top1)`` when the
-        token's ed=1 SymSpell top-1 is a single in-syllable-diacritic
-        insertion, else ``None``. ``insert_index`` is the offset in ``word``
-        at which ``inserted_char`` is added to yield ``corrected_top1``. Pure
-        SHAPE gate — never relaxes a freq/ed threshold.
         """
         if not word:
             return None
@@ -1286,6 +1281,12 @@ class ErrorSuppressionMixin:
         corrected = syl[:local] + inserted + syl[local:]
         err.position = err.position + s_start
         err.text = syl
+        # Pin the error-level confidence too: narrowing runs in post-processing
+        # (after context fusion may have rewritten error.confidence into the
+        # [0.5, 0.60) INFORM band), so without this the recovered correction is
+        # silently dropped from corrected_text even though a 0.9 suggestion
+        # still appears in the error list.
+        err.confidence = 0.9
         err.suggestions = [
             Suggestion(
                 text=corrected,

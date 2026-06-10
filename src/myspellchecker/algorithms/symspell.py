@@ -462,7 +462,9 @@ class SymSpell:
         # per-check session cache. Without it, _find_similar_terms
         # re-validates the same variants once per delete-bucket hit — tens
         # of millions of is_valid_word calls on long sentences (p95 tail).
-        # Benign data race under threads: values are idempotent.
+        # Mutated only inside _valid_nasal_variants, which is reached solely via
+        # _find_similar_terms under _index_lock, so all reads/writes (and the
+        # overflow .clear()) are serialized — there is no data race here.
         self._nasal_variant_cache: dict[tuple[str, str], frozenset[str]] = {}
         self._NASAL_VARIANT_CACHE_MAX = 150_000
 
