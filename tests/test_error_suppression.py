@@ -542,11 +542,13 @@ class TestNarrowOrthoInsertionError:
         mixin = self._mixin(["က", "ခ", "ဂ"])
         err = _make_error(text="ကခဂ", position=5, error_type="invalid_word")
         # asat inserted at index 3 (end); affected syllable is the last, "ဂ".
+        err.confidence = 0.55  # simulate a fusion-clobbered INFORM-band value
         mixin._narrow_ortho_insertion_error(err, (3, "်", "ကခဂ်"))
         assert err.text == "ဂ"
         assert err.position == 5 + 2  # offset by s_start of "ဂ"
         assert err.suggestions[0].text == "ဂ်"
         assert err.suggestions[0].source == "ortho_insertion_rescue"
+        assert err.confidence == 0.9  # re-pinned out of the INFORM band
         assert err._structural_early_exit is True
 
     def test_noop_on_segmentation_mismatch(self):

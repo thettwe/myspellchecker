@@ -1281,6 +1281,12 @@ class ErrorSuppressionMixin:
         corrected = syl[:local] + inserted + syl[local:]
         err.position = err.position + s_start
         err.text = syl
+        # Pin the error-level confidence too: narrowing runs in post-processing
+        # (after context fusion may have rewritten error.confidence into the
+        # [0.5, 0.60) INFORM band), so without this the recovered correction is
+        # silently dropped from corrected_text even though a 0.9 suggestion
+        # still appears in the error list.
+        err.confidence = 0.9
         err.suggestions = [
             Suggestion(
                 text=corrected,
