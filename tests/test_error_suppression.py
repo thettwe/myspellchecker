@@ -354,6 +354,7 @@ class TestSuppressCompoundSplitValidWords:
         syllables: list[str],
         valid_syllables: set[str] | None = None,
         symspell_top1: tuple[str, float, int] | None = None,
+        ortho_rescue: bool = False,
     ):
         """Create a mixin with just enough wiring to exercise the suppressor.
 
@@ -373,6 +374,10 @@ class TestSuppressCompoundSplitValidWords:
         # Wire the skip-rule gate params.
         mixin.config.validation.skip_rule_gate_max_ed = max_ed
         mixin.config.validation.skip_rule_gate_min_freq = min_freq
+        # config is a MagicMock, so an unset boolean flag would read as a
+        # truthy Mock. Pin the ortho-insertion-rescue carve-out to its real
+        # production default (off) unless a test opts in explicitly.
+        mixin.config.validation.compound_split_ortho_insertion_rescue = ortho_rescue
 
         # SymSpell mock.
         if symspell_top1 is None:
@@ -418,6 +423,23 @@ class TestSuppressCompoundSplitValidWords:
         mixin._suppress_compound_split_valid_words(errors)
         assert errors == []
 
+    def test_ortho_rescue_on_keeps_and_narrows_below_freq_gate(self):
+        # With the carve-out enabled, an ed=1 single-asat insertion below the
+        # freq gate is KEPT (not suppressed) and narrowed to the affected
+        # syllable carrying the corrected form as the rank-1 suggestion.
+        mixin = self._build_mixin(
+            syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
+            symspell_top1=("စွမ်းဆောင်ရည်", 1.0, 500),  # below min_freq=1000
+            ortho_rescue=True,
+        )
+        err = _make_error(text="စွမ်းဆောင်ရည", error_type="invalid_word")
+        errors = [err]
+        mixin._suppress_compound_split_valid_words(errors)
+        assert errors == [err]  # kept, not suppressed
+        assert err.text == "ည"  # narrowed to the affected syllable
+        assert err.suggestions[0].text == "ည်"
+        assert err._structural_early_exit is True
+
     def test_suppresses_when_candidate_above_ed_gate(self):
         mixin = self._build_mixin(
             syllables=["စွမ်း", "ဆောင်", "ရ", "ည"],
@@ -450,6 +472,98 @@ class TestSuppressCompoundSplitValidWords:
         errors = [err]
         mixin._suppress_compound_split_valid_words(errors)
         assert errors == [err]
+
+
+# ---------------------------------------------------------------------------
+# Orthographic-insertion rescue carve-out (default-off in production)
+# ---------------------------------------------------------------------------
+
+
+class TestOrthoInsertionDetail:
+    """Unit tests for the _ortho_insertion_detail SHAPE gate."""
+
+    @staticmethod
+    def _mixin(top1: str | None, ed: float = 1.0):
+        mixin = _make_mixin()
+        sym = MagicMock()
+        if top1 is None:
+            sym.lookup.return_value = []
+        else:
+            cand = MagicMock()
+            cand.term = top1
+            cand.edit_distance = ed
+            sym.lookup.return_value = [cand]
+        mixin.symspell = sym
+        return mixin
+
+    def test_detects_asat_insertion(self):
+        # ရုပ (3 codepoints) + ် (U+103A asat) appended → single insertion.
+        detail = self._mixin("ရုပ်")._ortho_insertion_detail("ရုပ")
+        assert detail is not None
+        i, inserted, top1 = detail
+        assert (i, inserted, top1) == (3, "်", "ရုပ်")
+
+    def test_rejects_edit_distance_above_one(self):
+        assert self._mixin("ရုပ်", ed=2.0)._ortho_insertion_detail("ရုပ") is None
+
+    def test_rejects_non_insertion_shape(self):
+        # Same length as the typo (a swap, not an insertion).
+        assert self._mixin("ကကခ")._ortho_insertion_detail("ကကက") is None
+
+    def test_rejects_non_diacritic_insertion(self):
+        # Inserted codepoint is a consonant, not an in-syllable diacritic.
+        assert self._mixin("ကကက")._ortho_insertion_detail("ကက") is None
+
+    def test_rejects_latin_token(self):
+        # Loanword grey-zone guard: any ASCII letter disqualifies the token.
+        assert self._mixin("aက်")._ortho_insertion_detail("aက") is None
+
+    def test_tolerates_missing_symspell(self):
+        mixin = _make_mixin()
+        mixin.symspell = None
+        assert mixin._ortho_insertion_detail("ရုပ") is None
+
+    def test_tolerates_empty_candidates(self):
+        assert self._mixin(None)._ortho_insertion_detail("ရုပ") is None
+
+
+class TestNarrowOrthoInsertionError:
+    """Unit tests for the _narrow_ortho_insertion_error span-narrowing helper."""
+
+    @staticmethod
+    def _mixin(syllables: list[str]):
+        mixin = _make_mixin()
+        seg = MagicMock()
+        seg.segment_syllables.return_value = syllables
+        mixin.segmenter = seg
+        return mixin
+
+    def test_narrows_to_affected_syllable(self):
+        mixin = self._mixin(["က", "ခ", "ဂ"])
+        err = _make_error(text="ကခဂ", position=5, error_type="invalid_word")
+        # asat inserted at index 3 (end); affected syllable is the last, "ဂ".
+        mixin._narrow_ortho_insertion_error(err, (3, "်", "ကခဂ်"))
+        assert err.text == "ဂ"
+        assert err.position == 5 + 2  # offset by s_start of "ဂ"
+        assert err.suggestions[0].text == "ဂ်"
+        assert err.suggestions[0].source == "ortho_insertion_rescue"
+        assert err._structural_early_exit is True
+
+    def test_noop_on_segmentation_mismatch(self):
+        # Syllables that do not re-join to err.text → safe no-op, error kept wide.
+        mixin = self._mixin(["x", "y"])
+        err = _make_error(text="ကခ", position=0, error_type="invalid_word")
+        before = (err.text, err.position, list(err.suggestions))
+        mixin._narrow_ortho_insertion_error(err, (2, "်", "ကခ်"))
+        assert (err.text, err.position, list(err.suggestions)) == before
+        assert err._structural_early_exit is False
+
+    def test_noop_when_insert_index_zero(self):
+        mixin = self._mixin(["က", "ခ"])
+        err = _make_error(text="ကခ", position=0, error_type="invalid_word")
+        mixin._narrow_ortho_insertion_error(err, (0, "်", "်ကခ"))
+        assert err.text == "ကခ"
+        assert err._structural_early_exit is False
 
 
 # ---------------------------------------------------------------------------
