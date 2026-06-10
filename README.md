@@ -6,7 +6,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Coverage](https://img.shields.io/badge/coverage-75%25-green)](tests/)
-[![Tests](https://img.shields.io/badge/tests-4%2C940_passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-5%2C182_passed-brightgreen)](tests/)
 
 ## Overview
 
@@ -34,6 +34,7 @@
 *   **Compound & Morpheme Handling**: DP-based compound resolution, ternary compound splits in morpheme correction, productive reduplication validation.
 *   **AI Semantic Checking (Optional)**: ONNX masked language model for context-aware validation.
 *   **Syllable-Span Probe (opt-in, v1.7.1)**: A frozen-encoder neural probe that improves recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model; default-off, enabled via `use_probe_*` config flags or `MSC_USE_PROBE_*` environment variables.
+*   **Aw-Vowel Un-Mask Detector (opt-in, v1.8.0)**: Surfaces a class of Myanmar aw-vowel spelling errors — flat/tall *aa* swaps in the aw-vowel rime (ော ↔ ေါ, e.g. `ခော်` → `ခေါ်`) — that pre-normalization would otherwise silently repair before validation. Default-off, enabled via the `detect_aw_vowel_unmask` config flag or `MSC_DETECT_AW_VOWEL_UNMASK`.
 *   **Named Entity Recognition**: Heuristic and Transformer-based NER to reduce false positives on names and places.
 
 ### Dictionary Building Pipeline
@@ -65,7 +66,7 @@
 
 Full documentation is available at **[docs.myspellchecker.com](https://docs.myspellchecker.com/)**.
 
-> **What's new in v1.7.1?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for the opt-in **syllable-span probe** — a frozen-encoder neural enhancement (three default-off strategies sharing one small model) that improves recall on broken-compound, over-segmentation, and consonant-substitution errors (+0.0125 composite when enabled). Earlier v1.7.x work added mined-confusable detection, the cross-whitespace and compound-merge probes, the skip-rule confidence gate, and benchmark-hygiene reclassification.
+> **What's new in v1.8.0?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for the opt-in **aw-vowel un-mask detector** — it surfaces Myanmar aw-vowel spelling errors (ော ↔ ေါ) the normalizer previously masked (+0.0350 spelling composite when enabled, at zero added false positives). This release also cuts hot-path latency ~40% (p95 658 → 401 ms, with identical results) and hardens concurrent batch checking. The v1.7.1 syllable-span probe remains available behind its opt-in flags.
 
 ### Getting Started
 *   **[Introduction](https://docs.myspellchecker.com/introduction)**: Overview of the library and its architecture.

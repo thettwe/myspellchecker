@@ -754,7 +754,8 @@ class SpellChecker(
                   medial_order_errors, duplicate_diacritic_errors,
                   leading_vowel_e_errors, vowel_reorder_errors,
                   vowel_medial_reorder_errors, incomplete_stacking_errors,
-                  vowel_after_dotbelow_errors: individual error lists for merging
+                  vowel_after_dotbelow_errors, aw_vowel_unmask_errors:
+                  individual error lists for merging
         """
         self._thread_local.strategy_debug_telemetry = {}
         self._thread_local.last_strategy_debug_telemetry = {}
@@ -800,6 +801,14 @@ class SpellChecker(
         # Detect vowel after dot-below BEFORE normalization reorders vowels
         vowel_after_dotbelow_errors = self._detect_vowel_after_dotbelow(text)
 
+        # Detect aw-vowel (ော↔ေါ) typos BEFORE normalization silently repairs
+        # them into dictionary-valid forms (detection-side un-mask, default-off)
+        aw_vowel_unmask_errors = (
+            self._detect_aw_vowel_unmask_errors(text)
+            if self.config.validation.detect_aw_vowel_unmask
+            else []
+        )
+
         normalized_text = self._normalize_text(text, zawgyi_config)
 
         # Build position map from original to normalized text so that
@@ -821,6 +830,7 @@ class SpellChecker(
             + vowel_reorder_errors
             + vowel_medial_reorder_errors
             + vowel_after_dotbelow_errors
+            + aw_vowel_unmask_errors
         )
 
         return {
@@ -841,6 +851,7 @@ class SpellChecker(
             "vowel_medial_reorder_errors": vowel_medial_reorder_errors,
             "incomplete_stacking_errors": incomplete_stacking_errors,
             "vowel_after_dotbelow_errors": vowel_after_dotbelow_errors,
+            "aw_vowel_unmask_errors": aw_vowel_unmask_errors,
         }
 
     def _run_validation(
@@ -885,6 +896,7 @@ class SpellChecker(
                 "vowel_reorder_errors",
                 "vowel_medial_reorder_errors",
                 "vowel_after_dotbelow_errors",
+                "aw_vowel_unmask_errors",
             ):
                 for err in prepared.get(key, []):
                     remap_pre_norm_error(err, offset_map)
@@ -903,6 +915,7 @@ class SpellChecker(
         self._merge_pre_norm_errors(errors, prepared["vowel_reorder_errors"])
         self._merge_pre_norm_errors(errors, prepared["vowel_medial_reorder_errors"])
         self._merge_pre_norm_errors(errors, prepared["vowel_after_dotbelow_errors"])
+        self._merge_pre_norm_errors(errors, prepared["aw_vowel_unmask_errors"])
 
         # Final span-overlap dedup for pre-normalization errors
         errors = self._dedup_pre_norm_overlaps(errors)

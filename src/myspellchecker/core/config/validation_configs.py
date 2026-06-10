@@ -96,6 +96,20 @@ class ValidationConfig(BaseModel):
         le=1.0,
         description="Confidence score for medial confusion corrections (ျ vs ြ)",
     )
+    detect_aw_vowel_unmask: bool = Field(
+        default=False,
+        description=(
+            "Enable the pre-normalization aw-vowel un-mask detector. The "
+            "pre-lookup normalizer silently repairs aw-vowel typos "
+            "(flat ော → tall ေါ after {ပ,ခ,ဒ}; stray ေါ → ော after other "
+            "bases) before the validator judges the token, masking genuine "
+            "spelling errors like ခော်. When True, a raw-text detector "
+            "emits a confusable error with the canonical form as the single "
+            "suggestion for tokens that are dictionary-OOV as typed but "
+            "valid after the aw-vowel repair. Loanword bases {ဂ,င,ဝ} are "
+            "excluded from the tall→flat direction. Default-off."
+        ),
+    )
     raise_on_strategy_error: bool = Field(
         default=False,
         description=(
@@ -777,6 +791,15 @@ class ValidationConfig(BaseModel):
             "Min SymSpell top-1 candidate frequency for the skip-rule "
             "confidence gate. The default threshold balances precision "
             "against recall recovery; raising it tightens precision."
+        ),
+    )
+    compound_split_ortho_insertion_rescue: bool = Field(
+        default=False,
+        description=(
+            "Carve-out: keep (do not suppress) compound-split tokens whose ed=1 "
+            "SymSpell top-1 is a single in-syllable diacritic INSERTION "
+            "(asat/visarga/dot-below/ha-htoe/ya-medial), non-Latin. Recovers "
+            "orthographic-insertion typos the skip-rule freq gate kills."
         ),
     )
 
