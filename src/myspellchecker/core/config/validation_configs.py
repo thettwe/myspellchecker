@@ -97,7 +97,7 @@ class ValidationConfig(BaseModel):
         description="Confidence score for medial confusion corrections (ျ vs ြ)",
     )
     detect_aw_vowel_unmask: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable the pre-normalization aw-vowel un-mask detector. The "
             "pre-lookup normalizer silently repairs aw-vowel typos "
@@ -107,7 +107,7 @@ class ValidationConfig(BaseModel):
             "emits a confusable error with the canonical form as the single "
             "suggestion for tokens that are dictionary-OOV as typed but "
             "valid after the aw-vowel repair. Loanword bases {ဂ,င,ဝ} are "
-            "excluded from the tall→flat direction. Default-off."
+            "excluded from the tall→flat direction. Default-on since v1.9.0."
         ),
     )
     raise_on_strategy_error: bool = Field(
@@ -794,7 +794,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     compound_split_ortho_insertion_rescue: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Carve-out: keep (do not suppress) compound-split tokens whose ed=1 "
             "SymSpell top-1 is a single in-syllable diacritic INSERTION "
@@ -1434,7 +1434,7 @@ class ValidationConfig(BaseModel):
     # - ProbeBoostedCompoundStrategy at priority 24 (boosts BrokenCompoundStrategy)
     # See `30_Audits/Probe Hybrid Ships at +0.0067 2026-05-03.md`.
     use_probe_corrector: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable ProbeValidationStrategy (priority 85). Uses a probe model "
             "(frozen encoder + thin head) instead of the v3 GECToR corrector. "
@@ -1443,7 +1443,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     use_probe_compound: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable ProbeBoostedCompoundStrategy (priority 24). Pre-filter "
             "before BrokenCompoundStrategy: emits broken_compound errors when "
@@ -1496,7 +1496,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     use_probe_segmenter_rescue: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable ProbeSegmenterRescueStrategy (priority 26). Targets the "
             "no-whitespace over-segmentation residual: when the segmenter "
