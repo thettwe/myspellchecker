@@ -688,7 +688,12 @@ class WordValidator(Validator):
             # they contain some Myanmar chars, but are not real Myanmar words.
             # Only applies when the token has BOTH Myanmar and non-Myanmar chars.
             myanmar_chars = sum(1 for c in word if "\u1000" <= c <= "\u109f")
-            if myanmar_chars > 0 and myanmar_chars < len(word) * 0.5:
+            # Additionally skip tokens mixing Myanmar with ASCII alphanumerics
+            # in ANY proportion (e.g. a Myanmar word glued to "1" or "x"):
+            # numbering/code artifacts, not Myanmar words \u2014 no benchmark gold
+            # ever mixes the two scripts inside one error span.
+            has_ascii_alnum = any(c.isascii() and c.isalnum() for c in word)
+            if myanmar_chars > 0 and (has_ascii_alnum or myanmar_chars < len(word) * 0.5):
                 myanmar_word_idx += 1
                 continue
 

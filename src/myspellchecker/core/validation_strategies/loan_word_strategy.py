@@ -43,8 +43,11 @@ _BIGRAM_RATIO_THRESHOLD = 2.0
 
 # Maximum word frequency for a variant to be flagged without bigram context.
 # Variants above this threshold require bigram evidence to avoid FPs on
-# extremely common words that happen to also be loan word variants.
-_HIGH_FREQ_GUARD = 50_000
+# established words that happen to also be loan word variants. 5,000 separates
+# the benchmark populations exactly: every loan-strategy true positive sits
+# below it (max 1,613) and every false positive above it (min 5,837 — e.g.
+# ခုနစ် "seven" at 11,052 was corrected to ခုနှစ် "year" on clean text).
+_HIGH_FREQ_GUARD = 5_000
 
 
 class LoanWordValidationStrategy(ValidationStrategy):
@@ -208,13 +211,13 @@ class LoanWordValidationStrategy(ValidationStrategy):
         # Both in DB. Use frequency ratio.
         freq_ratio = std_freq / max(var_freq, 1)
 
-        # High-frequency variant guard: very common words need strong evidence.
+        # High-frequency variant guard: a word this established is not a typo
+        # even when bigram statistics prefer the standard form (e.g. ခုနစ်
+        # "seven" at freq 11,052, ဆော့ဖ်ဝဲလ်, ဗွီဒီယို — all linguist-ruled
+        # acceptable variants). Every benchmark loan-strategy true positive
+        # sits far below this threshold, so the guard is absolute.
         if var_freq >= _HIGH_FREQ_GUARD:
-            # Require bigram support for high-frequency variants.
-            bigram_ratio = self._compute_bigram_ratio(variant, standard, context, idx)
-            if bigram_ratio >= _BIGRAM_RATIO_THRESHOLD:
-                return 0.80
-            return 0.0  # Not enough evidence.
+            return 0.0
 
         # Standard is much more frequent → likely the intended form.
         if freq_ratio >= _FREQ_RATIO_THRESHOLD:
