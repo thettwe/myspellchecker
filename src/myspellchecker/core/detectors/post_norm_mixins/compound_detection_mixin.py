@@ -44,7 +44,7 @@ from myspellchecker.core.detectors.utils import (
     get_tokenized,
     iter_occurrences,
 )
-from myspellchecker.core.response import Error, SyllableError
+from myspellchecker.core.response import Error, Suggestion, SyllableError
 from myspellchecker.core.validation_strategies.confusable_strategy import (
     generate_confusable_variants,
 )
@@ -373,6 +373,8 @@ class CompoundDetectionMixin:
     provider: "DictionaryProvider"
     semantic_checker: Any
     symspell: Any
+    config: Any
+    segmenter: Any
 
     # ----- False compound suppression keys (loaded from compound_morphology.yaml) -----
     _FALSE_COMPOUND_UNLOADED: object = object()  # sentinel: distinct from None and empty set
@@ -1611,3 +1613,159 @@ class CompoundDetectionMixin:
                         error_type=ET_CONFUSABLE_ERROR,
                     )
                 )
+
+    # Tone slots that, when already present at a syllable's end, forbid an
+    # additional visarga (one tone mark per syllable).
+    _VISARGA_BLOCKING_FINALS: frozenset[str] = frozenset(
+        "့းံ"  # dot-below ့, visarga း, anusvara ံ
+    )
+
+    def _detect_visarga_insertion(self, text: str, errors: list[Error]) -> None:
+        """High-precision *internal* visarga (း) insertion repair (avt-02 B1).
+
+        Complements the word-final-only :meth:`_detect_missing_visarga` by
+        scanning multi-syllable windows that are themselves (rare) dictionary
+        keys and probing a visarga insertion at every legal syllable-final
+        boundary — catching internal compound repairs the word-final detector
+        structurally cannot reach (ဆွေနွေး→ဆွေးနွေး, ratio 563×; နာလည်→နားလည်,
+        445×). Anchoring on a known dictionary key both fixes the emission span
+        to the offending word (so the whole-word suggestion earns top-1 credit
+        regardless of how the segmenter split the surrounding chunk) and
+        sidesteps the particle-phrase trap (ငါတွေ is OOV, so ngါတွေ→ငါးတွေ never
+        fires).
+
+        A repair fires only when the corrected window is a valid word with
+        ``freq >= visarga_insertion_min_freq`` whose frequency is at least
+        ``visarga_insertion_freq_ratio`` × the window's own frequency, and the
+        window's own frequency does not exceed
+        ``visarga_insertion_skip_above_freq``. Emissions carry
+        ``_structural_early_exit`` so the freq-gated, high-confidence repair
+        survives the confusable suppressor and span dedup.
+
+        Gated by ``config.validation.detect_visarga_insertion`` (default on).
+        """
+        cfg = getattr(self.config, "validation", None) if self.config else None
+        if cfg is None or not getattr(cfg, "detect_visarga_insertion", False):
+            return
+        if not self.provider or not hasattr(self.provider, "is_valid_word"):
+            return
+
+        ratio_thr = float(cfg.visarga_insertion_freq_ratio)
+        min_freq = int(cfg.visarga_insertion_min_freq)
+        skip_above = int(cfg.visarga_insertion_skip_above_freq)
+        max_window = int(cfg.visarga_insertion_max_window)
+        if max_window < 2:
+            # Word-final (width-1) repairs are owned by _detect_missing_visarga.
+            return
+
+        from myspellchecker.tokenizers.syllable import SyllableTokenizer
+
+        syltok = SyllableTokenizer()
+        existing_positions = get_existing_positions(errors)
+        claimed: list[tuple[int, int]] = []
+
+        for span in get_tokenized(self, text):
+            chunk = span.text
+            chunk_pos = span.position
+            if not any("က" <= ch <= "႟" for ch in chunk):
+                continue
+            syls = syltok.tokenize(chunk)
+            n = len(syls)
+            if n < 2:
+                continue
+            offsets: list[int] = []
+            cur = 0
+            for s in syls:
+                offsets.append(cur)
+                cur += len(s)
+            # Minimal windows first so the tightest span wins; a claimed span
+            # blocks any wider window overlapping it.
+            for width in range(2, min(max_window, n) + 1):
+                for i in range(0, n - width + 1):
+                    abs_start = chunk_pos + offsets[i]
+                    abs_end = chunk_pos + offsets[i + width - 1] + len(syls[i + width - 1])
+                    if any(a < abs_end and abs_start < b for a, b in claimed):
+                        continue
+                    window = chunk[offsets[i] : abs_end - chunk_pos]
+                    best = self._best_visarga_window(
+                        window, syls[i : i + width], ratio_thr, min_freq, skip_above
+                    )
+                    if best is None:
+                        continue
+                    # Maximal-window guard: reject a window that is merely a
+                    # fragment of a longer valid word (ချင်ပြည်နယ် inside the
+                    # correct ကချင်ပြည်နယ် "Kachin State"). If an adjacent
+                    # syllable extends it into another valid word, the span is
+                    # not the real lexical unit and the repair is spurious.
+                    if i > 0 and self.provider.is_valid_word(syls[i - 1] + window):
+                        continue
+                    if i + width < n and self.provider.is_valid_word(window + syls[i + width]):
+                        continue
+                    claimed.append((abs_start, abs_end))
+                    if abs_start in existing_positions:
+                        continue
+                    corrected, ratio = best
+                    conf = min(0.95, 0.80 + 0.05 * min(ratio / 100.0, 3.0))
+                    err = SyllableError(
+                        text=window,
+                        position=abs_start,
+                        suggestions=[Suggestion(corrected)],
+                        confidence=conf,
+                        error_type=ET_CONFUSABLE_ERROR,
+                    )
+                    err._structural_early_exit = True
+                    errors.append(err)
+                    existing_positions.add(abs_start)
+
+    def _best_visarga_window(
+        self,
+        window: str,
+        syls: list[str],
+        ratio_thr: float,
+        min_freq: int,
+        skip_above: int,
+    ) -> tuple[str, float] | None:
+        """Return ``(corrected, ratio)`` for the best single-visarga insertion.
+
+        ``window`` must be a valid dictionary key whose own frequency is at or
+        below ``skip_above``; the corrected form (one visarga inserted at a
+        legal syllable-final boundary) must be a valid word clearing
+        ``min_freq`` and the ``ratio_thr`` frequency ratio. Returns ``None``
+        when no insertion point qualifies; ties break toward the highest
+        corrected frequency.
+        """
+        provider = self.provider
+        if window.endswith(self._VISARGA) or not provider.is_valid_word(window):
+            return None
+        orig_freq = provider.get_word_frequency(window)
+        orig_freq = int(orig_freq) if isinstance(orig_freq, (int, float)) else 0
+        if orig_freq > skip_above:
+            return None
+        effective_orig = max(orig_freq, 1)
+
+        best: tuple[str, float, int] | None = None
+        cum = 0
+        # Insert at INTERNAL syllable boundaries only (never word-final). The
+        # window is already a valid dictionary key (top gate), so a trailing
+        # visarga is the freq-agnostic, FP-prone real-word↔real-word case
+        # (ခံစာ↔ခံစား) owned by _detect_missing_visarga; restricting to
+        # interior boundaries isolates genuine compound-internal omissions.
+        for syl in syls[:-1]:
+            cum += len(syl)
+            if syl[-1] in self._VISARGA_BLOCKING_FINALS:
+                continue
+            corrected = window[:cum] + self._VISARGA + window[cum:]
+            if corrected == window or not provider.is_valid_word(corrected):
+                continue
+            cand_freq = provider.get_word_frequency(corrected)
+            cand_freq = int(cand_freq) if isinstance(cand_freq, (int, float)) else 0
+            if cand_freq < min_freq:
+                continue
+            ratio = cand_freq / effective_orig
+            if ratio < ratio_thr:
+                continue
+            if best is None or cand_freq > best[2]:
+                best = (corrected, ratio, cand_freq)
+        if best is None:
+            return None
+        return best[0], best[1]

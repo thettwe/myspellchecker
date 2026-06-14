@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from myspellchecker.core.constants import (
     ET_BROKEN_STACKING,
@@ -57,7 +57,7 @@ from myspellchecker.core.detectors.utils import (
     iter_occurrences,
     try_replace_syllable_error,
 )
-from myspellchecker.core.response import Error, SyllableError
+from myspellchecker.core.response import Error, Suggestion, SyllableError
 from myspellchecker.text.normalize import normalize
 from myspellchecker.utils.logging_utils import get_logger
 
@@ -269,6 +269,7 @@ class PostNormalizationDetectorsMixin(
 
     # --- Type stubs for attributes provided by SpellChecker or sibling mixins ---
     provider: "DictionaryProvider"
+    config: "Any"  # SpellCheckerConfig, provided by SpellChecker
     _COLLOQUIAL_ENDINGS_WITH_STRIPPED: frozenset[str]  # from SentenceDetectorsMixin
     _FORMAL_ENDINGS_WITH_STRIPPED: frozenset[str]  # from SentenceDetectorsMixin
     _VOWEL_SIGNS: frozenset[str]  # from PreNormalizationDetectorsMixin
@@ -314,15 +315,35 @@ class PostNormalizationDetectorsMixin(
                 tail = text[end:].lstrip()
                 if not any(tail.startswith(t) for t in triggers):
                     continue
+                # Emit the whole enclosing (whitespace-delimited) word so the
+                # suggestion matches the gold granularity (ပြော့သည်→ပြောသည်,
+                # not ပြော့→ပြော) and earns top-1 credit — the disambiguating
+                # trigger is frequently glued onto the typo word.
+                wstart, wend = idx, end
+                while wstart > 0 and not text[wstart - 1].isspace():
+                    wstart -= 1
+                while wend < len(text) and not text[wend].isspace():
+                    wend += 1
+                word = text[wstart:wend]
+                corrected_word = text[wstart:idx] + correct + text[end:wend]
                 new_err = SyllableError(
-                    text=wrong,
-                    position=idx,
-                    suggestions=[correct],
+                    text=word,
+                    position=wstart,
+                    suggestions=[Suggestion(corrected_word)],
                     confidence=TEXT_DETECTOR_CONFIDENCES.get("aukmyit_confusion", 0.88),
                     error_type=ET_CONFUSABLE_ERROR,
                 )
-                if idx in existing_positions:
-                    try_replace_syllable_error(errors, idx, new_err)
+                # Context-trigger disambiguated this dot-below error, so exempt
+                # it from the generic low-value-confusable suppressor that drops
+                # every ့-only difference (avt-02 B2).
+                if getattr(
+                    getattr(self.config, "validation", None),
+                    "aukmyit_context_suppression_immune",
+                    False,
+                ):
+                    new_err._structural_early_exit = True
+                if wstart in existing_positions:
+                    try_replace_syllable_error(errors, wstart, new_err)
                     continue
                 errors.append(new_err)
 
@@ -340,15 +361,35 @@ class PostNormalizationDetectorsMixin(
                 tail = text[end:].lstrip()
                 if not any(tail.startswith(t) for t in triggers):
                     continue
+                # Emit the whole enclosing (whitespace-delimited) word so the
+                # suggestion matches the gold granularity (ပြော့သည်→ပြောသည်,
+                # not ပြော့→ပြော) and earns top-1 credit — the disambiguating
+                # trigger is frequently glued onto the typo word.
+                wstart, wend = idx, end
+                while wstart > 0 and not text[wstart - 1].isspace():
+                    wstart -= 1
+                while wend < len(text) and not text[wend].isspace():
+                    wend += 1
+                word = text[wstart:wend]
+                corrected_word = text[wstart:idx] + correct + text[end:wend]
                 new_err = SyllableError(
-                    text=wrong,
-                    position=idx,
-                    suggestions=[correct],
+                    text=word,
+                    position=wstart,
+                    suggestions=[Suggestion(corrected_word)],
                     confidence=TEXT_DETECTOR_CONFIDENCES.get("aukmyit_confusion", 0.88),
                     error_type=ET_CONFUSABLE_ERROR,
                 )
-                if idx in existing_positions:
-                    try_replace_syllable_error(errors, idx, new_err)
+                # Context-trigger disambiguated this dot-below error, so exempt
+                # it from the generic low-value-confusable suppressor that drops
+                # every ့-only difference (avt-02 B2).
+                if getattr(
+                    getattr(self.config, "validation", None),
+                    "aukmyit_context_suppression_immune",
+                    False,
+                ):
+                    new_err._structural_early_exit = True
+                if wstart in existing_positions:
+                    try_replace_syllable_error(errors, wstart, new_err)
                     continue
                 errors.append(new_err)
 
