@@ -1859,6 +1859,22 @@ def print_summary(report: dict) -> None:
     print("  Formula: 0.35*F1 + 0.30*MRR + 0.20*(1-FPR) + 0.15*Top1")
     print(f"{'─' * 70}")
 
+    # v1.9 ship-gate caps (WS-RG rg-01): surface ALL binding caps, not just
+    # latency. This is informational here (run_benchmark is a reference tool);
+    # `python benchmarks/ship_gate.py <result.json>` is the enforcing gate.
+    try:
+        from ship_gate import check_report, gate_passed
+
+        gate_results = check_report(report)
+        if gate_results:
+            print("\n  v1.9 ship-gate caps:")
+            for gr in gate_results:
+                print(f"  {gr.line()}")
+            print(f"  => SHIP-GATE: {'PASS' if gate_passed(gate_results) else 'FAIL'}")
+            print(f"{'─' * 70}")
+    except Exception:  # pragma: no cover - never let the gate print break a run
+        pass
+
     rerank_telemetry = report.get("rerank_rule_telemetry", {})
     if rerank_telemetry:
         print(f"\n{'─' * 70}")
