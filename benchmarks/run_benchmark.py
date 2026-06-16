@@ -766,6 +766,51 @@ def run_benchmark(
     elif _aw_env in ("0", "false", "no", "off"):
         config.validation.detect_aw_vowel_unmask = False
     print(f"  detect_aw_vowel_unmask: {config.validation.detect_aw_vowel_unmask}")
+    # Visarga (း) insertion detector (avt-02 B1). PARKED default-off
+    # (FP-clean but composite-neutral); env is tri-state (truthy / falsy /
+    # unset). Scalar knobs let the benchmark sweep ratio / min-freq / window.
+    _vis_env = _os.environ.get("MSC_DETECT_VISARGA_INSERTION", "").lower()
+    if _vis_env in ("1", "true", "yes", "on"):
+        config.validation.detect_visarga_insertion = True
+    elif _vis_env in ("0", "false", "no", "off"):
+        config.validation.detect_visarga_insertion = False
+    print(f"  detect_visarga_insertion: {config.validation.detect_visarga_insertion}")
+    _vis_ratio_env = _os.environ.get("MSC_VISARGA_INSERTION_FREQ_RATIO", "").strip()
+    if _vis_ratio_env:
+        try:
+            config.validation.visarga_insertion_freq_ratio = float(_vis_ratio_env)
+            print(f"  visarga_insertion_freq_ratio: {_vis_ratio_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_FREQ_RATIO not a float: {_vis_ratio_env}")
+    _vis_minfreq_env = _os.environ.get("MSC_VISARGA_INSERTION_MIN_FREQ", "").strip()
+    if _vis_minfreq_env:
+        try:
+            config.validation.visarga_insertion_min_freq = int(_vis_minfreq_env)
+            print(f"  visarga_insertion_min_freq: {_vis_minfreq_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_MIN_FREQ not an int: {_vis_minfreq_env}")
+    _vis_skip_env = _os.environ.get("MSC_VISARGA_INSERTION_SKIP_ABOVE", "").strip()
+    if _vis_skip_env:
+        try:
+            config.validation.visarga_insertion_skip_above_freq = int(_vis_skip_env)
+            print(f"  visarga_insertion_skip_above_freq: {_vis_skip_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_SKIP_ABOVE not an int: {_vis_skip_env}")
+    _vis_win_env = _os.environ.get("MSC_VISARGA_INSERTION_MAX_WINDOW", "").strip()
+    if _vis_win_env:
+        try:
+            config.validation.visarga_insertion_max_window = int(_vis_win_env)
+            print(f"  visarga_insertion_max_window: {_vis_win_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_MAX_WINDOW not an int: {_vis_win_env}")
+    # Context-aukmyit suppression immunity (avt-02 B2). Default-on; tri-state.
+    _auk_env = _os.environ.get("MSC_AUKMYIT_CONTEXT_SURVIVE", "").lower()
+    if _auk_env in ("1", "true", "yes", "on"):
+        config.validation.aukmyit_context_suppression_immune = True
+    elif _auk_env in ("0", "false", "no", "off"):
+        config.validation.aukmyit_context_suppression_immune = False
+    _auk_immune = config.validation.aukmyit_context_suppression_immune
+    print(f"  aukmyit_context_suppression_immune: {_auk_immune}")
     sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
     if sme_bigram_env:
         try:
