@@ -172,6 +172,20 @@ class ConfusableSemanticConfig(BaseModel):
             "because the pairs are linguistically verified."
         ),
     )
+    curated_high_freq_hard_block_threshold: int = Field(
+        default=500000,
+        ge=0,
+        description=(
+            "Word frequency at/above which curated and near-synonym "
+            "confusable pairs are hard-blocked (never flagged). The "
+            "curated path otherwise ignores word frequency, so "
+            "ultra-common verbs (ပေး/ထား/သွား, freq >500k) that share "
+            "context-dependent curated near-synonym pairs (give↔place, "
+            "go↔stay) fire on correct usage. Such top-frequency words "
+            "are virtually never real-word-confusion errors. "
+            "Set to 0 to disable the block."
+        ),
+    )
     near_synonym_logit_diff_threshold: float = Field(
         default=3.0,
         ge=0.0,
