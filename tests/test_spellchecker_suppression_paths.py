@@ -371,3 +371,88 @@ class TestSuppressionPaths:
 
         assert len(errors) == 2
         assert all(e.error_type != "pos_sequence_error" for e in errors)
+
+
+class TestDotBelowConfidenceExemption:
+    """psg-02: high-confidence confusable errors escape the categorical
+    dot-below (U+1037) suppression; low-confidence ones still die."""
+
+    @staticmethod
+    def _checker() -> SpellChecker:
+        checker = SpellChecker.__new__(SpellChecker)
+        checker.provider = MagicMock()
+        checker.provider.get_word_frequency.return_value = 100
+        return checker
+
+    def test_low_confidence_dot_below_pair_still_suppressed(self):
+        checker = self._checker()
+        errors = [
+            Error(
+                text="နင့်",
+                position=3,
+                suggestions=["နင်"],
+                error_type="confusable_error",
+                confidence=0.3,
+            )
+        ]
+
+        checker._suppress_low_value_confusable_errors(errors, text="သူ နင့် အတူ သွားတယ်")
+
+        assert errors == []
+
+    def test_high_confidence_margin_backed_dot_below_pair_exempt(self):
+        checker = self._checker()
+        errors = [
+            Error(
+                text="နင့်",
+                position=3,
+                suggestions=["နင်"],
+                error_type="confusable_error",
+                confidence=0.78,
+                source_strategy="ConfusableSemanticStrategy",
+            )
+        ]
+
+        checker._suppress_low_value_confusable_errors(errors, text="သူ နင့် အတူ သွားတယ်")
+
+        assert len(errors) == 1
+
+    def test_high_confidence_without_source_strategy_still_suppressed(self):
+        # The syntactic FP class (သည်↔သည့်) carries a fixed categorical
+        # confidence with no source strategy — confidence alone must not
+        # exempt it (measured 2026-07-02: +29 FP without this guard).
+        checker = self._checker()
+        errors = [
+            Error(
+                text="နင့်",
+                position=3,
+                suggestions=["နင်"],
+                error_type="confusable_error",
+                confidence=0.72,
+            )
+        ]
+
+        checker._suppress_low_value_confusable_errors(errors, text="သူ နင့် အတူ သွားတယ်")
+
+        assert errors == []
+
+    def test_exemption_threshold_configurable(self):
+        from myspellchecker.core.config.main import SpellCheckerConfig
+
+        checker = self._checker()
+        checker.config = SpellCheckerConfig()
+        checker.config.validation.dot_below_suppress_confidence_exempt = 2.0
+        errors = [
+            Error(
+                text="နင့်",
+                position=3,
+                suggestions=["နင်"],
+                error_type="confusable_error",
+                confidence=0.78,
+                source_strategy="ConfusableSemanticStrategy",
+            )
+        ]
+
+        checker._suppress_low_value_confusable_errors(errors, text="သူ နင့် အတူ သွားတယ်")
+
+        assert errors == []

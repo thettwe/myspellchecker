@@ -145,6 +145,14 @@ _GENERIC_WIDE_TYPES = frozenset(
 
 _CONFUSABLE_SHORT_TOKEN_SUPPRESS_FREQ = _ST.confusable_short_token_freq
 _CONFUSABLE_AMBIGUITY_MAX_CONFIDENCE = _ST.confusable_ambiguity_max_confidence
+
+# Strategies whose error confidence is derived from an MLM logit margin
+# (margin/10) — the only confidences trusted by the dot-below exemption in
+# _suppress_low_value_confusable_errors. Detector-emitted confusables carry
+# fixed categorical confidences and an empty source_strategy.
+_DOT_BELOW_MARGIN_BACKED_SOURCES = frozenset(
+    {"ConfusableSemanticStrategy", "MinedConfusablePairStrategy"}
+)
 _CONFUSABLE_FRAGMENT_MAX_TOKEN_LEN = _ST.confusable_fragment_max_token_len
 _CONFUSABLE_SELF_SUGGEST_MAX_TOKEN_LEN = _ST.confusable_self_suggest_max_token_len
 _BARE_CONSONANT_PROXIMITY = _ST.bare_consonant_proximity
@@ -632,6 +640,12 @@ class ErrorSuppressionMixin:
         if not errors or not self.provider:
             return
 
+        _config = getattr(self, "config", None)
+        _validation = getattr(_config, "validation", None) if _config else None
+        dot_below_exempt_conf = float(
+            getattr(_validation, "dot_below_suppress_confidence_exempt", 0.6)
+        )
+
         filtered: list[Error] = []
         for e in errors:
             if e.error_type != ET_CONFUSABLE_ERROR:
@@ -714,8 +728,21 @@ class ErrorSuppressionMixin:
             # only by a dot-below (့, U+1037).  This catches syntactic pairs
             # like သည် ↔ သည့် (declarative vs attributive) that text-level
             # detectors flag but are not actionable spelling errors.
-            # Exception: VisargaStrategy curated corrections are trusted.
-            if e.suggestions and getattr(e, "source_strategy", "") != "VisargaStrategy":
+            # Exceptions: VisargaStrategy curated corrections are trusted,
+            # and high-confidence errors from MLM-margin-backed strategies
+            # are exempt — this rule runs a second time in post-processing,
+            # after the suppression-immune restore, so this is the only
+            # signal that can protect a genuine correction here. Both
+            # conditions are required: the syntactic FP class carries a
+            # fixed categorical confidence (0.72) with NO source strategy,
+            # so confidence alone cannot separate it (measured 2026-07-02:
+            # confidence-only exemption = +29 FP / +1 TP).
+            _e_src = getattr(e, "source_strategy", "")
+            _margin_backed_exempt = (
+                _e_src in _DOT_BELOW_MARGIN_BACKED_SOURCES
+                and (getattr(e, "confidence", 0.0) or 0.0) >= dot_below_exempt_conf
+            )
+            if e.suggestions and _e_src != "VisargaStrategy" and not _margin_backed_exempt:
                 sug_str = str(e.suggestions[0])
                 _DOT_BELOW = "\u1037"
                 if (

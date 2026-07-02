@@ -790,6 +790,13 @@ def run_benchmark(
     elif _vis_env in ("0", "false", "no", "off"):
         config.validation.detect_visarga_insertion = False
     print(f"  detect_visarga_insertion: {config.validation.detect_visarga_insertion}")
+    _dbex_env = _os.environ.get("MSC_DOT_BELOW_CONF_EXEMPT", "").strip()
+    if _dbex_env:
+        try:
+            config.validation.dot_below_suppress_confidence_exempt = float(_dbex_env)
+            print(f"  dot_below_suppress_confidence_exempt: {_dbex_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_DOT_BELOW_CONF_EXEMPT not a float: {_dbex_env}")
     _vis_ratio_env = _os.environ.get("MSC_VISARGA_INSERTION_FREQ_RATIO", "").strip()
     if _vis_ratio_env:
         try:

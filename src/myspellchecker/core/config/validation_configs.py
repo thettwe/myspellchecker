@@ -161,6 +161,23 @@ class ValidationConfig(BaseModel):
             "repairs. Wider windows catch longer compounds at more cost."
         ),
     )
+    dot_below_suppress_confidence_exempt: float = Field(
+        default=0.6,
+        ge=0.0,
+        description=(
+            "Confusable errors from MLM-margin-backed strategies "
+            "(ConfusableSemantic / MinedConfusablePair) whose confidence is "
+            "at or above this value escape the categorical dot-below (့) "
+            "suppression rule in _suppress_low_value_confusable_errors. The "
+            "rule exists because syntactic pairs like သည်↔သည့် "
+            "are not actionable, but it also killed genuine aukmyit/visarga "
+            "corrections that reached post-processing with gold at rank 1 "
+            "(MLM margin 3.4-16.3; confidence = margin/10). Both conditions "
+            "are required — the syntactic FP class carries a fixed 0.72 "
+            "confidence with no source strategy, so confidence alone cannot "
+            "separate it. Set above 1.0 to restore the unconditional kill."
+        ),
+    )
     aukmyit_context_suppression_immune: bool = Field(
         default=True,
         description=(
