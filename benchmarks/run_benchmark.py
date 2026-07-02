@@ -583,6 +583,7 @@ def run_benchmark(
     fusion_threshold: float = 0.5,
     calibration_path: Path | None = None,
     holdout: str = "include",
+    fn_examples_limit: int = 120,
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -1373,7 +1374,7 @@ def run_benchmark(
                     if isinstance(hist, dict):
                         hist[reason] = int(hist.get(reason, 0)) + 1
                     examples = fn_reason_telemetry.setdefault("examples", [])
-                    if isinstance(examples, list) and len(examples) < 120:
+                    if isinstance(examples, list) and len(examples) < fn_examples_limit:
                         span = gold.get("span", {})
                         start = int(span.get("start", -1))
                         end = int(span.get("end", -1))
@@ -2216,6 +2217,17 @@ def main():
         ),
     )
 
+    parser.add_argument(
+        "--fn-examples-limit",
+        type=int,
+        default=120,
+        help=(
+            "Max per-FN example rows kept in fn_reason_telemetry (default 120, "
+            "matching historical runs). Raise for FN-audit runs that need a "
+            "reason label on every miss."
+        ),
+    )
+
     args = parser.parse_args()
 
     if not args.db.exists():
@@ -2257,6 +2269,7 @@ def main():
         fusion_threshold=args.fusion_threshold,
         calibration_path=args.calibration,
         holdout=args.holdout,
+        fn_examples_limit=args.fn_examples_limit,
     )
 
     # Print summary
