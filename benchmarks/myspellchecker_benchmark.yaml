@@ -1,4 +1,4 @@
-version: 1.5.0-v19-granularity-normalization
+version: 1.5.0-v19h-holdout-freeze
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -326,6 +326,7 @@ sentences:
 - id: BM-003
   input: သင်ခန်းစာထဲမှာ ဃီတပွဲ၏ အဓိပ္ပာယ်ကို နမူနာဖြင့် ဖော်ပြထားသည် ဟု ဆရာမက သတိပေးခဲ့သည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 3
@@ -389,6 +390,7 @@ sentences:
 - id: BM-007
   input: သင်ခန်းစာထဲမှာ ဆနစ်၏ အဓိပ္ပာယ်ကို နမူနာဖြင့် ဖော်ပြထားသည် ဟု သုတေသနမှတ်စုတွင် ဖော်ပြထားသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -641,6 +643,7 @@ sentences:
 - id: BM-035
   input: ကျာင်းအတွက် ညီမ ဆေးဆိုင်ကို စောစော သွားခဲ့တယ် လို့ သူငယ်ချင်းက ပြောတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -704,6 +707,7 @@ sentences:
 - id: BM-038
   input: လေ့ကျင့်ခန်းစာအုပ်တွင် လှျို့ဝှက်ချက်၏ အဓိပ္ပာယ်ကို နမူနာဖြင့် ဖော်ပြထားသည် ဟု သုတေသနမှတ်စုတွင် ဖော်ပြထားသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -1308,6 +1312,7 @@ sentences:
 - id: BM-099
   input: ကွန်ရက်စနစ်တွင် လက္ခံချက်အတွက် ပြင်ဆင်ချက် ထည့်သွင်းထားသည် ဟု အသုံးပြုသူလမ်းညွှန်တွင် ပါသည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 3
@@ -1329,6 +1334,7 @@ sentences:
 - id: BM-100
   input: သံဂါအတွက် သူ စျေးကို စောစော သွားခဲ့တယ် လို့ မေမေက ပြောတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -1371,6 +1377,7 @@ sentences:
 - id: BM-104
   input: မိတ်ဆက်ဟောပြောပွဲတွင် သင်ကေတ၏ အဓိပ္ပာယ်ကို နမူနာဖြင့် ဖော်ပြထားသည် ဟု ကျောင်းသားများက မှတ်သားထားကြသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 2
@@ -1413,6 +1420,7 @@ sentences:
 - id: BM-111
   input: အင်ဂလိပ်ဆိုင်ရာ အစီရင်ခံစာကို မိုးလေဝသနှင့်ဇလဗေဒဌာနက ယခုသီတင်းပတ်အတွင်း ထုတ်ပြန်ခဲ့သည် ဟု ထုတ်ပြန်ချက်တွင် ဖော်ပြထားသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 3
@@ -1854,6 +1862,7 @@ sentences:
 - id: BM-152
   input: API ဝန်ဆောင်မှုတွင် အလုပ် ချိန်အတွက် ပြင်ဆင်ချက် ထည့်သွင်းထားသည် ဟု စမ်းသပ်ရလဒ်များက ပြသသည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -1938,6 +1947,7 @@ sentences:
 - id: BM-159
   input: အားလပ်ရက်မှာ သူ မိသားစုနဲ့ အိမ်မှာ နေတယ် လို့ သူငယ်ချင်က ပြောတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -1966,6 +1976,7 @@ sentences:
 - id: BM-163
   input: ယခုသီတင်းပတ်အတွင်း တာဝန်ရှိသူတစ်ဦး ဖုန်းကို စားပွဲပေါ်မှာ ပေးခဲ့တယ်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -2078,6 +2089,7 @@ sentences:
 - id: BM-187
   input: စာကြည့်တိုက်မှာ ကျွန်တော်က ဖုနးအကြောင်း သူငယ်ချင်းနဲ့ စကားပြောခဲ့တယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -2099,6 +2111,7 @@ sentences:
 - id: BM-188
   input: ဧရာဝတီတိုင်းတွင် ကျောငးဆိုင်ရာ ပြဿနာကို ဒေသခံများ တိုင်ကြားခဲ့ကြသည် ဟု သိရသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -2120,6 +2133,7 @@ sentences:
 - id: BM-189
   input: ဌာနမှူးက သငတန်းအကြောင်း မှတ်စုတစ်ပုဒ် ရေးသားခဲ့သည် ဟု ဆရာမက သတိပေးခဲ့သည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 3
@@ -2225,6 +2239,7 @@ sentences:
 - id: BM-194
   input: ရွေးချယ်မှုအတွက် ညီမ ဆေးဆိုင်ကို စောစော သွားခဲ့တယ်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -2233,6 +2248,7 @@ sentences:
 - id: BM-197
   input: ဌာနမှူးက သငတန်းအကြောင်း မှတ်စုတစ်ပုဒ် ရေးသားခဲ့သည် ဟု ကျောင်းသားများက မှတ်သားထားကြသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 2
@@ -2346,6 +2362,7 @@ sentences:
 - id: BM-218
   input: ရုံးနားကကဖေးမှာ ကျွန်မက ပရောဂျတ်အကြောင်း သူငယ်ချင်းနဲ့ စကားပြောခဲ့တယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -2367,6 +2384,7 @@ sentences:
 - id: BM-219
   input: နေပြည်တော်တွင် ကွန်ပြူတာဆိုင်ရာ ပြဿနာကို ဒေသခံများ တိုင်ကြားခဲ့ကြသည် ဟု သိရသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -2640,6 +2658,7 @@ sentences:
 - id: BM-248
   input: ဝဘ်စနစ်တွင် ဗီတမင်အတွက် ပြင်ဆင်ချက် ထည့်သွင်းထားသည် ဟု စနစ်မှတ်တမ်းတွင် ဖော်ပြထားသည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -3148,6 +3167,7 @@ sentences:
 - id: BM-282
   input: လက်ရှိတွင် မြို့တော်စည်ပင်သာယာရေးကော်မတီက စုံစမ်းစစ်ဆေးခဲ့သည် ဟု သိရသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -3506,6 +3526,7 @@ sentences:
 - id: BM-307
   input: နံနက်ပိုင်းတွင် သင်ကြားရေးအဖွဲ့က မေးခွန်း လေးယောက် စစ်ဆေးခဲ့သည် ဟု ကျောင်းသားများက မှတ်သားထားကြသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 2
@@ -3611,6 +3632,7 @@ sentences:
 - id: BM-315
   input: မနက်စာအတွက် တမင်းနဲ့ ဟင်းချက်ဖို့ ပြင်ဆင်ထားတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -3758,6 +3780,7 @@ sentences:
 - id: BM-322
   input: ကူညီပေးတဲ့အတွက် ကြေးဇူးတင်ပါတယ် ဟု ပြောခဲ့ပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -3898,6 +3921,7 @@ sentences:
 - id: BM-328
   input: မြန်မာ့ ရွှဲထည်ပစ္စည်းတွေက ကမ္ဘာမှာ နာမည်ကြီးပါတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -3919,6 +3943,7 @@ sentences:
 - id: BM-329
   input: ဒီည မိုးခိုင်မာစွာ ရွာလို့ အပြင်မထွက်တော့ဘူး။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -3970,6 +3995,7 @@ sentences:
 - id: BM-332
   input: စနစ်သည် မြန်ဆန်စွာ တုံ့ပျန်နိုင်သည် ဟု အင်ဂျင်နီယာများက မှတ်ချက်ပြုသည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -4021,6 +4047,7 @@ sentences:
 - id: BM-335
   input: အတန်းတွင် ခိုင်မာစွာ ဆွေးနွေးခဲ့ကြသည် ဟု သုတေသနမှတ်စုတွင် ဖော်ပြထားသည်။
   is_clean: true
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -4128,6 +4155,7 @@ sentences:
 - id: BM-340
   input: စနစ်သည် သာယာစွာ တုံ့ပြန်နိုင်သည် ဟု အပ်ဒိတ်မှတ်စုတွင် ပါရှိသည်။
   is_clean: true
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 3
@@ -4316,6 +4344,7 @@ sentences:
 - id: BM-351
   input: စာမေးပွဲခန်းတွင် အေးဆေး နေရမည် ဟု သုတေသနမှတ်စုတွင် ဖော်ပြထားသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -4686,6 +4715,7 @@ sentences:
 - id: BM-371
   input: ဒီအစီရင်ခံစာအတွက် အချက်အလက တွေကို စုဆောင်းနေပါတယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -4923,6 +4953,7 @@ sentences:
 - id: BM-387
   input: အတန်းပြီးနောက် သင်ကြားရေးအဖွဲ့က ရှင်းပြခဲ့သည် လူနာတင် ယာဉ်ကို အသေးစိတ် ဟု ကျောင်းသားများက မှတ်သားထားကြသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 2
@@ -5472,6 +5503,7 @@ sentences:
 - id: BM-509
   input: အိမ်နားက စားသောက်ဆိုင်မှာ မုန့်ဟင်းခါး အရမ်းကောင်းတယ် ဆိုတာ အိမ်သားတွေ သိတယ်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -5601,6 +5633,7 @@ sentences:
 - id: BM-522
   input: အထက်တန်း ကြောင်း မှာ စာမေးပွဲ ဖြေရမယ်
   is_clean: false
+  holdout: true
   domain: academic
   register: colloquial
   difficulty_tier: 2
@@ -5622,6 +5655,7 @@ sentences:
 - id: BM-523
   input: ကလေးတွေက မြွေကို ကျောက် သည်
   is_clean: true
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 3
@@ -6103,6 +6137,7 @@ sentences:
 - id: BM-EXT-C003
   input: ဒါက တကယ်ကို လှတဲ့နေ့ဝင်ချိန် ဓာတ်ပုံပဲ။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -6111,6 +6146,7 @@ sentences:
 - id: BM-EXT-C004
   input: သူငယ်ချင်းတွေနဲ့ ကော်ဖီသောက်ရတာ ပျော်စရာကောင်းတယ်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -6151,6 +6187,7 @@ sentences:
 - id: BM-EXT-C009
   input: ဒီသီချင်းက အရမ်းကောင်းတယ် နားထောင်ကြည့်ပါ။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -6175,6 +6212,7 @@ sentences:
 - id: BM-EXT-C012
   input: မနက်ဖြန် အားလပ်ရင် လာကြမယ်နော်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -6295,6 +6333,7 @@ sentences:
 - id: BM-EXT-C027
   input: ရေချိုးပြီးရင် ထွက်မယ် စောင့်ပါ။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -6487,6 +6526,7 @@ sentences:
 - id: BM-EXT-C051
   input: ပရိတ်ကြီးတရားတော်ကို အိမ်တွင် နေ့စဉ် ရွတ်ဆိုပွားများသင့်သည်။
   is_clean: true
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier:
@@ -6519,6 +6559,7 @@ sentences:
 - id: BM-EXT-C055
   input: စေတီတော်ကို ဘုရားဖူးလာသူများက ရေဖွင့်ပေးလျက်ရှိကြသည်။
   is_clean: true
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier:
@@ -6639,6 +6680,7 @@ sentences:
 - id: BM-EXT-C070
   input: ညနေချမ်းတွင် ငှက်များ အုံပြန်ပြန်ကြ၍ ကောင်းကင်သည် ငှက်အုံးများဖြင့် ပြည့်နှက်နေသည်။
   is_clean: true
+  holdout: true
   domain: literary
   register: formal
   difficulty_tier:
@@ -6655,6 +6697,7 @@ sentences:
 - id: BM-EXT-C072
   input: မြို့ဟောင်းရှိ အုတ်တံတိုင်းသည် ရာစုနှစ်များ ကုန်လွန်ခြင်း၏ သက်သေဖြစ်သည်။
   is_clean: true
+  holdout: true
   domain: literary
   register: formal
   difficulty_tier:
@@ -6687,6 +6730,7 @@ sentences:
 - id: BM-EXT-C076
   input: နိုင်ငံတော်သမ္မတသည် နိုင်ငံခြားခရီးစဉ်မှ ယမန်နေ့က ပြန်လည်ရောက်ရှိခဲ့သည်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -6695,6 +6739,7 @@ sentences:
 - id: BM-EXT-C077
   input: ဆန်စပါးထုတ်လုပ်မှုသည် ယခုနှစ်တွင် ယမန်နှစ်ထက် ၁၅ ရာခိုင်နှုန်း တိုးတက်ခဲ့သည်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -6807,6 +6852,7 @@ sentences:
 - id: BM-EXT-C091
   input: ငလျင်ဒဏ်ခံ ဒေသများတွင် ပြန်လည်ထူထောင်ရေးလုပ်ငန်းများ ဆောင်ရွက်လျက်ရှိသည်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -6815,6 +6861,7 @@ sentences:
 - id: BM-EXT-C092
   input: ကုန်သွယ်ရေးဝန်ကြီးဌာနက ပြည်ပပို့ကုန်ကို တိုးချဲ့ရန် အစီအစဉ်ရေးဆွဲထားသည်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -6823,6 +6870,7 @@ sentences:
 - id: BM-EXT-C093
   input: ရန်ကုန်တက္ကသိုလ်က ပါရဂူဘွဲ့အသစ်ကို စတင်ဖွင့်လှစ်ခဲ့ကြောင်း ကြေညာခဲ့သည်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -6831,6 +6879,7 @@ sentences:
 - id: BM-EXT-C094
   input: စစ်ကိုင်းတိုင်းဒေသကြီးတွင် ဆန်စပါးထုတ်လုပ်မှု ယခုနှစ်ပိုမိုများပြားခဲ့သည်။
   is_clean: true
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -6999,6 +7048,7 @@ sentences:
 - id: BM-EXT-C115
   input: ရှင့်ကို ဒီအခွင့်အရေးအတွက် ကျေးဇူးအထူးတင်ပါတယ်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: polite
   difficulty_tier:
@@ -7159,6 +7209,7 @@ sentences:
 - id: BM-EXT-C135
   input: ဗားရှင်းထိန်းချုပ်စနစ်ကို အသုံးပြုခြင်းဖြင့် ကုဒ်ပြောင်းလဲမှုများကို ခြေရာခံနိုင်သည်။
   is_clean: true
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier:
@@ -7497,6 +7548,7 @@ sentences:
 - id: BM-EXT-E017
   input: ကွန်ပျူတာ ဟတ်ဝဲ ပြဿနာကို စစ်ဆေးပါ။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -7630,6 +7682,7 @@ sentences:
 - id: BM-EXT-E024
   input: အိုင်တီ ဒီပတ်မန့်ကို ပြောင်းရွှေ့ခဲ့သည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 2
@@ -7673,6 +7726,7 @@ sentences:
 - id: BM-EXT-E026
   input: ဝက်ဘဆိုက်ရဲ့ ပါဖောမန့်ကို တိုင်းတာပါ။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 2
@@ -7736,6 +7790,7 @@ sentences:
 - id: BM-EXT-E029
   input: သူသည် ရန်ကုန်ကို နေထိုင်သည်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -8162,6 +8217,7 @@ sentences:
 - id: BM-EXT-E050
   input: သုတေသနအဖွဲ့က ဟိုတစ်နေ့က ပြုလုပ်ခဲ့သော စမ်းသပ်မှုကို ထုတ်ပြန်ခဲ့သည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 2
@@ -8681,6 +8737,7 @@ sentences:
 - id: BM-EXT-E074
   input: လွန်ခဲ့သောနှစ်တွင် ကုမ္ပဏီသည် ဝန်ထမ်း ၁၀၀ ခန့်ထားမည်ဖြစ်သည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 1
@@ -8725,6 +8782,7 @@ sentences:
 - id: BM-EXT-E076
   input: လာမည့်လတွင် အစည်းအဝေးကို ကျင်းပခဲ့ကြသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 1
@@ -8864,6 +8922,7 @@ sentences:
 - id: BM-EXP-C005
   input: ငါ့သျှင်တို့ တစ်ဖန်ထို့ပြင်လည်း သီလရှိသော သီလနှင့်ပြည့်စုံသော သူသည် ခန္ဓာကိုယ်ပျက်စီး၍ နောက်၌ ကောင်းသော လားရာဖြစ်သော နတ်ပြည်၌ ဖြစ်ရ၏။ ဤကား သီလရှိသော သူ၏ သီလနှင့်ပြည့်စုံခြင်း၌ ငါးခုမြောက် အကျိုး 'အာနိသင်' ပေတည်း။ (၁၄)
   is_clean: true
+  holdout: true
   domain: religious
   register: informal
   difficulty_tier:
@@ -8958,6 +9017,7 @@ sentences:
 - id: BM-EXP-C015
   input: '''''ဘယ်လိုဖြစ်သွားလဲ ဆို တော့ ကလေးရဲ့ သဘောသဘာဝ က သူတို့တစ်ခုခုလိုချင်ရင် မိဘ ကို တစ်နည်းနည်းနဲ့ပြပြီးတောင်း တာ။ ပေါက်ကွဲပြပြီး တောင်းတဲ့ လူကြီးကလိုက်လျော လို့ရှိရင် ကလေးစိတ်ထဲမှာ ငါ ကောင်းကောင်းမွန်မွန်တောင်း တုန်းကတော့ မပေးဘူး။ လိုချင်တာရ တယ်ဆိုပြီး နောက်အခါတွေမှာ ပေါက်ကွဲတဲ့အပြုအမူတွေ လုပ်ပြီး တောင်းတာ။ အဲဒီလိုနဲ့ တချို့ ကလေးတွေမှာ ဝုန်းဒိုင်းကြဲပြီး ပေါက်ကွဲတဲ့ ကလေးလေးတွေ ဖြစ်လာတာပေါ့'''' ဟု ကလေးငယ် များ၏ အပြုအမူပိုင်းဆိုင်ရာ အဆင့်စီမံခန့်ခွဲပေးသော ဒေါက်တာ ဌေးဌေး (စိတ်ပညာ) ကဆိုသည်။'
   is_clean: true
+  holdout: true
   domain: general
   register: formal
   difficulty_tier:
@@ -9056,6 +9116,7 @@ sentences:
 - id: BM-EXP-C024
   input: ကမ္ဘာ့ပစ္စည်းမဲ့ ခေါင်းဆောင်ကြီးများ ဖြစ်ကြသော ကားလ်မတ်နှင့် အိန်ဂျယ်တို့က အာရှတိုက်တွင် နယ်ချဲ့ သမားတို့ ကျူးလွန်နေသော ကိုလိုနီစစ်ပွဲများကို ဝေဖန်တိုက်ခိုက်နေသည့် ကြားကပင် အင်္ဂလိပ်တို့သည် နတ်မြစ်ဝရှိ ရှင်မဖြူကျွန်းအရေးကို အကြောင်းပြု၍ မြန်မာနိုင်ငံကို စစ်အင်အားဖြင့် ချီတက်တိုက်ခိုက်လေတော့သည်။
   is_clean: true
+  holdout: true
   domain: literary
   register: formal
   difficulty_tier:
@@ -9448,6 +9509,7 @@ sentences:
 - id: BM-EXP-C045
   input: ၃၁။ ဓမ္မေန ကိရ ဇာတဿ၊ ပိတာ ပုတ္တဿ မက္ကဋော။
   is_clean: true
+  holdout: true
   domain: religious
   register: informal
   difficulty_tier:
@@ -9552,6 +9614,7 @@ sentences:
 - id: BM-EXP-C056
   input: လက်ဝတ်ရတနာ ပြုလုပ်ခြင်းက အနုပညာတစ်ခုလို့လည်း ပြောလို့ရတယ်။
   is_clean: true
+  holdout: true
   domain: general
   register: colloquial
   difficulty_tier:
@@ -9582,6 +9645,7 @@ sentences:
 - id: BM-EXP-C058
   input: တပ်မတော်သို့ အသက် နှစ် မပြည်သေးဘဲ ဝင်ရောက်သူများကို စိစစ်ပြီး မိဘ အုပ်ထိန်းသူများ ထံသို့ ပြန်လွှဲ ပြောင်းပေးမှု အကြိမ်ရေ ကြိမ်တွင် စစ်သည် ဦး ရှိကြောင်း၊ ယင်းသို့ စုဆောင်း မှုတွင် တာဝန်ရှိသူတပ်မ တော်သား အရာရှိ ဦး၊ အခြား အဆင့် ဦးကို စစ်စည်းကမ်းအရ အရေးယူခဲ့ကြောင်း တပ်မတော်သားကိုယ် စားလှယ်များ၏ ဆွေးနွေးချက်အရ သိရသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: polite
   difficulty_tier:
@@ -9603,6 +9667,7 @@ sentences:
 - id: BM-EXP-C059
   input: အိမ်မှာ ဘုရားစင် မရှိသဖြင့် ထောင့်ကျသော နေရာတွင် နံရံကို မျက်နှာပြုပြီး စိပ်လေသည်။
   is_clean: true
+  holdout: true
   domain: literary
   register: formal
   difficulty_tier:
@@ -9659,6 +9724,7 @@ sentences:
 - id: BM-EXP-C066
   input: အတက်ဥဘဲရွာ()သည် ချင်းပြည်နယ်၊ မတူပီခရိုင်၊ ပလက်ဝမြို့နယ်၊ ပြင်ငူကျေးရွာအုပ်စု၌ တည်ရှိသည်။ ရွာနေရာကုတ်မှာ ဖြစ်သည်။ သန်းခေါင်စာရင်းအရ ပြင်ငူကျေးရွာအုပ်စုတွင် ကျား ဦး၊ မ ဦး၊ လူဦးရေ စုစုပေါင်း ဦး နေထိုင်သည်။ ကိုးကား ကဏ္ဍ:ပလက်ဝမြို့နယ်ရှိ ရွာများ
   is_clean: true
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier:
@@ -10306,6 +10372,7 @@ sentences:
 - id: BM-EXP-C094
   input: ဖြစ်ချင်တော့ ကိုယ်လက်မှတ်ဝယ် ရန် ကြည့်သည့် နေရာတွင်Upton Parkဘူတာ ရှိနေသည်။ ထိုနေရာကို နှိပ်ပြီး လက် မှတ် နည်းနည်း သံသယ ဖြစ်လာသည်။ လက်မှတ်ခက လန်ဒန်မြို့ တွင်းသွား မဟုတ်ဘဲ ဈေးကြီးနေသည်။ နောက်တစ်ခုက Upton Park နံဘေး တွင် ကွင်းဖြင့် မာဆေးဆိုဒ်ဟု ရေးထားသည်။ ပရီးမီးယားလိဂ်ဘောလုံးပွဲများ ရူးရူးမူးမူး ကြည့်ခဲ့ဖူးသဖြင့် မာဆေးဆိုဒ် ဆိုသည်ကို အတန်ငယ် ရင်းနှီးသည်။ မာဆေးဆိုဒ်မှာ အင်္ဂလန်အနောက်မြောက် ပိုင်းရှိ စီရင်စုကောင်တီတစ်ခု ဖြစ်သည်။ ယင်းကောင်တီတွင် နာမည်ကျော် လီဗာပူးလ်နှင့် အဲဗာတန် ဘောလုံးကလပ်အသင်းများ ရှိသည်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier:
@@ -10470,6 +10537,7 @@ sentences:
 - id: BM-EXP-C095
   input: မစားရက်မသောက်ရက် ကျိတ်စုထားတဲ့ မုန့်ဖိုးလေးတွေကို crush ရှေ့မှာ ရေလိုသုံးပြဖူးလား။
   is_clean: true
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
@@ -10560,6 +10628,7 @@ sentences:
 - id: BM-EXP-C101
   input: အင်း နော်၊ ကိုဆန်းလွင် ပြောတော့ မ သဘော ပေါက်ပါတယ်၊ မက ကိုဆန်းလွင်လို မပြောတတ်လို့၊ မ ဆိုလိုတာလည်း ဒီသဘောပါပဲ၊ မ အဖြေ ပေးသင့်တဲ့ အချိန်ဟာ ဘယ်အချိန် ဖြစ်မလဲ ဆိုတာ မ အနေနှင့် ကြိုမသိနိုင်လို့ ကြိုပြီး အသိပေးတဲ့ သဘော ပြောတာပါ
   is_clean: true
+  holdout: true
   domain: literary
   register: informal
   difficulty_tier:
@@ -10625,6 +10694,7 @@ sentences:
 - id: BM-EXP-C109
   input: COVID – 19 ရောဂါရှိ မရှိ စောင့်ကြည့်မှုခံယူနေစဉ် မိမိကိုယ်ကို သတ်သေခဲ့သူ ကိုနေထက်လင်း၏ အလောင်းကို ရဲတပ်ဖွဲ့နှင့် တာဝန်ရှိသူများက ပုသိမ်ပြည်သူ့ဆေးရုံကြီးသို့ ပို့ဆောင်ခဲ့ပြီး ရင်ခွဲစစ်ဆေးမှုများ လုပ်ဆောင်ကာ ဓမ္မတာအတိုင်း သေဆုံးခြင်းဟုတ်မဟုတ် ရဲတပ်ဖွဲ့က သေမှုသေခင်းဖွင့်လှစ်၍ စုံစမ်းစစ်ဆေး မှုများ ဆောင်ရွက်နေကြောင်း သိရသည်။
   is_clean: true
+  holdout: true
   domain: general
   register: formal
   difficulty_tier:
@@ -10657,6 +10727,7 @@ sentences:
 - id: BM-EXP-C113
   input: ပေါက်ကုန်း - သာယာဝတီခရိုင်၊ မင်းလှမြို့နယ်၊ ပေါက်ကုန်းကျေးရွာအုပ်စု၊ ပီကုတ် (183367)
   is_clean: true
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier:
@@ -10746,6 +10817,7 @@ sentences:
 - id: BM-EXP-C124
   input: ရှမ်းပြည်နယ် တောင်ပိုင်းရှိ တောင်ကြီး-ညောင်ရွှေ ယာဉ်လိုင်းကားခများ ဆခွဲဈေးတက်သွား၍ ခရီးသည်များ ဒုက္ခရောက်နေကြသည်ဟု ဒေသခံများက ပြောသည်။
   is_clean: true
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier:
@@ -10803,6 +10875,7 @@ sentences:
 - id: BM-EXP-C131
   input: '''''ယခုအခါ၌ ငါတို့၏ ကောဝိဠာရမည်သော ပင်လယ်ကသစ်ပင်ကြီးသည် ရွက်ညွန့် ပွင့်ငုံတို့ ဖြစ် ပေါ်၏၊ မကြာမီပင် ပွင့်ငုံတို့ ဖြစ်တော့မည်''''ဟု နှစ်သက်ဝမ်းမြောက်သောစိတ် ရှိကြကုန်၏။ (၅)'
   is_clean: true
+  holdout: true
   domain: religious
   register: informal
   difficulty_tier:
@@ -11006,6 +11079,7 @@ sentences:
 - id: BM-EXP-C143
   input: ချောင်းဆုံမြို့နယ်၌ ရော်ဘာ အများဆုံး စိုက်ပျိုးပြီး တစ်နိုင်တစ်ပိုင် စိုက်ပျိုးခြင်းဖြင့် ခြံရှင်များအနေဖြင့် အပိုဝင်ငွေရရှိသည့်အပြင် ရော်ဘာခြစ် အလုပ်သမားများလည်း မိသားစု စားဝတ်နေရေး အဆင်ပြေကြောင်း သိရသည်။
   is_clean: true
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier:
@@ -11205,6 +11279,7 @@ sentences:
 - id: BM-EXP-C158
   input: ဆရာမင်းလူ ရသ အစွမ်းနဲ့ တည်ဆောက်ခဲ့တဲ့ ဝတ္ထုထဲက မြို့မကျ၊ လူ့အဖွဲ့အစည်း တခုဟာ တကယ်တော့ ဗမာပြည် တပြည်လုံးကို ကိုယ်စားပြုတယ်။ အခြေခံလူတန်းစား တခု ကို အခြေခံပြီး တိုင်းပြည်မှာ အခြေတည်သင့်၊ ကျင့်သုံးသင့် တဲ့ အကျင့်၊ အကြံ၊ အတွေးအခေါ်၊ အယူအဆ၊ သဘောတရားတွေကို ရသပညာ နဲ့ သွတ်သွင်း ဖန်တီး လမ်းညွှန် ပြထားခြင်း ဖြစ်တယ်။
   is_clean: true
+  holdout: true
   domain: general
   register: colloquial
   difficulty_tier:
@@ -11272,6 +11347,7 @@ sentences:
 - id: BM-EXP-C163
   input: နှစ်၊ အနှစ် အတွင်းမှာလဲ ဒီထက်ပိုပြီးနီးနီးစပ်စပ် မတွေ့ကြုံရတော့ဘူးလို့
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier:
@@ -11308,6 +11384,7 @@ sentences:
 - id: BM-EXP-C164
   input: စစ်ကိုင်း၊ ဖေဖော်ဝါရီ ၂၁-၂၀၂၁
   is_clean: true
+  holdout: true
   domain: technical
   register: informal
   difficulty_tier:
@@ -11426,6 +11503,7 @@ sentences:
 - id: BM-EXP-C169
   input: အစိုးရ ရှေ့နေများက ဟားပက်သည် အသက် နှစ်အရွယ် ရှာဆင်း၊ အသက် အရွယ် ဂျက်စဝမ့်ဒီလီယန်နှင့် အသက် အရွယ် ဟာပယ်ဆင်းတို့အား ဇနီးကို သတ်ပေးရန် ငှားရမ်းခဲ့ကြောင်း စွဲချက်တင်ထားသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier:
@@ -11464,6 +11542,7 @@ sentences:
 - id: BM-EXP-C172
   input: စစ်အာဏာရှင် တော်လှန်ရေးမှာ ပါဝင်နေကြတဲ့ ရဲရဲတောက် အာဂ အမျိုးသမီးတွေဟာ ဖိနှိပ်မှု၊ အခက်အခဲ၊ အကြမ်းဖက် နှိမ်နင်းမှုတွေကြားကနေ ပါဝင်နေကြသလို လက်နက်ကိုင် တော်လှန်ရေးမှာပါ ရွပ်ရွပ်ချွံချွံ ပါဝင်နေတာ တွေ့မြင်ရပါတယ်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier:
@@ -11574,6 +11653,7 @@ sentences:
 - id: BM-EXP-C176
   input: 'သင်ပန်းရွာ (အင်္ဂလိပ်: Thinpan)သည် မန္တလေးတိုင်းဒေသကြီး၊ ကျောက်ဆည်ခရိုင်၊ တံတားဦးမြို့နယ်၊ ခောင်းကွဲကျေးရွာအုပ်စု၌ တည်ရှိသည်။ ရွာနေရာကုတ်မှာ ဖြစ်သည်။ သန်းခောင်စာရင်းအရ ခောင်းကွဲကျေးရွာအုပ်စုတွင် ကျား ဦး၊ မ ဦး၊ လူဦးရေ စုစုပောင်း ဦးနေထိုင်သည်။'
   is_clean: false
+  holdout: true
   domain: academic
   register: polite
   difficulty_tier:
@@ -11918,6 +11998,7 @@ sentences:
 - id: BM-EXP-C187
   input: မှန်နန်းအပျိုတော်ကြီးမှာကား မိမိ၏ ဧည့်ခံပွဲသို့ ရောက်ရှိလာသော ပြင်သစ်မြို့စားကလေးကို ဧည့်သည်များရှေ့မှောက်သို့ ခေါ်သွားကာ မိတ်ဆက်ပေးခြင်းဖြင့် ဂုဏ်ယူလျက်ရှိလေသည်။
   is_clean: true
+  holdout: true
   domain: literary
   register: formal
   difficulty_tier:
@@ -12118,6 +12199,7 @@ sentences:
 - id: BM-EXP-C202
   input: ရုတ်တရက် လူနှစ်ယောက်က နတ်ဗိမာန် အိမ်တော်သို့ ဝင်ရောက်သွားကာ မိန်းမပျိုထံသို့ ရောက်လာသည်။ တစ်ယောက်က လှပချောမောသော မိန်းကလေးဖြစ်ပြီး မိန်းကလေး နှစ်ယောက်က ရုပ်ဆင်သည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier:
@@ -12390,6 +12472,7 @@ sentences:
 - id: BM-EXP-C222
   input: 'လန်ဒန်အခြေစိုက် စီးပွားရေးလုပ်ငန်းနှင့် ဘဏ္ဍာရေးဆိုင်ရာ မဂ္ဂဇင်းတစ်ခုဖြစ်သော Asiamoney ချီးမြှင့်သည့် "Best for Microfinance in Myanmar: 2020" ဆုကို DAWN က မတ်လ၊ လက်ခံရရှိခဲ့ပါသည်။ DAWN လက်ရှိအကောင်ထည်ဖော် ဆောင်ရွက်လျက်ရှိသည့် ဒီဂျစ်တယ် နည်းပညာအခြေခံသော ငွေရေးကြေးရေး အဖွဲ့အစည်းအဖြစ်သို့ အသွင်ကူးပြောင်းမှု၊ မြန်မာနိုင်ငံတဝန်းရှိ အမျိုးသမီး တစ်နိုင်တစ်ပိုင် စွန့်ဦးတီထွင်လုပ်ငန်းရှင်များနှင့် အသေးစား စီးပွားရေး လုပ်ငန်းရှင်များအတွက် အရည်အသွေး ပြည့်မီသော ငွေရေးကြေးရေး ဝန်ဆောင်မှုတို့အတွက် DAWN အနေဖြင့် မြန်မာနိုင်ငံ၏ အကောင်းဆုံးသော အသေးစားငွေရေးကြေးရေး အဖွဲ့အစည်းအဖြစ် အသိမှတ်ပြု ဆုချီးမြှင့်ခံရခြင်း ဖြစ်သည်။ထို့အပြင် အဆိုပါဆုသည် အဖွဲ့ဝင်များကို ဗဟိုပြု၍ ငွေကြေးဆိုင်ရာနှင့် လူမှုဘဝ …'
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier:
@@ -12468,6 +12551,7 @@ sentences:
 - id: BM-EXP-C225
   input: ၄၉၉။ အကြင်ဟူသည် အကြင်သို့သဘောရှိသော။ပ။
   is_clean: true
+  holdout: true
   domain: religious
   register: informal
   difficulty_tier:
@@ -12799,6 +12883,7 @@ sentences:
 - id: BM-EXP-E011
   input: 'သိန်းကျင်းရွာ (အင်္ဂလိပ်: Theinkyin)သည် မကွေးတိုင်းဒေသကြီး၊ ဂန့်ဂောခရိုင်၊ ဆောမြို့နယ်၊ ဆီမီးကျေးရွာအုပ်စု၌ တည်ရှိသည်။ ရွာနေရာကုတ်မှာ ဖြစ်သည်။ သန်းခောင်စာရင်းအရ ဆီမီးကျေးရွာအုပ်စုတွင် ကျား ဦး၊ မ ဦး၊ လူဦရေ စုစုပောင်း ဦးနေထိုင်သည်။'
   is_clean: false
+  holdout: true
   domain: academic
   register: polite
   difficulty_tier: 2
@@ -13463,6 +13548,7 @@ sentences:
 - id: BM-EXP-E038
   input: ထိုကြောင့် ကိုခောင်းကြီး လမ်း ဆိုင်တွေကို မသုံးဘဲ လမ်ဘက် ဆိုင်များကို စိတ်ကူးထား၏။
   is_clean: false
+  holdout: true
   domain: literary
   register: informal
   difficulty_tier: 2
@@ -13625,6 +13711,7 @@ sentences:
 - id: BM-EXP-E042
   input: တရုတ်ရဲ့ နဲ့ ဟောင်ကောင် အရေး၊ ထိုင်ဝမ် အရေး၊ တောင်တရုတ် ပင်လယ်ပြင် အရေး၊ နောက် အမေရိကန်ရဲ့ မဟာမိတ်တွေကို တရုတ်က စီးပွားရေးမှာ နိုင်ထက်စီးနင်း ဆောင်ရွက်မှုတွေနဲ့ ပတ်သက်ပြီး အမေရိကန်နဲ့ တရုတ်ကြား မပြေမလည် ဖြစ်နေပေမယ့်လည်း ရာသီဥတု ပြော့င်းလဲမှု အရေးမှာ တရုတ် အစိုးရနဲ့ အတူ ဆောင်ရွက်ဖို့ ပြင်ဆင်ထားကြောင်း အမေရိကန်ဘက်က ပြောပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -13732,6 +13819,7 @@ sentences:
 - id: BM-EXP-E044
   input: ထိုအခါ ရဟန်းတို့သည် တရားသဘင်၌ စကားစပ်မိ၍ ထိုရဟန်းအကြောင်းကို ပြောဆိုနေကြရာ မြတ်စွာဘုရား ကြွလာတော်မူ၍ ထိုအကြောင်းကို သိတော်မူလျှင်– “ရဟန်းတို့...ရှေးအခါ ဤရဟန်းသည် သဒ္ဓါတရားမရှိ၊ အလှူခံတို့ကို မြင်၍ ကြည်ညိုခြင်းမရှိ၊ မြက်ဖျားတွင် ကပ်သောသိပောက်မျှကိုလည်း သူတပါးအား မပေးလေ၊ ထိုသူကြွယ်ကို ငါဆုံးမ၍ အလှူကို လှူစေပြီးလျှင် ဘဝတပါးသို့ ရောက်၍ပင် မစွန့်”ဟု မိန့်တော်မူကာ အောက်ပါ အတိတီဇာတ်ကို ဆောင်တော်မူသတည်း။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -14124,6 +14212,7 @@ sentences:
 - id: BM-EXP-E062
   input: ပထမဆုံး စပြောရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒော်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေး ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ ကသိုလ် အပတ်စဉ် က ဖြစ်ပါတယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 2
@@ -14581,6 +14670,7 @@ sentences:
 - id: BM-EXP-E082
   input: တောင်ကုန်းရွာ ()သည် စစ်ကိုင်းတိုင်းဒေသကြီး၊ ကသာခရိုင်၊ အင်းတော်မြို့နယ်၊ မြောက်ကုန်းကျေးရွာအုပ်စု၌ တည်ရှိသည်။ ရွာနေရာကုတ်မှာ ဖြစ်သည်။ သန်းခောင်စာရင်းအရ မြောက်ကုန်းကျေးရွာအုပ်စုတွင် ကျား ဦး၊ မ ဦး၊ လူဦးရေ စုစု ပောင်း ဦးနေထိုင်သည်။ ကိုးကား ကဏ္ဍ:အင်းတော်မြို့နယ်ရှိ ရွာများ
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -14636,6 +14726,7 @@ sentences:
 - id: BM-EXP-E084
   input: ဖျေရှင်းနည်း - ဒါက ရောဂါဝေဒနာတစ်ခု မဟုတ်ပေမယ့် သက်သောင့်သက်သာ နေထိုင်မှုက သင့်ကို သက်သာရာ ရစေပါလိမ့်မယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: colloquial
   difficulty_tier: 2
@@ -14657,6 +14748,7 @@ sentences:
 - id: BM-EXP-E085
   input: ဒါကြောင့် လက်ရှိ တိုင်းရင်းသား လက်နက်ကိုင်တွေ အချင်းချင်း သဘောထား UNFC ထဲမှာ ပြေလည်မူရသည် အထိ ညှိကြပါ၊ ဒီ ပြဿနာအပော် အကြောင်းပြုပြီး KNU ခောင်းဆောင်တွေကို ထိုးနှက်တိုက်ခိုက်မှုတွေ မလုပ်ကြပါနဲ့၊ အလားတူ KNU အဖွဲ့ထဲမှာလည်း ဒီ ပြဿနာကို နိုင်ငံရေး အမြတ်မထုတ်ပဲ ဆွေးနွေးညှိနှိုင်း အဖြေရှာကြမှသာ တိုင်းရင်းသားတွေ အတွက်ရော၊ တိုင်းပြည်အတွက်ပါ ကောင်းကျိုး ပော်ပောက်စေမှာ ဖြစ်ပါကြောင်း သုံးသပ်တင်ပြလိုက်ရပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -14738,6 +14830,7 @@ sentences:
 - id: BM-EXP-E087
   input: အရင်ထက်စာရင်တော့ အများကြီးတိုးတက်လာတယ်လို့ဆိုရမှာပါ၊ ဒီနှစ်ဘတ်ဂျက်မှာဆိုရင် ရှာဖွေကယ်ဆယ်ရေးစက်လှေတွေဝယ်ယူထားတာရှိပါတယ်၊ စီးရှိပါတယ်၊ အရင်ကဝယ်ထားတာတွေလဲရှိပါတယ်၊ ဒါဟာလည်း ပြည်နယ်အစိုးရရဲ့ဘတ်ဂျက်နဲ့ ဝယ်ပေးထားပါတယ်၊ မှာ စက်ပစ္စည်းကိရိယာအနေနဲ့မီးသတ်ယာဉ် တင်၊ Big Flow (or) HydroSub 60 နောက်တွဲယာဉ်် (၁)စီး၊ မီးသတ်နဲ့ရှာဖွေကယ်ဆယ်ရေးပစ္စည်း အမျိုးပေါင်း လောက် ဒီနှစ်မှာ ဖြည့်ဆည်းထားပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -14946,6 +15039,7 @@ sentences:
 - id: BM-EXP-E095
   input: ဌာနနှင့် ဌာနီကို မခွဲ ခြားဘဲ ဆိုခြင်း၊ ဌာန၏အမည်ကို ဌာနီ၌ တင်စား၍ ဆိုခြင်း။
   is_clean: false
+  holdout: true
   domain: religious
   register: informal
   difficulty_tier: 2
@@ -15140,6 +15234,7 @@ sentences:
 - id: BM-EXP-E103
   input: အခု လူတွေကြားထဲ ပောက်ထွက်လာတဲ့ အစီရင်ခံစာ မှာ တော့ အစ္စရေး အနေနဲ့ အလွန်အကျွံ အင်အားသုံးခဲ့တာ ကို ရေးသား ထားပေမယ့် အစ္စရေး စစ်သား တွေ အနေနဲ့ ဂါဇာ ကို လက်နက် တွေ ပို့ ရင် ရပ်တန့် ဘို့ အတွက် တားဆီးနိုင်ခွင့် က တရားဝင် ရှိတယ်၊ နောက် အစ္စရေး စစ်ဟား တွေ အနေနဲ့ သူတို့ ကို တိုက်ခိုက် လာရင် သူတို့ကိုယ် သူတို့ ပြန် ကာကွယ် ပိုင်ခွင့် ရှိတယ် လို့ ရေးထား ပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -15553,6 +15648,7 @@ sentences:
 - id: BM-EXP-E119
   input: တပ်မတော်သို့ အသက် နှစ် မပြည်သေးဘဲ ဝင်ရောက်သူများကို စိစစ်ပြီး မိဘ အုပ်ထိန်းသူများ ထံသို့ ပြန်လွှဲ ပြော့င်းပေးမှု အကြိမ်ရေ ကြိမ်တွင် စစ်သည် ဦး ရှိကြောင်း၊ ယင်းသို့ စုဆောင်း မှုတွင် တာဝန်ရှိသူတပ်မ တော်သား အရာရှိ ဦး၊ အခြား အဆင့် ဦးကို စစ်စည်းကမ်းအရ အရေးယူခဲ့ကြောင်း တပ်မတော်သားကိုယ် စားလှယ်များ၏ ဆွေးနွေးချက်အရ သိရသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: polite
   difficulty_tier: 2
@@ -15616,6 +15712,7 @@ sentences:
 - id: BM-EXP-E122
   input: '''''ဘယ်လိုဖြစ်သွားလဲ ဆို တော့ ကလေးရဲ့ သဘောသဘာဝ က သူတို့တစ်ခုခုလိုချင်ရင် မိဘ ကို တစ်နည်းနည်းနဲ့ပြပြီးတောင်း တာ။ ပောက်ကွဲပြပြီး တောင်းတဲ့ လူကြီးကလိုက်လျော လို့ရှိရင် ကလေးစိတ်ထဲမှာ ငါ ကောင်းကောင်းမွန်မွန်တောင်း တုန်းကတော့ မပေးဘူး။ လိုချင်တာရ တယ်ဆိုပြီး နောက်အခါတွေမှာ ပောက်ကွဲတဲ့အပြုအမူတွေ လုပ်ပြီး တောင်းတာ။ အဲဒီလိုနဲ့ တချို့ ကလေးတွေမှာ ဝုန်းဒိုင်းကြဲပြီး ပောက်ကွဲတဲ့ ကလေးလေးတွေ ဖြစ်လာတာပော့'''' ဟု ကလေးငယ် များ၏ အပြုအမူပို င်းဆိုင်ရာ အ ဆင့်စီမံခန့်ခွဲပေးသော ဒောက်တာ ဌေးဌေး (စိတ်ပညာ) ကဆိုသည်။'
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -15736,6 +15833,7 @@ sentences:
 - id: BM-EXP-E124
   input: ကျနော်က လွှတ်တော်မှာ ဗဟိုဝန်ထမ်းတက္ကသိုလ်ကို ဖျက်ပစ်ဖို့ ဒါမှမဟုတ် ပြုပြင်ပြောင်းလည်းရေး လုပ်ဖို့ တင်ခဲ့ပေမယ့် မအောင်မြင်ခဲ့ဘူး။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 2
@@ -15757,6 +15855,7 @@ sentences:
 - id: BM-EXP-E125
   input: လက်ဝတ်ရတနာ ပြုလုပ်ခြင်းက အနုပညာတစ်ခုလို့လည်း ပြော့လို့ရတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: colloquial
   difficulty_tier: 2
@@ -15961,6 +16060,7 @@ sentences:
 - id: BM-EXP-E131
   input: ပြည်ထောင်စု ဒီမိုကရေဆီပါတီ ဥက္ကဌ ကိုဖြိုးမင်းသိန်း ဖြစ်ပါတယ်။ တပ်မတော်အစိုးရဟာ နိုင်ငံဝန်ထမ်းတွေ ဖြစ်တယ်လို့ စစ်အစိုးရက တချိန်က ပြောခဲ့ဖူးပါတယ်။ ဒါကြောင့် အခုလက်ရှိ ရွေးကောက်ပွဲဥပဒေအရ နိုင်ငံရေး မလုပ်ရ၊ နိုင်ငံရေးပါတီမထောင်ရ ကန့်သတ်မှုရှိတာကြောင့် ရွေးကောက်ပွဲဥပဒေနဲ့များ ငြိစွန်းနေသလား စဉ်းစားသူတွေ လည်း ရှိပါတယ်။ ဒီအတိုင်း ခွင့်ပြုချက်ရသွားပြီး နိုင်ငံရေးပါတီထောင်ပြီး ရွေးကောက်ပွဲဝင်မယ် ဆိုရင်တော့ ရွေးကောက်ပွဲ အခြေအနေက တဘက်သတ်ဖြစ်သွားမယ်လို့ ကိုဝင်းမင်းက ယူဆပါတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -16242,6 +16342,7 @@ sentences:
 - id: BM-EXP-E140
   input: ကိုဘုထန်ပိုင်က "မနေ့က ညကတည်းက အင်တာနက်လိုင်းတွေတော့ ပြန်ပွင့်တယ်။ ဒါပေမယ့် လိုင်းကတော့ သိပ် မကောင်းဘူး။ ကျနော့် ဖုန်းကြောင့် ဖြစ်တာလား။ ဘယ်လို ဖွင့်ပေးတာလည်း ဆိုတာတော့ မသိတော့ဘူး" ဟု ဧရာဝတီဟို့ ပြောသည်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -16441,6 +16542,7 @@ sentences:
 - id: BM-EXP-E147
   input: '''''ဘယ်လိုဖြစ်သွားလဲ ဆို တော့ ကလေးရဲ့ သဘောသဘာဝ က သူတို့တစ်ခုခုလိုချင်ရင် မိဘ ကို တစ်နည်းနည်းနဲ့ပြပြီးတောင်း တာ။ ပောက်ကွဲပြပြီး တောင်းတဲ့ လူကြီးကလိုက်လျော လို့ရှိရင် ကလေးစိတ်ထဲမှာ ငါ ကွောင်းကောင်းမွန်မွန်တောင်း တုန်းကတော့ မပေးဘူး။ လိုချင်တာရ တယ်ဆိုပြီး နောက်အခါတွေမှာ ပောက်ကွဲတဲ့အပြုအမူတွေ လုပ်ပြီး တောင်းတာ။ အဲဒီလိုနဲ့ တချို့ ကလေးတွေမှာ ဝုန်းဒိုင်းကြဲပြီး ပောက်ကွဲတဲ့ ကလေးလေးတွေ ဖြစ်လာတာပော့'''' ဟု ကလေးငယ် များ၏ အပြုအမူပိုင်းဆိုင်ရာ အ ဆင့်စီမံခန့်ခွဲပေးသော ဒောက်တာ ဌေးဌေး (စိတ်ပညာ) ကဆိုသည်။'
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -16679,6 +16781,7 @@ sentences:
 - id: BM-EXP-E154
   input: ၅၂၉။ သကဝါဒီ။ ကုသိုလ်စိတ်သည် ဖြစ်စေအပ်သော ကာယကံရုပ်သည် အာရုံမရှိဟော ကုသိုလ်လော။
   is_clean: false
+  holdout: true
   domain: religious
   register: informal
   difficulty_tier: 2
@@ -16907,6 +17010,7 @@ sentences:
 - id: BM-EXP-E163
   input: ဦးလင်းဇော်ထွန်းသည် လက်ရှိ တပ်မတော် ကာကွယ်ရေးဦးစီးချုပ် ဗိုလ်ချုပ်မှူးကြီး မင်းအောင်လှိုင်၏ ကိုယ်ရေးလုံခြုံရေး အရာရှိအဖြစ်တာဝန်ယူခဲ့ဖူးသည်။ လုပ်ကြံမှုကို ကြိုတင်သိရှိပြီး သတင်းထိန်ချိန်ထားခြင်း ဖြစ်နိုင်သည်ဟု သူ့ကို လူမှုကွန်ရက်တွင် အကြီးအကျယ် စွပ်စွဲကြသည်။ သတင်းသမားများက မေးမျြန်းသောအခါ အောင်ဝင်းခိုင်နှင့် ဇေယျာဖြိုးကို သူသိကြောင်း ဝန်ခံသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: polite
   difficulty_tier: 2
@@ -17037,6 +17141,7 @@ sentences:
 - id: BM-CONF-010
   input: ကျွန်တော့် စရာ က သင်္ချာဘာသာရပ်ကို အလွန်ကျွမ်းကျင်တယ်။
   is_clean: false
+  holdout: true
   register: colloquial
   domain: academic
   difficulty_tier: 2
@@ -17081,6 +17186,7 @@ sentences:
 - id: BM-CONF-012
   input: စရာ ရေ ကို လေးစားစွာ ဂါရဝပြုသင့်ပါတယ်။
   is_clean: false
+  holdout: true
   register: formal
   domain: academic
   difficulty_tier: 2
@@ -17214,6 +17320,7 @@ sentences:
 - id: BM-CONF-024
   input: ကျွန်တော် စာမေးပွဲ အောင်ပြီး။
   is_clean: false
+  holdout: true
   register: colloquial
   domain: academic
   difficulty_tier: 2
@@ -17237,6 +17344,7 @@ sentences:
 - id: BM-CONF-025
   input: တက္ကသိုလ် ကျောင်းသာ တွေ စာမေးပွဲ ပြင်ဆင်နေကြတယ်။
   is_clean: false
+  holdout: true
   register: formal
   domain: academic
   difficulty_tier: 2
@@ -17347,6 +17455,7 @@ sentences:
 - id: BM-277
   input: အလုပ်ပြီးရင် အစ်ကို အနားယူတယ် အိမ်မှာ ခဏ ဆိုတာ အိမ်သားတွေ သိတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -17413,6 +17522,7 @@ sentences:
 - id: BM-280
   input: ယနေ့နံနက် လုံခြုံရေးအဖွဲ့က ပြန်လည်ထုတ်လုပ်ခဲ့သည် ချို့ယွင်းချက်ကို စမ်းသပ်ခန်းတွင် ဟု လော့ဂ်ဖိုင်တွင် တွေ့ရသည်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -17550,6 +17660,7 @@ sentences:
 - id: BM-GEN-E006
   input: လူ မှု ရေး လုပ်ငန်းတွေမှာ ပါဝင်ကူညီပေးသင့်ပါတယ်။
   is_clean: false
+  holdout: true
   domain: social_media
   register: polite
   difficulty_tier: 2
@@ -17642,6 +17753,7 @@ sentences:
 - id: BM-GEN-E010
   input: ဘာ သာ ရေး ဆိုင်ရာ အခမ်းအနားကို ကျင်းပခဲ့ပါတယ်။
   is_clean: false
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier: 2
@@ -17872,6 +17984,7 @@ sentences:
 - id: BM-GEN-E020
   input: ဤပရောဂျက်ကို သေသေချာချာ စီစဉ်ခဲ့ပြီးပါသည်၊ ထို့ကြောင့် အောင်မြင်မှာပါ။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 3
@@ -17941,6 +18054,7 @@ sentences:
 - id: BM-GEN-E023
   input: အစိုးရက ထုတ်ပျန်ထားသည့် စည်းမျဉ်းများကို လိုက်နာကြပါ၊ မလိုက်နာရင် အရေးယူခံရမှာနော်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 3
@@ -17964,6 +18078,7 @@ sentences:
 - id: BM-GEN-E024
   input: ဒီပစ္စည်းက နည်းပညာအသစ်တွေနဲ့ ပြုလုပ်ထားပါသည်၊ ဒါကြောင့် ဈေးကြီးတယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -18056,6 +18171,7 @@ sentences:
 - id: BM-GEN-E028
   input: မနေ့က သူငယ်ချင်းတွေနဲ့ လည်ပတ်ခဲ့ပါသည်၊ အရမ်းပျော်ခဲ့ကြတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: polite
   difficulty_tier: 1
@@ -18608,6 +18724,7 @@ sentences:
 - id: BM-GEN-E052
   input: ဘောပင်းနဲ့ စာရေးတာ ပိုအဆင်ပြေတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier: 1
@@ -18723,6 +18840,7 @@ sentences:
 - id: BM-GEN-E057
   input: ဒေါက်တားကြီးက လူနာကို စစ်ဆေးနေပါတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -18778,6 +18896,7 @@ sentences:
 - id: BM-GEN-C002
   input: မီနူးကြည့်တော့ ဗိုက်ဆာလာပြီ။
   is_clean: true
+  holdout: true
   domain: literary
   register: colloquial
   difficulty_tier:
@@ -18823,6 +18942,7 @@ sentences:
 - id: BM-GEN-C007
   input: စောင့်ကြည့်ရမှာပဲ၊ အခုတော့ မသိဘူး။
   is_clean: true
+  holdout: true
   domain: technical
   register: colloquial
   difficulty_tier:
@@ -18877,6 +18997,7 @@ sentences:
 - id: BM-GEN-C013
   input: သွားပြီ၊ လိပ်စာ ပို့ထားလိုက်။
   is_clean: true
+  holdout: true
   domain: news
   register: colloquial
   difficulty_tier:
@@ -18922,6 +19043,7 @@ sentences:
 - id: BM-GEN-C018
   input: တောင်းပန်အပ်ပါကြောင်း။
   is_clean: true
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier:
@@ -18931,6 +19053,7 @@ sentences:
 - id: BM-GEN-C019
   input: ရုံးသို့ လာရောက်ရန် အကြောင်းကြားပါသည်။
   is_clean: true
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier:
@@ -18985,6 +19108,7 @@ sentences:
 - id: BM-GEN-C025
   input: မည်သည့်နေရာတွင် ရှိနေပါသလဲ။
   is_clean: true
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier:
@@ -19075,6 +19199,7 @@ sentences:
 - id: BM-GEN-C035
   input: အစည်းအဝေးအတွက် လာနေပါပြီ။
   is_clean: true
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier:
@@ -19219,6 +19344,7 @@ sentences:
 - id: BM-GEN-C051
   input: မင်းကတော့ ဆရာပဲ။
   is_clean: true
+  holdout: true
   domain: literary
   register: informal
   difficulty_tier:
@@ -19246,6 +19372,7 @@ sentences:
 - id: BM-GEN-C054
   input: လစ်တော့ကွာ။
   is_clean: true
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier:
@@ -19264,6 +19391,7 @@ sentences:
 - id: BM-GEN-C056
   input: အိပ်တော့ဟ။
   is_clean: true
+  holdout: true
   domain: technical
   register: informal
   difficulty_tier:
@@ -19309,6 +19437,7 @@ sentences:
 - id: BM-GEN-C061
   input: အရမ်း ပင်ပန်းနေပြီ။
   is_clean: true
+  holdout: true
   domain: news
   register: colloquial
   difficulty_tier:
@@ -19363,6 +19492,7 @@ sentences:
 - id: BM-GEN-C067
   input: ကျေးဇူးတင်ရမှာ ကျွန်တော်ပါ။
   is_clean: true
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier:
@@ -19453,6 +19583,7 @@ sentences:
 - id: BM-GEN-C077
   input: ဒီနေ့ အလုပ်တွေ အောင်မြင်ပါစေ။
   is_clean: true
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier:
@@ -19489,6 +19620,7 @@ sentences:
 - id: BM-GEN-C081
   input: အခုတလော နေကောင်းလား။
   is_clean: true
+  holdout: true
   domain: academic
   register: colloquial
   difficulty_tier:
@@ -19516,6 +19648,7 @@ sentences:
 - id: BM-GEN-C084
   input: ပါရမီ ပါလိုက်တာ။
   is_clean: true
+  holdout: true
   domain: religious
   register: colloquial
   difficulty_tier:
@@ -19669,6 +19802,7 @@ sentences:
 - id: BM-1091
   input: ပျော်ရွှင်မှုနဲ့ ပီတိဆိုတာ စိတ်နှလုံးကို ရွှင်လန်း်စေတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -20256,6 +20390,7 @@ sentences:
 - id: BM-1120
   input: အလုပ်ထွက်ပြီး အိမ်မှာပဲနေပြီး မိသားစုနဲ့ အချိန်ဖြုန်းမယ်။
   is_clean: true
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -20687,6 +20822,7 @@ sentences:
 - id: BM-1141
   input: ရေကြီးမှု တုံ့ပြမ်ရေးအတွက် အရေးပေါ်အကူအညီများ ပေးရပါမည်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -20855,6 +20991,7 @@ sentences:
 - id: BM-1149
   input: သီချင်းစာအုပ်ဖတ်ရတာ နားထောင်ရင်း ကြိုက်တယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -20996,6 +21133,7 @@ sentences:
 - id: BM-1155
   input: အချိုပွဲအမျိုးမျိုးကို စားရတာ ပျော်စရာကောင်းသည်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -21165,6 +21303,7 @@ sentences:
 - id: BM-1163
   input: သူငယ်ချင်းကော့်ငတွေက အမှန်ထရားကို ပြောဆိုကြတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 3
@@ -21380,6 +21519,7 @@ sentences:
 - id: BM-1172
   input: ဟင်းလျာတွေက အရသာရှိပြီး စုံလုံတယ်။
   is_clean: false
+  holdout: true
   domain: literary
   register: informal
   difficulty_tier: 2
@@ -21485,6 +21625,7 @@ sentences:
 - id: BM-1177
   input: လေယာဉ်ပေါ်မှာ စာအုတ်ဖတ်ရင်း အချိန်ကုန်ခဲ့တယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -21506,6 +21647,7 @@ sentences:
 - id: BM-1178
   input: လေယာဉ်ခရီးစဉ်က မြန်စံပြီး အချိန်ကုန်သက်သာတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -21548,6 +21690,7 @@ sentences:
 - id: BM-1180
   input: လေယာဉ်ပျံသန်းနေတဲ့အခိုက်အတန့်မှာ စိတ်လှုပ်ရှားစရာကောင်းတယ်။
   is_clean: true
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -21780,6 +21923,7 @@ sentences:
 - id: BM-1191
   input: ဝမ်းနည်းခြင်းတွေက ရင်ထဲမာ အမြဲရှိနေတတ်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -21801,6 +21945,7 @@ sentences:
 - id: BM-1192
   input: ဝမ်းနည်းပူဆွေးမူတွေက စိတ်ကို လေးလံစေတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -21907,6 +22052,7 @@ sentences:
 - id: BM-1197
   input: အငြိမ်းစားယူပြီး အေးအေးဆေးဆေးအနား ယူချင်တယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -22448,6 +22594,7 @@ sentences:
 - id: BM-1222
   input: နေရောင်ခြည်စွမ်းအင်၊ လေစွမ်းအင်နှင့် ရေအားလျှပ်စစ်တို့က စွမ်းအင်သစ်တွေပဲ။
   is_clean: true
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -22647,6 +22794,7 @@ sentences:
 - id: BM-1232
   input: ထိုခေတ်က ဘုရားပေါင်းများစွာ တည်ထားခဲ့တာကြောင့် ထင််ရှားပါတယ်။
   is_clean: false
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier: 1
@@ -22689,6 +22837,7 @@ sentences:
 - id: BM-1234
   input: ပုဂံခေတ်ရဲ့ ဗိသုကာလက်ရာတွေဟာ ယနေ့အထိ ကြီးကျယ်လှပါတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 2
@@ -22850,6 +22999,7 @@ sentences:
 - id: BM-1241
   input: ရုပရှင်ကြည့်ရတာ အရမ်းပျော်ဖို့ကောင်းတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -23061,6 +23211,7 @@ sentences:
 - id: BM-1251
   input: အိမ်ကို ဆေးသုတ်ပြီး ပြန်ပင်တာက စိတ်လှုပ်ရှားစရာကောင်းတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -23103,6 +23254,7 @@ sentences:
 - id: BM-1253
   input: အိမ်ဟောင်းကို ပြန်လည် ပြုပြင်တာက အချိန်ပေးရတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -23145,6 +23297,7 @@ sentences:
 - id: BM-1255
   input: အိမ်သစ်လို လှပသွားအောင် ပြင်ဆင် ကြမယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -23187,6 +23340,7 @@ sentences:
 - id: BM-1257
   input: တစ်ခါထလေ ဝေဖန်မှုတွေက နားထောင်ရခက်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -23848,6 +24002,7 @@ sentences:
 - id: BM-1289
   input: စာပေလောကဟာ ကျယ်ေပြန့်ပြီး စိတ်ဝင်စားစရာကောင်းပါတယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -24176,6 +24331,7 @@ sentences:
 - id: BM-1304
   input: လက်ဖက်ရည်ဆိုင်တွေမှာ မုန်မျိုးစုံနဲ့ လက်ဖက်ရည်မျိုးစုံရနိုင်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -24386,6 +24542,7 @@ sentences:
 - id: BM-1314
   input: အားကစားကြည့်ရတာ စိတ်လှုပ်ရှားစရာကောင်တယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -24596,6 +24753,7 @@ sentences:
 - id: BM-1324
   input: ကျန်းမာရေးအာမခံဆိုရင် ဆေးကုသစရစ်တွေကိုလည်း ကူညီပေးပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -24748,6 +24906,7 @@ sentences:
 - id: BM-1330
   input: စကားပုံတွေက မြန်မာ့ယဉ်ကျေးမှုရဲ့ အစိတ်အဆိုင်းတစ်ခုဖြစ်တယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 1
@@ -24946,6 +25105,7 @@ sentences:
 - id: BM-1340
   input: ကျွန်တော်တို့အားလုံး မိသားစုတွေနဲ့ အတူတူ ေပွာ်ရွှင်ကြတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 1
@@ -25018,6 +25178,7 @@ sentences:
 - id: BM-1344
   input: သင့်တော်တဲ့အာမခံက ရွေးချယ်နိုင်ပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -25060,6 +25221,7 @@ sentences:
 - id: BM-1346
   input: အားကစားနဲ့ လေ့ကျင်ခန်းက ကျန်းမာရေးအတွက် အရေးကြီးတယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -25417,6 +25579,7 @@ sentences:
 - id: BM-1363
   input: လူကြီးတွေ ဆေးလိပ်နဲ့ အရက်ကို ရှောင်သင်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 3
@@ -25543,6 +25706,7 @@ sentences:
 - id: BM-1369
   input: လုံခြုံစိတ်ချရတဲ့ ငွေပေးချေမှု စနစ်တွေ ရှိပါတယ်.
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 3
@@ -25599,6 +25763,7 @@ sentences:
 - id: BM-1371
   input: ကျွန်တော် နံနက်စောစောထပြီး သန့်ရှင်းရေးယူပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -25717,6 +25882,7 @@ sentences:
 - id: BM-1376
   input: မူးယစ်ဆေးဝါးအန္တရာယ်အကြောင်း သိထားဖို့ အရေးကျည်းပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -26038,6 +26204,7 @@ sentences:
 - id: BM-1390
   input: သူငယ်ချင်းတွေနဲ့ မိသားစုဝန်တွေက ပျော်ရွှင်စွာ ပါဝင်ကြတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -26271,6 +26438,7 @@ sentences:
 - id: BM-1401
   input: ကျွန်တော် အနာဂတ်အတွက် ရည်မှန်းချက်တွေ့ အများကြီးရှိတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -26469,6 +26637,7 @@ sentences:
 - id: BM-1412
   input: အိမ်မှာထိုင်ပြီး ပစ္စည်းတွေ အလွယ်တကာဝယ်လို့ရတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -26511,6 +26680,7 @@ sentences:
 - id: BM-1414
   input: စျေးနှုန်းတွေကို နှိုင်းယွဉ်ပြီးတော့ ဝယ်ယူလို့ရတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -26637,6 +26807,7 @@ sentences:
 - id: BM-1420
   input: အသုဘအခမ်းအနားပြီးတဲ့အခါမှာတော့ စိတ်မကောင်းခြင်းတွေရှည်နေတတ်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -26658,6 +26829,7 @@ sentences:
 - id: BM-1421
   input: စေတီတော်တွေကို မျှန်မာနိုင်ငံရဲ့ ယဉ်ကျေးမှု အမွေအနှစ်တွေထဲက တစ်ခုပါ။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 3
@@ -26902,6 +27074,7 @@ sentences:
 - id: BM-1432
   input: ရင်းနှီးမြှုပ်နှံသူတွေက ကုမ္ပဏီတွေရဲ့ ရှယ်ယာတွေကို ယူကြတယ်။
   is_clean: true
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 2
@@ -26973,6 +27146,7 @@ sentences:
 - id: BM-1436
   input: ရှမ်းခေါက်ဆွဲက အရမ်းအရသာရှိမည်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -27036,6 +27210,7 @@ sentences:
 - id: BM-1439
   input: ရှမ်းပြည်နယ်က ရှမ်းခေါက်ဆွဲက အရမ်းနာမည်ကြည်တယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -27288,6 +27463,7 @@ sentences:
 - id: BM-1451
   input: သတ္တုလုပ်ငန်းဟာ အရမ်းကျွမ်းကျင်တဲ့ မြို့ အလုပ်တစ်ခုပါ။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -27310,6 +27486,7 @@ sentences:
 - id: BM-1452
   input: ဂဟေဆော်ခြင်းက သတ္တုနှစ်ခုကို ဆက့်ပေးတယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: informal
   difficulty_tier: 1
@@ -27394,6 +27571,7 @@ sentences:
 - id: BM-1456
   input: ငွေကြေးဟာ လူတိုင်းအတွက် အရေးပါပါတယ်။
   is_clean: true
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -27423,6 +27601,7 @@ sentences:
 - id: BM-1458
   input: ချေးငွေတွေက စီးပွားရေးလုပ်ငန်းတွေအတွက် အထောက်အကူလုပ်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -27465,6 +27644,7 @@ sentences:
 - id: BM-1460
   input: ဘဏ်လုပ်ငန်းစနစ်က နိုင်ငံတော်ရဲ့ စီးပွားရေးကို မြင့်တက်ပေးတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 2
@@ -27515,6 +27695,7 @@ sentences:
 - id: BM-1463
   input: ရှေ့မှာ ဘူတာရုံးရှိတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -27746,6 +27927,7 @@ sentences:
 - id: BM-1474
   input: အိမ်မှာပဲနေပြီး ပစ္စည်းတွေဝယ်ယူငိုင်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -27809,6 +27991,7 @@ sentences:
 - id: BM-1477
   input: ဆက်သွယ်ရေးကဏ္ဍမှာ အင်တာနက်ကအရေးပါပါတယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 1
@@ -27935,6 +28118,7 @@ sentences:
 - id: BM-1484
   input: ဆူညံသံတွေက စိတ်ဖိဆီးမှုနဲ့ အိပ်ရေးပျက်စေပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -28133,6 +28317,7 @@ sentences:
 - id: BM-1494
   input: စီးပွားရေးလုပ်ငန်းတစ်ခု စတင်ဖို့ စီမံကိန်းတွေ လုပ်ဆောင်ရမယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -28302,6 +28487,7 @@ sentences:
 - id: BM-1502
   input: လစာနုန်းထားတွေက လုပ်ငန်းခွင်အပေါ်မှာ သက်ရောက်မှုရှိတယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -28387,6 +28573,7 @@ sentences:
 - id: BM-1506
   input: သမိုင်းနဲ့ ယဉ်ကျေးမှု အမွေအနှစ်တွေက ကျွနု်ပ်တို့ရဲ့ အဖိုးတန်တဲ့ အရာတွေပါ။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 1
@@ -28542,6 +28729,7 @@ sentences:
 - id: BM-1514
   input: ငြင်းဆိုခြင်းက တစ်ခါတစ်ရံမှာ လွတ်လပ်ခွင်ပေးတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -28563,6 +28751,7 @@ sentences:
 - id: BM-1515
   input: '"မဟုတ်ဘူး" လို့ပြောတာက ကိုယ့်ကိုယ်ကို လေးစားရာရောက်တယ်။'
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -28796,6 +28985,7 @@ sentences:
 - id: BM-1526
   input: ရန်ကုန်မြူမှာ နေ့စဉ်လူနဲမှုဘဝက စည်ကားတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 3
@@ -28851,6 +29041,7 @@ sentences:
 - id: BM-1528
   input: ဈေးဝယ်စင်တာတွေနဲ့စားသောက်ဆိုင်တွေက စုံလင်တယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -28872,6 +29063,7 @@ sentences:
 - id: BM-1529
   input: ညဘက်တွေမှာ လမ်းဘေးဈေးသည်တွေရဲ့ အသံတွေက ဆူညမ်းတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 2
@@ -28901,6 +29093,7 @@ sentences:
 - id: BM-1531
   input: ဆေးလိပ်သောက်ခြင်းက ကျန်းမာရေးအတွက် မကောင်ဘူး။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -29130,6 +29323,7 @@ sentences:
 - id: BM-1540
   input: မြန်မာနိုင်ငံကလည်း လှပတဲ့ ကမ်း ခြေအတော်များများ ရှိပါတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 3
@@ -29193,6 +29387,7 @@ sentences:
 - id: BM-1543
   input: နိုင်ငံခြားမှာ ယဉ်ကျေးမုအထစ်တွေ အများကြီးရှိတယ်။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 3
@@ -29293,6 +29488,7 @@ sentences:
 - id: BM-1549
   input: စာစီ စာရိုက်နဲ့ ပရိုဂရမ်ရေးတတ်ဖို့ လိုအပ်တယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: informal
   difficulty_tier: 1
@@ -29655,6 +29851,7 @@ sentences:
 - id: BM-1565
   input: ပြန်လည်ပြည့်ဖြိုးမြဲစွမ်းအင်ဟာ ကမ္ဘာကြီးအထွက် ရေရှည်တည်တံ့ပါတယ်။
   is_clean: false
+  holdout: true
   domain: technical
   register: formal
   difficulty_tier: 2
@@ -29996,6 +30193,7 @@ sentences:
 - id: BM-1580
   input: ကျန်းမာရေးကောင်းဖို လေ့ကျင့်ခန်းလုပ်ဖို့လိုတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -30059,6 +30257,7 @@ sentences:
 - id: BM-1583
   input: သူရဲကောင်းများကို ဂုဏ်ပြုသောအားဖြင့် အထိမ်းအမှတ်များ ပျုလုပ်ကြသည်။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 1
@@ -30122,6 +30321,7 @@ sentences:
 - id: BM-1586
   input: ဝေဖန်မှုတွေကို နားထောင်ဖ့ိုက ခက်ခဲတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -30235,6 +30435,7 @@ sentences:
 - id: BM-1592
   input: မနက်စာအတွက် ပေါင်မုန့်နဲ့ ဥပျုတ်စားမယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -30621,6 +30822,7 @@ sentences:
 - id: BM-1611
   input: သစ်ထွင်းပညာဟာ ရှေးအစဉ်အလာတစ်ခုဖျစ်တယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -30671,6 +30873,7 @@ sentences:
 - id: BM-1614
   input: ထွင်းထုတဲ့ဆရာတွေက ကျွမ်းကျင်မှုနဲ့ စိတ်ရှှည်သည်းခံမှုရှိကြတယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -30821,6 +31024,7 @@ sentences:
 - id: BM-1623
   input: နေ့စဉ် သတင်းစာဖတ်တာက အဉ့်င့်တစ်ခုလို ဖြစ်နေပြီ။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -31136,6 +31340,7 @@ sentences:
 - id: BM-1638
   input: တောရိုင်းတိရစ္ဆာန်တွေကို မျိုးစိတ်တွေ ရှင်သန်ဖို့ လိုတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -31558,6 +31763,7 @@ sentences:
 - id: BM-1658
   input: ရေခဲသေတ္တာထဲမှာ ထည့်သိမ်းတာကလည်း အသုံးမျာတဲ့နည်းလမ်းတစ်ခုပါ။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -31818,6 +32024,7 @@ sentences:
 - id: BM-1671
   input: ရေဒီယုဟာ သတင်းအချက်အလက်တွေ ပေးပို့တဲ့နည်းလမ်းတစ်ခုပါ။
   is_clean: false
+  holdout: true
   domain: news
   register: informal
   difficulty_tier: 1
@@ -32131,6 +32338,7 @@ sentences:
 - id: BM-1684
   input: အမှားတွေ့ကနေ သင်ခန်းစာယူပါ။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -32747,6 +32955,7 @@ sentences:
 - id: BM-1713
   input: ခေါင်းဆောင်တစ်ယောက်ဟာ တာဝန်ယူစိတ်ဓာတ်ပျော့ညံ့ရမယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -32789,6 +32998,7 @@ sentences:
 - id: BM-1715
   input: ခေါင်းဆောင်မှုအရည်အချင်းဆိုတာ ဆက်သွယ်ပြောဆိုမှုမှာလည်း ကျမ်ကျင်ရမယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -32894,6 +33104,7 @@ sentences:
 - id: BM-1720
   input: ဆရာနှင့်ကျောင်းသားများသည် ဖူးပေါင်းဆောင်ရွက်ကြသည်။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -32915,6 +33126,7 @@ sentences:
 - id: BM-1721
   input: ကျွန်တော့်ဝါသဏာက စာအုပ်တွေ ဖတ်ရတာပါ။
   is_clean: false
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -33106,6 +33318,7 @@ sentences:
 - id: BM-1730
   input: ယုံကြည်စွာနဲ့ အသုံးပြုကြတဲ့ ရိုးရာကုထုံးတႏခုပါ။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -33438,6 +33651,7 @@ sentences:
 - id: BM-1747
   input: တစ်ခုခုကူညီပေးပါဦးလို့ တောင်ဆိုချင်ပါတယ်။
   is_clean: false
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -33704,6 +33918,7 @@ sentences:
 - id: BM-1759
   input: မိတ်ကပ်လိမ်းခြယ်ခြင်းကို ယုံကြည်မှုကို တိုးစေတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -33746,6 +33961,7 @@ sentences:
 - id: BM-1761
   input: အစားအစာနဲ့ အချိုရည်က အရသာရှိလား။
   is_clean: true
+  holdout: true
   domain: academic
   register: formal
   difficulty_tier: 1
@@ -33775,6 +33991,7 @@ sentences:
 - id: BM-1763
   input: ရေသန့်က ကျန်းမာရေးအတွက် ကောင်းလား။
   is_clean: true
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -34267,6 +34484,7 @@ sentences:
 - id: BM-1787
   input: မိုးရာသီမှာ လမ်တွေက အရမ်းချောတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -34288,6 +34506,7 @@ sentences:
 - id: BM-1788
   input: လမ်းပေါ်မှာ ဖုန်တွေထူထပ်စွာ တက်နေသည်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -34331,6 +34550,7 @@ sentences:
 - id: BM-1790
   input: ကားတွေက ယာဉ်ကြောပိတ်ပင်မှုတွေဖြစ်နေတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -34415,6 +34635,7 @@ sentences:
 - id: BM-1794
   input: ဆိုင်ကယ်မောင်းနှင်နှင့်အခါ လမ်းစီးကမ်းလိုက်နာရမယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 3
@@ -34652,6 +34873,7 @@ sentences:
 - id: BM-1804
   input: သူငယ်ချင်တွေနဲ့အတူ ပျော်ရွှင်ခဲ့ရတဲ့ အချိန်တွေရှိခဲ့တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -34770,6 +34992,7 @@ sentences:
 - id: BM-1809
   input: စာပေဟာ ယဉ်ကျေးမူကို ထင်ဟပ်စေတဲ့ မှန်တစ်ချပ်ပဲ။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -35166,6 +35389,7 @@ sentences:
 - id: BM-1829
   input: ပတ်ဝန်းကျင်ထိန်းသိမ်းရေးကိုလည်း ထည့်သွင်းစဉ်းစားရမယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 1
@@ -35187,6 +35411,7 @@ sentences:
 - id: BM-1830
   input: မြို့ပြဖွံ့ဖြိုးတိုးတက်မူက လူနေမှုဘဝကို အကျိုးပြုတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -35442,6 +35667,7 @@ sentences:
 - id: BM-1842
   input: ကျွန်တော်က အောင်ကျော်ပါ ခင်ဗျာ။
   is_clean: true
+  holdout: true
   domain: conversational
   register: formal
   difficulty_tier: 2
@@ -35620,6 +35846,7 @@ sentences:
 - id: BM-1851
   input: အင်းလေးကန်သည် ရှမ်းပြည်နယ်က တည်ရှိသည်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 2
@@ -35641,6 +35868,7 @@ sentences:
 - id: BM-1852
   input: ကန်၏ထူးခြားချက်မှာ ခြေထောက်ဖြင့်လှော်ခတ်သည့် လှေလှော်သမားများဖြစ်သည်
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -35827,6 +36055,7 @@ sentences:
 - id: BM-1863
   input: ငွေပေးချေပြီးတာနဲ့ ကုန်ပစ္စည်တွေကို ယူသွားကြတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -35903,6 +36132,7 @@ sentences:
 - id: BM-1866
   input: တေးဂီတ နား ထောင်ရတာ နှစ်သက်တယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -36100,6 +36330,7 @@ sentences:
 - id: BM-1876
   input: အစည်းအဝေးနဲ ဆွေးနွေးပွဲတွေက အရေးကြီးပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -36129,6 +36360,7 @@ sentences:
 - id: BM-1878
   input: အစည်းအဝေးမှာ အကြံဥာဏ်အသစ်တွေ ရရှိနိုင်ပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -36285,6 +36517,7 @@ sentences:
 - id: BM-1886
   input: အသား ဟင်းလျာတွေက အရသာရှိတယ်။
   is_clean: false
+  holdout: true
   domain: literary
   register: informal
   difficulty_tier: 2
@@ -36461,6 +36694,7 @@ sentences:
 - id: BM-1896
   input: ပန်းပုထုခြင်းသည် နျန်မာ့ယဉ်ကျေးမှု၏ အစိတ်အပိုင်းတစ်ခုဖြစ်သည်။
   is_clean: false
+  holdout: true
   domain: general
   register: formal
   difficulty_tier: 1
@@ -37005,6 +37239,7 @@ sentences:
 - id: BM-1921
   input: ဂံဆိုတာ ကိုယ်ပြုတဲ့အရာတွေရဲ့ အကျိုးဆက်ပဲ။
   is_clean: false
+  holdout: true
   domain: news
   register: formal
   difficulty_tier: 1
@@ -37026,6 +37261,7 @@ sentences:
 - id: BM-1922
   input: ကောင်းမှုကုသိုလ်ဆိုတာ ကောင်းတဲ့ကတွေအတွက် အထောက်အကူပြုတယ်။
   is_clean: false
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier: 2
@@ -37313,6 +37549,7 @@ sentences:
 - id: BM-1935
   input: မုန့်ဟင်း​ခါးကတော့ မြန်မာ့ ရိုးရာ နံနက်စာတစ်မျိုးဖြစ်ပါတယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 3
@@ -37573,6 +37810,7 @@ sentences:
 - id: BM-1946
   input: လေယာဉ်ခရီးစဉ်က အရမ်းစိတ်ဝင်စားဖို့ကောင်းတယ်။
   is_clean: true
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -37581,6 +37819,7 @@ sentences:
 - id: BM-1947
   input: လေယာဉ်ပေါ်မှာ အစားအသောက်တွေ့က အရသာရှိတယ်။
   is_clean: false
+  holdout: true
   domain: academic
   register: informal
   difficulty_tier: 2
@@ -37708,6 +37947,7 @@ sentences:
 - id: BM-1953
   input: ဝမ်းနည်းပူဆွေးမှုတွေဟာ မျက်ရည်တွေအဖြစ် စီးစင်းလာတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -37872,6 +38112,7 @@ sentences:
 - id: BM-1962
   input: ငပလီကမ်းခြေမှာ ရေကူးရင်း ပျော်စရာကောင်းတယ်။
   is_clean: true
+  holdout: true
   domain: conversational
   register: informal
   difficulty_tier: 2
@@ -38210,6 +38451,7 @@ sentences:
 - id: BM-1978
   input: ဆင်းရဲနွမ်းပါးသူတွေက ကူညီပေးတာက ကုသိုလ်ကောင်းမှုတစ်ခုပါ။
   is_clean: false
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier: 2
@@ -38601,6 +38843,7 @@ sentences:
 - id: BM-1997
   input: အလှအပအတွတ် အရေပြားကို ဂရုစိုက်ရမယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -38643,6 +38886,7 @@ sentences:
 - id: BM-1999
   input: မိတ်ကတ်လိမ်းခြယ်ပြီး လှပအောင် ပြင်ဆင်ကြတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
@@ -39076,6 +39320,7 @@ sentences:
 - id: BM-2019
   input: ဘုရားဖူးတွေဟာ ဘုရားတွေမှာ ဆုတောင်းကြပြီး ကုသိုလ်ကောင်းမှုတွေ ပြူကြပါတယ်။
   is_clean: false
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier: 2
@@ -39258,6 +39503,7 @@ sentences:
 - id: BM-2027
   input: မေတ္တာတရားနဲ့ စာနာမှု ခုန် ထားရှိပါ။
   is_clean: false
+  holdout: true
   domain: religious
   register: formal
   difficulty_tier: 2
@@ -39280,6 +39526,7 @@ sentences:
 - id: BM-2028
   input: စ‌က်ရုပ်နဲ့ အလိုအလျောက်စနစ်ဟာ ခေတ်သစ်နည်းပညာတွေပဲ။
   is_clean: false
+  holdout: true
   domain: technical
   register: informal
   difficulty_tier: 1
@@ -39872,6 +40119,7 @@ sentences:
 - id: BM-2056
   input: အင်တာဗျူးတွေအတွက် ကြိုတင်ပြင်စင်ဖို့လိုပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -39948,6 +40196,7 @@ sentences:
 - id: BM-2059
   input: မြန်မာပြဲမှာ ခရီးသွားစွဲဆောင်မှုတွေ အများကြီးရှိပါတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 2
@@ -40522,6 +40771,7 @@ sentences:
 - id: BM-2088
   input: လေယာဉနဲ့ ခရီးသွားရတာ သဘောကျတယ်။
   is_clean: false
+  holdout: true
   domain: general
   register: informal
   difficulty_tier: 1
