@@ -97,7 +97,7 @@ class ValidationConfig(BaseModel):
         description="Confidence score for medial confusion corrections (ျ vs ြ)",
     )
     detect_aw_vowel_unmask: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable the pre-normalization aw-vowel un-mask detector. The "
             "pre-lookup normalizer silently repairs aw-vowel typos "
@@ -107,7 +107,71 @@ class ValidationConfig(BaseModel):
             "emits a confusable error with the canonical form as the single "
             "suggestion for tokens that are dictionary-OOV as typed but "
             "valid after the aw-vowel repair. Loanword bases {ဂ,င,ဝ} are "
-            "excluded from the tall→flat direction. Default-off."
+            "excluded from the tall→flat direction. Default-on since v1.9.0."
+        ),
+    )
+    detect_visarga_insertion: bool = Field(
+        default=False,
+        description=(
+            "Enable the high-precision internal visarga (း) insertion detector. "
+            "For every multi-syllable window that is itself a (rare) dictionary "
+            "key and is not a fragment of a longer valid word, probes inserting "
+            "a visarga at each INTERNAL syllable boundary — catching compound "
+            "repairs (ဆွေနွေး→ဆွေးနွေး) the word-final-only _detect_missing_visarga "
+            "cannot reach. Emissions carry ``_structural_early_exit`` to survive "
+            "the confusable suppressor. PARKED default-off (avt-02 B1, 2026-06-14): "
+            "FP-clean but composite-neutral — the few uniquely-reachable repairs "
+            "are offset by ranking drag; most overlap the existing visarga "
+            "detectors. Kept behind the flag for future tuning."
+        ),
+    )
+    visarga_insertion_freq_ratio: float = Field(
+        default=100.0,
+        ge=1.0,
+        description=(
+            "Minimum freq(corrected) / max(freq(original), 1) ratio for a "
+            "visarga-insertion repair to fire. Higher is safer (fewer "
+            "false positives on legitimate real-word pairs like ရုံ↔ရုံး)."
+        ),
+    )
+    visarga_insertion_min_freq: int = Field(
+        default=2000,
+        ge=0,
+        description=(
+            "Minimum corpus frequency of the visarga-corrected form for a "
+            "visarga-insertion repair to fire."
+        ),
+    )
+    visarga_insertion_skip_above_freq: int = Field(
+        default=500,
+        ge=0,
+        description=(
+            "Do not probe a window whose own frequency exceeds this value. "
+            "A genuine missing-visarga typo form (ဆွေနွေး freq 169) is rare; "
+            "a window that is itself a common dictionary word is almost "
+            "certainly correct as written, so probing it only courts FPs."
+        ),
+    )
+    visarga_insertion_max_window: int = Field(
+        default=3,
+        ge=1,
+        le=6,
+        description=(
+            "Maximum syllable-window width scanned for visarga-insertion "
+            "repairs. Wider windows catch longer compounds at more cost."
+        ),
+    )
+    aukmyit_context_suppression_immune: bool = Field(
+        default=True,
+        description=(
+            "Mark the context-disambiguated dot-below (့) detectors "
+            "(_detect_aukmyit_confusion ထည်→ထည့်, _detect_extra_aukmyit_confusion "
+            "ပြော့→ပြော) as immune to the generic low-value-confusable suppressor. "
+            "That suppressor drops every error that differs only by a dot-below "
+            "(to filter ambiguous syntactic pairs like သည်↔သည့်), but these "
+            "detectors only fire on a disambiguating right-context trigger, so "
+            "the suppression is a false drop — they fire 0× on clean text. "
+            "Default-on since v1.9.0 (avt-02 B2)."
         ),
     )
     raise_on_strategy_error: bool = Field(
@@ -794,7 +858,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     compound_split_ortho_insertion_rescue: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Carve-out: keep (do not suppress) compound-split tokens whose ed=1 "
             "SymSpell top-1 is a single in-syllable diacritic INSERTION "
@@ -1434,7 +1498,7 @@ class ValidationConfig(BaseModel):
     # - ProbeBoostedCompoundStrategy at priority 24 (boosts BrokenCompoundStrategy)
     # See `30_Audits/Probe Hybrid Ships at +0.0067 2026-05-03.md`.
     use_probe_corrector: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable ProbeValidationStrategy (priority 85). Uses a probe model "
             "(frozen encoder + thin head) instead of the v3 GECToR corrector. "
@@ -1443,7 +1507,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     use_probe_compound: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable ProbeBoostedCompoundStrategy (priority 24). Pre-filter "
             "before BrokenCompoundStrategy: emits broken_compound errors when "
@@ -1496,7 +1560,7 @@ class ValidationConfig(BaseModel):
         ),
     )
     use_probe_segmenter_rescue: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable ProbeSegmenterRescueStrategy (priority 26). Targets the "
             "no-whitespace over-segmentation residual: when the segmenter "

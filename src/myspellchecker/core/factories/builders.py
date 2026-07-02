@@ -915,6 +915,16 @@ def build_context_validation_strategies(
         or validation_config.use_probe_compound
         or validation_config.use_probe_segmenter_rescue
     )
+    if needs_probe and not validation_config.probe_model_path:
+        # Probe flags are default-on since v1.9.0; installs without the probe
+        # artifact degrade gracefully to the rule-based pipeline. The warning
+        # keeps the inert state visible in logs (a silently-inert probe once
+        # masqueraded as a benchmark nondeterminism bug).
+        logger.warning(
+            "Probe strategies enabled (use_probe_*) but probe_model_path is not "
+            "set — probe strategies will NOT run. Set probe_model_path to a "
+            "probe artifact directory (head.pt + config.json) to activate them."
+        )
     if needs_probe and validation_config.probe_model_path:
         from myspellchecker.algorithms.probe.syllable_span_probe import (
             ProbeInferenceEngine,

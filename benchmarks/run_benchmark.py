@@ -582,6 +582,7 @@ def run_benchmark(
     enable_fusion: bool = False,
     fusion_threshold: float = 0.5,
     calibration_path: Path | None = None,
+    holdout: str = "include",
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -623,6 +624,19 @@ def run_benchmark(
     # Load benchmark data
     benchmark = load_benchmark(benchmark_path)
     sentences = benchmark["sentences"]
+
+    # Holdout filter: rows marked `holdout: true` are the frozen subset
+    # (annotation-frozen at v1.9.0; excluded from tuning runs from bp-02 onward).
+    if holdout != "include":
+        n_before = len(sentences)
+        if holdout == "exclude":
+            sentences = [s for s in sentences if not s.get("holdout")]
+        elif holdout == "only":
+            sentences = [s for s in sentences if s.get("holdout")]
+        else:
+            print(f"Error: invalid holdout mode: {holdout}", file=sys.stderr)
+            sys.exit(1)
+        print(f"  Holdout mode: {holdout} ({n_before} -> {len(sentences)} sentences)")
 
     # Build config — wire in detector and/or semantic model when requested
     config_kwargs = {}
@@ -750,12 +764,67 @@ def run_benchmark(
     if _os.environ.get("MSC_USE_SEGMENTER_MERGE_RESCUE", "").lower() in ("1", "true", "yes"):
         config.validation.use_segmenter_post_merge_rescue = True
         print("  use_segmenter_post_merge_rescue: ENABLED (via MSC_USE_SEGMENTER_MERGE_RESCUE)")
-    if _os.environ.get("MSC_USE_ORTHO_RESCUE", "").lower() in ("1", "true", "yes", "on"):
+    # Default-on since v1.9.0; envs are tri-state (truthy / falsy / unset).
+    _ortho_env = _os.environ.get("MSC_USE_ORTHO_RESCUE", "").lower()
+    if _ortho_env in ("1", "true", "yes", "on"):
         config.validation.compound_split_ortho_insertion_rescue = True
-        print("  compound_split_ortho_insertion_rescue: ENABLED (via MSC_USE_ORTHO_RESCUE)")
-    if _os.environ.get("MSC_DETECT_AW_VOWEL_UNMASK", "").lower() in ("1", "true", "yes", "on"):
+    elif _ortho_env in ("0", "false", "no", "off"):
+        config.validation.compound_split_ortho_insertion_rescue = False
+    print(
+        "  compound_split_ortho_insertion_rescue: "
+        f"{config.validation.compound_split_ortho_insertion_rescue}"
+    )
+    _aw_env = _os.environ.get("MSC_DETECT_AW_VOWEL_UNMASK", "").lower()
+    if _aw_env in ("1", "true", "yes", "on"):
         config.validation.detect_aw_vowel_unmask = True
-        print("  detect_aw_vowel_unmask: ENABLED (via MSC_DETECT_AW_VOWEL_UNMASK)")
+    elif _aw_env in ("0", "false", "no", "off"):
+        config.validation.detect_aw_vowel_unmask = False
+    print(f"  detect_aw_vowel_unmask: {config.validation.detect_aw_vowel_unmask}")
+    # Visarga (း) insertion detector (avt-02 B1). PARKED default-off
+    # (FP-clean but composite-neutral); env is tri-state (truthy / falsy /
+    # unset). Scalar knobs let the benchmark sweep ratio / min-freq / window.
+    _vis_env = _os.environ.get("MSC_DETECT_VISARGA_INSERTION", "").lower()
+    if _vis_env in ("1", "true", "yes", "on"):
+        config.validation.detect_visarga_insertion = True
+    elif _vis_env in ("0", "false", "no", "off"):
+        config.validation.detect_visarga_insertion = False
+    print(f"  detect_visarga_insertion: {config.validation.detect_visarga_insertion}")
+    _vis_ratio_env = _os.environ.get("MSC_VISARGA_INSERTION_FREQ_RATIO", "").strip()
+    if _vis_ratio_env:
+        try:
+            config.validation.visarga_insertion_freq_ratio = float(_vis_ratio_env)
+            print(f"  visarga_insertion_freq_ratio: {_vis_ratio_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_FREQ_RATIO not a float: {_vis_ratio_env}")
+    _vis_minfreq_env = _os.environ.get("MSC_VISARGA_INSERTION_MIN_FREQ", "").strip()
+    if _vis_minfreq_env:
+        try:
+            config.validation.visarga_insertion_min_freq = int(_vis_minfreq_env)
+            print(f"  visarga_insertion_min_freq: {_vis_minfreq_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_MIN_FREQ not an int: {_vis_minfreq_env}")
+    _vis_skip_env = _os.environ.get("MSC_VISARGA_INSERTION_SKIP_ABOVE", "").strip()
+    if _vis_skip_env:
+        try:
+            config.validation.visarga_insertion_skip_above_freq = int(_vis_skip_env)
+            print(f"  visarga_insertion_skip_above_freq: {_vis_skip_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_SKIP_ABOVE not an int: {_vis_skip_env}")
+    _vis_win_env = _os.environ.get("MSC_VISARGA_INSERTION_MAX_WINDOW", "").strip()
+    if _vis_win_env:
+        try:
+            config.validation.visarga_insertion_max_window = int(_vis_win_env)
+            print(f"  visarga_insertion_max_window: {_vis_win_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_VISARGA_INSERTION_MAX_WINDOW not an int: {_vis_win_env}")
+    # Context-aukmyit suppression immunity (avt-02 B2). Default-on; tri-state.
+    _auk_env = _os.environ.get("MSC_AUKMYIT_CONTEXT_SURVIVE", "").lower()
+    if _auk_env in ("1", "true", "yes", "on"):
+        config.validation.aukmyit_context_suppression_immune = True
+    elif _auk_env in ("0", "false", "no", "off"):
+        config.validation.aukmyit_context_suppression_immune = False
+    _auk_immune = config.validation.aukmyit_context_suppression_immune
+    print(f"  aukmyit_context_suppression_immune: {_auk_immune}")
     sme_bigram_env = _os.environ.get("MSC_SEG_MERGE_BIGRAM_THRESHOLD", "").strip()
     if sme_bigram_env:
         try:
@@ -1012,18 +1081,37 @@ def run_benchmark(
     probe_rescue_thr_env = _os.environ.get("MSC_PROBE_RESCUE_THRESHOLD", "").strip()
     probe_rescue_freq_env = _os.environ.get("MSC_PROBE_RESCUE_MIN_FREQ", "").strip()
     probe_max_existing_env = _os.environ.get("MSC_PROBE_MAX_EXISTING_ERRORS", "").strip()
-    if probe_corr_env in ("1", "true", "yes", "on"):
+    # Flags default-on since v1.9.0; envs are tri-state (truthy / falsy / unset).
+    _TRUTHY = ("1", "true", "yes", "on")
+    _FALSY = ("0", "false", "no", "off")
+    if probe_corr_env in _TRUTHY:
         config.validation.use_probe_corrector = True
-        print("  use_probe_corrector: True")
-    if probe_comp_env in ("1", "true", "yes", "on"):
+    elif probe_corr_env in _FALSY:
+        config.validation.use_probe_corrector = False
+    if probe_comp_env in _TRUTHY:
         config.validation.use_probe_compound = True
-        print("  use_probe_compound: True")
-    if probe_rescue_env in ("1", "true", "yes", "on"):
+    elif probe_comp_env in _FALSY:
+        config.validation.use_probe_compound = False
+    if probe_rescue_env in _TRUTHY:
         config.validation.use_probe_segmenter_rescue = True
-        print("  use_probe_segmenter_rescue: True")
+    elif probe_rescue_env in _FALSY:
+        config.validation.use_probe_segmenter_rescue = False
     if probe_path_env:
         config.validation.probe_model_path = probe_path_env
-        print(f"  probe_model_path: {probe_path_env}")
+    _probe_flags_on = (
+        config.validation.use_probe_corrector
+        or config.validation.use_probe_compound
+        or config.validation.use_probe_segmenter_rescue
+    )
+    _probe_inert = _probe_flags_on and not config.validation.probe_model_path
+    _inert_suffix = " (INERT — probe_model_path not set)" if _probe_inert else ""
+    print(f"  use_probe_corrector: {config.validation.use_probe_corrector}{_inert_suffix}")
+    print(f"  use_probe_compound: {config.validation.use_probe_compound}{_inert_suffix}")
+    print(
+        f"  use_probe_segmenter_rescue: "
+        f"{config.validation.use_probe_segmenter_rescue}{_inert_suffix}"
+    )
+    print(f"  probe_model_path: {config.validation.probe_model_path}")
     if probe_corr_thr_env:
         config.validation.probe_corrector_threshold = float(probe_corr_thr_env)
         print(f"  probe_corrector_threshold: {probe_corr_thr_env}")
@@ -1342,6 +1430,7 @@ def run_benchmark(
         total_out_of_domain=total_out_of_domain,
         total_detection_only=total_detection_only,
         total_tokenization_layer=total_tokenization_layer,
+        holdout=holdout,
     )
     report["config"]["targeted_rerank_hints"] = targeted_rerank_hints
     report["config"]["targeted_candidate_injections"] = targeted_candidate_injections
@@ -1367,6 +1456,7 @@ def compute_report(
     total_out_of_domain: int = 0,
     total_detection_only: int = 0,
     total_tokenization_layer: int = 0,
+    holdout: str = "include",
 ) -> dict:
     """Compute all metrics and produce the final report."""
 
@@ -1486,6 +1576,7 @@ def compute_report(
             "error_sentences": len(results) - clean_total,
             "scope": scope,
             "out_of_scope_errors_excluded": total_out_of_scope,
+            "holdout": holdout,
             "domain": domain,
             "out_of_domain_errors_excluded": total_out_of_domain,
             "detection_only_excluded": total_detection_only,
@@ -1784,6 +1875,22 @@ def print_summary(report: dict) -> None:
     print(f"  COMPOSITE SCORE: {report['overall_metrics']['composite_score']:.4f}")
     print("  Formula: 0.35*F1 + 0.30*MRR + 0.20*(1-FPR) + 0.15*Top1")
     print(f"{'─' * 70}")
+
+    # v1.9 ship-gate caps (WS-RG rg-01): surface ALL binding caps, not just
+    # latency. This is informational here (run_benchmark is a reference tool);
+    # `python benchmarks/ship_gate.py <result.json>` is the enforcing gate.
+    try:
+        from ship_gate import check_report, gate_passed
+
+        gate_results = check_report(report)
+        if gate_results:
+            print("\n  v1.9 ship-gate caps:")
+            for gr in gate_results:
+                print(f"  {gr.line()}")
+            print(f"  => SHIP-GATE: {'PASS' if gate_passed(gate_results) else 'FAIL'}")
+            print(f"{'─' * 70}")
+    except Exception:  # pragma: no cover - never let the gate print break a run
+        pass
 
     rerank_telemetry = report.get("rerank_rule_telemetry", {})
     if rerank_telemetry:
@@ -2095,6 +2202,20 @@ def main():
         ),
     )
 
+    parser.add_argument(
+        "--holdout",
+        type=str,
+        default="include",
+        choices=["include", "exclude", "only"],
+        help=(
+            "How to treat rows marked `holdout: true` in the benchmark YAML "
+            "(the frozen subset, selected 2026-07-02 via select_holdout.py). "
+            "'include' scores all rows (default; matches all historical runs), "
+            "'exclude' drops holdout rows (tuning runs from bp-02 onward), "
+            "'only' scores just the holdout rows (ship-gate drift check)."
+        ),
+    )
+
     args = parser.parse_args()
 
     if not args.db.exists():
@@ -2135,6 +2256,7 @@ def main():
         enable_fusion=args.fusion,
         fusion_threshold=args.fusion_threshold,
         calibration_path=args.calibration,
+        holdout=args.holdout,
     )
 
     # Print summary

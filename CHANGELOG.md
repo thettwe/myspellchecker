@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-07-02
+
+### Changed
+
+- **Detection features are now ON by default.** The aw-vowel un-mask detector (`detect_aw_vowel_unmask`), the orthographic-insertion rescue (`compound_split_ortho_insertion_rescue`), and the three syllable-span probe strategies (`use_probe_corrector`, `use_probe_compound`, `use_probe_segmenter_rescue`) ship enabled. The probe strategies additionally require `probe_model_path` to point at a probe artifact; without it they degrade gracefully to the rule-based pipeline and log a warning. Opt out per feature via the existing config flags or environment variables (`MSC_DETECT_AW_VOWEL_UNMASK=0`, `MSC_USE_ORTHO_RESCUE=0`, `MSC_USE_PROBE_CORRECTOR=0`, `MSC_USE_PROBE_COMPOUND=0`, `MSC_USE_PROBE_RESCUE=0`).
+- The benchmark's gold annotations were normalized to the checker's emission granularity, deletion semantics were made explicit, and the error-subtype vocabulary was consolidated and closed (benchmark version `1.5.0-v19-granularity-normalization`). Corrected sentences are unchanged; top-1/MRR accounting no longer penalizes correct fixes annotated at a different span width.
+
+### Added
+
+- **Context-aware aukmyit corrections**: real-word aukmyit (dot-below ့) confusions are now corrected when sentence context supports the correction. A visarga-insertion detector also landed but ships disabled by default (`detect_visarga_insertion`).
+- **Frozen benchmark holdout subset**: 250 stratified rows are marked `holdout: true` in the benchmark (version `1.5.0-v19h-holdout-freeze`) and are annotation-frozen for regression tracking. `run_benchmark.py` gains `--holdout include|exclude|only`; `benchmarks/select_holdout.py` documents the deterministic selection.
+- **Release-gate enforcement in code**: `benchmarks/ship_gate.py` enforces the quality caps (composite floor, clean-text false-positive cap, false-positive-rate non-regression, latency) and fails the run on breach; covered by CI tests.
+
+### Fixed
+
+- **Fewer false alarms on clean text.** A high-frequency guard for established loan-word variants, a mixed-script token guard, and a high-frequency hard block for curated confusable corrections cut clean sentences with false positives from 83 to 71 (of 779) on the default configuration, with zero lost true positives from the confusable block.
+
+### Benchmark
+
+- Default configuration: composite `0.7301` → **`0.7717`** (no probe artifact; clean false-positive sentences 71/779, false-positive rate 9.1%, p95 356 ms). With the probe artifact present: **`0.7865`**. Frozen holdout references: `0.7906` (default) / `0.8026` (full).
+
 ## [1.8.0] - 2026-06-10
 
 ### Added

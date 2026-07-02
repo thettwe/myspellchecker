@@ -188,18 +188,28 @@ def test_config_flags_wire_through_builder(provider):
     assert "ProbeBoostedCompoundStrategy" in classes
 
 
-def test_disabled_by_default(provider):
-    """With default config, none of the probe strategies are registered."""
+def test_not_registered_without_model_path(provider, caplog):
+    """Probe flags are default-on since v1.9.0, but without `probe_model_path`
+    the strategies degrade gracefully: none registered, and a warning makes
+    the inert state visible (a silently-inert probe once masqueraded as a
+    benchmark nondeterminism bug)."""
+    import logging
+
     from myspellchecker.core.config.main import SpellCheckerConfig
     from myspellchecker.core.spellchecker import SpellChecker
 
     config = SpellCheckerConfig()
-    # Defaults: use_probe_corrector / compound / segmenter_rescue all False
-    checker = SpellChecker(config=config, provider=provider)
+    assert config.validation.use_probe_corrector is True
+    assert config.validation.use_probe_compound is True
+    assert config.validation.use_probe_segmenter_rescue is True
+    assert config.validation.probe_model_path is None
+    with caplog.at_level(logging.WARNING):
+        checker = SpellChecker(config=config, provider=provider)
     classes = {s.__class__.__name__ for s in checker.context_validator.strategies}
     assert "ProbeValidationStrategy" not in classes
     assert "ProbeBoostedCompoundStrategy" not in classes
     assert "ProbeSegmenterRescueStrategy" not in classes
+    assert any("probe_model_path is not set" in r.message for r in caplog.records)
 
 
 def test_probe_segmenter_rescue_runs_without_error(probe_engine, provider):

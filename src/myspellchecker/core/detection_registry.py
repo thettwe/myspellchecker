@@ -65,6 +65,10 @@ POST_NORM_DETECTOR_SEQUENCE: tuple[DetectorEntry, ...] = (
     DetectorEntry("_detect_formal_yi_in_colloquial_context", "Verb+၏ in colloquial context"),
     DetectorEntry("_detect_negation_sfp_mismatch", "Negation pattern mismatch"),
     DetectorEntry("_detect_merged_sfp_conjunction", "Merged SFP + conjunction"),
+    DetectorEntry(
+        "_detect_visarga_insertion",
+        "High-precision internal visarga (း) insertion (ဆွေနွေး→ဆွေးနွေး)",
+    ),
     DetectorEntry("_detect_missing_visarga", "Missing visarga (း) via frequency ratio"),
     DetectorEntry("_detect_register_mixing", "Formal/colloquial register mixing"),
     DetectorEntry("_detect_informal_with_honorific", "Informal particle + honorific"),

@@ -191,6 +191,9 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             if near_synonym_logit_diff_threshold is not None
             else self._config.near_synonym_logit_diff_threshold
         )
+        self.curated_high_freq_hard_block_threshold = (
+            self._config.curated_high_freq_hard_block_threshold
+        )
         self._hasher = PhoneticHasher(ignore_tones=False)
         self._MAX_SEMANTIC_CHECKS_PER_SENTENCE = self._config.max_semantic_checks_per_sentence
         self.logger = logger
@@ -567,6 +570,14 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             # high-frequency. Stronger MLM evidence is needed.
             is_near_synonym_variant = variant in near_synonym_variants
             if is_near_synonym_variant:
+                # High-frequency hard block (see curated branch below):
+                # ultra-common words are virtually never real-word-confusion
+                # errors, so skip near-synonym flagging for them.
+                if (
+                    self.curated_high_freq_hard_block_threshold > 0
+                    and word_freq >= self.curated_high_freq_hard_block_threshold
+                ):
+                    continue
                 threshold = self.near_synonym_logit_diff_threshold
                 variant_freq = 0
                 if hasattr(self.provider, "get_word_frequency"):
@@ -605,6 +616,17 @@ class ConfusableSemanticStrategy(ValidationStrategy):
             # variant rules. Use a flat, low threshold.
             is_curated_variant = variant in curated_variants
             if is_curated_variant:
+                # High-frequency hard block: curated near-synonym pairs
+                # (give↔place, go↔stay) otherwise fire on correct usage of
+                # ultra-common verbs (ပေး/ထား/သွား, freq >500k), which are
+                # virtually never real-word-confusion errors. The curated path
+                # ignores word frequency (unlike the default path's
+                # high_freq_logit_diff bar), so guard it explicitly here.
+                if (
+                    self.curated_high_freq_hard_block_threshold > 0
+                    and word_freq >= self.curated_high_freq_hard_block_threshold
+                ):
+                    continue
                 threshold = self.curated_logit_diff_threshold
                 variant_freq = 0
                 if hasattr(self.provider, "get_word_frequency"):
