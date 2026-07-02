@@ -582,6 +582,7 @@ def run_benchmark(
     enable_fusion: bool = False,
     fusion_threshold: float = 0.5,
     calibration_path: Path | None = None,
+    holdout: str = "include",
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -623,6 +624,19 @@ def run_benchmark(
     # Load benchmark data
     benchmark = load_benchmark(benchmark_path)
     sentences = benchmark["sentences"]
+
+    # Holdout filter: rows marked `holdout: true` are the frozen subset
+    # (annotation-frozen at v1.9.0; excluded from tuning runs from bp-02 onward).
+    if holdout != "include":
+        n_before = len(sentences)
+        if holdout == "exclude":
+            sentences = [s for s in sentences if not s.get("holdout")]
+        elif holdout == "only":
+            sentences = [s for s in sentences if s.get("holdout")]
+        else:
+            print(f"Error: invalid holdout mode: {holdout}", file=sys.stderr)
+            sys.exit(1)
+        print(f"  Holdout mode: {holdout} ({n_before} -> {len(sentences)} sentences)")
 
     # Build config — wire in detector and/or semantic model when requested
     config_kwargs = {}
@@ -1416,6 +1430,7 @@ def run_benchmark(
         total_out_of_domain=total_out_of_domain,
         total_detection_only=total_detection_only,
         total_tokenization_layer=total_tokenization_layer,
+        holdout=holdout,
     )
     report["config"]["targeted_rerank_hints"] = targeted_rerank_hints
     report["config"]["targeted_candidate_injections"] = targeted_candidate_injections
@@ -1441,6 +1456,7 @@ def compute_report(
     total_out_of_domain: int = 0,
     total_detection_only: int = 0,
     total_tokenization_layer: int = 0,
+    holdout: str = "include",
 ) -> dict:
     """Compute all metrics and produce the final report."""
 
@@ -1560,6 +1576,7 @@ def compute_report(
             "error_sentences": len(results) - clean_total,
             "scope": scope,
             "out_of_scope_errors_excluded": total_out_of_scope,
+            "holdout": holdout,
             "domain": domain,
             "out_of_domain_errors_excluded": total_out_of_domain,
             "detection_only_excluded": total_detection_only,
@@ -2185,6 +2202,20 @@ def main():
         ),
     )
 
+    parser.add_argument(
+        "--holdout",
+        type=str,
+        default="include",
+        choices=["include", "exclude", "only"],
+        help=(
+            "How to treat rows marked `holdout: true` in the benchmark YAML "
+            "(the frozen subset, selected 2026-07-02 via select_holdout.py). "
+            "'include' scores all rows (default; matches all historical runs), "
+            "'exclude' drops holdout rows (tuning runs from bp-02 onward), "
+            "'only' scores just the holdout rows (ship-gate drift check)."
+        ),
+    )
+
     args = parser.parse_args()
 
     if not args.db.exists():
@@ -2225,6 +2256,7 @@ def main():
         enable_fusion=args.fusion,
         fusion_threshold=args.fusion_threshold,
         calibration_path=args.calibration,
+        holdout=args.holdout,
     )
 
     # Print summary
