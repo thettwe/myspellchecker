@@ -66,7 +66,7 @@
 
 Full documentation is available at **[docs.myspellchecker.com](https://docs.myspellchecker.com/)**.
 
-> **What's new in v1.8.0?** See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for the opt-in **aw-vowel un-mask detector** — it surfaces Myanmar aw-vowel spelling errors (ော ↔ ေါ) the normalizer previously masked (+0.0350 spelling composite when enabled, at zero added false positives). This release also cuts hot-path latency ~40% (p95 658 → 401 ms, with identical results) and hardens concurrent batch checking. The v1.7.1 syllable-span probe remains available behind its opt-in flags.
+> **What's new in v1.9.0?** The detection features introduced in v1.7.1 and v1.8.0 — the aw-vowel un-mask detector, the orthographic-insertion rescue, and the syllable-span probe strategies — are now **enabled by default**: a default installation detects substantially more real spelling errors out of the box, while false alarms on clean text *decreased* (clean sentences with false positives down 83 → 71 on our benchmark) thanks to new high-frequency word guards. Context-aware aukmyit (dot-below ့) corrections improve further. Each feature remains individually switchable via config flags or environment variables. See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for details.
 
 ### Getting Started
 *   **[Introduction](https://docs.myspellchecker.com/introduction)**: Overview of the library and its architecture.
