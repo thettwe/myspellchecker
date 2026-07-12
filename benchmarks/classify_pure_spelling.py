@@ -149,6 +149,17 @@ def classify_instance(subtype: str, erroneous_text: str, lookup: DictLookup) -> 
     """Return (bucket, rule) for one gold error instance."""
     if subtype in CONTEXT_OVERRIDE_SUBTYPES:
         return "context", "synonym-override"
+    # spacing subtype DESCOPED from the PURE KPI (owner-ratified 2026-07-12):
+    # separability analysis (spacing_separability.json) showed the
+    # joined-freq/spaced-bigram signal cannot distinguish planted spacing
+    # errors from legitimate spaced pairs (clean text carries equivalent
+    # patterns at ratio 100-600); Burmese spacing is not standardized
+    # orthography, so these golds are annotation convention rather than
+    # non-wordness. Reported as a separate bucket, never counted in PURE.
+    # broken_compound / word_boundary / merged_word stay PURE (58% / 95%
+    # cleared — mechanisms demonstrably work on them).
+    if subtype == "spacing":
+        return "spacing", "spacing-deferred"
     if subtype in PURE_OVERRIDE_SUBTYPES:
         return "pure", "loan-override"
     if subtype in ENCODING_SUBTYPES:
@@ -201,6 +212,7 @@ def report(result_path: Path, classification: dict[str, dict]) -> None:
     stats = {
         "pure": {"tp": 0, "fn": 0, "top1": 0},
         "context": {"tp": 0, "fn": 0, "top1": 0},
+        "spacing": {"tp": 0, "fn": 0, "top1": 0},
     }
     joined = 0
     for s in result["per_sentence_results"]:
@@ -221,7 +233,7 @@ def report(result_path: Path, classification: dict[str, dict]) -> None:
     print(f"result: {result_path}")
     print(f"joined spelling golds: {joined} of {len(classification)} classified")
     total_tp = total = 0
-    for name in ("pure", "context"):
+    for name in ("pure", "context", "spacing"):
         b = stats[name]
         n = b["tp"] + b["fn"]
         total_tp += b["tp"]

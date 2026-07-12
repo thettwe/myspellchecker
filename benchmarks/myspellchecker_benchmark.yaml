@@ -1,4 +1,4 @@
-version: 1.5.0-v19h-holdout-freeze
+version: 1.6.0-annotation-audit
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -9169,6 +9169,32 @@ sentences:
     context_required: false
     notes: 'Added by Gemini 3.1 Pro arbiter 2026-04-15. Narrowed to the changed codepoint by bp-03 2026-06-10: the old 4-char span crossed a whitespace boundary (single-token integrity rule); splice-equivalent.'
     domain: spelling
+  - error_id: BM-EXP-C025-E4
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 86
+      end: 88
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E117'
+  - error_id: BM-EXP-C025-E4
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 159
+      end: 161
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E117'
   notes: 'Audit 2026-04-15: has unannotated error(s). Gemini: The phrase ''အ ခြေ ပြီး'' is grammatically incorrect and incomplete. It should likely be ''အခြေချပြီး'' (settled) or ''အခြေတည်ပြီး'' (established)..'
 - id: BM-EXP-C026
   input: ထိုပွဲကို ခံ၍ နောက်ဆုံး ဖြစ်သော နေ့မြတ်၌ ယေရှုသည် ရပ်၍ ကြွေးကြော် တော်မူသည်ကား၊ ရေငတ်သော သူရှိလျှင် ငါ့ထံသို့ လာ၍ သောက်လော့။ ငါ့ကို ယုံကြည်သော သူသည် ကျမ်းစာ လာသည် အတိုင်း အသက် ရေထွက်ရာ စမ်းရေတွင်း ဖြစ်လိမ့်မည်ဟု မိန့်တော်မူ၏။ ထိုသို့ မိန့်တော်မူသော်၊ ယုံကြည်သော သူတို့သည် ခံရလတံ့သော ၀ိညာဉ်တော်ကို ရည်မှတ်၍ မိန့်တော်မူ၏။ ယေရှုသည် ဘုန်းပွင့်တော် မမူ သေးသောကြောင့် သန့်ရှင်းသော ၀ိညာဉ်တော်ကို ပေးတော် မမူသေး။
@@ -12651,6 +12677,19 @@ sentences:
     context_required: false
     notes: Injected compound_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E001-E2
+    error_type: semantic_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 120
+      end: 134
+    erroneous_text: နှင့် တို့တွင်
+    gold_correction: တို့တွင်
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C007'
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E002
   input: ၁။ သောက၊ဒုက္ခ၊ဆင်းရဲမှု၊ ရောဂါဝေဒနာ လွတ် မြောက် ရန် ဤဂုန်တော်အား အစဉ်အမြဲ ဖတ်ရွတ် ရပါမည်။
@@ -12753,6 +12792,19 @@ sentences:
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
     domain: spelling
+  - error_id: BM-EXP-E004-E5
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 255
+      end: 257
+    erroneous_text: ပဲ
+    gold_correction: ဘဲ
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E130'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E005
   input: ဌာနနှင့် ဌာနီကို မခွဲခြားဘဲ ဆိုခြင်း၊ ဌာန၏အမည်ကို ဌာနီ၌ ထင်စား၍ ဆိုခြင်း။
@@ -12774,6 +12826,19 @@ sentences:
     context_required: false
     notes: "Injected compound_confusion error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E005-E2
+    error_type: spelling
+    error_subtype: aukmyit_confusion
+    detection_layer: word
+    span:
+      start: 3
+      end: 8
+    erroneous_text: နှင့်
+    gold_correction: နှင့်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C040'
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E006
   input: ငါ့သျှင်တို့ တစ်ဖန်ထို့ပြင်လည်း သီလရှိသော သီလနှင့်ပြည့်စုံသော သူသည် ခန္ဓာခိုယ်ပျက်စီး၍ နောက်၌ ကောင်းသော လားရာဖြစ်သော နတ်ပြည်၌ ဖြစ်ရ၏။ ဤကား သီလရှိသော သူ၏ သီလနှင့်ပြည့်စုံခြင်း၌ ငါးခုမြောက် အကျိုး 'အာနိသင်' ပေတည်း။ (၁၄)
@@ -12816,6 +12881,32 @@ sentences:
     context_required: true
     notes: Injected broken_compound error.
     domain: spelling
+  - error_id: BM-EXP-E007-E2
+    error_type: wrong_word
+    error_subtype: real_word_confusion
+    detection_layer: word
+    span:
+      start: 22
+      end: 37
+    erroneous_text: တစ်ဦးတစ်ယောက်ထဲ
+    gold_correction: တစ်ဦးတစ်ယောက်တည်း
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C038'
+  - error_id: BM-EXP-E007-E2
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 60
+      end: 67
+    erroneous_text: ဟောလိဝု
+    gold_correction: ဟောလိဝုဒ်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C038'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E008
   input: သိပ္ပံပညာ ထွန်းကားသော ခေတ်တွင် စက်မှု ထွန်းကားသော လူ့အဖွဲ့အစည်း တစ်ခုအတွင်း ပေါ်ပေါက်သော ထိုအတွေးအမြင်သည် အတွေးအမြင် ဖြစ်မှလည်း ထိုအတွေးအမြင်ကို ခေတ်လူများ လက်ခံကြပေလိမ့်မည်။
@@ -13707,6 +13798,32 @@ sentences:
     context_required: false
     notes: Injected compound_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E041-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 282
+      end: 292
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
+  - error_id: BM-EXP-E041-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 374
+      end: 384
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E042
   input: တရုတ်ရဲ့ နဲ့ ဟောင်ကောင် အရေး၊ ထိုင်ဝမ် အရေး၊ တောင်တရုတ် ပင်လယ်ပြင် အရေး၊ နောက် အမေရိကန်ရဲ့ မဟာမိတ်တွေကို တရုတ်က စီးပွားရေးမှာ နိုင်ထက်စီးနင်း ဆောင်ရွက်မှုတွေနဲ့ ပတ်သက်ပြီး အမေရိကန်နဲ့ တရုတ်ကြား မပြေမလည် ဖြစ်နေပေမယ့်လည်း ရာသီဥတု ပြော့င်းလဲမှု အရေးမှာ တရုတ် အစိုးရနဲ့ အတူ ဆောင်ရွက်ဖို့ ပြင်ဆင်ထားကြောင်း အမေရိကန်ဘက်က ပြောပါတယ်။
@@ -14033,6 +14150,19 @@ sentences:
     context_required: false
     notes: Injected missing_visarga error.
     domain: spelling
+  - error_id: BM-EXP-E052-E2
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 174
+      end: 183
+    erroneous_text: ထိန်ချိန်
+    gold_correction: ထိမ်ချန်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C018'
   notes: Generated error sentence with 1 missing_visarga error.
 - id: BM-EXP-E053
   input: အကယ်၍ သယံဇာတ တန်ချိန် သန်း ကိုအပြည့်အဝ ပါက လျှပ်စစ် မော်တော်ယာဉ် ၂၇. သန်း ဘက်ထရီ လိုအပ်ချက်ကို ဖြည့်ဆည်း ပေးနိုင်သည်။ BYD ရောင်းအား သည် ၁. သန်း ဖြစ်သည်။ ဤ ခန့်မှန်း ချက်အရ BYD သည် လာမည့် ဆယ် နှစ်အတွင်း ကုန်ကြန်း များ လုံလောက် စွာ ရရှိ မည်ဖြစ်သည်။
@@ -14117,6 +14247,32 @@ sentences:
     context_required: false
     notes: Injected missing_visarga error.
     domain: spelling
+  - error_id: BM-EXP-E056-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 282
+      end: 292
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
+  - error_id: BM-EXP-E056-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 374
+      end: 384
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
   notes: Generated error sentence with 1 missing_visarga error.
 - id: BM-EXP-E057
   input: လယ်ယာမြေ သိမ်းဆည်းခံရမှု စုံစမ်းရေးကော်မရှင်ကို ကြိုဆို တောင်သူ လယ်သမားတွေ လယ်ယာမြေ သိမ်းဆည်း ခံရမှုတွေအတွက် လွှတ်တော်က စုံစမ် ဖော်ထုတ်ပေးမယ့် ကိစ္စကို ကြိုဆိုကြောင်း၊ မျိုးဆက် ကျောင်းသားတွေ၊ တောင်သူ လယ်သမားအရေး ဆောင်ရွက်နေသူတွေနဲ့ ဥပဒေ ပညာရှင်တွေ ဒီကနေ့ ရက်စွဲနဲ့ ကြေညာချက် တစ်စောင် ထုတ်ပြန် လိုက်ပါတယ်။
@@ -14166,6 +14322,45 @@ sentences:
     context_required: true
     notes: "Injected broken_compound error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E059-E2
+    error_type: spelling
+    error_subtype: aukmyit_confusion
+    detection_layer: word
+    span:
+      start: 33
+      end: 40
+    erroneous_text: မည်သည့်
+    gold_correction: မည်သည့်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C041'
+  - error_id: BM-EXP-E059-E2
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 51
+      end: 56
+    erroneous_text: မသိပဲ
+    gold_correction: မသိဘဲ
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C041'
+  - error_id: BM-EXP-E059-E2
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 58
+      end: 68
+    erroneous_text: မစုံစမ်းပဲ
+    gold_correction: မစုံစမ်းဘဲ
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C041'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E060
   input: ဟုတ်တယ်၊ မင်းပြော့နေတာ ဘယ်သူလဲဆိုတာ ငါသိမယ်ထင်တယ်။
@@ -14208,6 +14403,19 @@ sentences:
     context_required: false
     notes: "Injected vowel_medial_substitution error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E061-E2
+    error_type: semantic_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 119
+      end: 133
+    erroneous_text: နှင့် တို့တွင်
+    gold_correction: တို့တွင်
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C007'
   notes: Generated error sentence with 1 vowel_medial_substitution error.
 - id: BM-EXP-E062
   input: ပထမဆုံး စပြောရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒော်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေး ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ ကသိုလ် အပတ်စဉ် က ဖြစ်ပါတယ်။
@@ -14313,6 +14521,32 @@ sentences:
     context_required: false
     notes: Injected missing_visarga error.
     domain: spelling
+  - error_id: BM-EXP-E066-E2
+    error_type: register_error
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 176
+      end: 180
+    erroneous_text: ဘို့
+    gold_correction: ဖို့
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E090'
+  - error_id: BM-EXP-E066-E2
+    error_type: wrong_word
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 16
+      end: 21
+    erroneous_text: ပောက်
+    gold_correction: ပေါက်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E134'
   notes: Generated error sentence with 1 missing_visarga error.
 - id: BM-EXP-E067
   input: ထိုကြောင့် လမ်းဘေးဆိုင်တွေကို မသုံးဘဲ ကုန်တိုက်များကို စိတ်ကူထား၏။
@@ -14540,6 +14774,19 @@ sentences:
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
     domain: spelling
+  - error_id: BM-EXP-E075-E6
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 254
+      end: 256
+    erroneous_text: ပဲ
+    gold_correction: ဘဲ
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E130'
   notes: Generated error sentence with 1 consonant_substitution error.
 - id: BM-EXP-E076
   input: ပြည်ထောင်စု ဒီမိုကရေစီပါတီ ဥက္ကဌ ကိုဖြိုးမင်းသိန်း ဖြစ်ပါတယ်။ တပ်မတော်အစိုးရဟာ နိုင်ငံဝန်ထမ်းတွေ ဖြစ်တယ်လို့ စစ်အစိုးရက တချိန်က ပြောခဲ့ဖူးပါတယ်။ ဒါကြောင့် အခုလက်ရှိ ရွေးကောက်ပွဲဥပဒေအရ နိုင်ငံရေး မလုပ်ရ၊ နိုင်ငံရေးပါတီမထောင်ရ ကန့်သတ်မှုရှိတာကြောင့် ရွေးကောက်ပွဲဥပဒေနဲ့များ ငြိစွန်းနေသလား စဉ်းစားသူတွေ လည်း ရှိပါတယ်။ ဒီအ တိုင်း ခွင့်ပြုချက်ရသွားပြီး နိုင်ငံရေးပါတီထောင်ပြီး ရွေးကောက်ပွဲဝင်မယ် ဆိုရင်တော့ ရွေးကောက်ပွဲ အခြေအနေက တဘက်သတ်ဖြစ်သွားမယ်လို့ ကိုဝင်းမင်းက ယူဆပါတယ်။
@@ -14882,6 +15129,19 @@ sentences:
     context_required: false
     notes: Injected compound_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E088-E2
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 175
+      end: 184
+    erroneous_text: ထိန်ချိန်
+    gold_correction: ထိမ်ချန်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C018'
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E089
   input: ထိုင်းတောင်ပိုင်း ကန်ချနဘူရီပြည်နယ်ထဲမှာလည်း အခုလပိုင်းအတွင်း လူကုန်ကူးပွဲစားတွေနဲ့ တရားမဝင်ရောက်လာလို့ ဖမ်းဆီးခံရတဲ့ မြန်မာနိုင်ငံသား ရာဂဏန်းလောက်ရှိနေပါတယ်။ စစ်တပ် အာဏာသိမ်း အုပ်ချုပ်နေတဲ့ မြန်မာနိုင်ငံထဲမှာ အာဏာသိ မ်းမှု ဆန့်ကျင် ဆန္ဒပြသူတွေကို ပစ်ခတ် နှိမ်နှင်း ဖမ်းဆီးမှုတွေ ရှိနေတာကြောင့် ထိုင်း၊ အိန္ဒိယ နယ်စပ်တွေဖက်ကို ထွက်ပြေးတိမ်းရှောင်သူတွေ အများအပြားရှိနေပါတယ်။
@@ -14903,6 +15163,19 @@ sentences:
     context_required: true
     notes: Injected broken_compound error.
     domain: spelling
+  - error_id: BM-EXP-E089-E2
+    error_type: spelling
+    error_subtype: aukmyit_confusion
+    detection_layer: word
+    span:
+      start: 224
+      end: 232
+    erroneous_text: ဆန့်ကျင်
+    gold_correction: ဆန့်ကျင်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C042'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E090
   input: အခု လူတွေကြားထဲ ပေါက်ထွက်လာတဲ့ အစီရင်ခံစာ မှာ တော့ အစ္စရေး အနေနဲ့ အလွန်အကျွံ အင်အားသုံးခဲ့တာ ကို ရေးသား ထားပေမယ့် အစ္စရေး စစ်သား တွေ အနေနဲ့ ဂါဇာ ကို လက်နက် တွေ ပို့ ရင် ရပ်တန့် ဘို့ အတွက် တားဆီးနိုင်ခွင့် က တရားဝင် ရှိတယ်၊ နောက် အစ္စရေး စစ်သား တွေ အနေနဲ့ သူတို့ ကို တိုက်ခိုက် လာရင် သူတို့ကိုယ် သူတို့ ပျံ ကာကွယ် ပိုင်ခွင့် ရှိတယ် လို့ ရေးထား ပါတယ်။
@@ -15014,6 +15287,19 @@ sentences:
     context_required: false
     notes: "Injected missing_visarga error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E093-E2
+    error_type: semantic_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 118
+      end: 132
+    erroneous_text: နှင့် တို့တွင်
+    gold_correction: တို့တွင်
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C007'
   notes: Generated error sentence with 1 missing_visarga error.
 - id: BM-EXP-E094
   input: တောင်တွင်းကြီးမြို့နယ်မှာ စစ်တပ်က အာဏာသိမ်းပြီးနောက် စစ်ကောင်စီတပ်တွေရဲ့ ရိုက်နှက်ပစ်ခတ် သတ်ဖြတ်မှုကြောင့် ဒေသခံပြည်သူ ခုနစ်ဦးအထိ သေဆုံးခဲ့ ရတယ်လို့ ဒေသခံတွေရဲ့ မှတ်တမ်းတွေအရ သိရပါတယ်။
@@ -15209,6 +15495,32 @@ sentences:
     context_required: true
     notes: Injected broken_compound error.
     domain: spelling
+  - error_id: BM-EXP-E101-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 284
+      end: 294
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
+  - error_id: BM-EXP-E101-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 376
+      end: 386
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E102
   input: ပြည်ထောင်စု ဒီမိုကရေစီပါတီ ဥက္ကဌ ကိုဖြိုးမင်းသိန်း ဖြစ်ပါတယ်။ တပ်မတော်အစိုးရဟာ နိုင်ငံဝန်ထမ်းတွေ ဖြစ်တယ်လို့ စစ်အစိုးရက တချိန်က ပြောခဲ့ဖူးပါတယ်။ ဒါကြောင့် အခုလက်ရှိ ရွေးကောက်ပွဲဥပဒေအရ နိုင်ငံရေး မလုပ်ရ၊ နိုင်ငံရေးပါတီမထောင်ရ ကန့်သတ်မှုရှိတာကြောင့် ရွေးကောက်ပွဲဥပဒေနဲ့များ ငြိစွန်းနေသလား စဉ်းစားသူတွေ လည်း ရှိပါတယ်။ ဒီအတိုင်း ခွင့်ပြုချက်ရသွားပြီး နိုင်ငံရေးပါတီထောင်ပြီး ရွေးကောက်ပွဲဝင်မယ် ဆိုရင်တော့ ရွေးကောက်ပွဲ အခြေအနေက တဘက်သတ်ဖြစ်သွာမယ်လို့ ကိုဝင်းမင်းက ယူဆပါတယ်။
@@ -15404,6 +15716,58 @@ sentences:
     context_required: true
     notes: Injected broken_compound error.
     domain: spelling
+  - error_id: BM-EXP-E109-E2
+    error_type: word_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 15
+      end: 25
+    erroneous_text: အ ခြေ ပြီး
+    gold_correction: အ ခြေ ချ ပြီး
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C025'
+  - error_id: BM-EXP-E109-E2
+    error_type: word_error
+    error_subtype: broken_compound
+    detection_layer: word
+    span:
+      start: 37
+      end: 44
+    erroneous_text: မောင် မ
+    gold_correction: မောင်နှမ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C025'
+  - error_id: BM-EXP-E109-E2
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 86
+      end: 88
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E117'
+  - error_id: BM-EXP-E109-E2
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 160
+      end: 162
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E117'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E110
   input: ထိုင်းတောင်ပိုင်း ကန်ချနဘူရီပြည်နယ်ထဲမှာလည်း အခုလပိုင်းအတွင်း လူကုန်ကူးပွဲစားတွေနဲ့ တရားမဝင်ရောက်လာလို့ ဖမ်းဆီးခံရတဲ့ မြန်မာနိုင်ငံသား ရာဂဏန်းလောက်ရှိနေပါတယ်။ စစ်တပ် အာဏာသိမ်း အုပ်ချုပ်နေတဲ့ မြန်မာနိုင်ငံထဲမှာ အာဏာသိမ်းမူ ဆန့်ကျင် ဆန္ဒပြသူတွေကို ပစ်ခတ် နှိမ်နှင်း ဖမ်းဆီးမှုတွေ ရှိနေတာကြောင့် ထိုင်း၊ အိန္ဒိယ နယ်စပ်တွေဖက်ကို ထွက်ပြေးတိမ်းရှောင်သူတွေ အများအပြားရှိနေပါတယ်။
@@ -15425,6 +15789,19 @@ sentences:
     context_required: false
     notes: Injected compound_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E110-E2
+    error_type: spelling
+    error_subtype: aukmyit_confusion
+    detection_layer: word
+    span:
+      start: 222
+      end: 230
+    erroneous_text: ဆန့်ကျင်
+    gold_correction: ဆန့်ကျင်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C042'
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-EXP-E111
   input: ကျွန်တော်တို့နှစ်ဦးစလုံး၏ အပောင်းအသင်းများကလည်း အခါ အခွင့်သင့်တိုင်း ကျွန်တော်တို့နှစ်ယောက်၏ မတူညီမှုများကို ပြော့ပြတတ် ကြသည်။
@@ -15611,6 +15988,19 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     domain: spelling
+  - error_id: BM-EXP-E117-E5
+    error_type: word_error
+    error_subtype: broken_compound
+    detection_layer: word
+    span:
+      start: 37
+      end: 44
+    erroneous_text: မောင် မ
+    gold_correction: မောင်နှမ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C025'
 - id: BM-EXP-E118
   input: သမန္တမင်း ပြော့င်းရွှေ့၍ မင်းမဲ့ဖြစ်နေသည့် မှိုင်းကာရီမြို့ကို စောလွန်းရွှေ ခော် ယွန်းမင်း လာရောက်အုပ်ချုပ်စိုးစံတော်မူလေ၏။ ယွန်းမင်းကြီး စောလွန်းရွှေ နတ်ရွာစံတော်မူလျှင် သားတော် စောထွတ်မင်းသား နှင့် သမီးတော် စောမြဒေဝီ တို့သည် ခမည်းတော်၏ အရိုက်အရာကို သူအုပ်စိုးသင့် ငါအုပ်စိုးသင့်ဟူ၍ ငြင်းခုံလုယက်နေကြသည်ကို မှူးမတ်များ ဖြေဖြန်ပေးကြသော်လည်း ကျေနပ်ခြင်း မရှိကြသဖြင့် တရားအဆုံးအဖြတ် တော်သည်ဟု သတင်းကျော်ကြားသော် တကူမြို့ (ယခုဝဲကျွန်းရပ်နှင့် ဆင်ဆိပ်ရပ်)ကို အုပ်စိုးသော တကူမင်းကြီး ထံ အဆုံးအဖြတ်ခံရန် သွားကြလေသည်။
   is_clean: false
@@ -15949,6 +16339,19 @@ sentences:
     context_required: false
     notes: "Injected consonant_substitution error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E128-E2
+    error_type: semantic_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 119
+      end: 133
+    erroneous_text: နှင့် တို့တွင်
+    gold_correction: တို့တွင်
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C007'
   notes: Generated error sentence with 1 consonant_substitution error.
 - id: BM-EXP-E129
   input: တကယ်လို့ အမေဟာ ဒီလို စိတ်ဓာတ် ပြင်းထန်သူမျိုး မဟုတ်ဘဲ နူးညံ့တဲ့ စိတ်သဘောထား ရှိသူမျိုး ဖြစ်ရင်တောင် အမေဟာ သူ့ရဲ့ အနာဂတ် သူရဲကောင်း၊ သူ့ရဲ့ အိပ်မက်ထဲက ဟီးရိုးကို သူ့ရဲ့ လက်ရှိအားနွဲ့တဲ့ ကလေးဘဝ၊ တစ်နည်းပြော့ရရင် အမေ့ အပော်မှာ မှီခိုနေရတဲ့ ဘဝကို ပြန်ပြီး သတိရသွားအောင် ကလေးကို ဆက်ဆံ ပြတတ်ပါတယ်။
@@ -16296,6 +16699,19 @@ sentences:
     context_required: true
     notes: Injected broken_compound error.
     domain: spelling
+  - error_id: BM-EXP-E137-E2
+    error_type: semantic_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 120
+      end: 134
+    erroneous_text: နှင့် တို့တွင်
+    gold_correction: တို့တွင်
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C007'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E138
   input: ဝထ္ထု, ဒွာရ၊ ဝတ္ထုနှင့် ဒွာရ။
@@ -16338,6 +16754,58 @@ sentences:
     context_required: false
     notes: Injected missing_visarga error.
     domain: spelling
+  - error_id: BM-EXP-E139-E2
+    error_type: word_error
+    error_subtype: missing_word
+    detection_layer: word
+    span:
+      start: 14
+      end: 24
+    erroneous_text: အ ခြေ ပြီး
+    gold_correction: အ ခြေ ချ ပြီး
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C025'
+  - error_id: BM-EXP-E139-E2
+    error_type: word_error
+    error_subtype: broken_compound
+    detection_layer: word
+    span:
+      start: 36
+      end: 43
+    erroneous_text: မောင် မ
+    gold_correction: မောင်နှမ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C025'
+  - error_id: BM-EXP-E139-E2
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 85
+      end: 87
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E117'
+  - error_id: BM-EXP-E139-E2
+    error_type: wrong_word
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 158
+      end: 160
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E117'
   notes: Generated error sentence with 1 missing_visarga error.
 - id: BM-EXP-E140
   input: ကိုဘုထန်ပိုင်က "မနေ့က ညကတည်းက အင်တာနက်လိုင်းတွေတော့ ပြန်ပွင့်တယ်။ ဒါပေမယ့် လိုင်းကတော့ သိပ် မကောင်းဘူး။ ကျနော့် ဖုန်းကြောင့် ဖြစ်တာလား။ ဘယ်လို ဖွင့်ပေးတာလည်း ဆိုတာတော့ မသိတော့ဘူး" ဟု ဧရာဝတီဟို့ ပြောသည်။
@@ -16538,6 +17006,20 @@ sentences:
     context_required: false
     notes: Injected aukmyit_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E146-E2
+    error_type: grammar_error
+    error_subtype: spacing
+    detection_layer: word
+    span:
+      start: 41
+      end: 44
+    erroneous_text: ' . '
+    gold_correction: ' '
+    detection_only: true
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C136'
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E147
   input: '''''ဘယ်လိုဖြစ်သွားလဲ ဆို တော့ ကလေးရဲ့ သဘောသဘာဝ က သူတို့တစ်ခုခုလိုချင်ရင် မိဘ ကို တစ်နည်းနည်းနဲ့ပြပြီးတောင်း တာ။ ပောက်ကွဲပြပြီး တောင်းတဲ့ လူကြီးကလိုက်လျော လို့ရှိရင် ကလေးစိတ်ထဲမှာ ငါ ကွောင်းကောင်းမွန်မွန်တောင်း တုန်းကတော့ မပေးဘူး။ လိုချင်တာရ တယ်ဆိုပြီး နောက်အခါတွေမှာ ပောက်ကွဲတဲ့အပြုအမူတွေ လုပ်ပြီး တောင်းတာ။ အဲဒီလိုနဲ့ တချို့ ကလေးတွေမှာ ဝုန်းဒိုင်းကြဲပြီး ပောက်ကွဲတဲ့ ကလေးလေးတွေ ဖြစ်လာတာပော့'''' ဟု ကလေးငယ် များ၏ အပြုအမူပိုင်းဆိုင်ရာ အ ဆင့်စီမံခန့်ခွဲပေးသော ဒောက်တာ ဌေးဌေး (စိတ်ပညာ) ကဆိုသည်။'
@@ -16777,6 +17259,32 @@ sentences:
     context_required: false
     notes: "Injected vowel_medial_substitution error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E153-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 284
+      end: 294
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
+  - error_id: BM-EXP-E153-E2
+    error_type: invalid_syllable
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 376
+      end: 386
+    erroneous_text: ၀ိညာဉ်တော်
+    gold_correction: ဝိညာဉ်တော်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C026'
   notes: Generated error sentence with 1 vowel_medial_substitution error.
 - id: BM-EXP-E154
   input: ၅၂၉။ သကဝါဒီ။ ကုသိုလ်စိတ်သည် ဖြစ်စေအပ်သော ကာယကံရုပ်သည် အာရုံမရှိဟော ကုသိုလ်လော။
@@ -16972,6 +17480,19 @@ sentences:
     context_required: true
     notes: Injected broken_compound error.
     domain: spelling
+  - error_id: BM-EXP-E161-E2
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 175
+      end: 184
+    erroneous_text: ထိန်ချိန်
+    gold_correction: ထိမ်ချန်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C018'
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E162
   input: ကဲတပည့်တို့ လောကကြီးမှာ လူတွေဝင်ငွေရရှိနိုင်တဲ့ နည်းလမ်းတွေ ဘယ်လောက်ပောများ လဲဆိုတာ အခုခင်ဗျားတို့ မြင်တွေ့ခဲ့ရပြီ၊ အဲဒီနည်းလမ်း သို့မဟုတ် လုပ်ငန်းမှန်သမျှဟာ လူတွေဆီ ကို စမ်းရေစီးသလို စီးဆင်းလာနေတဲ့ ရွှေဒင်္ဂါးတန်း ငွေဒင်္ဂါးတန်းတွေပဲ၊ အလုပ်လုပ်တဲ့ လူတိုင်းဟာ ဒီစီကြောင်းထဲက အသပြာကို ကိုယ့်အိတ်ထဲ မြောင်းသွယ်လို့ ရသလောက် သွယ်ယူနေကြတဲ့ သဘောပါပဲ။
@@ -17049,6 +17570,19 @@ sentences:
     context_required: false
     notes: Injected aukmyit_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E164-E2
+    error_type: grammar_error
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 30
+      end: 33
+    erroneous_text: သော
+    gold_correction: စွာ
+    edit_distance: 1
+    context_required: false
+    domain: grammar
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-C137'
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E165
   input: အခု လူတွေကြားထဲ ပောက်ထွက်လာတဲ့ အစီရင်ခံစာ မှာ တော့ အစ္စရေး အနေနဲ့ အလွန်အကျွံ အင်အားသုံးခဲ့တာ ကို ရေးသား ထားပေမယ့် အစ္စရေး စစ်သား တွေ အနေနဲ့ ဂါဇာ ကို လက်နက် တွေ ပို့ ရင် ရပ်တန့် ဘို့ အတွက် တားသိးနိုင်ခွင့် က တရားဝင် ရှိတယ်၊ နောက် အစ္စရေး စစ်သား တွေ အနေနဲ့ သူတို့ ကို တိုက်ခိုက် လာရင် သူတို့ကိုယ် သူတို့ ပြန် ကာကွယ် ပိုင်ခွင့် ရှိတယ် လို့ ရေးထား ပါတယ်။
@@ -17070,6 +17604,32 @@ sentences:
     context_required: false
     notes: Injected compound_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E165-E2
+    error_type: register_error
+    error_subtype: particle_misuse
+    detection_layer: word
+    span:
+      start: 177
+      end: 181
+    erroneous_text: ဘို့
+    gold_correction: ဖို့
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E090'
+  - error_id: BM-EXP-E165-E2
+    error_type: wrong_word
+    error_subtype: zawgyi_conversion_error
+    detection_layer: word
+    span:
+      start: 16
+      end: 21
+    erroneous_text: ပောက်
+    gold_correction: ပေါက်
+    edit_distance: 1
+    context_required: false
+    domain: spelling
+    notes: 'annotation-audit 2026-07-12: residual family typo, annotated in sibling BM-EXP-E134'
   notes: Generated error sentence with 1 compound_confusion error.
 - id: BM-CONF-005
   input: ကလေးတွေ ထမင်းဆားပြီးရင် ကျောင်းသွားကြ။

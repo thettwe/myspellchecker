@@ -375,13 +375,19 @@ class HiddenCompoundStrategy(ValidationStrategy):
             f = self.provider.get_word_frequency(bi)
             if f >= self.compound_min_frequency:
                 best = self._pick_better(best, (bi, f, v, False))
-                continue
-            # freq=0 subsumed compound → trigram verification.
-            if f == 0 and trigram_candidates and idx < len(trigram_candidates):
+            # Subsumed-compound trigram verification: when the trigram is an
+            # attested dictionary word with STRONGER evidence than the bigram
+            # itself, use it. Originally gated on f == 0; the 2026-07-12
+            # freq-0 dictionary repair gave curated subsumed bigrams (e.g.
+            # ကုန်ကျ, floored to 2000) a nonzero frequency that sits below
+            # the confidence floor while the attested trigram (ကုန်ကျစရိတ်,
+            # 27677) carries the real evidence — trigram wins on evidence
+            # strength, not on the bigram being exactly zero.
+            if trigram_candidates and idx < len(trigram_candidates):
                 tri = trigram_candidates[idx]
                 if trigram_valid.get(tri):
                     f2 = self.provider.get_word_frequency(tri)
-                    if f2 >= self.compound_min_frequency:
+                    if f2 >= self.compound_min_frequency and f2 > f:
                         best = self._pick_better(best, (bi, f2, v, True))
 
         if best is None:
