@@ -589,22 +589,21 @@ class ValidationConfig(BaseModel):
         ),
     )
     meta_confidence_bypass: dict[str, float] = Field(
-        default_factory=dict,
+        default_factory=lambda: {"missing_asat": 0.9, "invalid_syllable": 0.95},
         description=(
             "Per-error-type confidence floors that bypass the meta-classifier "
             "post-filter. An error whose type is in this map, whose confidence "
             "meets the per-type floor, AND which carries at least one "
             "suggestion is kept without being scored — all three conditions "
-            "required. Default EMPTY (no bypass). Measured 2026-07-11 with "
-            "{'missing_asat': 0.9, 'invalid_syllable': 0.95}: +7 pure-spelling "
-            "detection TPs (+0.71pp PURE clearance) but composite -0.0023 on "
-            "the frozen v19h yaml — 12 of the 16 added FPs are correct "
-            "detections of unannotated residual typos in duplicate-derived "
-            "benchmark rows (relabeling is barred by the annotation-"
-            "independence policy), and the rest is MRR/top1 dilution from "
-            "coarse suggestions. Park until the under-annotation class is "
-            "audited; enable via this map or MSC_META_CONF_BYPASS in the "
-            "benchmark runner."
+            "required. Default ON since v2.0 (2026-07-12): originally parked "
+            "when measured against the pre-audit yaml (the added FPs were "
+            "later verified to be unannotated residual typos in duplicate-"
+            "derived benchmark rows, corrected in yaml 1.6.0-annotation-"
+            "audit), and mistakenly believed clean-FP-cap-blocked (the "
+            "binding gate counts sentences-with-FP, not total FPs — this "
+            "bypass adds ZERO binding cost). Re-measured on the corrected "
+            "yaml: +14 pure-spelling detections, 0 lost, ship-gate PASS. "
+            "Set to an empty dict to restore unconditional meta filtering."
         ),
     )
     dedup_restore_displaced: bool = Field(

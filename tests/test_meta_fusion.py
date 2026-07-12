@@ -275,13 +275,17 @@ class TestConfidenceBypass:
         with_bypass = model.filter_errors([bypassed, sibling], threshold=0.0)
         assert sibling in with_bypass and bypassed in with_bypass
 
-    def test_default_config_has_no_bypass(self):
-        """The bypass is PARKED default-off — the measured map regressed
-        composite on the frozen v19h yaml (see field description)."""
+    def test_default_config_bypass_map(self):
+        """Default ON since v2.0 (2026-07-12): re-measured on the corrected
+        yaml = +14 pure-spelling detections at zero binding clean-FP cost
+        (see field description for the unpark history)."""
         from myspellchecker.core.config.main import SpellCheckerConfig
 
         config = SpellCheckerConfig()
-        assert config.validation.meta_confidence_bypass == {}
+        assert config.validation.meta_confidence_bypass == {
+            "missing_asat": 0.9,
+            "invalid_syllable": 0.95,
+        }
 
     def test_config_map_wires_through(self):
         from myspellchecker.core.config.main import SpellCheckerConfig
