@@ -161,6 +161,23 @@ class ValidationConfig(BaseModel):
             "repairs. Wider windows catch longer compounds at more cost."
         ),
     )
+    dot_below_suppress_confidence_exempt: float = Field(
+        default=0.6,
+        ge=0.0,
+        description=(
+            "Confusable errors from MLM-margin-backed strategies "
+            "(ConfusableSemantic / MinedConfusablePair) whose confidence is "
+            "at or above this value escape the categorical dot-below (့) "
+            "suppression rule in _suppress_low_value_confusable_errors. The "
+            "rule exists because syntactic pairs like သည်↔သည့် "
+            "are not actionable, but it also killed genuine aukmyit/visarga "
+            "corrections that reached post-processing with gold at rank 1 "
+            "(MLM margin 3.4-16.3; confidence = margin/10). Both conditions "
+            "are required — the syntactic FP class carries a fixed 0.72 "
+            "confidence with no source strategy, so confidence alone cannot "
+            "separate it. Set above 1.0 to restore the unconditional kill."
+        ),
+    )
     aukmyit_context_suppression_immune: bool = Field(
         default=True,
         description=(
@@ -569,6 +586,48 @@ class ValidationConfig(BaseModel):
             "as produced by train_meta_classifier.py. When None and "
             "use_meta_classifier=True, attempts to load from bundled "
             "rules/meta_classifier.yaml."
+        ),
+    )
+    meta_confidence_bypass: dict[str, float] = Field(
+        default_factory=dict,
+        description=(
+            "Per-error-type confidence floors that bypass the meta-classifier "
+            "post-filter. An error whose type is in this map, whose confidence "
+            "meets the per-type floor, AND which carries at least one "
+            "suggestion is kept without being scored — all three conditions "
+            "required. Default EMPTY (no bypass). Measured 2026-07-11 with "
+            "{'missing_asat': 0.9, 'invalid_syllable': 0.95}: +7 pure-spelling "
+            "detection TPs (+0.71pp PURE clearance) but composite -0.0023 on "
+            "the frozen v19h yaml — 12 of the 16 added FPs are correct "
+            "detections of unannotated residual typos in duplicate-derived "
+            "benchmark rows (relabeling is barred by the annotation-"
+            "independence policy), and the rest is MRR/top1 dilution from "
+            "coarse suggestions. Park until the under-annotation class is "
+            "audited; enable via this map or MSC_META_CONF_BYPASS in the "
+            "benchmark runner."
+        ),
+    )
+    dedup_restore_displaced: bool = Field(
+        default=True,
+        description=(
+            "Restore dedup-displaced errors into empty slots after the "
+            "post-processing filters (Option R, 2026-07-12). Position/span "
+            "dedup arbitrate on type/length/confidence with no knowledge of "
+            "downstream survivability; kill-site instrumentation measured 45 "
+            "pure-spelling golds whose narrow, often gold-carrying errors "
+            "lost their slot to a wider error that the meta-classifier or "
+            "compound-split filter then removed (displacement-then-death, "
+            "48/56 ironclad). Displaced losers are kept in a per-check "
+            "graveyard; after the meta-classifier, losers whose slot has no "
+            "surviving error are re-admitted through the same tail gauntlet "
+            "every survivor passed (suppressors, confidence gates, MLM "
+            "plausibility, compound-split, meta scoring) plus a measured "
+            "slice blocklist, then receive the standard suggestion "
+            "processing. Measured (full config, frozen v19h yaml): +44 golds "
+            "/ 0 lost / clean-FP 87<=88 / PURE clearance +3.32pp / composite "
+            "0.7862 (-0.0003 vs shipped row; >=1 of the added FPs is a "
+            "verified benchmark under-annotation artifact). Ratified under "
+            "the v2.0 gate reading 2026-07-12."
         ),
     )
 
@@ -1286,12 +1345,17 @@ class ValidationConfig(BaseModel):
     # Disabled by default: requires per-process SymSpell caching to amortise
     # the per-window lookup cost before it is viable in production.
     use_syllable_window_oov: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable SyllableWindowOOVStrategy: detect multi-syllable OOV typos "
             "that the segmenter decomposes into individually-valid syllables. "
             "Runs at priority 22 (before HiddenCompound, StatisticalConfusable, "
-            "BrokenCompound)."
+            "BrokenCompound). Default True since v2.0 (psg-04, 2026-07-12): "
+            "measured +4 detected golds / ZERO added FPs in all three "
+            "populations (clean sentences, error-sentence non-gold, "
+            "displacement) / composite +0.0001 on the frozen v19h yaml. Its "
+            "emissions bypass the meta-classifier (untrained type) and only "
+            "15 die downstream, all at position-dedup."
         ),
     )
     syllable_window_sizes: tuple[int, ...] = Field(

@@ -583,6 +583,7 @@ def run_benchmark(
     fusion_threshold: float = 0.5,
     calibration_path: Path | None = None,
     holdout: str = "include",
+    fn_examples_limit: int = 120,
 ) -> dict:
     """
     Run the full benchmark suite.
@@ -789,6 +790,35 @@ def run_benchmark(
     elif _vis_env in ("0", "false", "no", "off"):
         config.validation.detect_visarga_insertion = False
     print(f"  detect_visarga_insertion: {config.validation.detect_visarga_insertion}")
+    _dbex_env = _os.environ.get("MSC_DOT_BELOW_CONF_EXEMPT", "").strip()
+    if _dbex_env:
+        try:
+            config.validation.dot_below_suppress_confidence_exempt = float(_dbex_env)
+            print(f"  dot_below_suppress_confidence_exempt: {_dbex_env}")
+        except ValueError:
+            print(f"  WARNING: MSC_DOT_BELOW_CONF_EXEMPT not a float: {_dbex_env}")
+    _ddr_env = _os.environ.get("MSC_DEDUP_RESTORE", "").strip().lower()
+    if _ddr_env in ("1", "true", "yes", "on"):
+        config.validation.dedup_restore_displaced = True
+        print("  dedup_restore_displaced: True (env)")
+    elif _ddr_env in ("0", "false", "no", "off"):
+        config.validation.dedup_restore_displaced = False
+        print("  dedup_restore_displaced: False (env)")
+    _mcb_env = _os.environ.get("MSC_META_CONF_BYPASS", "").strip()
+    if _mcb_env:
+        if _mcb_env.lower() in ("off", "none", "0"):
+            config.validation.meta_confidence_bypass = {}
+            print("  meta_confidence_bypass: OFF")
+        else:
+            try:
+                _mcb = {}
+                for _part in _mcb_env.split(","):
+                    _t, _c = _part.split(":")
+                    _mcb[_t.strip()] = float(_c)
+                config.validation.meta_confidence_bypass = _mcb
+                print(f"  meta_confidence_bypass: {_mcb}")
+            except ValueError:
+                print(f"  WARNING: MSC_META_CONF_BYPASS unparseable: {_mcb_env}")
     _vis_ratio_env = _os.environ.get("MSC_VISARGA_INSERTION_FREQ_RATIO", "").strip()
     if _vis_ratio_env:
         try:
@@ -1373,7 +1403,7 @@ def run_benchmark(
                     if isinstance(hist, dict):
                         hist[reason] = int(hist.get(reason, 0)) + 1
                     examples = fn_reason_telemetry.setdefault("examples", [])
-                    if isinstance(examples, list) and len(examples) < 120:
+                    if isinstance(examples, list) and len(examples) < fn_examples_limit:
                         span = gold.get("span", {})
                         start = int(span.get("start", -1))
                         end = int(span.get("end", -1))
@@ -2216,6 +2246,17 @@ def main():
         ),
     )
 
+    parser.add_argument(
+        "--fn-examples-limit",
+        type=int,
+        default=120,
+        help=(
+            "Max per-FN example rows kept in fn_reason_telemetry (default 120, "
+            "matching historical runs). Raise for FN-audit runs that need a "
+            "reason label on every miss."
+        ),
+    )
+
     args = parser.parse_args()
 
     if not args.db.exists():
@@ -2257,6 +2298,7 @@ def main():
         fusion_threshold=args.fusion_threshold,
         calibration_path=args.calibration,
         holdout=args.holdout,
+        fn_examples_limit=args.fn_examples_limit,
     )
 
     # Print summary

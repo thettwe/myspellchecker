@@ -207,3 +207,91 @@ class TestUntrainedErrorTypeBypass:
         score_alone = bundled_model.score_error(legit, all_errors=[legit], error_index=0)
         score_filtered = bundled_model.score_error(legit, all_errors=[legit], error_index=0)
         assert score_alone == pytest.approx(score_filtered)
+
+
+class TestConfidenceBypass:
+    """psg-05: high-confidence near-precision-1 error types bypass the meta
+    filter when ALL THREE conditions hold — type in the bypass map,
+    confidence at/above the per-type floor, non-empty suggestions."""
+
+    @staticmethod
+    def _scored_error(**kwargs):
+        """Mock error that actually reaches the scoring path (MagicMock
+        auto-attributes are truthy, which would trip the boost bypass)."""
+        e = _make_error(**kwargs)
+        e._boosted_by_compound_split = False
+        e._structural_early_exit = False
+        return e
+
+    @staticmethod
+    def _with_bypass(model, mapping):
+        model.confidence_bypass = mapping
+        return model
+
+    def test_bypass_keeps_high_conf_mapped_type(self, bundled_model):
+        model = self._with_bypass(bundled_model, {"missing_asat": 0.9})
+        err = self._scored_error(error_type="missing_asat", confidence=0.9, suggestions=["ထိန်း"])
+        # threshold=1.0 forces the classifier to kill everything it scores —
+        # survival proves the bypass, not a lucky score.
+        kept = model.filter_errors([err], threshold=1.0)
+        assert kept == [err]
+
+    def test_below_floor_is_scored_and_killed(self, bundled_model):
+        model = self._with_bypass(bundled_model, {"missing_asat": 0.9})
+        err = self._scored_error(error_type="missing_asat", confidence=0.89, suggestions=["ထိန်း"])
+        assert model.filter_errors([err], threshold=1.0) == []
+
+    def test_no_suggestions_not_bypassed(self, bundled_model):
+        # The suggestion condition excludes bare digit-token invalid_syllable
+        # flags (measured 2026-07-11: all six clean-text kills in that slice
+        # were suggestion-less).
+        model = self._with_bypass(bundled_model, {"invalid_syllable": 0.95})
+        err = self._scored_error(error_type="invalid_syllable", confidence=1.0, suggestions=[])
+        assert model.filter_errors([err], threshold=1.0) == []
+
+    def test_unmapped_type_not_bypassed(self, bundled_model):
+        model = self._with_bypass(bundled_model, {"missing_asat": 0.9})
+        err = self._scored_error(error_type="invalid_word", confidence=0.99, suggestions=["fix"])
+        assert model.filter_errors([err], threshold=1.0) == []
+
+    def test_empty_map_restores_unconditional_filtering(self, bundled_model):
+        model = self._with_bypass(bundled_model, {})
+        err = self._scored_error(error_type="missing_asat", confidence=0.95, suggestions=["ထိန်း"])
+        assert model.filter_errors([err], threshold=1.0) == []
+
+    def test_sibling_scores_unchanged_by_bypass(self, bundled_model):
+        """A bypassed error must not perturb its siblings' outcomes — it
+        stays in the trained context and consumes its error_index slot."""
+        sibling = self._scored_error(
+            error_type="invalid_word", confidence=0.85, suggestions=["fix"], position=10
+        )
+        bypassed = self._scored_error(
+            error_type="missing_asat", confidence=0.95, suggestions=["ထိန်း"], position=0
+        )
+        model = self._with_bypass(bundled_model, {})
+        baseline = model.filter_errors([bypassed, sibling], threshold=0.0)
+        assert sibling in baseline
+        model = self._with_bypass(bundled_model, {"missing_asat": 0.9})
+        with_bypass = model.filter_errors([bypassed, sibling], threshold=0.0)
+        assert sibling in with_bypass and bypassed in with_bypass
+
+    def test_default_config_has_no_bypass(self):
+        """The bypass is PARKED default-off — the measured map regressed
+        composite on the frozen v19h yaml (see field description)."""
+        from myspellchecker.core.config.main import SpellCheckerConfig
+
+        config = SpellCheckerConfig()
+        assert config.validation.meta_confidence_bypass == {}
+
+    def test_config_map_wires_through(self):
+        from myspellchecker.core.config.main import SpellCheckerConfig
+        from myspellchecker.core.validation_strategies.meta_fusion import (
+            MetaClassifierFusion,
+        )
+
+        config = SpellCheckerConfig()
+        config.validation.meta_confidence_bypass = {"missing_asat": 0.9}
+        # replicate the init wiring (spellchecker.py meta-classifier block)
+        mc = MetaClassifierFusion.from_bundled()
+        mc.confidence_bypass = dict(config.validation.meta_confidence_bypass or {})
+        assert mc.confidence_bypass["missing_asat"] == pytest.approx(0.9)
