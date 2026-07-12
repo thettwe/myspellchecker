@@ -1322,12 +1322,17 @@ class ValidationConfig(BaseModel):
     # Disabled by default: requires per-process SymSpell caching to amortise
     # the per-window lookup cost before it is viable in production.
     use_syllable_window_oov: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Enable SyllableWindowOOVStrategy: detect multi-syllable OOV typos "
             "that the segmenter decomposes into individually-valid syllables. "
             "Runs at priority 22 (before HiddenCompound, StatisticalConfusable, "
-            "BrokenCompound)."
+            "BrokenCompound). Default True since v2.0 (psg-04, 2026-07-12): "
+            "measured +4 detected golds / ZERO added FPs in all three "
+            "populations (clean sentences, error-sentence non-gold, "
+            "displacement) / composite +0.0001 on the frozen v19h yaml. Its "
+            "emissions bypass the meta-classifier (untrained type) and only "
+            "15 die downstream, all at position-dedup."
         ),
     )
     syllable_window_sizes: tuple[int, ...] = Field(
