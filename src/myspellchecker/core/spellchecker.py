@@ -356,6 +356,10 @@ class SpellChecker(
         self._neural_reranker = self._create_neural_reranker()
         self._neural_reranker_gap_threshold = self.config.neural_reranker.confidence_gap_threshold
 
+        # Dedup graveyard (Option R): thread-local store for dedup-displaced
+        # errors, consumed by _restore_displaced_errors in post-processing.
+        self._dedup_graveyard_tls = threading.local()
+
         # Initialize meta-classifier post-filter (graceful degradation)
         self._meta_classifier = None
         if self.config.validation.use_meta_classifier:
@@ -875,6 +879,10 @@ class SpellChecker(
         Returns:
             Tuple of (errors, layers_applied).
         """
+        # Reset the per-check dedup graveyard (Option R) so displaced errors
+        # from a previous check on this thread never leak into this one.
+        self._reset_dedup_graveyard()
+
         # Run validation layers on normalized text
         errors, layers_applied = self._run_validation_layers(
             normalized_text,
@@ -982,7 +990,10 @@ class SpellChecker(
         with self._rerank_telemetry_lock:
             self._last_rerank_rule_telemetry = {}
             self._rerank_detector_suggestions_by_distance(errors, sentence_text=normalized_text)
-            rerank_telemetry = dict(self._last_rerank_rule_telemetry)
+            # Deep-copy: the restore pass (Option R) may run the reranker
+            # again later in this call; a shallow copy would alias the inner
+            # counter dicts and inflate the already-snapshotted telemetry.
+            rerank_telemetry = {k: dict(v) for k, v in self._last_rerank_rule_telemetry.items()}
 
         # Suggestion expansion/reranking can re-introduce low-value
         # semantic/confusable variants. Re-apply only those filters on
@@ -1055,6 +1066,16 @@ class SpellChecker(
                 provider=self.provider,
                 normalized_text=normalized_text,
             )
+
+        # Option R: restore dedup-displaced errors into empty slots. Runs
+        # last — restored candidates individually pass the same suppressors,
+        # confidence gates, MLM/compound-split filters, and meta scoring
+        # applied above, so this stage is strictly additive and never
+        # re-arbitrates a surviving winner.
+        if self.config.validation.dedup_restore_displaced:
+            restored = self._restore_displaced_errors(errors, normalized_text)
+            if restored:
+                errors = list(errors) + restored
 
         return errors, rerank_telemetry
 

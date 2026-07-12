@@ -797,6 +797,13 @@ def run_benchmark(
             print(f"  dot_below_suppress_confidence_exempt: {_dbex_env}")
         except ValueError:
             print(f"  WARNING: MSC_DOT_BELOW_CONF_EXEMPT not a float: {_dbex_env}")
+    _ddr_env = _os.environ.get("MSC_DEDUP_RESTORE", "").strip().lower()
+    if _ddr_env in ("1", "true", "yes", "on"):
+        config.validation.dedup_restore_displaced = True
+        print("  dedup_restore_displaced: True (env)")
+    elif _ddr_env in ("0", "false", "no", "off"):
+        config.validation.dedup_restore_displaced = False
+        print("  dedup_restore_displaced: False (env)")
     _mcb_env = _os.environ.get("MSC_META_CONF_BYPASS", "").strip()
     if _mcb_env:
         if _mcb_env.lower() in ("off", "none", "0"):

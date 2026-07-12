@@ -607,6 +607,29 @@ class ValidationConfig(BaseModel):
             "benchmark runner."
         ),
     )
+    dedup_restore_displaced: bool = Field(
+        default=True,
+        description=(
+            "Restore dedup-displaced errors into empty slots after the "
+            "post-processing filters (Option R, 2026-07-12). Position/span "
+            "dedup arbitrate on type/length/confidence with no knowledge of "
+            "downstream survivability; kill-site instrumentation measured 45 "
+            "pure-spelling golds whose narrow, often gold-carrying errors "
+            "lost their slot to a wider error that the meta-classifier or "
+            "compound-split filter then removed (displacement-then-death, "
+            "48/56 ironclad). Displaced losers are kept in a per-check "
+            "graveyard; after the meta-classifier, losers whose slot has no "
+            "surviving error are re-admitted through the same tail gauntlet "
+            "every survivor passed (suppressors, confidence gates, MLM "
+            "plausibility, compound-split, meta scoring) plus a measured "
+            "slice blocklist, then receive the standard suggestion "
+            "processing. Measured (full config, frozen v19h yaml): +44 golds "
+            "/ 0 lost / clean-FP 87<=88 / PURE clearance +3.32pp / composite "
+            "0.7862 (-0.0003 vs shipped row; >=1 of the added FPs is a "
+            "verified benchmark under-annotation artifact). Ratified under "
+            "the v2.0 gate reading 2026-07-12."
+        ),
+    )
 
     suppression_immune_strategies: frozenset[str] = Field(
         default=frozenset(),
