@@ -588,6 +588,25 @@ class ValidationConfig(BaseModel):
             "rules/meta_classifier.yaml."
         ),
     )
+    meta_confidence_bypass: dict[str, float] = Field(
+        default_factory=dict,
+        description=(
+            "Per-error-type confidence floors that bypass the meta-classifier "
+            "post-filter. An error whose type is in this map, whose confidence "
+            "meets the per-type floor, AND which carries at least one "
+            "suggestion is kept without being scored — all three conditions "
+            "required. Default EMPTY (no bypass). Measured 2026-07-11 with "
+            "{'missing_asat': 0.9, 'invalid_syllable': 0.95}: +7 pure-spelling "
+            "detection TPs (+0.71pp PURE clearance) but composite -0.0023 on "
+            "the frozen v19h yaml — 12 of the 16 added FPs are correct "
+            "detections of unannotated residual typos in duplicate-derived "
+            "benchmark rows (relabeling is barred by the annotation-"
+            "independence policy), and the rest is MRR/top1 dilution from "
+            "coarse suggestions. Park until the under-annotation class is "
+            "audited; enable via this map or MSC_META_CONF_BYPASS in the "
+            "benchmark runner."
+        ),
+    )
 
     suppression_immune_strategies: frozenset[str] = Field(
         default=frozenset(),

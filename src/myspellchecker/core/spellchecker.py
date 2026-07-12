@@ -369,6 +369,10 @@ class SpellChecker(
                     self._meta_classifier = MetaClassifierFusion.from_yaml(mc_path)
                 else:
                     self._meta_classifier = MetaClassifierFusion.from_bundled()
+                # psg-05: per-type confidence floors that bypass the filter.
+                self._meta_classifier.confidence_bypass = dict(
+                    self.config.validation.meta_confidence_bypass or {}
+                )
             except Exception as exc:
                 self.logger.warning(
                     "Meta-classifier failed to load (%s); FP suppression disabled. "

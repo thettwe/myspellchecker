@@ -797,6 +797,21 @@ def run_benchmark(
             print(f"  dot_below_suppress_confidence_exempt: {_dbex_env}")
         except ValueError:
             print(f"  WARNING: MSC_DOT_BELOW_CONF_EXEMPT not a float: {_dbex_env}")
+    _mcb_env = _os.environ.get("MSC_META_CONF_BYPASS", "").strip()
+    if _mcb_env:
+        if _mcb_env.lower() in ("off", "none", "0"):
+            config.validation.meta_confidence_bypass = {}
+            print("  meta_confidence_bypass: OFF")
+        else:
+            try:
+                _mcb = {}
+                for _part in _mcb_env.split(","):
+                    _t, _c = _part.split(":")
+                    _mcb[_t.strip()] = float(_c)
+                config.validation.meta_confidence_bypass = _mcb
+                print(f"  meta_confidence_bypass: {_mcb}")
+            except ValueError:
+                print(f"  WARNING: MSC_META_CONF_BYPASS unparseable: {_mcb_env}")
     _vis_ratio_env = _os.environ.get("MSC_VISARGA_INSERTION_FREQ_RATIO", "").strip()
     if _vis_ratio_env:
         try:
