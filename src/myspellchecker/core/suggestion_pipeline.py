@@ -14,6 +14,7 @@ from myspellchecker.algorithms.distance.edit_distance import (
     weighted_damerau_levenshtein_distance,
 )
 from myspellchecker.core.constants import (
+    ET_BROKEN_COMPOUND,
     ET_BROKEN_STACKING,
     ET_BROKEN_VIRAMA,
     ET_CLASSIFIER_ERROR,
@@ -159,6 +160,12 @@ class SuggestionPipelineMixin:
     # reranked by n-gram context (their suggestions are deterministic).
     _NGRAM_RERANK_PROTECTED_TYPES: frozenset[str] = frozenset(
         {
+            # Merged multi-token spans: the reranker's context model is
+            # structurally invalid for them — text.split() maps the error to
+            # the unsegmented clump, every bigram backs off to unigrams, and
+            # high-frequency particles injected for SUB-tokens outrank the
+            # gold compound (measured: gold rank 1 -> 6 on merge rescues).
+            ET_BROKEN_COMPOUND,
             ET_PARTICLE_TYPO,
             ET_MEDIAL_CONFUSION,
             ET_BROKEN_VIRAMA,

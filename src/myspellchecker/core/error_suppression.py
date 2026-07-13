@@ -1622,6 +1622,38 @@ class ErrorSuppressionMixin:
         validation = getattr(config, "validation", None) if config else None
         return bool(getattr(validation, "dedup_restore_displaced", False))
 
+    # Rescue strategies exist to catch merge typos NOTHING else flags; a
+    # surviving rescue emission must never compete with an overlapping
+    # detection from another strategy (its wide merge span would displace a
+    # narrower correct suggestion in span dedup — 26 previously rank-1 golds
+    # lost benchmark-wide when it did).
+    _RESCUE_YIELD_SOURCES: frozenset[str] = frozenset({"ProbeSegmenterRescueStrategy"})
+
+    def _yield_rescue_overlaps(self, errors: list[Error]) -> None:
+        """Drop rescue-sourced errors that overlap any other detection.
+
+        Deliberate suppression, not displacement: the yielded errors are NOT
+        graveyarded, so ``_restore_displaced_errors`` cannot resurrect them.
+        """
+        if len(errors) < 2:
+            return
+        rescue = [e for e in errors if e.source_strategy in self._RESCUE_YIELD_SOURCES]
+        if not rescue or len(rescue) == len(errors):
+            return
+        others = [e for e in errors if e.source_strategy not in self._RESCUE_YIELD_SOURCES]
+        drop: set[int] = set()
+        for r in rescue:
+            r_start = r.position
+            r_end = r_start + len(r.text or "")
+            for o in others:
+                o_start = o.position
+                o_end = o_start + len(o.text or "")
+                if r_start < o_end and o_start < r_end:
+                    drop.add(id(r))
+                    break
+        if drop:
+            errors[:] = [e for e in errors if id(e) not in drop]
+
     def _dedup_errors_by_position(self, errors: list[Error]) -> None:
         """Deduplicate errors at the same position, keeping the best one.
 
@@ -1634,6 +1666,8 @@ class ErrorSuppressionMixin:
         """
         if not errors:
             return
+
+        self._yield_rescue_overlaps(errors)
 
         _capture = self._dedup_restore_enabled()
         _original = list(errors) if _capture else None

@@ -54,7 +54,13 @@ class TestStrategyTier:
         assert _get_tier("CustomStrategy") == 2
 
     def test_all_known_strategies_have_tiers(self):
-        assert len(STRATEGY_TIER) == 17
+        assert len(STRATEGY_TIER) == 18
+
+    def test_probe_segmenter_rescue_tier2(self):
+        # psg-16: tier 2 deliberately — singleton fusion survival comes from
+        # the reliability weight, and tier 3 measurably stole winner slots
+        # from correct contextual detections (33 rank degradations).
+        assert _get_tier("ProbeSegmenterRescueStrategy") == 2
 
 
 class TestSelectWinner:

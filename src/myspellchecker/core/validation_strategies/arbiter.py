@@ -46,6 +46,13 @@ STRATEGY_TIER: dict[str, int] = {
     "BrokenCompoundStrategy": 2,
     "CrossWhitespaceProbeStrategy": 2,
     "CompoundMergeProbeStrategy": 2,
+    # Tier 2 deliberately (NOT the HiddenCompound tier-3 precedent): PSR's
+    # singleton survival comes from its reliability weight, not its tier, and
+    # a tier-3 registration let it win same-position co-fires and prepend its
+    # merge suggestion onto previously top1-correct detections (measured: 33
+    # rank degradations, composite -0.0125). At tier 2 contextual winners keep
+    # their suggestions; PSR keeps its singleton emissions.
+    "ProbeSegmenterRescueStrategy": 2,
     # Tier 3: Contextual (use context signals, medium cost)
     "POSSequenceValidationStrategy": 3,
     "QuestionStructureValidationStrategy": 3,
@@ -163,6 +170,9 @@ INDEPENDENCE_CLUSTERS: dict[str, list[str]] = {
         "BrokenCompoundStrategy",
         "CompoundMergeProbeStrategy",
         "CrossWhitespaceProbeStrategy",
+        # Probes overlapping merge windows with CompoundMergeProbe — correlated
+        # evidence, so same-cluster max() rather than Noisy-OR double-counting.
+        "ProbeSegmenterRescueStrategy",
     ],
     "hidden_compound": ["HiddenCompoundStrategy"],
     "question": ["QuestionStructureValidationStrategy"],
