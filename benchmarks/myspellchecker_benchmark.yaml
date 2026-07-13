@@ -1,4 +1,4 @@
-version: 1.6.0-annotation-audit
+version: 1.6.1-clean-row-audit
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
@@ -10645,11 +10645,25 @@ sentences:
   notes: 'Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word ''တံခါးပောက်ကြီး'' should be ''တံခါးပေါက်ကြီး''. This is a U+102B vs U+102C issue..  The word ''တံခါးပောက်ကြီး'' should be ''တံခါးပေါက်ကြီး''. This is a U+102B vs U+102C issue.. Audit 2026-04-15: has unannotated error(s). Gemini: The word ''တံခါးပောက်ကြီး'' should be ''တံခါးပေါက်ကြီး''. This is a common Zawgyi-to-Unicode conversion error where U+102B (ါ) is incorrectly converted to. Needs manual error annotation.'
 - id: BM-EXP-C100
   input: မိန်းမရဲ့ ကံအကြောင်းတရား မိန်းမရဲ့ နောင်ရေးဟာ သူကိုယ်တိုင် အားထုတ်ဖော်မှုမှာ မတည်၊ ဖိုသတ္တဝါရဲ့ ရှေ့ဆောင်မှု၊ ဖိုသတ္တဝါရဲ့ လမ်းညွှန်မှု အပေါ်မှာသာ တည်တယ်လို့ ငယ်ငယ်ကတည်းက စွဲခဲ့လေတော့ အပျိုဘော်ဝင်စ မိန်းကလေးဟာ ကိုယ့်ရဲ့ အရှုံးပေးဝါဒကို ချက်ချင်းမသိဘူး။
-  is_clean: true
+  is_clean: false
   domain: literary
   register: colloquial
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C100-E1
+    error_type: wrong_word
+    error_subtype: consonant_substitution
+    detection_layer: word
+    span:
+      start: 184
+      end: 196
+    erroneous_text: အပျိုဘော်ဝင်
+    gold_correction: အပျိုဖော်ဝင်
+    edit_distance: 1
+    context_required: false
+    notes: 'Clean-row under-annotation audit 2026-07-13 (psg-17, 2-lens adversarial
+      verified): ဘော် is a misspelling of ဖော် in အပျိုဖော်ဝင်စ; MLC standard အပျိုဖော်.'
+    domain: spelling
   notes: 'Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word ''အပော်'' should be ''အပေါ်''. This is a U+102B vs U+102C issue..  The word ''အပော်'' should be ''အပေါ်''. This is a U+102B vs U+102C issue.. Audit 2026-04-15: has unannotated error(s). Gemini: The word ''အပော်'' should be ''အပေါ်''. This is a common Zawgyi-to-Unicode conversion error where U+102B (ါ) is incorrectly converted to U+102C (ာ).. Needs manual error annotation.'
 - id: BM-EXP-C101
   input: အင်း နော်၊ ကိုဆန်းလွင် ပြောတော့ မ သဘော ပေါက်ပါတယ်၊ မက ကိုဆန်းလွင်လို မပြောတတ်လို့၊ မ ဆိုလိုတာလည်း ဒီသဘောပါပဲ၊ မ အဖြေ ပေးသင့်တဲ့ အချိန်ဟာ ဘယ်အချိန် ဖြစ်မလဲ ဆိုတာ မ အနေနှင့် ကြိုမသိနိုင်လို့ ကြိုပြီး အသိပေးတဲ့ သဘော ပြောတာပါ
