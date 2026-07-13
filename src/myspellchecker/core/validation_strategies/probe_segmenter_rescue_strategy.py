@@ -63,7 +63,7 @@ NEVER_MERGE_PARTICLES = frozenset(
         "မှ",
         "ရဲ့",
         "၏",
-        "နှင့်",
+        "နှင့်",  # canonical order: asat U+103A before aukmyit U+1037
         "များ",
         "ပါ",
         "နှ",

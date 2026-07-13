@@ -196,3 +196,67 @@ class TestRestoreOrchestration:
         restored = c._restore_displaced_errors([], "text")
         assert immune_loser in restored
         assert plain_loser not in restored
+
+
+class TestRescueYieldOverlaps:
+    """psg-16: rescue-sourced errors yield to any overlapping detection.
+
+    Deliberate suppression (not graveyarded), so Option R cannot resurrect
+    the yielded error and re-displace the narrower correct suggestion.
+    """
+
+    def test_overlapping_rescue_dropped(self):
+        c = _checker()
+        keeper = _make_error(text="ကပ်", position=10, source_strategy="HiddenCompoundStrategy")
+        rescue = _make_error(
+            text="မိတ်ကပ်",
+            position=7,
+            error_type="broken_compound",
+            source_strategy="ProbeSegmenterRescueStrategy",
+            suggestions=["မိတ်ကပ်လိမ်း"],
+        )
+        errors = [keeper, rescue]
+        c._dedup_errors_by_position(errors)
+        assert keeper in errors
+        assert rescue not in errors
+
+    def test_yielded_rescue_not_graveyarded(self):
+        c = _checker(restore_enabled=True)
+        keeper = _make_error(text="ကပ်", position=10, source_strategy="HiddenCompoundStrategy")
+        rescue = _make_error(
+            text="မိတ်ကပ်",
+            position=7,
+            error_type="broken_compound",
+            source_strategy="ProbeSegmenterRescueStrategy",
+        )
+        errors = [keeper, rescue]
+        c._dedup_errors_by_position(errors)
+        assert all(
+            g.source_strategy != "ProbeSegmenterRescueStrategy" for g in c._dedup_graveyard_items()
+        )
+
+    def test_gap_filling_rescue_kept(self):
+        c = _checker()
+        other = _make_error(text="စမ်း", position=0, source_strategy="HiddenCompoundStrategy")
+        rescue = _make_error(
+            text="မိတ်ကပ်",
+            position=20,
+            error_type="broken_compound",
+            source_strategy="ProbeSegmenterRescueStrategy",
+        )
+        errors = [other, rescue]
+        c._dedup_errors_by_position(errors)
+        assert rescue in errors
+        assert other in errors
+
+    def test_rescue_only_list_untouched(self):
+        c = _checker()
+        r1 = _make_error(
+            text="မိတ်ကပ်",
+            position=0,
+            error_type="broken_compound",
+            source_strategy="ProbeSegmenterRescueStrategy",
+        )
+        errors = [r1]
+        c._dedup_errors_by_position(errors)
+        assert r1 in errors

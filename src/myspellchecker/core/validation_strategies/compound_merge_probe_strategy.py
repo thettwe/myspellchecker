@@ -74,7 +74,7 @@ _NEVER_MERGE_PARTICLES: frozenset[str] = frozenset(
         "၏",
         # Comitative
         "နဲ့",
-        "နှင့်",
+        "နှင့်",  # canonical order: asat U+103A before aukmyit U+1037
         # Plural
         "များ",
         # Question particles

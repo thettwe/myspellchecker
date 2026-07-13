@@ -30,6 +30,11 @@ STRATEGY_RELIABILITY: dict[str, float] = {
     "BrokenCompoundStrategy": 0.80,
     "CrossWhitespaceProbeStrategy": 0.85,
     "CompoundMergeProbeStrategy": 0.80,
+    # Probe-verified merge rescue: neural span-probe gate (>=0.75) + freq-gated
+    # SymSpell candidate; 1 clean-row emission benchmark-wide at the production
+    # operating point. Unregistered it fell to DEFAULT_RELIABILITY 0.5, which
+    # silently killed every singleton emission (0.5 * conf < 0.5 threshold).
+    "ProbeSegmenterRescueStrategy": 0.80,
     # Tier 3: Contextual -- precision varies with context quality
     "POSSequenceValidationStrategy": 0.60,
     "QuestionStructureValidationStrategy": 0.55,

@@ -284,3 +284,56 @@ class TestErrorCandidateWordIndices:
         )
         assert c.word_indices == (2, 3)
         assert len(c.word_indices) == 2
+
+
+# ---------------------------------------------------------------------------
+# ProbeSegmenterRescue fusion registration (psg-16)
+# ---------------------------------------------------------------------------
+
+
+class TestProbeSegmenterRescueRegistration:
+    """PSR must be fusion-registered so singleton emissions survive.
+
+    Unregistered it fell to DEFAULT_RELIABILITY (0.5), so a singleton emission
+    at any confidence < 1.0 fused below the 0.5 threshold and was deleted by
+    the context validator's rejected-position rebind (measured on benchmark
+    rows BM-1158 / BM-1616).
+    """
+
+    def test_singleton_survives_fusion_threshold(self):
+        cal = StrategyCalibrator()
+        c = _candidate(
+            "ProbeSegmenterRescueStrategy",
+            error_type="broken_compound",
+            confidence=0.88,
+        )
+        fused_conf, winner = fuse_candidates([c], cal)
+        assert winner is c
+        assert fused_conf == pytest.approx(0.80 * 0.88)
+        assert fused_conf >= 0.5
+
+    def test_min_operating_confidence_survives(self):
+        # PSR emits at conf = min(0.9, probe_prob); its probe gate is 0.75, so
+        # 0.75 is the lowest confidence a production emission can carry.
+        cal = StrategyCalibrator()
+        c = _candidate(
+            "ProbeSegmenterRescueStrategy",
+            error_type="broken_compound",
+            confidence=0.75,
+        )
+        fused_conf, _ = fuse_candidates([c], cal)
+        assert fused_conf >= 0.5
+
+    def test_contextual_cofire_keeps_winner_slot(self):
+        # Tier 2 deliberately: at co-fire positions the contextual winner must
+        # keep its error_type and rank-0 suggestion — a tier-3 PSR measurably
+        # displaced 33 previously-correct detections (composite -0.0125).
+        cal = StrategyCalibrator()
+        pos = _candidate("POSSequenceValidationStrategy", confidence=0.68)
+        psr = _candidate(
+            "ProbeSegmenterRescueStrategy",
+            error_type="broken_compound",
+            confidence=0.88,
+        )
+        _, winner = fuse_candidates([pos, psr], cal)
+        assert winner.strategy_name == "POSSequenceValidationStrategy"
