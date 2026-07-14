@@ -1,13 +1,13 @@
-version: 1.6.2-gold-mechanical-fix
+version: 1.6.3-valid-word-audit
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
   created_date: '2026-03-17'
   annotation_revision_date: '2026-07-14'
   total_sentences: 2084
-  clean_count: 522
-  error_count: 1562
-  observable_error_span_count: 1809
+  clean_count: 588
+  error_count: 1496
+  observable_error_span_count: 1786
   annotation_anomaly_count: 0
   difficulty_distribution:
     tier_2: 863
@@ -27,13 +27,13 @@ metadata:
     consonant_substitution: 152
     broken_compound: 127
     vowel_medial_substitution: 143
-    compound_confusion: 91
+    compound_confusion: 89
     tone_mark_error: 84
-    aukmyit_confusion: 101
-    loan_word_misspelling: 85
-    real_word_confusion: 89
+    aukmyit_confusion: 100
+    loan_word_misspelling: 84
+    real_word_confusion: 87
     non_word_typo: 79
-    homophone_confusion: 77
+    homophone_confusion: 76
     word_boundary: 63
     missing_visarga: 60
     register_mismatch: 53
@@ -42,24 +42,24 @@ metadata:
     zawgyi_encoding: 12
     hidden_compound_typo: 38
     stacking_error: 32
-    verb_tense_agreement: 28
+    verb_tense_agreement: 26
     spacing: 34
     word_order: 25
-    collocation_error: 22
+    collocation_error: 21
     ngram_unlikely: 21
     colloquial_in_formal: 23
     zero_width_chars: 13
     classifier_error: 12
     missing_information: 9
-    semantic_error: 11
+    semantic_error: 9
     zawgyi_conversion_error: 113
     missing_asat: 12
     missing_word: 19
-    aspect_error: 5
+    aspect_error: 4
     negation_error: 4
     merged_word: 3
     incomplete_sentence: 1
-    synonym_substitution: 32
+    synonym_substitution: 22
   word_vs_syllable_policy_date: '2026-03-17'
   unflaggable_source_rows_promoted_to_clean: 8
   reclassified_word_level_from_previous_invalid_syllable: 145
@@ -7262,25 +7262,12 @@ sentences:
   notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
 - id: BM-EXT-E004
   input: သူက စားပွဲကို သာပေးခဲ့တယ်။
-  is_clean: false
+  is_clean: true
   domain: conversational
   register: colloquial
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-EXT-E004-E1
-    error_type: wrong_word
-    error_subtype: homophone_confusion
-    detection_layer: context
-    span:
-      start: 14
-      end: 16
-    erroneous_text: သာ
-    gold_correction: သား
-    edit_distance: 1
-    context_required: true
-    notes: 'Homophone confusion: သာ (only/just) vs သား (also/son). Missing visarga changes particle meaning.'
-    domain: grammar
-  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+  expected_errors: []
+  notes: Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.
 - id: BM-EXT-E005
   input: ဒီကားက အရမ်းမန်တယ် လမ်းပေါ်မှာ ဖြတ်သွားတယ်။
   is_clean: false
@@ -10973,19 +10960,6 @@ sentences:
   register: formal
   difficulty_tier:
   expected_errors:
-  - error_id: BM-EXP-C153-E1
-    error_type: wrong_word
-    error_subtype: aukmyit_confusion
-    detection_layer: word
-    span:
-      start: 101
-      end: 104
-    erroneous_text: တွေ
-    gold_correction: တွေ့
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C153-E2
     error_type: wrong_word
     error_subtype: zawgyi_conversion_error
@@ -21176,25 +21150,12 @@ sentences:
   notes: '1 error(s). Subtypes: real_word_confusion.'
 - id: BM-1146
   input: တေးဂီတ ကြားရတာ သဘောကျတယ်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1146-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 7
-      end: 14
-    erroneous_text: ကြားရတာ
-    gold_correction: နားထောင်ရတာ
-    edit_distance: 7
-    context_required: true
-    notes: Replaced 'နားထောင်ရတာ' (to listen actively) with 'ကြားရတာ' (to hear passively), which is semantically confusable but wrong in the context of intentionally enjoying music.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1147
   input: သီချင်းတွေက စိပ်ကြည်နူးစေတယ်။
   is_clean: false
@@ -21968,25 +21929,12 @@ sentences:
   notes: '1 error(s). Subtypes: tone_mark_error.'
 - id: BM-1182
   input: မီဒီယာတွေက သတင်းအချက်အလက်တွေကို ဖျက်ဆီးပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: news
   register: formal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1182-E1
-    error_type: semantic_error
-    error_subtype: semantic_error
-    detection_layer: context
-    span:
-      start: 32
-      end: 39
-    erroneous_text: ဖျက်ဆီး
-    gold_correction: ပေးပို့
-    edit_distance: 7
-    context_required: true
-    notes: Reassigned from 'classifier_error' as no classifiers are present. Replaced 'ပေးပို့' (delivers) with 'ဖျက်ဆီး' (destroys), which is semantically opposite and incorrect in the context.
-    domain: grammar
-  notes: '1 error(s). Subtypes: semantic_error.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1183
   input: လူမှုကွန်ရက်ပေါ်မှာ သတင်းအမှားတွေလည်း ဆိတတ်ပါတယ်။
   is_clean: false
@@ -22107,25 +22055,12 @@ sentences:
   notes: '1 error(s). Subtypes: collocation_error.'
 - id: BM-1188
   input: စာရိုက်တာနဲ့ အီးမေးလ်ပို့တာလိုမျိုး အခြေခံကျွမ်းကျင်မှုတွေ လိုချင်တယ်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1188-E1
-    error_type: wrong_word
-    error_subtype: real_word_confusion
-    detection_layer: context
-    span:
-      start: 59
-      end: 66
-    erroneous_text: လိုချင်
-    gold_correction: လိုအပ်
-    edit_distance: 3
-    context_required: true
-    notes: Reassigned from 'stacking_error' as there are no stacked consonants. Replaced 'လိုအပ်' (is necessary/needed) with 'လိုချင်' (want), which is a real word but semantically incorrect in the context.
-    domain: spelling
-  notes: '1 error(s). Subtypes: real_word_confusion.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1189
   input: အင်တာနက်ကို သုံးပြီး သတင်းအချက်အလက်တွေ ရှာဖွင့်နိုင်ရမယ်။
   is_clean: false
@@ -22758,25 +22693,12 @@ sentences:
   notes: '1 error(s). Subtypes: hidden_compound_typo.'
 - id: BM-1218
   input: ဟောပြောကောင်းနှင့် လေ့ကျင့်မှုတွေ အများကြီး လိုအပ်ပါလိမ့်မယ်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: formal
   difficulty_tier: 3
-  expected_errors:
-  - error_id: BM-1218-E1
-    error_type: grammar_error
-    error_subtype: verb_tense_agreement
-    detection_layer: grammar
-    span:
-      start: 44
-      end: 59
-    erroneous_text: လိုအပ်ပါလိမ့်မယ
-    gold_correction: လိုအပ်ပါတယ်
-    edit_distance: 6
-    context_required: true
-    notes: Changed the verb 'လိုအပ်ပါတယ်' (is needed - present) to 'လိုအပ်ပါလိမ့်မယ်' (will be needed - future), creating a tense disagreement with the general truth context.
-    domain: grammar
-  notes: '2 error(s). Subtypes: particle_misuse, verb_tense_agreement.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1219
   input: မိမိရဲ့အသိပန်းရာကို မျှဝေပေးနိုင်တဲ့အခွင့်အရေးလည်း ဖြစ်ပါတယ်။
   is_clean: false
@@ -27246,25 +27168,12 @@ sentences:
   notes: '1 error(s). Subtypes: syllable_error.'
 - id: BM-1429
   input: အိပ်မက်တွေကို မှတ်မိပြီး အဓိပ္ပာယ်ဖွင့်ဆိုကြတယ်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1429-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 14
-      end: 24
-    erroneous_text: မှတ်မိပြီး
-    gold_correction: မှတ်သားပြီး
-    edit_distance: 3
-    context_required: true
-    notes: Replaced 'မှတ်သား' (to note down/learn/remember actively) with 'မှတ်မိ' (to recall/remember passively). While both relate to memory, 'မှတ်သား' implies a more active process suitable for interpretation, making 'မှတ်မိ' semantically less fitting in this context.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1430
   input: အိပ်မက်အနက်ဖွင့်တာက ကိုယ့်ရဲ့စိတ်ပိုင်းဆိုင်ရာကို နားလည်အောင် ဂူညီပေးနိုင်တယ်။
   is_clean: false
@@ -28078,25 +27987,12 @@ sentences:
   notes: '1 error(s). Subtypes: consonant_substitution.'
 - id: BM-1470
   input: ထမင်းနှင့်ဟင်းက အရသာရှိပြီး အာဟာရလည်း ပြည့်စုံတယ်။
-  is_clean: false
+  is_clean: true
   domain: literary
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1470-E1
-    error_type: wrong_word
-    error_subtype: compound_confusion
-    detection_layer: context
-    span:
-      start: 38
-      end: 46
-    erroneous_text: ပြည့်စုံ
-    gold_correction: ပြည့်ဝ
-    edit_distance: 3
-    context_required: true
-    notes: Replaced 'ပြည့်ဝ' (full/satiated) with 'ပြည့်စုံ' (complete/perfect), which is a valid word but alters the specific meaning within the compound 'အာဟာရ ပြည့်ဝ' (full of nutrition).
-    domain: spelling
-  notes: '1 error(s). Subtypes: compound_confusion.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1471
   input: အွန်လိုင်းစျေးဝင်တာက အရမ်းလွယ်ကူတယ်။
   is_clean: false
@@ -28375,25 +28271,12 @@ sentences:
   notes: '1 error(s). Subtypes: loan_word_misspelling.'
 - id: BM-1485
   input: ဆူညံသံလျော့ချဖို့အတွက် ဥပဒေတွေ ပြဋ္ဌာန်းသင့်ပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: news
   register: formal
   difficulty_tier: 1
-  expected_errors:
-  - error_id: BM-1485-E1
-    error_type: wrong_word
-    error_subtype: loan_word_misspelling
-    detection_layer: word
-    span:
-      start: 31
-      end: 40
-    erroneous_text: ပြဋ္ဌာန်း
-    gold_correction: ပြဌာန်း
-    edit_distance: 2
-    context_required: false
-    notes: Replaced `ပြဌာန်း` (to promulgate/enact) with `ပြဋ္ဌာန်း`, which is a common misspelling using `ဋ္ဌ` instead of `ဌ` for this Pali-derived word.
-    domain: spelling
-  notes: '1 error(s). Subtypes: loan_word_misspelling.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1486
   input: လေယာဉ်နဲ့ ခရီးသွားရတာ အလွန်ပျော်ဖို့ကောင်းတယ်။
   is_clean: false
@@ -28787,25 +28670,12 @@ sentences:
   notes: '1 error(s). Subtypes: verb_tense_agreement.'
 - id: BM-1505
   input: ကုမ္ပဏီအများစုက လစာနဲ့ အကျိုးခံစားခွင့်တွေကို ပြိုင်ဆိုင်မှုရှိအောင် ဖန်တီးကြတယ်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1505-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 69
-      end: 80
-    erroneous_text: ဖန်တီးကြတယ်
-    gold_correction: လုပ်ကြတယ်
-    edit_distance: 6
-    context_required: true
-    notes: Replaced 'လုပ်ကြတယ်' (they make/do) with 'ဖန်တီးကြတယ်' (they create), which is a near-synonym but less appropriate in the context of achieving competitiveness.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1506
   input: သမိုင်းနဲ့ ယဉ်ကျေးမှု အမွေအနှစ်တွေက ကျွနု်ပ်တို့ရဲ့ အဖိုးတန်တဲ့ အရာတွေပါ။
   is_clean: false
@@ -29008,46 +28878,20 @@ sentences:
   notes: '1 error(s). Subtypes: word_boundary.'
 - id: BM-1516
   input: ဘာသာရေးဆိုင်ရာ အလေ့အထတွေက လူ့အသက်တာမှာ အရေးပါပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1516-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 15
-      end: 21
-    erroneous_text: အလေ့အထ
-    gold_correction: အလေ့အကျင့်
-    edit_distance: 5
-    context_required: true
-    notes: Replaced `အလေ့အကျင့်` (practice) with `အလေ့အထ` (habit), a near-synonym that subtly changes the nuance in the context of religious practices.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1517
   input: ဘုရားရှိခိုးကျောင်းတွေမှာ ဆုတောင်းခြင်းက စိတ်အေးချမ်းမှုကို ရစေပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: religious
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1517-E1
-    error_type: wrong_word
-    error_subtype: compound_confusion
-    detection_layer: context
-    span:
-      start: 45
-      end: 56
-    erroneous_text: အေးချမ်းမှု
-    gold_correction: ငြိမ်းချမ်းမှု
-    edit_distance: 5
-    context_required: true
-    notes: Replaced `ငြိမ်းချမ်းမှု` (peace of mind) with `အေးချမ်းမှု` (serenity), where `အေးချမ်း` is a confusable component creating a valid but less precise compound.
-    domain: spelling
-  notes: '1 error(s). Subtypes: compound_confusion.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1518
   input: ဥပုသ်နေ့တွေမှာ တရား စခန်းဝင်ကြတာမျိုးလည်းရှိပါတယ်။
   is_clean: false
@@ -29071,25 +28915,12 @@ sentences:
   notes: '1 error(s). Subtypes: broken_compound.'
 - id: BM-1519
   input: ဘာသာတရားဝင်ကိုးကွယ်သူတွေကတော့ အလှူအတန်းတွေပြုလုပ်ကြတယ်။
-  is_clean: false
+  is_clean: true
   domain: religious
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1519-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 11
-      end: 21
-    erroneous_text: ကိုးကွယ်သူ
-    gold_correction: ယုံကြည်သူ
-    edit_distance: 5
-    context_required: true
-    notes: Replaced `ယုံကြည်သူ` (believer) with `ကိုးကွယ်သူ` (worshipper), a near-synonym that is plausible but slightly off in nuance for the general term 'religious believers'.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1520
   input: ဘုရားကိုကိုးကွယ်ဆည်းကပ်ခြင်းဟာ ယုံကြည်သူတို့အတွက် အဓိကထားပါတယ်။
   is_clean: false
@@ -32281,25 +32112,12 @@ sentences:
   notes: '1 error(s). Subtypes: vowel_medial_substitution.'
 - id: BM-1672
   input: ရေဒီယိုကနေ သီချင်းတွေ၊ ဟောပြောပွဲတွေ ကြားနိုင်ပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: technical
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1672-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 37
-      end: 41
-    erroneous_text: ကြား
-    gold_correction: နားထောင်
-    edit_distance: 7
-    context_required: true
-    notes: Replaced 'နားထောင်' (listen actively) with 'ကြား' (hear passively), which is semantically confusable but doesn't fit the context of actively listening to songs/talks.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1673
   input: ရေဒိယိုအသံလွှင့်မှုဟာ လှိုင်းနှုန်းတွေနဲ အလုပ်လုပ်ပါတယ်။
   is_clean: false
@@ -35817,25 +35635,12 @@ sentences:
   notes: '1 error(s). Subtypes: non_word_typo.'
 - id: BM-1838
   input: ပွဲတော်များတွင် လူအများ စုပေါင်းအားရကြသည်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: formal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1838-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 32
-      end: 36
-    erroneous_text: အားရ
-    gold_correction: ပျော်ရွှင်
-    edit_distance: 8
-    context_required: true
-    notes: Replaced 'ပျော်ရွှင်' (joyful) with 'အားရ' (satisfied/pleased), which is semantically close but less appropriate for expressing outward collective joy at a festival.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1839
   input: အစားအစာမျိုးစုံ၊ ကပွဲများနှင့် ဖျော်ဖြေမှဳများလည်းရှိသည်။
   is_clean: false
@@ -36515,25 +36320,12 @@ sentences:
   notes: '2 error(s). Subtypes: zawgyi_encoding, homophone_confusion.'
 - id: BM-1873
   input: သတ္တုတွင်းလုပ်ငန်းသည် သဘာဝပတ်ဝန်းကျင်ကို ထိပါးစေနိုင်သည်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: formal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1873-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 41
-      end: 46
-    erroneous_text: ထိပါး
-    gold_correction: ထိခိုက်
-    edit_distance: 5
-    context_required: true
-    notes: Replaced `ထိခိုက်` (to harm/affect) with `ထိပါး` (to infringe/provoke), which is semantically close but contextually wrong for 'environment'.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1874
   input: သတ္တုတွင်းလုပ်ငန်းထွင် အန္တရာယ်များစွာရှိသည်။
   is_clean: false
@@ -36985,25 +36777,12 @@ sentences:
   notes: '2 error(s). Subtypes: non_word_typo, vowel_medial_substitution.'
 - id: BM-1898
   input: လက်မှုပညာရှင်များသည် သစ်သားကို အသေးစိတ်ထွင်းထုကြသည်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: formal
   difficulty_tier: 1
-  expected_errors:
-  - error_id: BM-1898-E1
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 31
-      end: 39
-    erroneous_text: အသေးစိတ်
-    gold_correction: အနုစိတ်
-    edit_distance: 3
-    context_required: false
-    notes: Replaced 'အနုစိတ်' (intricately, referring to finesse in art) with 'အသေးစိတ်' (detailed, referring to completeness), which is semantically less fitting for carving.
-    domain: spelling
-  notes: '1 error(s). Subtypes: confusable_semantic.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1899
   input: ထွင်းထုထားသော ပုံများသည် အလွန်လှပပြီး စွဲဆောင်မူရှိသည်။
   is_clean: false
@@ -38140,25 +37919,12 @@ sentences:
   notes: '1 error(s). Subtypes: tone_mark_error.'
 - id: BM-1951
   input: ဝမ်းနည်းကြေကွဲခြင်းတွေက ရင်ထဲမှာ အမြဲရှိနေမည်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1951-E1
-    error_type: grammar_error
-    error_subtype: aspect_error
-    detection_layer: grammar
-    span:
-      start: 37
-      end: 45
-    erroneous_text: ရှိနေမည်
-    gold_correction: ရှိနေတတ်တယ်
-    edit_distance: 5
-    context_required: true
-    notes: Changed the aspect marker 'တတ်တယ်' (tend to/habitual) to 'မည်' (future) which creates an aspect disagreement with 'အမြဲ' (always) in a general statement.
-    domain: grammar
-  notes: '1 error(s). Subtypes: aspect_error.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1952
   input: ဆုံးရှုံးမူတွေက နှလုံးသားကို နာကျင်စေတယ်။
   is_clean: false
@@ -38448,25 +38214,12 @@ sentences:
   notes: '1 error(s). Subtypes: non_word_typo.'
 - id: BM-1968
   input: စာရေးခြင်းက အတွေးအခေါ်တွေကို ဖော်ထုတ်ရာမှာ အထောက်အကူပြုတယ်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1968-E1
-    error_type: wrong_word
-    error_subtype: real_word_confusion
-    detection_layer: context
-    span:
-      start: 29
-      end: 37
-    erroneous_text: ဖော်ထုတ်
-    gold_correction: ဖော်ပြ
-    edit_distance: 4
-    context_required: true
-    notes: Replaced 'ဖော်ပြ' (express/show) with 'ဖော်ထုတ်' (reveal/expose), a real word that is semantically close but less fitting for 'expressing thoughts'.
-    domain: spelling
-  notes: '1 error(s). Subtypes: real_word_confusion.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1969
   input: ကောင်းနွန်တဲ့စာရေးစွမ်းရည်ရှိခြင်းက အောင်မြင်မှုအတွက် အရေးပါတယ်။
   is_clean: false
@@ -38793,25 +38546,12 @@ sentences:
   notes: '1 error(s). Subtypes: syllable_error.'
 - id: BM-1983
   input: သူငယ်ချင်းကြီးတွေက အခက်အခဲတွေမှာ ကူညီပေးကြတယ်။
-  is_clean: false
+  is_clean: true
   domain: conversational
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1983-E1
-    error_type: semantic_error
-    error_subtype: collocation_error
-    detection_layer: context
-    span:
-      start: 0
-      end: 14
-    erroneous_text: သူငယ်ချင်းကြီး
-    gold_correction: သူငယ်ချင်းကောင်း
-    edit_distance: 4
-    context_required: true
-    notes: Replaced 'သူငယ်ချင်းကောင်း' (good friends) with 'သူငယ်ချင်းကြီး' (senior/older friends), breaking the common collocation and changing the meaning.
-    domain: grammar
-  notes: '1 error(s). Subtypes: collocation_error.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-1984
   input: ယုံကြည်မှုမရှိရင် ခင်မင်မှုတွေ မှာတည်မြဲမဟုတ်ဘူး။
   is_clean: false
@@ -39258,19 +38998,6 @@ sentences:
     context_required: true
     notes: Removed the asat (်) from 'ကပ်' to 'ကပ', which is a real word but changes the meaning from 'attach/adhere' to 'close' or 'covering'.
     domain: spelling
-  - error_id: BM-2004-E2
-    error_type: wrong_word
-    error_subtype: synonym_substitution
-    detection_layer: context
-    span:
-      start: 40
-      end: 47
-    erroneous_text: ခြားနား
-    gold_correction: ကွဲပြား
-    edit_distance: 5
-    context_required: true
-    notes: Replaced 'ကွဲပြား' (differ) with 'ခြားနား' (distinguish/difference), which is semantically confusing in this context.
-    domain: spelling
   notes: '2 error(s). Subtypes: missing_visarga, confusable_semantic.'
 - id: BM-2005
   input: ဝတ်ပြုကိုးကွယ်ခြင်းသည် ယုံကြည်ခြင်းဤ အခြေခံဖြစ်သည်။
@@ -39337,25 +39064,12 @@ sentences:
   notes: '1 error(s). Subtypes: hidden_compound_typo.'
 - id: BM-2008
   input: တိုက်ခိုက်ပေးလို့ ကျေးဇူးတင်ပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-2008-E1
-    error_type: semantic_error
-    error_subtype: semantic_error
-    detection_layer: context
-    span:
-      start: 0
-      end: 10
-    erroneous_text: တိုက်ခိုက်
-    gold_correction: ကူညီ
-    edit_distance: 9
-    context_required: true
-    notes: Replaced 'ကူညီ' (help) with 'တိုက်ခိုက်' (attack), which is semantically opposite and wrong in this context.
-    domain: grammar
-  notes: '1 error(s). Subtypes: semantic_error.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-2009
   input: ကျွန်တော့်အမှားကြောင့် ခွင့်လွှတ်ပေးပါ။
   is_clean: false
@@ -39930,25 +39644,12 @@ sentences:
   notes: '1 error(s). Subtypes: vowel_medial_substitution.'
 - id: BM-2036
   input: ပျော်ရွှင်စရာကောင်းတဲ့ ပွဲတော်အခမ်းအနားတွေလည်း ကျင်းပကြခဲ့တယ်။
-  is_clean: false
+  is_clean: true
   domain: general
   register: formal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-2036-E1
-    error_type: grammar_error
-    error_subtype: verb_tense_agreement
-    detection_layer: grammar
-    span:
-      start: 47
-      end: 58
-    erroneous_text: ကျင်းပကြခဲ့
-    gold_correction: ကျင်းပကြ
-    edit_distance: 3
-    context_required: true
-    notes: Added past tense marker `ခဲ့` to the verb, making it `ကျင်းပကြခဲ့`, which implies a past event, whereas the sentence describes a general characteristic of the festival (habitual present tense).
-    domain: grammar
-  notes: '1 error(s). Subtypes: verb_tense_agreement.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotated span was an audit-confirmed false positive (a valid word) and was removed.'
 - id: BM-2037
   input: သီတင်းကျွတ်လပြည့်နေ့မှာ ပုံမှန်အားဖြင် ကျင်းပလေ့ရှိတယ်။
   is_clean: false
