@@ -184,9 +184,22 @@ def build_classification(db_path: Path) -> dict[str, dict]:
             continue
         for e in s.get("expected_errors") or []:
             subtype = e.get("error_subtype", "")
-            if categorize_domain(subtype) != "spelling":
+            # Authoritative scope tag (psg-26, owner-ratified 2026-07-14): "spelling" =
+            # primary (PURE/CONTEXT, counts toward the KPI), "grammar" = secondary
+            # (grammar/register/spacing/extraneous, excluded here). Fall back to the
+            # subtype categorization for any un-tagged gold.
+            scope = e.get("scope")
+            if scope is not None:
+                if scope != "spelling":
+                    continue
+            elif categorize_domain(subtype) != "spelling":
                 continue
-            bucket, rule = classify_instance(subtype, e.get("erroneous_text", "") or "", lookup)
+            if e.get("error_type") == "semantic_error":
+                # owner-ratified: semantic golds (real-word/homophone confusions) are kept
+                # as CONTEXT regardless of surface, not sent to PURE by dict-lookup.
+                bucket, rule = "context", "semantic_error"
+            else:
+                bucket, rule = classify_instance(subtype, e.get("erroneous_text", "") or "", lookup)
             out[f"{s['id']}::{e.get('error_id')}"] = {
                 "bucket": bucket,
                 "rule": rule,
