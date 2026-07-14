@@ -197,6 +197,10 @@ class MetaClassifierFusion:
         self._feature_names = feature_names
         self._threshold = threshold
         self._n_features = len(coefficients)
+        # psg-05: per-error-type confidence floors that bypass the filter.
+        # Populated from config.validation.meta_confidence_bypass by the
+        # SpellChecker after construction; empty = no confidence bypass.
+        self.confidence_bypass: dict[str, float] = {}
 
         if len(feature_names) != len(coefficients):
             raise ValueError(
@@ -378,6 +382,26 @@ class MetaClassifierFusion:
             source = getattr(error, "source_strategy", "")
             if source in _BYPASS_META_STRATEGIES:
                 kept.append(error)
+                continue
+
+            # psg-05: high-confidence detector emissions of near-precision-1
+            # error types bypass the meta filter (2026-07-11 kill-site probe:
+            # this filter was the #1 killer of currently-FN pure-spelling
+            # golds; missing_asat >=0.9 and invalid_syllable >=0.95 measured
+            # zero/one clean-text kill). THREE conditions are required — type
+            # in the map, confidence at/above the per-type floor, and a
+            # non-empty suggestion list (excludes bare digit-token
+            # invalid_syllable flags). The bypassed error still consumes its
+            # trained_idx slot so every other error's context features and
+            # error_index stay byte-identical to the unbypassed run.
+            floor = self.confidence_bypass.get(error_type)
+            if (
+                floor is not None
+                and (getattr(error, "confidence", 0.0) or 0.0) >= floor
+                and getattr(error, "suggestions", None)
+            ):
+                kept.append(error)
+                trained_idx += 1
                 continue
 
             prob = self.score_error(

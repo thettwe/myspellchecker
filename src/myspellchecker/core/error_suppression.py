@@ -145,6 +145,14 @@ _GENERIC_WIDE_TYPES = frozenset(
 
 _CONFUSABLE_SHORT_TOKEN_SUPPRESS_FREQ = _ST.confusable_short_token_freq
 _CONFUSABLE_AMBIGUITY_MAX_CONFIDENCE = _ST.confusable_ambiguity_max_confidence
+
+# Strategies whose error confidence is derived from an MLM logit margin
+# (margin/10) — the only confidences trusted by the dot-below exemption in
+# _suppress_low_value_confusable_errors. Detector-emitted confusables carry
+# fixed categorical confidences and an empty source_strategy.
+_DOT_BELOW_MARGIN_BACKED_SOURCES = frozenset(
+    {"ConfusableSemanticStrategy", "MinedConfusablePairStrategy"}
+)
 _CONFUSABLE_FRAGMENT_MAX_TOKEN_LEN = _ST.confusable_fragment_max_token_len
 _CONFUSABLE_SELF_SUGGEST_MAX_TOKEN_LEN = _ST.confusable_self_suggest_max_token_len
 _BARE_CONSONANT_PROXIMITY = _ST.bare_consonant_proximity
@@ -275,9 +283,16 @@ class ErrorSuppressionMixin:
     logger: Any
     _ner_model: Any
     _semantic_checker: Any  # SemanticChecker | None
+    _meta_classifier: Any  # MetaClassifierFusion | None (set by SpellChecker)
+    _rerank_telemetry_lock: Any  # threading.Lock (set by SpellChecker)
     _KEEP_ATTACHED_SUFFIXES: Any  # defined in PostNormalizationDetectorsMixin
     _MISSING_ASAT_PARTICLES: Any  # defined in PostNormalizationDetectorsMixin
     _MISSING_VISARGA_SUFFIXES: Any  # defined in PostNormalizationDetectorsMixin
+    # suggestion-processing methods defined in the suggestion mixin, invoked
+    # by _restore_displaced_errors (Option R)
+    _extend_suggestions_with_sentence_context: Any
+    _append_morpheme_subwords: Any
+    _rerank_detector_suggestions_by_distance: Any
 
     # --- Suppression methods -----------------------------------------------------
 
@@ -632,6 +647,12 @@ class ErrorSuppressionMixin:
         if not errors or not self.provider:
             return
 
+        _config = getattr(self, "config", None)
+        _validation = getattr(_config, "validation", None) if _config else None
+        dot_below_exempt_conf = float(
+            getattr(_validation, "dot_below_suppress_confidence_exempt", 0.6)
+        )
+
         filtered: list[Error] = []
         for e in errors:
             if e.error_type != ET_CONFUSABLE_ERROR:
@@ -714,8 +735,21 @@ class ErrorSuppressionMixin:
             # only by a dot-below (့, U+1037).  This catches syntactic pairs
             # like သည် ↔ သည့် (declarative vs attributive) that text-level
             # detectors flag but are not actionable spelling errors.
-            # Exception: VisargaStrategy curated corrections are trusted.
-            if e.suggestions and getattr(e, "source_strategy", "") != "VisargaStrategy":
+            # Exceptions: VisargaStrategy curated corrections are trusted,
+            # and high-confidence errors from MLM-margin-backed strategies
+            # are exempt — this rule runs a second time in post-processing,
+            # after the suppression-immune restore, so this is the only
+            # signal that can protect a genuine correction here. Both
+            # conditions are required: the syntactic FP class carries a
+            # fixed categorical confidence (0.72) with NO source strategy,
+            # so confidence alone cannot separate it (measured 2026-07-02:
+            # confidence-only exemption = +29 FP / +1 TP).
+            _e_src = getattr(e, "source_strategy", "")
+            _margin_backed_exempt = (
+                _e_src in _DOT_BELOW_MARGIN_BACKED_SOURCES
+                and (getattr(e, "confidence", 0.0) or 0.0) >= dot_below_exempt_conf
+            )
+            if e.suggestions and _e_src != "VisargaStrategy" and not _margin_backed_exempt:
                 sug_str = str(e.suggestions[0])
                 _DOT_BELOW = "\u1037"
                 if (
@@ -1562,6 +1596,64 @@ class ErrorSuppressionMixin:
 
     # --- Deduplication methods ---------------------------------------------------
 
+    # ------------------------------------------------------------------
+    # Dedup graveyard (Option R, 2026-07-12): displaced losers are kept so
+    # _restore_displaced_errors can re-admit them into empty slots after the
+    # post-processing filters. Storage is thread-local (the checker may serve
+    # concurrent check() calls); the list is reset at _run_validation entry.
+    # ------------------------------------------------------------------
+
+    def _dedup_graveyard_items(self) -> list[Error]:
+        tls = getattr(self, "_dedup_graveyard_tls", None)
+        if tls is None:
+            return []  # graceful: wiring absent (bare mixin in tests)
+        if not hasattr(tls, "items"):
+            tls.items = []
+        items: list[Error] = tls.items
+        return items
+
+    def _reset_dedup_graveyard(self) -> None:
+        tls = getattr(self, "_dedup_graveyard_tls", None)
+        if tls is not None:
+            tls.items = []
+
+    def _dedup_restore_enabled(self) -> bool:
+        config = getattr(self, "config", None)
+        validation = getattr(config, "validation", None) if config else None
+        return bool(getattr(validation, "dedup_restore_displaced", False))
+
+    # Rescue strategies exist to catch merge typos NOTHING else flags; a
+    # surviving rescue emission must never compete with an overlapping
+    # detection from another strategy (its wide merge span would displace a
+    # narrower correct suggestion in span dedup — 26 previously rank-1 golds
+    # lost benchmark-wide when it did).
+    _RESCUE_YIELD_SOURCES: frozenset[str] = frozenset({"ProbeSegmenterRescueStrategy"})
+
+    def _yield_rescue_overlaps(self, errors: list[Error]) -> None:
+        """Drop rescue-sourced errors that overlap any other detection.
+
+        Deliberate suppression, not displacement: the yielded errors are NOT
+        graveyarded, so ``_restore_displaced_errors`` cannot resurrect them.
+        """
+        if len(errors) < 2:
+            return
+        rescue = [e for e in errors if e.source_strategy in self._RESCUE_YIELD_SOURCES]
+        if not rescue or len(rescue) == len(errors):
+            return
+        others = [e for e in errors if e.source_strategy not in self._RESCUE_YIELD_SOURCES]
+        drop: set[int] = set()
+        for r in rescue:
+            r_start = r.position
+            r_end = r_start + len(r.text or "")
+            for o in others:
+                o_start = o.position
+                o_end = o_start + len(o.text or "")
+                if r_start < o_end and o_start < r_end:
+                    drop.add(id(r))
+                    break
+        if drop:
+            errors[:] = [e for e in errors if id(e) not in drop]
+
     def _dedup_errors_by_position(self, errors: list[Error]) -> None:
         """Deduplicate errors at the same position, keeping the best one.
 
@@ -1574,6 +1666,11 @@ class ErrorSuppressionMixin:
         """
         if not errors:
             return
+
+        self._yield_rescue_overlaps(errors)
+
+        _capture = self._dedup_restore_enabled()
+        _original = list(errors) if _capture else None
 
         best_by_pos: dict[int, Error] = {}
         for e in errors:
@@ -1653,6 +1750,9 @@ class ErrorSuppressionMixin:
                         prev.suggestions.append(s)
         errors.clear()
         errors.extend(best_by_pos.values())
+        if _original is not None:
+            kept_ids = {id(x) for x in errors}
+            self._dedup_graveyard_items().extend(e for e in _original if id(e) not in kept_ids)
 
     def _dedup_errors_by_span(self, errors: list[Error]) -> None:
         """Remove errors fully contained within a larger error's span.
@@ -1667,6 +1767,9 @@ class ErrorSuppressionMixin:
         """
         if len(errors) < 2:
             return
+
+        _capture = self._dedup_restore_enabled()
+        _original = list(errors) if _capture else None
 
         errors.sort(key=lambda e: (e.position, -(len(e.text) if e.text else 0)))
         kept: list[Error] = []
@@ -1754,6 +1857,172 @@ class ErrorSuppressionMixin:
                 kept.append(e)
         errors.clear()
         errors.extend(kept)
+        if _original is not None:
+            kept_ids = {id(x) for x in errors}
+            self._dedup_graveyard_items().extend(e for e in _original if id(e) not in kept_ids)
+
+    @staticmethod
+    def _restore_slice_blocked(error: Error) -> str | None:
+        """Measured slice blocklist for dedup-loser restoration (2026-07-12).
+
+        Attribution from the untuned Phase-1 probe (gold / cleanFP / errFP
+        per slice): broken_compound+CrossWhitespaceProbe 0/1/17 and
+        broken_compound+detector 1/0/7 (the context-undecidable spacing
+        family); context_probability+NgramContext 0/2/4; detector
+        invalid_word below conf 0.85 carried 8/7/5 while the >=0.85 band was
+        3/0/0; hidden_compound <0.7 and syntax_error <0.7 noise singletons.
+        Returns the block reason, or None when the loser may proceed.
+        """
+        et = error.error_type or ""
+        src = getattr(error, "source_strategy", "") or ""
+        conf = float(getattr(error, "confidence", 0.0) or 0.0)
+        if et == ET_BROKEN_COMPOUND and src in ("", "CrossWhitespaceProbeStrategy"):
+            return "broken_compound_family"
+        if et == ET_CONTEXT_PROBABILITY and src == "NgramContextValidationStrategy":
+            return "ngram_context"
+        if et == ET_WORD and not src and conf < 0.85:
+            return "low_conf_detector_invalid_word"
+        if et == ET_HIDDEN_COMPOUND_TYPO and conf < 0.7:
+            return "low_conf_hidden_compound"
+        if et == ET_SYNTAX_ERROR and conf < 0.7:
+            return "low_conf_syntax"
+        return None
+
+    def _restore_displaced_errors(
+        self,
+        errors: list[Error],
+        normalized_text: str,
+    ) -> list[Error]:
+        """Re-admit dedup-displaced losers whose slot ended up empty (Option R).
+
+        Runs after the meta-classifier (the last filter). Each graveyard
+        loser is considered only when NO surviving error overlaps its span
+        (winners are never re-arbitrated — the duplicate-of-TP slots that
+        sank prior preference changes are untouched). A candidate is passed
+        through the real filter methods on a single-error list: the
+        post-dedup in-layer suppressors (skipped for suppression-immune
+        sources, mirroring the immune extraction survivors get), the
+        post-processing suppressors, the confidence gates, MLM plausibility,
+        compound-split, and the meta-classifier. Note the meta scores the
+        candidate with a single-error context — deliberately independent of
+        the sentence's other errors; full-context rescoring was measured to
+        reject recovered golds. Restored errors then receive the standard
+        suggestion processing (extension / morpheme subwords / distance
+        rerank), applied AFTER the filters: applying it before mutates
+        ``suggestions[0]`` and trips the confusable suppressor on
+        otherwise-viable candidates (measured -5 golds).
+        """
+        graveyard = self._dedup_graveyard_items()
+        if not graveyard:
+            return []
+
+        validation = self.config.validation
+        conf_thresholds = getattr(self, "_CONFIDENCE_THRESHOLDS", {}) or {}
+        sec_thresholds = getattr(self, "_SECONDARY_CONFIDENCE_THRESHOLDS", {}) or {}
+
+        def span_of(e: Error) -> tuple[int, int]:
+            pos = e.position
+            return (pos, pos + max(1, len(e.text or "")))
+
+        def overlaps(a: tuple[int, int], b: tuple[int, int]) -> bool:
+            return a[0] < b[1] and b[0] < a[1]
+
+        restored: list[Error] = []
+        for loser in graveyard:
+            if self._restore_slice_blocked(loser) is not None:
+                continue
+            lspan = span_of(loser)
+            if any(overlaps(lspan, span_of(s)) for s in errors) or any(
+                overlaps(lspan, span_of(s)) for s in restored
+            ):
+                continue
+
+            probe = [loser]
+            # Post-dedup in-layer suppressors (spellchecker._run_validation_layers
+            # runs these after dedup, so graveyard losers never saw them).
+            # Suppression-immune sources skip them, exactly as survivors from
+            # those strategies do via the immune extraction.
+            _immune_sources = validation.suppression_immune_strategies or frozenset()
+            if (getattr(loser, "source_strategy", "") or "") not in _immune_sources:
+                self._suppress_tense_adjacent_syntax(probe)
+                if not probe:
+                    continue
+                self._suppress_low_value_syllable_errors(probe, text=normalized_text)
+                if not probe:
+                    continue
+                self._suppress_low_value_syntax_errors(probe, text=normalized_text)
+                if not probe:
+                    continue
+                self._suppress_low_value_pos_sequence_errors(probe)
+                if not probe:
+                    continue
+                self._suppress_low_value_context_probability(probe, text=normalized_text)
+                if not probe:
+                    continue
+                self._suppress_known_entity_errors(probe, text=normalized_text)
+                if not probe:
+                    continue
+                self._filter_ner_entities(probe, normalized_text)
+                if not probe:
+                    continue
+            self._suppress_low_value_confusable_errors(probe, text=normalized_text)
+            if not probe:
+                continue
+            self._suppress_low_value_semantic_errors(probe, text=normalized_text)
+            if not probe:
+                continue
+            if not validation.bypass_word_heuristic_suppression:
+                self._suppress_low_value_word_errors(probe, text=normalized_text)
+                if not probe:
+                    continue
+
+            # Confidence gates — same thresholds AND the same confidence
+            # reading the survivors got (spellchecker's gate uses the raw
+            # attribute; a genuine 0.0 must not be coerced to 1.0).
+            l_conf = getattr(loser, "confidence", 1.0)
+            if l_conf < conf_thresholds.get(loser.error_type, 0.0):
+                continue
+            if (
+                errors
+                and sec_thresholds
+                and loser.error_type in sec_thresholds
+                and l_conf < sec_thresholds[loser.error_type]
+                and any(
+                    (getattr(e, "confidence", 0.0) or 0.0) > l_conf
+                    for e in errors
+                    if e.error_type != loser.error_type
+                )
+            ):
+                continue
+
+            if (
+                self._semantic_checker is not None
+                and not validation.bypass_word_heuristic_suppression
+            ):
+                self._suppress_invalid_word_via_mlm(probe, normalized_text)
+                if not probe:
+                    continue
+            if not validation.bypass_word_heuristic_suppression:
+                self._suppress_compound_split_valid_words(probe)
+                if not probe:
+                    continue
+            if self._meta_classifier is not None:
+                probe = self._meta_classifier.filter_errors(
+                    probe,
+                    provider=self.provider,
+                    normalized_text=normalized_text,
+                )
+                if not probe:
+                    continue
+
+            # Post-gauntlet suggestion processing (production stages).
+            with self._rerank_telemetry_lock:
+                self._extend_suggestions_with_sentence_context(probe, normalized_text)
+                self._append_morpheme_subwords(probe)
+                self._rerank_detector_suggestions_by_distance(probe, sentence_text=normalized_text)
+            restored.append(loser)
+
+        return restored
 
     @staticmethod
     def _suppress_tense_adjacent_syntax(errors: list[Error]) -> None:

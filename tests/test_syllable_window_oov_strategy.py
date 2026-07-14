@@ -245,19 +245,19 @@ class TestSyllableWindowFPRSafeguards:
 
 
 class TestSyllableWindowRegistration:
-    def test_strategy_not_registered_by_default(
+    def test_strategy_registered_by_default(
         self, hidden_compound_provider: MemoryProvider, hidden_compound_symspell: SymSpell
     ) -> None:
-        """The strategy is disabled by default and is not added to the chain."""
+        """Default-on since v2.0 (psg-04): +4 golds / zero added FPs measured."""
         config = SpellCheckerConfig()
-        assert config.validation.use_syllable_window_oov is False
+        assert config.validation.use_syllable_window_oov is True
         strategies = build_context_validation_strategies(
             config=config,
             provider=hidden_compound_provider,
             symspell=hidden_compound_symspell,
         )
         names = [s.__class__.__name__ for s in strategies]
-        assert "SyllableWindowOOVStrategy" not in names
+        assert "SyllableWindowOOVStrategy" in names
 
     def test_strategy_registered_when_explicitly_enabled(
         self, hidden_compound_provider: MemoryProvider, hidden_compound_symspell: SymSpell

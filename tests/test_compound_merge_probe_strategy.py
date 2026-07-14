@@ -484,3 +484,56 @@ def test_builder_skips_when_disabled() -> None:
     )
     names = [s.__class__.__name__ for s in strategies]
     assert "CompoundMergeProbeStrategy" not in names
+
+
+class TestNeverMergeParticleCanonicality:
+    """Every NEVER_MERGE entry must be in canonical diacritic order.
+
+    The runtime normalizer reorders asat before aukmyit (U+103A U+1037), so a
+    constant stored in the other order can never match a runtime token — the
+    entry silently never fires. This happened to the entry for the comitative
+    particle (stored aukmyit-first) in both merge strategies.
+    """
+
+    def test_cmps_entries_canonical(self):
+        from myspellchecker.core.validation_strategies.compound_merge_probe_strategy import (
+            _NEVER_MERGE_PARTICLES,
+        )
+        from myspellchecker.text.normalize import normalize
+
+        assert [t for t in _NEVER_MERGE_PARTICLES if normalize(t) != t] == []
+
+    def test_psr_entries_canonical(self):
+        from myspellchecker.core.validation_strategies.probe_segmenter_rescue_strategy import (
+            NEVER_MERGE_PARTICLES,
+        )
+        from myspellchecker.text.normalize import normalize
+
+        assert [t for t in NEVER_MERGE_PARTICLES if normalize(t) != t] == []
+
+    def test_particle_membership_survives_comment_edits(self):
+        # Guard against implicit string concatenation eating entries: a lost
+        # list comma once fused "နှင့်" with the next entry, silently removing
+        # BOTH particles from the exclusion.
+        from myspellchecker.core.validation_strategies.compound_merge_probe_strategy import (
+            _NEVER_MERGE_PARTICLES,
+        )
+        from myspellchecker.core.validation_strategies.probe_segmenter_rescue_strategy import (
+            NEVER_MERGE_PARTICLES,
+        )
+        from myspellchecker.text.normalize import normalize
+
+        for s in (_NEVER_MERGE_PARTICLES, NEVER_MERGE_PARTICLES):
+            assert normalize("နှင့်") in s
+            assert "များ" in s
+            assert not any(len(t) > 8 for t in s), "suspicious fused entry"
+
+    def test_broken_compound_protected_from_ngram_rerank(self):
+        # Merged multi-token spans must not be reranked by the n-gram blend:
+        # its split()-based context degenerates to unigram frequency and
+        # buries the gold compound under high-frequency particles (measured
+        # gold rank 1 -> 6 before the guard).
+        from myspellchecker.core.constants import ET_BROKEN_COMPOUND
+        from myspellchecker.core.suggestion_pipeline import SuggestionPipelineMixin
+
+        assert ET_BROKEN_COMPOUND in SuggestionPipelineMixin._NGRAM_RERANK_PROTECTED_TYPES
