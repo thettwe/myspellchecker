@@ -1,13 +1,13 @@
-version: 1.6.3-valid-word-audit
+version: 1.6.4-missing-error-audit
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
   created_date: '2026-03-17'
   annotation_revision_date: '2026-07-14'
   total_sentences: 2084
-  clean_count: 588
-  error_count: 1496
-  observable_error_span_count: 1786
+  clean_count: 575
+  error_count: 1509
+  observable_error_span_count: 1811
   annotation_anomaly_count: 0
   difficulty_distribution:
     tier_2: 863
@@ -24,14 +24,14 @@ metadata:
     literary: 102
     social_media: 9
   observed_error_subtype_distribution:
-    consonant_substitution: 152
+    consonant_substitution: 156
     broken_compound: 127
-    vowel_medial_substitution: 143
+    vowel_medial_substitution: 154
     compound_confusion: 89
-    tone_mark_error: 84
-    aukmyit_confusion: 100
-    loan_word_misspelling: 84
-    real_word_confusion: 87
+    tone_mark_error: 85
+    aukmyit_confusion: 101
+    loan_word_misspelling: 86
+    real_word_confusion: 92
     non_word_typo: 79
     homophone_confusion: 76
     word_boundary: 63
@@ -60,6 +60,7 @@ metadata:
     merged_word: 3
     incomplete_sentence: 1
     synonym_substitution: 22
+    invalid_syllable: 1
   word_vs_syllable_policy_date: '2026-03-17'
   unflaggable_source_rows_promoted_to_clean: 8
   reclassified_word_level_from_previous_invalid_syllable: 145
@@ -5516,12 +5517,26 @@ sentences:
   notes: Medial confusion reversed from BM-500. Trigram with preceding အထက်တန်း resolves.
 - id: BM-523
   input: ကလေးတွေက မြွေကို ကျောက် သည်
-  is_clean: true
+  is_clean: false
   holdout: true
   domain: general
   register: formal
   difficulty_tier: 3
   notes: Stone vs fear — near-perfect bigram ambiguity. Trigram resolves.
+  expected_errors:
+  - error_id: BM-523-E1
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 17
+      end: 23
+    erroneous_text: ကျောက်
+    gold_correction: ကြောက်
+    edit_distance: 1
+    context_required: false
+    notes: "'Children fear the snake' requires the verb «ကြောက်» (fear, medial ြ). The text has «ကျောက်» (stone, medial ျ) — a perfect homophone in modern pronunciation created by the classic ျ/ြ medial swap, yielding the wrong real"
+    domain: spelling
 - id: BM-524
   input: ကျောင်းပြီးရင် ကာ မောင်းပြီး အိမ်ပြန်တယ်
   is_clean: false
@@ -5778,6 +5793,19 @@ sentences:
     context_required: false
     notes: Extra ှ (ha-hto) in နိုင် (can/able). Real-word confusion — requires context.
     domain: spelling
+  - error_id: BM-534-E4
+    error_type: invalid_syllable
+    error_subtype: invalid_syllable
+    detection_layer: word
+    span:
+      start: 30
+      end: 35
+    erroneous_text: ဂုာယူ
+    gold_correction: ဂရု
+    edit_distance: 4
+    context_required: false
+    notes: «ဂုာ» is an orthographically invalid syllable — the vowels ု and ာ cannot co-occur on one consonant. In «ဂုာယူမစိုက်နှိုင်ဘူး» the intended phrase is «ဂရုမစိုက်နိုင်ဘူး» ('can't pay attention'), so «ဂုာယူ» → «ဂရု» (the ယ
+    domain: spelling
   notes: User-submitted multi-error sentence. Heavy error density — medial confusion, Zawgyi contamination, ha-hto insertion.
 - id: BM-535
   input: ထွေ့ကယာရှောက်မဆားနဲ့လို့ ငါမှာခြင်တယ်။
@@ -5998,12 +6026,25 @@ sentences:
   notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
 - id: BM-EXT-C003
   input: ဒါက တကယ်ကို လှတဲ့နေ့ဝင်ချိန် ဓာတ်ပုံပဲ။
-  is_clean: true
+  is_clean: false
   holdout: true
   domain: conversational
   register: colloquial
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXT-C003-E1
+    error_type: wrong_word
+    error_subtype: aukmyit_confusion
+    detection_layer: word
+    span:
+      start: 17
+      end: 28
+    erroneous_text: နေ့ဝင်ချိန်
+    gold_correction: နေဝင်ချိန်
+    edit_distance: 1
+    context_required: false
+    notes: Sunset is «နေဝင်ချိန်» (နေ = sun + ဝင် set + ချိန် time). The sentence writes «နေ့ဝင်ချိန်» with an extra aukmyit ့ turning နေ (sun) into နေ့ (day); 'day-entering-time' is not a valid Burmese compound. Genuine spelling e
+    domain: spelling
   notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
 - id: BM-EXT-C004
   input: သူငယ်ချင်းတွေနဲ့ ကော်ဖီသောက်ရတာ ပျော်စရာကောင်းတယ်။
@@ -6541,12 +6582,25 @@ sentences:
   notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
 - id: BM-EXT-C070
   input: ညနေချမ်းတွင် ငှက်များ အုံပြန်ပြန်ကြ၍ ကောင်းကင်သည် ငှက်အုံးများဖြင့် ပြည့်နှက်နေသည်။
-  is_clean: true
+  is_clean: false
   holdout: true
   domain: literary
   register: formal
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXT-C070-E1
+    error_type: wrong_word
+    error_subtype: consonant_substitution
+    detection_layer: word
+    span:
+      start: 50
+      end: 62
+    erroneous_text: ငှက်အုံးများ
+    gold_correction: ငှက်အုပ်များ
+    edit_distance: 2
+    context_required: false
+    notes: "A sky filled with flocks of birds is «ငှက်အုပ်များ» (အုပ် = flock, as in သိုးအုပ်). «ငှက်အုံး» is a non-word: «အုံး» exists only in compounds like ခေါင်းအုံး (pillow), and 'bird nests' (ငှက်အုံ) filling the sky makes no "
+    domain: spelling
   notes: Clean control sentence with no intentional spelling, lexical, grammar, or semantic error.
 - id: BM-EXT-C071
   input: သူ့မျက်နှာပေါ်တွင် ကြာရှည်စွာ ဆိတ်ငြိမ်နေခဲ့သော အပြုံးတစ်ခု ပေါ်လာသည်။
@@ -8882,11 +8936,24 @@ sentences:
   notes: Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. U+102C (ော) used instead of U+102B (ေါ) in 'စုစုပောင်း'. Should be 'စုစုပေါင်း'. This is a common Zawgyi-to-Unicode conversion error..  U+102C (ော) used instead of U+102B (ေါ) in 'စုစုပောင်း'. Should be 'စုစုပေါင်း'. This is a common Zawgyi-to-Unicode conversion error.. Clean control sentence from myanmar-wikipedia-dataset.txt (18 words).
 - id: BM-EXP-C017
   input: ပြည်ထောင်စု ဒီမိုကရေစီပါတီ ဥက္ကဌ ကိုဖြိုးမင်းသိန်း ဖြစ်ပါတယ်။ တပ်မတော်အစိုးရဟာ နိုင်ငံဝန်ထမ်းတွေ ဖြစ်တယ်လို့ စစ်အစိုးရက တချိန်က ပြောခဲ့ဖူးပါတယ်။ ဒါကြောင့် အခုလက်ရှိ ရွေးကောက်ပွဲဥပဒေအရ နိုင်ငံရေး မလုပ်ရ၊ နိုင်ငံရေးပါတီမထောင်ရ ကန့်သတ်မှုရှိတာကြောင့် ရွေးကောက်ပွဲဥပဒေနဲ့များ ငြိစွန်းနေသလား စဉ်းစားသူတွေ လည်း ရှိပါတယ်။ ဒီအတိုင်း ခွင့်ပြုချက်ရသွားပြီး နိုင်ငံရေးပါတီထောင်ပြီး ရွေးကောက်ပွဲဝင်မယ် ဆိုရင်တော့ ရွေးကောက်ပွဲ အခြေအနေက တဘက်သတ်ဖြစ်သွားမယ်လို့ ကိုဝင်းမင်းက ယူဆပါတယ်။
-  is_clean: true
+  is_clean: false
   domain: news
   register: formal
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C017-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 27
+      end: 32
+    erroneous_text: ဥက္ကဌ
+    gold_correction: ဥက္ကဋ္ဌ
+    edit_distance: 2
+    context_required: false
+    notes: The Pali loan for 'chairman' (ukkaṭṭha) is standardly spelled «ဥက္ကဋ္ဌ» with the ဋ္ဌ conjunct. The text's «ဥက္ကဌ» (U+1025 1000 1039 1000 100C) drops the ဋ္ (U+100B U+1039) — one of the most common genuine Burmese misspel
+    domain: spelling
   notes: Clean control sentence from myanmar-c4-dataset.txt (33 words).
 - id: BM-EXP-C018
   input: ဦးလင်းဇော်ထွန်းသည် လက်ရှိ တပ်မတော် ကာကွယ်ရေးဦးစီးချုပ် ဗိုလ်ချုပ်မှူးကြီး မင်းအောင်လှိုင်၏ ကိုယ်ရေးလုံခြုံရေး အရာရှိအဖြစ်တာဝန်ယူခဲ့ဖူးသည်။ လုပ်ကြံမှုကို ကြိုတင်သိရှိပြီး သတင်းထိန်ချိန်ထားခြင်း ဖြစ်နိုင်သည်ဟု သူ့ကို လူမှုကွန်ရက်တွင် အကြီးအကျယ် စွပ်စွဲကြသည်။ သတင်းသမားများက မေးမြန်းသောအခါ အောင်ဝင်းခိုင်နှင့် ဇေယျာဖြိုးကို သူသိကြောင်း ဝန်ခံသည်။
@@ -9185,11 +9252,24 @@ sentences:
   notes: Clean control sentence from myanmar-wikipedia-dataset.txt (5 words).
 - id: BM-EXP-C035
   input: ဖြေရှင်းနည်း - ဒါက ရောဂါဝေဒနာတစ်ခု မဟုတ်ပေမယ့် သက်သောင့်သက်သာ နေထိုင်မှုက သင့်ကို သက်သာရာရစေပါလိမ့်မယ်။
-  is_clean: true
+  is_clean: false
   domain: news
   register: colloquial
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C035-E1
+    error_type: wrong_word
+    error_subtype: consonant_substitution
+    detection_layer: word
+    span:
+      start: 47
+      end: 61
+    erroneous_text: သက်သောင့်သက်သာ
+    gold_correction: သက်တောင့်သက်သာ
+    edit_distance: 1
+    context_required: false
+    notes: The fixed idiom for 'comfortably' is «သက်တောင့်သက်သာ» with တ (U+1010) in the second syllable. The sentence writes «သက်သောင့်သက်သာ» with သ (U+101E) — a very common assimilation typo to the surrounding သ syllables. «သောင့်
+    domain: spelling
   notes: 'Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. [AUDIT] word_segmentation: The verb phrase ''သက်သာရာရစေပါလိမ့်မယ်'' (will make feel better) is incorrectly segmented as ''သက်သာရာရ. [AUDIT] word_segmentation: The verb phrase ''သက်သာရာရစေပါလိမ့်မယ်'' (will make feel better) is incorrectly segmented as ''သက်သာရာရ. Clean control sentence from myanmar-c4-dataset.txt (9 words).'
 - id: BM-EXP-C036
   input: အကယ်၍ သယံဇာတ တန်ချိန် သန်းကို အပြည့်အဝ ရရှိပါက လျှပ်စစ်မော်တော်ယာဉ် ၂၇ သန်း၏ ဘက်ထရီ လိုအပ်ချက်ကို ဖြည့်ဆည်းပေးနိုင်သည်။ BYD ရောင်းအားသည် ၁ သန်း ဖြစ်သည်။ ဤခန့်မှန်းချက်အရ BYD သည် လာမည့် ဆယ်နှစ်အတွင်း ကုန်ကြမ်းများ လုံလောက်စွာ ရရှိမည်ဖြစ်သည်။
@@ -10373,11 +10453,24 @@ sentences:
   notes: 'Audit 2026-04-15: has unannotated error(s). Gemini: The phrase ''တောင်ဘက် တိုင် တိုင်ကို'' contains a redundant repetition of ''တိုင်''. It should be ''တောင်ဘက်တိုင်ကို''..'
 - id: BM-EXP-C098
   input: 'ကောင်းကွေ့ရွာ (အင်္ဂလိပ်: Kaungkwayt)သည် စစ်ကိုင်းတိုင်းဒေသကြီး၊ ကောလင်းခရိုင်၊ ဝန်းသိုမြို့နယ်၊ ပန်းတိမ်ကုန်းကျေးရွာအုပ်စု၌ တည်ရှိသည်။ ရွာနေရာကုတ်မှာ ဖြစ်သည်။ သန်းခေါင်စာရင်းအရ ပန်းတိမ်ကုန်းကျေးရွာအုပ်စုတွင် ကျား ဦး၊ မ ဦး၊ လူဦးရေ စုစုပေါင်း ဦးနေထိုင်သည်။'
-  is_clean: true
+  is_clean: false
   domain: academic
   register: polite
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C098-E1
+    error_type: wrong_word
+    error_subtype: real_word_confusion
+    detection_layer: word
+    span:
+      start: 143
+      end: 147
+    erroneous_text: ကုတ်
+    gold_correction: ကုဒ်
+    edit_distance: 1
+    context_required: false
+    notes: In the standard Wikipedia/MIMU village-template term «ရွာနေရာကုဒ်» ('village location code'), the English loan 'code' is transliterated «ကုဒ်» with final ဒ. The sentence writes «ရွာနေရာကုတ်» with final တ — «ကုတ်» is a re
+    domain: spelling
   notes: 'Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word ''စုစုပောင်း'' should be ''စုစုပေါင်း''. This is a U+102B vs U+102C issue..  The word ''စုစုပောင်း'' should be ''စုစုပေါင်း''. This is a U+102B vs U+102C issue.. Audit 2026-04-15: has unannotated error(s). Gemini: The word ''စုစုပောင်း'' should be ''စုစုပေါင်း''. This is a common Zawgyi-to-Unicode conversion error where U+102B (ါ) is incorrectly converted to U+102C . Needs manual error annotation.'
 - id: BM-EXP-C099
   input: စပိန်၊ အမေရိကန် စစ်ပွဲနှင့် ဒုတိယကမ္ဘာ စစ်ကြီး ပြီးသည့်နောက်တွင်လည်း ဆန်ဖရန်စစ္စကိုသည် ပစိဖိတ် ရေကြောင်း နှင့် ကြည်းကြောင်း စစ်ဆင်ရေးများ ဆင်နွှဲရန် တံခါးပေါက်ကြီး ဖြစ်လာခဲ့ သည်။
@@ -10419,11 +10512,24 @@ sentences:
   notes: 'Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word ''ပောက်ပါတယ်'' should be ''ပေါက်ပါတယ်''. This is a U+102B vs U+102C issue..  The word ''ပောက်ပါတယ်'' should be ''ပေါက်ပါတယ်''. This is a U+102B vs U+102C issue.. Audit 2026-04-15: has unannotated error(s). Gemini: The word ''ပောက်ပါတယ်'' should be ''ပေါက်ပါတယ်''. This is a common Zawgyi-to-Unicode conversion error where U+102B (ါ) is incorrectly converted to U+102C . Needs manual error annotation.'
 - id: BM-EXP-C102
   input: မာရထာအင်ပါယာ သမိုင်းတွင် ရှီဗာဂျီး ပြီးလျှင် ဘဂျီး ရောင်ဝ်သည် အမွမ်းအတင်ခံရဆုံးသောပုဂ္ဂိုလ် ဖြစ်သည်။
-  is_clean: true
+  is_clean: false
   domain: general
   register: formal
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C102-E1
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 62
+      end: 72
+    erroneous_text: အမွမ်းအတင်
+    gold_correction: အမွှမ်းအတင်
+    edit_distance: 1
+    context_required: false
+    notes: The praise/glorification idiom derived from «အမွှမ်းတင်» is spelled «အမွှမ်းအတင်» with the ha-htoe medial ှ (U+103E) on မွ. The sentence's «အမွမ်းအတင်» omits the ှ — a confusion with the unrelated «ချီးမွမ်း»/«မွမ်းမံ» s
+    domain: spelling
   notes: Clean control sentence from myanmar-pretrain-data2.txt (8 words).
 - id: BM-EXP-C103
   input: သူက ထိုကိစ္စအား အမှန်တကယ် နားမလည်နိုင်ပေ။ ထိုသည်က အရှေ့နတ်ဘုရားကျွန်းစုနယ်မြေကြောင့်လား။
@@ -10583,11 +10689,24 @@ sentences:
   notes: Clean control sentence from myanmar-xnli_sentence2_my.txt (14 words).
 - id: BM-EXP-C122
   input: နေထွဋ်ကတော့ William Tun နဲ့ အတူ Laurel Art အနုပညာကျောင်းတက်ခဲ့တာခြင်းလည်းတူသလို ရေဒီယို ကက်ဆက် ဇာတ်လမ်းတွဲတွေမှာလည်း အတူတူသရုပ်ဆောင်ခဲ့ဖူးပါတယ်။
-  is_clean: true
+  is_clean: false
   domain: conversational
   register: formal
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C122-E1
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 64
+      end: 69
+    erroneous_text: ခြင်း
+    gold_correction: ချင်း
+    edit_distance: 1
+    context_required: false
+    notes: "In «တက်ခဲ့တာခြင်းလည်းတူသလို» the comparison particle 'alike in respect of X' must be «ချင်း» (ya-medial ျ): «တက်ခဲ့တာချင်းလည်းတူ». The written «ခြင်း» (ra-medial ြ) is the nominalizer, which cannot follow «တာ» (itself al"
+    domain: spelling
   notes: Clean control sentence from myanmar_spoken_corpus.txt (29 words).
 - id: BM-EXP-C123
   input: မြတ်စွာဘုရား သခင်ကိုယ်တော်မြတ်ကြီးက အနှစ်ရွေး တတ်ဖို့၊ သစ်ပင်တစ်ပင်မှာ အနှစ်ရွေးတတ်ဖို့ အရေးကြီးသလို အနှစ်ရွေးတတ်ဖို့ အရေးကြီးတယ်ဆိုတဲ့ အကြောင်းကို သာရော ပမသုတ်ဆိုပြီး ဟောတော်မူတယ် (မှန်ပါ)။
@@ -10878,11 +10997,24 @@ sentences:
   notes: Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word 'ပော်' (U+101D U+102C U+103D) is incorrect. It should be 'ပေါ်' (U+101D U+102B U+103D), which means 'on' or 'appear'. This is a common Zawgyi.  The word 'ပော်' (U+101D U+102C U+103D) is incorrect. It should be 'ပေါ်' (U+101D U+102B U+103D), which means 'on' or 'appear'. This is a common Zawgyi. Clean control sentence from myanmar-xnli_sentence2_my.txt (5 words).
 - id: BM-EXP-C145
   input: အဲဒီ proactive စိတ် က အလုပ်ထဲ မှာ တကယ် အကျိုးများစေတာကတော့ ကိုယ်တွေ့ပါဘဲ။
-  is_clean: true
+  is_clean: false
   domain: news
   register: informal
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C145-E1
+    error_type: wrong_word
+    error_subtype: real_word_confusion
+    detection_layer: word
+    span:
+      start: 70
+      end: 72
+    erroneous_text: ဘဲ
+    gold_correction: ပဲ
+    edit_distance: 1
+    context_required: false
+    notes: «ကိုယ်တွေ့ပါဘဲ» uses «ဘဲ» for the emphatic final particle; standard orthography requires «ပဲ» («ဘဲ» is the negative converb as in မ...ဘဲ, or the noun 'duck'). Classic ပဲ/ဘဲ homophone confusable — an orthographic error, n
+    domain: spelling
   notes: Clean control sentence from myanmar-c4-dataset.txt (8 words).
 - id: BM-EXP-C146
   input: ၁၁၆။ တုဏှီ အဟူ ကိမ္ပုရိသော သဘရိယော၊
@@ -11527,6 +11659,19 @@ sentences:
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
     domain: spelling
+  - error_id: BM-EXP-C177-E3
+    error_type: wrong_word
+    error_subtype: real_word_confusion
+    detection_layer: word
+    span:
+      start: 183
+      end: 200
+    erroneous_text: အကျိုးတက်ရောက်မှု
+    gold_correction: အကျိုးသက်ရောက်မှု
+    edit_distance: 1
+    context_required: false
+    notes: «အကျိုးတက်ရောက်မှု» mangles the fixed expression «အကျိုးသက်ရောက်မှု» ('impact/effect'; သက်ရောက် = take effect). «တက်ရောက်» means 'attend' and «အကျိုးတက်ရောက်မှု» is not a Myanmar word. တက်/သက် share the same rhyme and ar
+    domain: spelling
   notes: Clean control sentence from myanmar-fineweb-2-dataset-filtered.txt (12 words).
 - id: BM-EXP-C178
   input: ကိုသက်ထွန်း --- ဘာကြောင့်လဲဆိုတော့ အဲဒီအချိန်မှာ တာဝန်ယူနေတဲ့ စစ်တပ်တွေပါ လှည့်တယ်။ တွေ့တဲ့လူ၊ သူတို့ မသင်္ကာဘူးဆိုရင် အကုန်ဖမ်းသွားတာ။ သူတို့က အမှားအမှန်ကို ရှင်းလင်းတာ။ အဲဒီအတွက် အရင်ဆုံး သူတို့ မကျေနပ်တာ။ သို့တည်းမဟုတ် မသင်္ကာတာ တွေ့သမျှကို အကုန်ဖမ်းတယ်။ ဥပဒေအရ လုံခြုံမှုတော့ ကျနော်တို့ လက်ထဲမှာ မရှိဘူး။
@@ -11538,11 +11683,24 @@ sentences:
   notes: Clean control sentence from myanmar-c4-dataset.txt (26 words).
 - id: BM-EXP-C179
   input: ဝင်းနွယ်သူ့ကိုစိုက်ကြည့်နေရင်း ပါးချိုင့်လေးပေါ်အောင်ပြုံးလိုက်သည်။ ပြီးတော့ အိမ်အတွင်းဖက်သို့ လှည့်ထွက်ရန် ပြင်လိုက်သည်။ ဦးမိုး မတရားဘူး ဟင်. ဝင်းနွယ် အိမ်အတွင်းဖက်သို့ ဝင်သွားချေပြီ။ ဝေမိုး ချက်ချင်းသဘောပေါက်လိုက်ပေမယ့် ဝင်းနွယ်၏နောက်သို့ ဝင်၍လိုက်ခဲ့လေသည်။ ဝေမိုး အခန်းဝရောက်သောအခါ နန်းဝင်းဝင်းနွယ်မှာ အိပ်ခန်းထဲရှိ ပြတင်း ပေါက် တစ်ခုရှေ့တွင် အိမ်ခန်းထဲသို့ ကျောပေး၍ ရပ်နေသည်။ ဝေမိုး အိပ်ခန်းထဲသို့ ဖြေးညှင်းစွာလျှောက်ဝင်လာပြီး ကုတင် ဘေးတွင်ရပ်၍ ဝင်းနွယ်၏နောက်ကျောအလှကိုကြည့်၍ ခံစားနေမိသည်။ ဝင်းနွယ်နှင့်က တစ်လံအကွာလောက်သာ ကွာခြား တော့သည်။ ဝင်းနွယ်၏ အသက်ရှုသံတွေက ပြင်းထန်ပြီး မြန်ဆန်၍နေသည်။ အသက်ပြင်းပြင်းရှုနေသောကြောင့် ရင်လျားထားသော မလုံတလုံ ရင်သားဆိုင်ကြီးများမှာ ကြွတက်လာလိုက်၊ နိမ့်ဆင်းသွားလိုက်နှင့် ဖြစ်နေသည်။
-  is_clean: true
+  is_clean: false
   domain: general
   register: polite
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C179-E1
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 402
+      end: 414
+    erroneous_text: ဖြေးညှင်းစွာ
+    gold_correction: ဖြည်းညှင်းစွာ
+    edit_distance: 2
+    context_required: false
+    notes: «ဖြေးညှင်းစွာ» misspells the standard adverb «ဖြည်းညှင်းစွာ» ('slowly and gently'; cf. ဖြည်းဖြည်း). The writer substituted the phonetic vowel spelling ေ...း for the correct ည်း rhyme, dropping the ည် coda — a genuine hom
+    domain: spelling
   notes: Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word 'ပောက်' in 'ပြတင်း ပောက်' should be 'ပေါက်' (U+102B). This is a common Zawgyi-to-Unicode conversion error..  The word 'သဘောပောက်' should be 'သဘောပေါက်' (U+102B). This is a common Zawgyi-to-Unicode conversion error..  The word 'ပော်' should be 'ပေါ်' (U+102B). This is a common Zawgyi-to-Unicode conversion error..  The word 'ပောက်' in 'ပြတင်း ပောက်' should be 'ပေါက်' (U+102B). This is a common Zawgyi-to-Unicode conversion error..  The word 'သဘောပောက်' should be 'သဘောပေါက်' (U+102B). This is a common Zawgyi-to-Unicode conversion error..  The word 'ပော်' should be 'ပေါ်' (U+102B). This is a common Zawgyi-to-Unicode conversion error.. Clean control sentence from myanmar-culturax-dataset.txt (48 words).
 - id: BM-EXP-C180
   input: သဒ္ဓါတရား မရှိ၊ အရှက်မရှိ၊ အကြောက်အလန့်မရှိ၊ အကြားအမြင်နည်း၏၊ ပျင်းရိ၏၊ သတိလွတ်၏၊ ပညာမဲ့၏။ ဤသည်တို့သည် သူယုတ်မာတရား ခုနစ်ပါးတို့တည်း။ (၄)
@@ -12071,11 +12229,24 @@ sentences:
   notes: Clean control sentence from myanmar-fineweb-2-dataset-filtered.txt (11 words).
 - id: BM-EXP-C216
   input: အာဆင်နယ် အူနိုင်း အမ်မရီ က ရှက်ဖီး ယူနိုက်တက် အသင်းနဲ့ ပွဲမတိုင်မှီ ပွဲကြို သတင်းစာ ရှင်းလင်းပွဲမှာ အိုဇေးလ် ရဲ့ ပွဲထွက် ကစားခွင့်ကို ကန့်သတ် ထားတာမျိုး မရှိတာကြောင့် ကစားသမား အဆင်သင့် ဖြစ်ပါက အခွင့်အရေး ပေးသွားမှာ ဖြစ်ကြောင်း အတည်ပြု ပြောကြား လိုက်ပါတယ်။
-  is_clean: true
+  is_clean: false
   domain: conversational
   register: formal
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C216-E1
+    error_type: wrong_word
+    error_subtype: real_word_confusion
+    detection_layer: word
+    span:
+      start: 55
+      end: 67
+    erroneous_text: ပွဲမတိုင်မှီ
+    gold_correction: ပွဲမတိုင်မီ
+    edit_distance: 1
+    context_required: false
+    notes: «ပွဲမတိုင်မှီ» writes the temporal 'before' morpheme as «မှီ»; Myanmar Language Commission orthography requires «မီ» (မတိုင်မီ). «မှီ» is a distinct real word meaning lean/depend/reach — a very common မီ/မှီ near-homopho
+    domain: spelling
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (27 words).
 - id: BM-EXP-C217
   input: အာဆာအကြမ်းဖက်အဖွဲ့သည် နိုင်ငံတကာအကြမ်းဖက်အဖွဲ့များဖြစ်သည့် Al-Qaeda ISIL နှင့် Tehrik-e-Taliban Pakistan (TTP) တို့၏ ကူညီပံ့ပိုးမှုများ ရရှိနေကြောင်း၊ မကြာသေးမီက နိုင်ငံခြားသား အကြမ်းဖက်သမားများက အိမ်နီးချင်းနိုင်ငံ တစ်နိုင်ငံမှတစ်ဆင့် မြန်မာနိုင်ငံအတွင်းသို့ ဝင်ရောက်၍ အာဆာအဖွဲ့အား ပူးပေါင်းကူညီရန် ကြိုးစားခဲ့သည့် သာဓကရှိကြောင်း၊
@@ -12311,19 +12482,45 @@ sentences:
   note: 'Re-labeled: contains formatting issues (hyphens/ASCII commas/no-space-after-fullstop/numbers-attached)'
 - id: BM-EXP-C232
   input: လက်ရှိ သိပ်တက်ကြွပြီး၊ သိပ်ကြွတက်နေတဲ့ပါတီတွေရဲ့ ကိုယ်ခံအားနဲ့ စွဲမြဲမှု သက်လုံကို လည်း မျက်ဝါးထင်ထက် ထပ်မြင်ရမယ်။
-  is_clean: true
+  is_clean: false
   domain: conversational
   register: colloquial
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C232-E1
+    error_type: wrong_word
+    error_subtype: real_word_confusion
+    detection_layer: word
+    span:
+      start: 98
+      end: 101
+    erroneous_text: ထက်
+    gold_correction: ထင်
+    edit_distance: 1
+    context_required: false
+    notes: The fixed idiom is «မျက်ဝါးထင်ထင်» ('vividly, with one's own eyes'), curated in the production dictionary (freq 3509); the sentence writes «မျက်ဝါးထင်ထက်», substituting the real word «ထက်» ('than/above') for the reduplic
+    domain: spelling
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (9 words).
 - id: BM-EXP-C233
   input: အမေရိကန်တပ်ဖွဲ့တွေရဲ့ ပူးတွဲ စစ်ဦးစီးချုပ် ဥက္ကဌအဖြစ် သမ္မတ ဒေါ်နယ်ထရမ့်က အဆိုပြုထားသူ ကြည်းတပ် ဗိုလ်ချုပ်ကြီး က အမေရိကန်တပ်ဖွဲ့တွေကို အာဖဂန် နစ္စတန်ကနေ အချိန်မတိုင်ခင် ရုပ်သိမ်းမယ်ဆိုရင် မဟာဗျူဟာ အမှားတစ်ခု ဖြစ်လိမ့်မယ်လို့ ဆိုပါတယ်။
-  is_clean: true
+  is_clean: false
   domain: conversational
   register: polite
   difficulty_tier:
-  expected_errors: []
+  expected_errors:
+  - error_id: BM-EXP-C233-E1
+    error_type: wrong_word
+    error_subtype: loan_word_misspelling
+    detection_layer: word
+    span:
+      start: 43
+      end: 48
+    erroneous_text: ဥက္ကဌ
+    gold_correction: ဥက္ကဋ္ဌ
+    edit_distance: 2
+    context_required: false
+    notes: «ဥက္ကဌ» is the ubiquitous misspelling of 'chairman'; the standard သတ်ပုံ is «ဥက္ကဋ္ဌ» (Pali ukkaṭṭha) with the stacked ဋ္ဌ cluster. The written form drops the ဋ — a genuine Pali loan-word spelling error left unflagged.
+    domain: spelling
   notes: Clean control sentence from URajinda-myanmar_spoken_corpus.txt (19 words).
 - id: BM-EXP-C234
   input: ကန္တာရများ၌ မိုးမရွာခြင်းမှာ ကန္တာရနှင့် သမုဒ္ဒရာအကြား၌ တည်ရှိသောတောင်များ ကာဆီး နေသောကြောင့် ဖြစ်၏။
@@ -12694,6 +12891,19 @@ sentences:
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
     domain: spelling
+  - error_id: BM-EXP-E011-E4
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 64
+      end: 67
+    erroneous_text: ဂော
+    gold_correction: ဂေါ
+    edit_distance: 1
+    context_required: false
+    notes: "The Magway town Gangaw is spelled «ဂန့်ဂေါ» (attested in the project's named_entities.yaml): after ဂ the [ɔ̀] vowel must use tall-aa ေါ, never ော. «ဂန့်ဂော» is thus a wrong vowel-sign form (ာ U+102C for ါ U+102B) — the s"
+    domain: spelling
   notes: Generated error sentence with 1 missing_visarga error.
 - id: BM-EXP-E013
   input: တောင်တွင်းကြီးမြို့နယ်မှာ စစ်တပ်က အာဏာသိမ်းပြီးနောက် စစ်ကောင်စီတပ်တွေရဲ့ ရိုက်နှက်ပစ်ခတ် သတ်ဖြတ်မှုကြောင့် ဒေသခံပြည်သူ ခုနစ်ဦးအထိ သေဆုံးခဲ့ရတယ်လို့ ဒေသခံတွေရဲ့ မတ်တမ်းတွေအရ သိရပါတယ်။
@@ -13045,6 +13255,19 @@ sentences:
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
     domain: spelling
+  - error_id: BM-EXP-E025-E4
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 65
+      end: 68
+    erroneous_text: ဂော
+    gold_correction: ဂေါ
+    edit_distance: 1
+    context_required: false
+    notes: 'Same miss as BM-EXP-E011: «ဂန့်ဂော» must be «ဂန့်ဂေါ» — after ဂ the vowel [ɔ̀] takes tall-aa ါ (single codepoint ာ→ါ). Gold flags the identical ော→ေါ class in this very sentence (သန်းခောင်→သန်းခေါင်, စုစုပောင်း→စုစုပေါင်'
+    domain: spelling
   notes: Generated error sentence with 1 broken_compound error.
 - id: BM-EXP-E026
   input: ကဲတပည့်တို့ လောကကြီးမှာ လူတွေဝင်ငွေရရှိနိုင်တဲ့ နည်းလမ်းတွေ ဘယ်လောက်ပောများ လဲဆိုတာ အခုခင်ဗျားတို့ မြင်တွေ့ခဲ့ရပြီ၊ အဲဒီနည်းလမ်း သို့မဟုတ် လုပ်ငန်းမှန်သမျှဟာ လူတွေဆီ ကို စမ်းရေစီးသလို စီးဆင်းလာနေတဲ့ ရွှေဒင်္ဂါးတန်း ငွေဒင်္ဂါးတန်းတွေပဲ၊ အလုပ်လုပ်တဲ့ လူတိုင်းဟာ ဒီစီးကြောင်းထဲက အသပြာခို ကိုယ့်အိတ်ထဲ မြောင်းသွယ်လို့ ရသလောက် သွယ်ယူနေကြတဲ့ သဘောပါပဲ။
@@ -13255,6 +13478,19 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
+    domain: spelling
+  - error_id: BM-EXP-E035-E3
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 60
+      end: 67
+    erroneous_text: ဂန့်ဂော
+    gold_correction: ဂန့်ဂေါ
+    edit_distance: 3
+    context_required: false
+    notes: "Same miss again: «ဂန့်ဂော» should be «ဂန့်ဂေါ» (Gangaw District). ဂ belongs to the consonant class (ခ ဂ င ဒ ပ ဝ) that requires tall-aa ေါ for [ɔ̀]; the round ာ form is orthographically invalid here. Consistent with gold'"
     domain: spelling
   notes: Generated error sentence with 1 consonant_substitution error.
 - id: BM-EXP-E036
@@ -14299,6 +14535,19 @@ sentences:
     context_required: false
     notes: Injected aukmyit_confusion error.
     domain: spelling
+  - error_id: BM-EXP-E069-E2
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 40
+      end: 45
+    erroneous_text: ပောက်
+    gold_correction: ပေါက်
+    edit_distance: 1
+    context_required: false
+    notes: '«သဘော ပောက်ပါတယ်» — the verb is သဘောပေါက် (to understand). Verified codepoints: ပောက် = U+1015 U+1031 U+102C U+1000 U+103A, i.e. regular ာ (U+102C) after ပ. Myanmar orthography requires the tall ါ (U+102B) after ပ, so it'
+    domain: spelling
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E070
   input: ချစ်သူတွေဟာ တစ်ယောက်ကို တစ်ယောက် နာလည်မှု ရှိဖို့ လိုပါတယ်။
@@ -15227,6 +15476,19 @@ sentences:
     context_required: false
     notes: "Injected consonant_substitution error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
     domain: spelling
+  - error_id: BM-EXP-E103-E2
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 16
+      end: 25
+    erroneous_text: ပောက်ထွက်
+    gold_correction: ပေါက်ထွက်
+    edit_distance: 1
+    context_required: false
+    notes: '«လူတွေကြားထဲ ပောက်ထွက်လာတဲ့ အစီရင်ခံစာ» — a report that leaked out among people = ပေါက်ထွက်. Verified: ပောက် uses regular ာ (U+102C) after ပ where the tall ါ (U+102B) is mandatory, same ော→ေါ class the gold catches elsew'
+    domain: spelling
   notes: Generated error sentence with 1 consonant_substitution error.
 - id: BM-EXP-E104
   input: ပထမဆုံး စပြော့ရမယ့်သူကတော့ NLD အစိုးရ၊ အထူးသဖြင့် နိုင်ငံတော် အတိုင်ပင်ခံပုဂ္ဂိုလ် ဒော်အောင်ဆန်းစုကြည်နဲ့ ဆက်ဆံရေး ကောင်းတယ်လို့ သတင်းထွက်နေသူ ဒုတိယ ဗိုလ်ချုပ်မှူးကြီး စိုးဝင်းဟာ စစ်တက္ကသိုလ် အပတ်စဉ် က ဖြစ်ပါတယ်။
@@ -15696,6 +15958,19 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: 'Added by aw-vowel unmask audit 2026-06-07 (unmask-02): generator-planted typo left unannotated because the pre-lookup normalizer silently repaired it before detection; raw form is corpus freq-0.'
+    domain: spelling
+  - error_id: BM-EXP-E118-E3
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 320
+      end: 327
+    erroneous_text: ဖြေဖြန်
+    gold_correction: ဖြေဖျန်
+    edit_distance: 1
+    context_required: false
+    notes: '«မှူးမတ်များ ဖြေဖြန်ပေးကြသော်လည်း» — courtiers mediating a succession dispute: the mediation verb is ဖျန်ဖြေ/ဖြေဖျန် with medial YA ျ (U+103B). Verified codepoints show the second syllable as ဖြန် with medial RA ြ (U+103'
     domain: spelling
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E119
@@ -16340,6 +16615,19 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: "Injected aukmyit_confusion error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
+    domain: spelling
+  - error_id: BM-EXP-E136-E2
+    error_type: wrong_word
+    error_subtype: tone_mark_error
+    detection_layer: word
+    span:
+      start: 127
+      end: 129
+    erroneous_text: စာ
+    gold_correction: စား
+    edit_distance: 1
+    context_required: false
+    notes: '«9000 Btu 8000 နဲ့ စာတော့ (1.1 Hp)ကျော်ကျော်ရပါတယ်» — the arithmetic is 9000÷8000≈1.125, i.e. "just over 1.1 Hp", so the intended verb is စား (divide): «8000 နဲ့ စားတော့». Written စာ (letter/text) drops the visarga း, yi'
     domain: spelling
   notes: Generated error sentence with 1 aukmyit_confusion error.
 - id: BM-EXP-E137
@@ -17211,6 +17499,19 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: "Injected vowel_medial_substitution error. Re-annotated by bp-03 2026-06-10 (emission-anchored G1): gold snapped to the checker's splice-equivalent emission granularity; corrected sentence unchanged."
+    domain: spelling
+  - error_id: BM-EXP-E163-E2
+    error_type: wrong_word
+    error_subtype: vowel_medial_substitution
+    detection_layer: word
+    span:
+      start: 175
+      end: 184
+    erroneous_text: ထိန်ချိန်
+    gold_correction: ထိန်ချန်
+    edit_distance: 1
+    context_required: false
+    notes: In «သတင်းထိန်ချိန်ထားခြင်း» the intended verb is ထိမ်ချန်/ထိန်ချန် ('to withhold/conceal' the news); the written «ချိန်» (time/weigh) has a spurious vowel sign ိ where «ချန်» ('leave out') is required, and «ထိန်ချိန်» is
     domain: spelling
   notes: Generated error sentence with 1 vowel_medial_substitution error.
 - id: BM-EXP-E164
@@ -31953,6 +32254,19 @@ sentences:
     context_required: false
     notes: Replaced `ထ` with visually similar `ဌ` in `ပန်းထိမ်` (goldsmith), creating a non-word `ပန်းဌိမ်`.
     domain: spelling
+  - error_id: BM-1663-E2
+    error_type: wrong_word
+    error_subtype: consonant_substitution
+    detection_layer: word
+    span:
+      start: 36
+      end: 47
+    erroneous_text: စွဲဆောင်မှု
+    gold_correction: ဆွဲဆောင်မှု
+    edit_distance: 1
+    context_required: false
+    notes: "«စွဲဆောင်မှု» is a ဆ→စ near-homophone consonant substitution: the standard word for 'attraction/appeal' is «ဆွဲဆောင်မှု» (from ဆွဲဆောင် 'to attract', MLC spelling). «စွဲ» ('fixed/addicted', as in စွဲလမ်း) makes the compo"
+    domain: spelling
   notes: '1 error(s). Subtypes: non_word_typo.'
 - id: BM-1664
   input: ရှေးခေတ်ကတည်းက လက်ဆင့်ကမ်းလာတဲ့ အနူပညာတစ်ခုဖြစ်တယ်။
@@ -40150,6 +40464,19 @@ sentences:
     edit_distance: 2
     context_required: true
     notes: Modified 'မြန်မာပြည်' (Myanmar country) by changing 'ပြည်' to 'ပြဲ' (torn), resulting in two valid words ('မြန်မာ' and 'ပြဲ') but an incorrect meaning when combined ('torn Myanmar').
+    domain: spelling
+  - error_id: BM-2059-E2
+    error_type: wrong_word
+    error_subtype: consonant_substitution
+    detection_layer: word
+    span:
+      start: 21
+      end: 32
+    erroneous_text: စွဲဆောင်မှု
+    gold_correction: ဆွဲဆောင်မှု
+    edit_distance: 1
+    context_required: false
+    notes: "«ခရီးသွားစွဲဆောင်မှု» contains the same ဆ→စ onset substitution: 'tourist attraction' is standard «ခရီးသွားဆွဲဆောင်မှု» (ဆွဲဆောင် 'to attract'). «စွဲ» in place of «ဆွဲ» is a near-homophone misspelling, not a word-choice i"
     domain: spelling
   notes: '1 error(s). Subtypes: hidden_compound_typo.'
 - id: BM-2060
