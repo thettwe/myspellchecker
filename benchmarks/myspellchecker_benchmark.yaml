@@ -1,13 +1,13 @@
-version: 1.6.1-clean-row-audit
+version: 1.6.2-gold-mechanical-fix
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
   created_date: '2026-03-17'
-  annotation_revision_date: '2026-03-17'
+  annotation_revision_date: '2026-07-14'
   total_sentences: 2084
   clean_count: 522
   error_count: 1562
-  observable_error_span_count: 1846
+  observable_error_span_count: 1809
   annotation_anomaly_count: 0
   difficulty_distribution:
     tier_2: 863
@@ -24,112 +24,42 @@ metadata:
     literary: 102
     social_media: 9
   observed_error_subtype_distribution:
-    consonant_substitution: 143
-    broken_compound: 120
-    vowel_medial_substitution: 119
+    consonant_substitution: 152
+    broken_compound: 127
+    vowel_medial_substitution: 143
     compound_confusion: 91
-    tone_mark_error: 83
-    aukmyit_confusion: 83
-    loan_word_misspelling: 81
-    real_word_confusion: 79
+    tone_mark_error: 84
+    aukmyit_confusion: 101
+    loan_word_misspelling: 85
+    real_word_confusion: 89
     non_word_typo: 79
-    homophone_confusion: 74
+    homophone_confusion: 77
     word_boundary: 63
-    missing_visarga: 62
-    register_mismatch: 56
-    particle_misuse: 55
+    missing_visarga: 60
+    register_mismatch: 53
+    particle_misuse: 86
     syllable_error: 50
-    zawgyi_encoding: 43
+    zawgyi_encoding: 12
     hidden_compound_typo: 38
-    confusable_semantic: 32
-    stacking_error: 29
+    stacking_error: 32
     verb_tense_agreement: 28
-    spelling_error: 27
-    spacing: 27
+    spacing: 34
     word_order: 25
     collocation_error: 22
-    spelling: 21
-    ngram_unlikely: 20
-    zawgyi_contamination: 18
-    colloquial_in_formal: 17
-    orthography: 15
-    zawgyi_conversion: 14
+    ngram_unlikely: 21
+    colloquial_in_formal: 23
     zero_width_chars: 13
     classifier_error: 12
-    missing_information: 11
+    missing_information: 9
     semantic_error: 11
-    zawgyi_conversion_error: 9
-    spacing_error: 8
-    vowel_sign_confusion: 8
-    missing_asat: 8
-    particle_error: 7
-    zawgyi: 7
-    extra_space: 7
-    missing_word: 6
-    typo: 6
-    zawgyi_artifact: 5
-    misspelling: 5
-    zawgyi_vowel_confusion: 5
+    zawgyi_conversion_error: 113
+    missing_asat: 12
+    missing_word: 19
     aspect_error: 5
-    vowel_substitution: 4
-    wrong_particle: 4
-    zawgyi_unicode_mismatch: 4
-    colloquial_spelling: 4
-    character_substitution: 4
-    encoding_error: 4
     negation_error: 4
-    wrong_comma: 3
     merged_word: 3
-    ending_mark_error: 2
-    vowel_length_substitution: 2
-    wrong_word_in_context: 2
-    redundancy: 2
-    loanword_spelling: 2
-    zawgyi_vowel_error: 2
-    vowel_sign_error: 2
-    repetition: 2
-    punctuation_error: 2
-    missing_syllable: 2
-    contextual_error: 2
-    incomplete_sentence: 2
-    particle_spelling: 2
-    compound_vowel_substitution: 2
-    vowel_sign_substitution: 2
-    medial_deletion: 1
-    missing_consonant: 1
-    missing_character: 1
-    word_order_error: 1
-    illogical_usage: 1
-    missing_medial: 1
-    missing_words: 1
-    omission: 1
-    tone_mark_placement: 1
-    incorrect_word_segmentation: 1
-    unnecessary_punctuation: 1
-    homophone_error: 1
-    lexical_error: 1
-    wrong_vowel: 1
-    extraneous_word: 1
-    missing_dot_below: 1
-    informal_spelling: 1
-    tone_error: 1
-    vowel_error: 1
-    logical_contradiction: 1
-    contextual: 1
-    multiple_errors_in_span: 1
-    contextual_spelling: 1
-    medial_insertion: 1
-    particle_confusion: 1
-    medial_substitution: 1
-    complex_typo: 1
-    informal_particle_in_formal_context: 1
-    invalid_particle_combination: 1
-    zawgyi_error: 1
-    ha_htoe_deletion: 1
-    aukmyit_omission: 1
-    missing_anusvara: 1
-    medial_addition: 1
-    aukmyit_error: 1
+    incomplete_sentence: 1
+    synonym_substitution: 32
   word_vs_syllable_policy_date: '2026-03-17'
   unflaggable_source_rows_promoted_to_clean: 8
   reclassified_word_level_from_previous_invalid_syllable: 145
@@ -280,6 +210,7 @@ metadata:
   audit_note: 'v1.3.0: Final arbiter pass via Gemini 3.1 Pro. Zawgyi input text corrected, full annotations added, disputed items resolved. 3-tier LLM pipeline: Flash 2.5 → Flash-Lite 3.1 → Pro 3.1.'
   merged_date: '2026-04-15'
   multi_error_sentences: 181
+  version:
 sentences:
 - id: BM-001
   input: ဒီမနက် ကျွန်တော်က ခစားကွင်းအကြောင်း သူငယ်ချင်းနဲ့ စကားပြောခဲ့တယ်။
@@ -4073,19 +4004,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: grammar
-  - error_id: BM-336-E2
-    error_type: semantic_error
-    error_subtype: real_word_confusion
-    detection_layer: word
-    span:
-      start: 17
-      end: 24
-    erroneous_text: အရသာသော
-    gold_correction: အသေးစိတ်သော
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: grammar
 - id: BM-337
   input: ဒီည မိုးခိုင်မာစွာ ရွာလို့ အပြင်မထွတ်တော့ဘူး လို့ ပြောတယ်။
   is_clean: false
@@ -4269,20 +4187,6 @@ sentences:
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     scope: register
     domain: grammar
-  - error_id: BM-348-E2
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: word
-    span:
-      start: 33
-      end: 46
-    erroneous_text: တော်တော်ဂွမ်း
-    gold_correction: မပြည့်စုံစွာ
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    scope: register
-    domain: grammar
 - id: BM-349
   input: မနက်ဖြန် အလုပ်မရှိလို့ နောက်ကျမှ ထမည်ဖြစ်သည် ဆိုပြီး မှတ်ထားတယ်။
   is_clean: false
@@ -4325,20 +4229,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    scope: register
-    domain: grammar
-  - error_id: BM-350-E2
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: word
-    span:
-      start: 34
-      end: 52
-    erroneous_text: တော်တော်မိုက်နေသည်
-    gold_correction: အလွန်ဆိုးရွားနေသည်
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     scope: register
     domain: grammar
 - id: BM-351
@@ -4386,20 +4276,6 @@ sentences:
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     scope: register
     domain: grammar
-  - error_id: BM-352-E2
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: word
-    span:
-      start: 33
-      end: 46
-    erroneous_text: တော်တော်ဂွမ်း
-    gold_correction: အလွန်အားနည်းစွာ
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    scope: register
-    domain: grammar
 - id: BM-354
   input: မြို့တော်တွင် ယာဉ်ကြောပိတ်ဆို့မှု တော်တော်မိုက်နေသည် ဟု တာဝန်ရှိသူများက ဆိုသည်။
   is_clean: false
@@ -4420,20 +4296,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    scope: register
-    domain: grammar
-  - error_id: BM-354-E2
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: word
-    span:
-      start: 34
-      end: 52
-    erroneous_text: တော်တော်မိုက်နေသည်
-    gold_correction: အလွန်ဆိုးရွားနေသည်
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     scope: register
     domain: grammar
 - id: BM-355
@@ -10368,19 +10230,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     domain: spelling
-  - error_id: BM-EXP-C093-E2
-    error_type: lexical_error
-    error_subtype: consonant_substitution
-    detection_layer: word
-    span:
-      start: 117
-      end: 127
-    erroneous_text: ထိမ်းသိန်း
-    gold_correction: ထိန်းသိမ်း
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C093-E3
     error_type: lexical_error
     error_subtype: consonant_substitution
@@ -10416,19 +10265,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: spelling
-  - error_id: BM-EXP-C094-E2
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: tokenization
-    span:
-      start: 13
-      end: 32
-    erroneous_text: ကိုယ်လက်မှတ်ဝယ် ရန်
-    gold_correction: ကိုယ်လက်မှတ်ဝယ်ရန်
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C094-E3
     error_type: spacing
     error_subtype: spacing
@@ -10441,19 +10277,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
-  - error_id: BM-EXP-C094-E4
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: word
-    span:
-      start: 33
-      end: 65
-    erroneous_text: ကြည့်သည့် နေရာတွင်Upton Parkဘူတာ
-    gold_correction: ကြည့်သည့်နေရာတွင် Upton Park ဘူတာ
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: spelling
   - error_id: BM-EXP-C094-E5
     error_type: spacing
@@ -10468,19 +10291,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     domain: spelling
-  - error_id: BM-EXP-C094-E6
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: word
-    span:
-      start: 97
-      end: 105
-    erroneous_text: လက် မှတ်
-    gold_correction: လက်မှတ်
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C094-E7
     error_type: spacing
     error_subtype: spacing
@@ -10493,19 +10303,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
-  - error_id: BM-EXP-C094-E8
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: tokenization
-    span:
-      start: 141
-      end: 162
-    erroneous_text: လန်ဒန်မြို့ တွင်းသွား
-    gold_correction: လန်ဒန်မြို့တွင်းသွား
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: spelling
   - error_id: BM-EXP-C094-E9
     error_type: spacing
@@ -10520,19 +10317,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     domain: spelling
-  - error_id: BM-EXP-C094-E10
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: word
-    span:
-      start: 197
-      end: 218
-    erroneous_text: Upton Park နံဘေး တွင်
-    gold_correction: Upton Park နံဘေးတွင်
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C094-E11
     error_type: spacing
     error_subtype: spacing
@@ -10545,19 +10329,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
-  - error_id: BM-EXP-C094-E12
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: tokenization
-    span:
-      start: 370
-      end: 400
-    erroneous_text: အင်္ဂလန်အနောက်မြောက် ပိုင်းရှိ
-    gold_correction: အင်္ဂလန်အနောက်မြောက်ပိုင်းရှိ
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: spelling
   notes: 'Audit 2026-04-15: has unannotated error(s). Gemini: There are multiple spacing errors in ''ကြည့်သည့် နေရာတွင်Upton Parkဘူတာ''. ''နေရာတွင်'' should be one word, and ''Upton Park'' should be separated from ''ဘူတ.'
 - id: BM-EXP-C095
@@ -10584,30 +10355,16 @@ sentences:
   register: formal
   difficulty_tier:
   expected_errors:
-  - error_id: BM-EXP-C097-E1
-    error_type: lexical_error
-    error_subtype: missing_word
-    detection_layer: word
-    span:
-      start: 54
-      end: 68
-    erroneous_text: တိုင် တိုင်ကို
-    gold_correction: တိုင်ကို
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    scope: style
-    domain: grammar
   - error_id: BM-EXP-C097-E2
-    error_type: repetition
-    error_subtype: missing_word
+    error_type: extraneous_word
+    error_subtype: ngram_unlikely
     detection_layer: word
     span:
       start: 54
       end: 68
     erroneous_text: တိုင် တိုင်ကို
     gold_correction: တိုင်ကို
-    edit_distance: 1
+    edit_distance: 6
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     scope: style
@@ -10661,8 +10418,7 @@ sentences:
     gold_correction: အပျိုဖော်ဝင်
     edit_distance: 1
     context_required: false
-    notes: 'Clean-row under-annotation audit 2026-07-13 (psg-17, 2-lens adversarial
-      verified): ဘော် is a misspelling of ဖော် in အပျိုဖော်ဝင်စ; MLC standard အပျိုဖော်.'
+    notes: 'Clean-row under-annotation audit 2026-07-13 (psg-17, 2-lens adversarial verified): ဘော် is a misspelling of ဖော် in အပျိုဖော်ဝင်စ; MLC standard အပျိုဖော်.'
     domain: spelling
   notes: 'Input fixed (Zawgyi U+102C→U+102B) by Pro 2026-04-15. The word ''အပော်'' should be ''အပေါ်''. This is a U+102B vs U+102C issue..  The word ''အပော်'' should be ''အပေါ်''. This is a U+102B vs U+102C issue.. Audit 2026-04-15: has unannotated error(s). Gemini: The word ''အပော်'' should be ''အပေါ်''. This is a common Zawgyi-to-Unicode conversion error where U+102B (ါ) is incorrectly converted to U+102C (ာ).. Needs manual error annotation.'
 - id: BM-EXP-C101
@@ -11724,19 +11480,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
     domain: spelling
-  - error_id: BM-EXP-C176-E3
-    error_type: wrong_word
-    error_subtype: zawgyi_conversion_error
-    detection_layer: word
-    span:
-      start: 150
-      end: 165
-    erroneous_text: သန်းခောင်စာရင်း
-    gold_correction: သန်းခေါင်စာရင်း
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C176-E4
     error_type: spelling
     error_subtype: zawgyi_conversion_error
@@ -11889,19 +11632,6 @@ sentences:
     context_required: false
     notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: spelling
-  - error_id: BM-EXP-C185-E2
-    error_type: spacing
-    error_subtype: spacing
-    detection_layer: word
-    span:
-      start: 0
-      end: 8
-    erroneous_text: လှေ ဆိပ်
-    gold_correction: လှေဆိပ်
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
   - error_id: BM-EXP-C185-E3
     error_type: spacing
     error_subtype: spacing
@@ -11949,20 +11679,6 @@ sentences:
   register: formal
   difficulty_tier:
   expected_errors:
-  - error_id: BM-EXP-C186-E1
-    error_type: grammar
-    error_subtype: missing_information
-    detection_layer: word
-    span:
-      start: 15
-      end: 21
-    erroneous_text: ခုနှစ်
-    gold_correction: '[YEAR] ခုနှစ်'
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    scope: nli
-    domain: grammar
   - error_id: BM-EXP-C186-E2
     error_type: grammar_error
     error_subtype: missing_information
@@ -12167,20 +11883,6 @@ sentences:
   register: informal
   difficulty_tier:
   expected_errors:
-  - error_id: BM-EXP-C196-E1
-    error_type: grammar
-    error_subtype: incomplete_sentence
-    detection_layer: word
-    span:
-      start: 0
-      end: 49
-    erroneous_text: သည်။ အမေအိုတစ်ဦးအား လမ်းတစ်ဖက်သို့ တွဲကာပို့ဆောင်
-    gold_correction: အမေအိုတစ်ဦးအား လမ်းတစ်ဖက်သို့ တွဲကာပို့ဆောင်ပေးခဲ့သည်။
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
-    scope: nli
-    domain: grammar
   - error_id: BM-EXP-C196-E2
     error_type: grammar_error
     error_subtype: incomplete_sentence
@@ -12308,20 +12010,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    scope: nli
-    domain: grammar
-  - error_id: BM-EXP-C205-E2
-    error_type: grammar
-    error_subtype: missing_information
-    detection_layer: word
-    span:
-      start: 51
-      end: 71
-    erroneous_text: တနာရီ မိုင် လောက်နဲ့
-    gold_correction: တနာရီ မိုင် ၆၀ လောက်နဲ့
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     scope: nli
     domain: grammar
   notes: 'Audit 2026-04-15: has unannotated error(s). Gemini: The phrase ''တနာရီ မိုင် လောက်နဲ့'' is incomplete and grammatically incorrect. It is missing a numerical value for ''မိုင်'' (miles). It should specify a .'
@@ -14117,19 +13805,6 @@ sentences:
     edit_distance: 1
     context_required: false
     notes: Added by Gemini 3.1 Pro arbiter 2026-04-15.
-    domain: spelling
-  - error_id: BM-EXP-E051-E3
-    error_type: wrong_word
-    error_subtype: broken_compound
-    detection_layer: word
-    span:
-      start: 37
-      end: 47
-    erroneous_text: ဒီအ တိုင်း
-    gold_correction: ဒီအတိုင်း
-    edit_distance: 1
-    context_required: false
-    notes: Added by Gemini 3.1 Flash-Lite native review 2026-04-15.
     domain: spelling
   - error_id: BM-EXP-E051-E4
     error_type: wrong_word
@@ -16890,8 +16565,8 @@ sentences:
     detection_layer: word
     span:
       start: 89
-      end: 92
-    erroneous_text: ပြေ
+      end: 94
+    erroneous_text: ပြော့
     gold_correction: ပြော
     edit_distance: 1
     context_required: false
@@ -18781,8 +18456,8 @@ sentences:
     detection_layer: grammar
     span:
       start: 14
-      end: 16
-    erroneous_text: ဖျ
+      end: 18
+    erroneous_text: ဖျန်
     gold_correction: ဖြန်
     edit_distance: 1
     context_required: false
@@ -18869,12 +18544,12 @@ sentences:
   expected_errors:
   - error_id: BM-GEN-E033-E1
     error_type: wrong_word
-    error_subtype: real_word_confusion
+    error_subtype: loan_word_misspelling
     detection_layer: grammar
     span:
-      start: 45
-      end: 49
-    erroneous_text: ပြီ။
+      start: 58
+      end: 64
+    erroneous_text: ကော်ဖိ
     gold_correction: ကော်ဖီ
     edit_distance: 1
     context_required: false
@@ -18919,8 +18594,8 @@ sentences:
     detection_layer: grammar
     span:
       start: 2
-      end: 8
-    erroneous_text: ခရီးစည
+      end: 9
+    erroneous_text: ခရီးစည်
     gold_correction: ခရီးစဉ်
     edit_distance: 1
     context_required: false
@@ -18941,11 +18616,11 @@ sentences:
     error_subtype: loan_word_misspelling
     detection_layer: word
     span:
-      start: 11
-      end: 18
-    erroneous_text: ွန်ပ်ယူ
+      start: 10
+      end: 20
+    erroneous_text: ကွန်ပ်ယူတာ
     gold_correction: ကွန်ပျူတာ
-    edit_distance: 5
+    edit_distance: 2
     context_required: false
     notes: The 'ပ်' (pa-talan) is mistakenly used instead of 'ပျ' (pa-ya-yit) in the transliteration of 'computer'.
     scope: spelling
@@ -18964,9 +18639,9 @@ sentences:
     error_subtype: consonant_substitution
     detection_layer: word
     span:
-      start: 9
-      end: 12
-    erroneous_text: န်း
+      start: 12
+      end: 15
+    erroneous_text: ဆတ်
     gold_correction: ဆက်
     edit_distance: 1
     context_required: false
@@ -18987,11 +18662,11 @@ sentences:
     error_subtype: loan_word_misspelling
     detection_layer: word
     span:
-      start: 12
-      end: 19
-    erroneous_text: ' ဗွီဒီယ'
+      start: 13
+      end: 21
+    erroneous_text: 'ဗွီဒီယို'
     gold_correction: ဗီဒီယို
-    edit_distance: 5
+    edit_distance: 1
     context_required: false
     notes: An unnecessary 'ဝ' (wa-swe) is added, making 'video' sound like 'vwa-dee-yo' instead of 'vee-dee-yo'.
     scope: spelling
@@ -21491,8 +21166,8 @@ sentences:
     detection_layer: context
     span:
       start: 55
-      end: 62
-    erroneous_text: လုံပါတယ
+      end: 63
+    erroneous_text: လုံပါတယ်
     gold_correction: လိုပါတယ်
     edit_distance: 2
     context_required: true
@@ -22283,8 +21958,8 @@ sentences:
     detection_layer: context
     span:
       start: 20
-      end: 23
-    erroneous_text: တို
+      end: 25
+    erroneous_text: တိုင်
     gold_correction: တိုင်း
     edit_distance: 1
     context_required: true
@@ -22380,9 +22055,9 @@ sentences:
     detection_layer: context
     span:
       start: 23
-      end: 24
-    erroneous_text: က
-    gold_correction: တဲ့
+      end: 31
+    erroneous_text: ကြီးမားတ
+    gold_correction: ကြီးမားတဲ့
     edit_distance: 2
     context_required: false
     notes: Removed the aukmyit (့) from 'တဲ့' (attributive marker), changing it to 'တ', which makes 'တအခန်းကဏ္ဍ' an ungrammatical and difficult-to-parse phrase.
@@ -22989,8 +22664,8 @@ sentences:
     detection_layer: context
     span:
       start: 48
-      end: 57
-    erroneous_text: ပေးမူပါတယ
+      end: 58
+    erroneous_text: ပေးမူပါတယ်
     gold_correction: ပေးပါတယ်
     edit_distance: 2
     context_required: false
@@ -24439,8 +24114,8 @@ sentences:
     detection_layer: syllable
     span:
       start: 23
-      end: 30
-    erroneous_text: အောင်မြ
+      end: 36
+    erroneous_text: အောင်မြင်​မှု
     gold_correction: အောင်မြင်မှု
     edit_distance: 1
     context_required: false
@@ -24625,13 +24300,13 @@ sentences:
   expected_errors:
   - error_id: BM-1291-E1
     error_type: wrong_word
-    error_subtype: real_word_confusion
+    error_subtype: tone_mark_error
     detection_layer: context
     span:
       start: 14
       end: 19
     erroneous_text: အတွင်
-    gold_correction: အတွက်
+    gold_correction: အတွင်း
     edit_distance: 1
     context_required: true
     notes: Replaced 'အတွက်' (for) with 'အတွင်' (in/on), which is a real word but semantically incorrect here.
@@ -25065,19 +24740,6 @@ sentences:
   register: informal
   difficulty_tier: 1
   expected_errors:
-  - error_id: BM-1312-E1
-    error_type: wrong_word
-    error_subtype: aukmyit_confusion
-    detection_layer: context
-    span:
-      start: 22
-      end: 27
-    erroneous_text: အတြက္
-    gold_correction: အတွက်
-    edit_distance: 2
-    context_required: false
-    notes: Removed the aukmyit (့) from 'အတွက်'.
-    domain: spelling
   - error_id: BM-1312-E2
     error_type: invalid_syllable
     error_subtype: zawgyi_encoding
@@ -25736,15 +25398,15 @@ sentences:
   expected_errors:
   - error_id: BM-1343-E1
     error_type: wrong_word
-    error_subtype: missing_visarga
+    error_subtype: missing_asat
     fix_owner: asat
     detection_layer: word
     span:
       start: 31
       end: 35
     erroneous_text: ပါတယ
-    gold_correction: ပါတယ်။
-    edit_distance: 2
+    gold_correction: ပါတယ်
+    edit_distance: 1
     context_required: true
     notes: Removed 'visarga' (း) from the sentence-ending particle 'ပါတယ်။', which is grammatically standard.
     domain: spelling
@@ -27285,11 +26947,11 @@ sentences:
     error_subtype: syllable_error
     detection_layer: syllable
     span:
-      start: 21
+      start: 20
       end: 27
-    erroneous_text: ချိ်န်
+    erroneous_text: အချိ်န်
     gold_correction: အချိန်
-    edit_distance: 2
+    edit_distance: 1
     context_required: false
     notes: Introduced an invalid syllable by placing an asat (်) inside 'ချိန်' (ချေ+န်), creating 'ချိ်န်' which is an invalid character sequence.
     domain: spelling
@@ -28512,8 +28174,8 @@ sentences:
     detection_layer: context
     span:
       start: 31
-      end: 34
-    erroneous_text: ငို
+      end: 36
+    erroneous_text: ငိုင်
     gold_correction: နိုင်
     edit_distance: 1
     context_required: true
@@ -28680,9 +28342,9 @@ sentences:
     error_subtype: hidden_compound_typo
     detection_layer: context
     span:
-      start: 19
-      end: 24
-    erroneous_text: ောပိတ
+      start: 21
+      end: 28
+    erroneous_text: ပိတ်ဆို
     gold_correction: ပိတ်ဆို့
     edit_distance: 1
     context_required: true
@@ -29603,10 +29265,10 @@ sentences:
     error_subtype: zawgyi_encoding
     detection_layer: syllable
     span:
-      start: 30
+      start: 27
       end: 31
-    erroneous_text: ဵ
-    gold_correction: ု
+    erroneous_text: မှုဵ
+    gold_correction: မှု
     edit_distance: 1
     context_required: false
     notes: Replaced the standard Unicode vowel sign `ု` (U+102F) with the Zawgyi-specific `U+1033` (ဵ) within `မှု`.
@@ -35047,8 +34709,8 @@ sentences:
     detection_layer: context
     span:
       start: 13
-      end: 17
-    erroneous_text: ချိန
+      end: 19
+    erroneous_text: ချိန့်
     gold_correction: ချိုင့်
     edit_distance: 2
     context_required: true
@@ -36145,10 +35807,10 @@ sentences:
     detection_layer: word
     span:
       start: 54
-      end: 61
-    erroneous_text: ပါ၀င်သည
-    gold_correction: ပါဝင်သည်။
-    edit_distance: 2
+      end: 59
+    erroneous_text: ပါ၀င်
+    gold_correction: ပါဝင်
+    edit_distance: 1
     context_required: false
     notes: Substituted Myanmar letter 'ဝ' (U+101D) with Burmese digit '၀' (U+1040) in 'ပါဝင်သည်', creating a non-word typo.
     domain: spelling
@@ -37950,11 +37612,11 @@ sentences:
     error_subtype: non_word_typo
     detection_layer: word
     span:
-      start: 11
-      end: 13
-    erroneous_text: ဟ်
-    gold_correction: ဟ
-    edit_distance: 1
+      start: 7
+      end: 14
+    erroneous_text: ကောလဟ်လ
+    gold_correction: ကောလာဟလ
+    edit_distance: 2
     context_required: false
     notes: Inserted '်' (asat) after 'ဟ' in 'ကောလဟလ' (rumor), creating a non-word typo.
     domain: spelling
