@@ -6,7 +6,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Coverage](https://img.shields.io/badge/coverage-75%25-green)](tests/)
-[![Tests](https://img.shields.io/badge/tests-5%2C182_passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-5%2C304_passed-brightgreen)](tests/)
 
 ## Overview
 
@@ -23,7 +23,7 @@
 *   **SymSpell Algorithm**: Custom O(1) symmetric delete implementation with Myanmar-specific variant generation for fast correction suggestions.
 *   **N-gram Context Checking**: Bigram/Trigram probabilities detect real-word errors (correct spelling, wrong context).
 *   **Hidden Compound Detection**: Recovers multi-token compound typos that the segmenter over-splits into individually-valid syllables (e.g. `ခုန်ကျစရိတ်` → `ကုန်ကျစရိတ်`). Walks curated-vocabulary bigram/trigram windows and verifies against high-frequency dictionary compounds.
-*   **Syllable-Window OOV Detection** (opt-in): Complementary structural-phase detector that enumerates syllable-windows across adjacent words and consults SymSpell for high-frequency near-matches.
+*   **Syllable-Window OOV Detection** (on by default since v1.10.0): Complementary structural-phase detector that enumerates syllable-windows across adjacent words and consults SymSpell for high-frequency near-matches. Powers split-compound detection — misspelled compounds whose fragments each look valid. Opt out via `use_syllable_window_oov=False`.
 *   **Homophone Detection**: Bidirectional N-gram analysis catches sound-alike word errors with frequency-aware guards.
 *   **Confusable Detection**: Multi-layer valid-word confusion detection — statistical bigram, MLP classifier, and MLM semantic analysis.
 *   **Meta-Classifier Post-Filter**: Logistic regression model (41 features) replaces manual per-strategy confidence thresholds; compound-aware features in the v2 model drive FPR reduction.
@@ -33,8 +33,8 @@
 *   **Suffix-Aware Re-Segmentation**: DefaultSegmenter post-processes oversized tokens and colloquial-locative merges (e.g. `ရန်ကုန်မာ` → `[ရန်, ကုန်, မာ]`) for cleaner downstream validation.
 *   **Compound & Morpheme Handling**: DP-based compound resolution, ternary compound splits in morpheme correction, productive reduplication validation.
 *   **AI Semantic Checking (Optional)**: ONNX masked language model for context-aware validation.
-*   **Syllable-Span Probe (default-on since v1.9.0)**: A frozen-encoder neural probe that improves recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model and activate when `probe_model_path` points at a probe artifact (without it, the rule-based pipeline runs unchanged). Opt out via `use_probe_*` config flags or `MSC_USE_PROBE_*=0` environment variables.
-*   **Aw-Vowel Un-Mask Detector (default-on since v1.9.0)**: Surfaces a class of Myanmar aw-vowel spelling errors — flat/tall *aa* swaps in the aw-vowel rime (ော ↔ ေါ, e.g. `ခော်` → `ခေါ်`) — that pre-normalization would otherwise silently repair before validation. Opt out via the `detect_aw_vowel_unmask` config flag or `MSC_DETECT_AW_VOWEL_UNMASK=0`.
+*   **Syllable-Span Probe (default-on since v1.9.0)**: A frozen-encoder neural probe that improves recall on broken-compound, over-segmentation, and consonant-substitution errors. Three strategies share one small model and activate when `probe_model_path` points at a probe artifact (without it, the rule-based pipeline runs unchanged). Opt out via the `use_probe_corrector` / `use_probe_compound` / `use_probe_segmenter_rescue` config flags.
+*   **Aw-Vowel Un-Mask Detector (default-on since v1.9.0)**: Surfaces a class of Myanmar aw-vowel spelling errors — flat/tall *aa* swaps in the aw-vowel rime (ော ↔ ေါ, e.g. `ခော်` → `ခေါ်`) — that pre-normalization would otherwise silently repair before validation. Opt out via the `detect_aw_vowel_unmask` config flag.
 *   **Named Entity Recognition**: Heuristic and Transformer-based NER to reduce false positives on names and places.
 
 ### Dictionary Building Pipeline
@@ -66,7 +66,7 @@
 
 Full documentation is available at **[docs.myspellchecker.com](https://docs.myspellchecker.com/)**.
 
-> **What's new in v1.9.0?** The detection features introduced in v1.7.1 and v1.8.0 — the aw-vowel un-mask detector, the orthographic-insertion rescue, and the syllable-span probe strategies — are now **enabled by default**: a default installation detects substantially more real spelling errors out of the box, while false alarms on clean text *decreased* (clean sentences with false positives down 83 → 71 on our benchmark) thanks to new high-frequency word guards. Context-aware aukmyit (dot-below ့) corrections improve further. Each feature remains individually switchable via config flags or environment variables. See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for details.
+> **What's new in v1.10.0?** Split-compound detection — misspelled compounds whose fragments each look valid — is now caught out of the box, with the syllable-window OOV detector **enabled by default**. This release also adds displaced-correction recovery (restoring a valid correction that a broader wrong candidate had displaced), confidence-bypass surfacing of high-confidence structural errors (invalid syllables, missing diacritics) even without a ranked suggestion, dictionary coverage repair (~900 curated rare words given a baseline frequency so they are no longer flagged), and trigram-verified hidden-compound corrections. The benchmark was independently re-audited by two models, fixing 90 annotation defects and re-scoping to genuine spelling. See the **[Release Notes](https://docs.myspellchecker.com/reference/release-notes)** for details.
 
 ### Getting Started
 *   **[Introduction](https://docs.myspellchecker.com/introduction)**: Overview of the library and its architecture.
@@ -80,7 +80,7 @@ Full documentation is available at **[docs.myspellchecker.com](https://docs.mysp
 *   **[Word Validation](https://docs.myspellchecker.com/features/word-validation)**: Dictionary + SymSpell suggestions.
 *   **[Context Checking](https://docs.myspellchecker.com/features/context-checking)**: N-gram probability analysis.
 *   **[Hidden Compound Detection](https://docs.myspellchecker.com/features/hidden-compound-detection)**: Recover compound typos hidden by segmenter over-splitting.
-*   **[Syllable-Window OOV](https://docs.myspellchecker.com/features/syllable-window-oov)**: Multi-syllable OOV detection via SymSpell windows (opt-in).
+*   **[Syllable-Window OOV](https://docs.myspellchecker.com/features/syllable-window-oov)**: Multi-syllable OOV / split-compound detection via SymSpell windows (on by default since v1.10.0).
 *   **[Confusable Detection](https://docs.myspellchecker.com/features/confusable-detection)**: Multi-layer confusable word detection.
 *   **[Homophone Detection](https://docs.myspellchecker.com/features/homophones)**: Sound-alike error detection.
 
@@ -399,7 +399,7 @@ Composable validation pipeline with 14 strategies:
 | ToneValidation | 10 | Tone mark disambiguation |
 | Orthography | 15 | Medial order and compatibility |
 | SyntacticRule | 20 | Grammar rule checking |
-| SyllableWindowOOV | 22 | Multi-syllable OOV detection via SymSpell windows (opt-in) |
+| SyllableWindowOOV | 22 | Multi-syllable OOV / split-compound detection via SymSpell windows (on by default since v1.10.0) |
 | HiddenCompoundTypo | 23 | Compound typos hidden by segmenter over-splitting |
 | StatisticalConfusable | 24 | Bigram-based confusable detection |
 | BrokenCompound | 25 | Broken compound word detection |
@@ -415,42 +415,33 @@ See the [Validation Strategies Guide](https://docs.myspellchecker.com/features/v
 
 ## Benchmark Results
 
-Tested on a 1,304-sentence benchmark suite (641 clean, 663 with errors, 670 in-scope error spans; `scope=spelling` excludes 131 out-of-scope annotations) covering 3 difficulty tiers and 7 domains. The dictionary database and semantic model are **not bundled** with the library — users build or provide their own.
+Tested on a 2,084-sentence benchmark suite (791 clean, 1,548 in-scope spelling errors; 168 out-of-scope errors excluded via the `scope=spelling` tag) covering 3 difficulty tiers and 8 domains. The benchmark was independently audited by two models this release, with 90 annotation defects corrected. The dictionary database and semantic model are **not bundled** with the library — users build or provide their own.
 
 **Test environment:**
-- Dictionary: Production SQLite database (577 MB, 601K words, 2.2M bigrams, enrichment tables)
-- Semantic model: Custom RoBERTa MLM (6L/768H, ONNX quantized, 71 MB)
-- Hardware: Apple Silicon, Python 3.14
-- Benchmark: [`benchmarks/myspellchecker_benchmark.yaml`](benchmarks/) (1,304 sentences)
+- Dictionary: Production SQLite database (~577 MB, 601K words, 2.2M bigrams, enrichment tables)
+- Semantic model: Custom RoBERTa MLM (6L/768H, ONNX quantized, ~71 MB)
+- Hardware: Apple Silicon, Python 3.14.5
+- Benchmark: [`benchmarks/myspellchecker_benchmark.yaml`](benchmarks/) (version `1.6.6-scope-tagged`, 2,084 sentences)
 
-### With Semantic Model (v2.3)
+Composite score = `0.35·F1 + 0.30·MRR + 0.20·(1 − FPR) + 0.15·Top-1`, where FPR is the share of clean sentences that receive at least one false positive.
 
-| Metric | Value | vs v1.4.0 |
-|--------|------:|----------:|
-| **F1 Score** | 77.1% | +6.0 pts |
-| **Precision** | 82.6% | +8.5 pts |
-| **Recall** | 72.2% | +4.0 pts |
-| **FPR** (clean sentences) | 10.8% | −7.8 pts |
-| **Top-1 Suggestion Accuracy** | 70.5% | +0.8 pts |
-| **MRR** | 0.7569 | +0.010 |
-| **p95 latency** | 409ms | — |
+The **Full** configuration runs the semantic model and syllable-span probe artifact; the **Default** configuration runs the rule-based and structural pipeline without a probe artifact.
 
-### Baseline (no semantic model)
+| Metric | Full | Default |
+|--------|------:|--------:|
+| **Precision** | 86.3% | 86.4% |
+| **Recall** | 66.5% | 62.7% |
+| **F1 Score** | 75.1% | 72.6% |
+| **Top-1 Suggestion Accuracy** | 73.2% | 71.3% |
+| **MRR** | 0.7637 | 0.7550 |
+| **Clean-FP sentences** (FPR) | 78 / 791 (9.9%) | 73 / 791 (9.2%) |
+| **Composite score** | 0.782 | 0.769 |
+| **p95 latency** | 436 ms | 361 ms |
+| **Pure-spelling clearance** | 77.4% | 73.1% |
 
-For environments that don't ship the semantic model, the structural/contextual pipeline alone gives strong results at much lower latency:
+Pure-spelling clearance is a narrower false-negative-clearance metric measured over pure-spelling errors; it is reported separately from overall recall.
 
-| Metric | Value |
-|--------|------:|
-| **F1 Score** | 75.6% |
-| **Precision** | 81.2% |
-| **Recall** | 70.8% |
-| **FPR** (clean sentences) | 11.1% |
-| **Top-1 Suggestion Accuracy** | 73.2% |
-| **MRR** | 0.7794 |
-| **p95 latency** | 97ms |
-| **Composite score** | 0.7899 |
-
-The benchmark covers 14 validation strategies across conversational, news, technical, academic, religious, literary, and general domains with sentences ranging from simple syllable errors to hard context-dependent confusables.
+The benchmark covers 14 validation strategies across conversational, news, technical, academic, religious, literary, general, and social media domains with sentences ranging from simple syllable errors to hard context-dependent confusables.
 
 ## Development
 
@@ -465,19 +456,19 @@ pip install -e ".[dev]"
 
 ### Testing
 
-The test suite has 4,940 tests with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
+The test suite has 5,304 tests (5,331 including slow-marked tests) with 75% code coverage, organized into unit, integration, e2e, and stress tiers with auto-applied pytest markers.
 
 ```bash
 # Run default test suite (~5 min, skips slow tests)
 pytest tests/
 
 # Run by category
-pytest tests/ -m integration    # 307 integration tests
+pytest tests/ -m integration    # 296 integration tests
 pytest tests/ -m e2e            # 10 end-to-end CLI tests
-pytest tests/ -m slow           # 39 slow tests (property-based, stress, DB builds)
+pytest tests/ -m slow           # 27 slow tests (property-based, stress, DB builds)
 
 # Run with coverage
-pytest tests/ --cov=src/myspellchecker --cov-fail-under=65
+pytest tests/ --cov=src/myspellchecker --cov-fail-under=75
 
 # Formatting and linting
 ruff format .
