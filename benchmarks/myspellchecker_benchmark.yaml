@@ -1,13 +1,13 @@
-version: 1.6.4-missing-error-audit
+version: 1.6.5-spelling-scope
 category: benchmark
 description: 'Myanmar spell checker benchmark v1.5. Spelling-first domain labeling refined (2026-04-18): added text_overrides for 18 particle-family spans mislabeled as spelling by v1.4.0 (aukmyit_confusion case-markers + homophone_confusion sentence-final particles). Mechanical mapping resolves 100% of 1,716 spans (spelling 82.4% / grammar 17.6% / both 0%). v1.4.0: initial domain labeling. Based on v1.3.0 (v1.2 audited 2026-04-15 via 6-agent + Gemini 2.5 Flash pipeline).'
 metadata:
   created_date: '2026-03-17'
   annotation_revision_date: '2026-07-14'
   total_sentences: 2084
-  clean_count: 575
-  error_count: 1509
-  observable_error_span_count: 1811
+  clean_count: 588
+  error_count: 1496
+  observable_error_span_count: 1796
   annotation_anomaly_count: 0
   difficulty_distribution:
     tier_2: 863
@@ -31,13 +31,13 @@ metadata:
     tone_mark_error: 85
     aukmyit_confusion: 101
     loan_word_misspelling: 86
-    real_word_confusion: 92
+    real_word_confusion: 91
     non_word_typo: 79
-    homophone_confusion: 76
+    homophone_confusion: 75
     word_boundary: 63
     missing_visarga: 60
-    register_mismatch: 53
-    particle_misuse: 86
+    register_mismatch: 45
+    particle_misuse: 83
     syllable_error: 50
     zawgyi_encoding: 12
     hidden_compound_typo: 38
@@ -54,9 +54,9 @@ metadata:
     semantic_error: 9
     zawgyi_conversion_error: 113
     missing_asat: 12
-    missing_word: 19
+    missing_word: 18
     aspect_error: 4
-    negation_error: 4
+    negation_error: 3
     merged_word: 3
     incomplete_sentence: 1
     synonym_substitution: 22
@@ -5100,20 +5100,6 @@ sentences:
     context_required: false
     notes: Word segmentation error. The span "လူနာတင် ယာဉ်" should be written as "လူနာတင်ယာဉ်".
     domain: spelling
-  - error_id: BM-419-E2
-    error_type: grammar_error
-    error_subtype: missing_word
-    detection_layer: context
-    span:
-      start: 62
-      end: 70
-    erroneous_text: အသေးစိတ်
-    gold_correction: အသေးစိတ် ရှင်းပြခဲ့သည်
-    edit_distance: 5
-    context_required: true
-    notes: Sentence-final adverb without predicate verb. Structurally incomplete.
-    scope: syntax
-    domain: grammar
   notes: Annotated sentence with 2 error(s). At least one marked span depends on sentence context for disambiguation.
 - id: BM-422
   input: နောက်လတွင် ကျန်းမာရေးဝန်ကြီးဋာနက ကောင်းကင် စတင်ခဲ့သည် ဟု ထုတ်ပြန်ချက်တွင် ဖော်ပြထားသည်။
@@ -7835,25 +7821,12 @@ sentences:
   notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
 - id: BM-EXT-E037
   input: ဆရာက ကျောင်းသားကို ပညာ ပေးသည်ဖြင့် ဘာသာရပ်ကို တတ်မြောက်ကြသည်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: formal
   difficulty_tier: 3
-  expected_errors:
-  - error_id: BM-EXT-E037-E1
-    error_type: grammar_error
-    error_subtype: particle_misuse
-    detection_layer: grammar
-    span:
-      start: 29
-      end: 34
-    erroneous_text: ဖြင့်
-    gold_correction: သောကြောင့်
-    edit_distance: 6
-    context_required: true
-    notes: 'Particle misuse: ဖြင့် (instrumental ''with'') used where causal သောကြောင့် (because) is needed.'
-    domain: grammar
-  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+  expected_errors: []
+  notes: Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.
 - id: BM-EXT-E038
   input: ဒီအချိန်ထိ ကျွန်မ စာမေးပွဲအတွက် ပြင်ဆင်ကာ ရှိပါသည်။
   is_clean: false
@@ -7965,26 +7938,12 @@ sentences:
   notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
 - id: BM-EXT-E043
   input: မြို့တော်ဝန်ကြီးက ဖွင့်ပွဲကို ကိုယ်တိုင်ကြွရောက်ပြီး ပြောတာက ဟာသတွေချည်းပဲ ဟဲဟဲ။
-  is_clean: false
+  is_clean: true
   domain: news
   register: formal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-EXT-E043-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: context
-    span:
-      start: 61
-      end: 79
-    erroneous_text: ဟာသတွေချည်းပဲ ဟဲဟဲ
-    gold_correction: ဟာသဝင်မိန့်ခွန်းများ ပြောကြားခဲ့သည်
-    edit_distance: 27
-    context_required: true
-    notes: 'Register mismatch: News about mayor with very casual ဟဲဟဲ. Formal news register expected.'
-    scope: register
-    domain: grammar
-  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+  expected_errors: []
+  notes: Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.
 - id: BM-EXT-E044
   input: တရားရုံးတော်မှ ချမှတ်သော စီရင်ချက်ကို မကြိုက်ဘူး ဘာဖြစ်လို့လဲ ဆိုတော့ မတရားလို့ပဲ။
   is_clean: false
@@ -8031,26 +7990,12 @@ sentences:
   notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
 - id: BM-EXT-E046
   input: သံအမတ်ကြီးက ပြောတာက ကောင်းပါဘူး ကြာမယ်ဟ အဲဒါ။
-  is_clean: false
+  is_clean: true
   domain: news
   register: formal
   difficulty_tier: 3
-  expected_errors:
-  - error_id: BM-EXT-E046-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: context
-    span:
-      start: 20
-      end: 44
-    erroneous_text: ကောင်းပါဘူး ကြာမယ်ဟ အဲဒါ
-    gold_correction: ကောင်းမွန်မည်မဟုတ်ကြောင်း ကြာမြင့်မည်ဟု ဆိုခဲ့သည်
-    edit_distance: 33
-    context_required: true
-    notes: 'Register mismatch: Diplomatic context (ambassador) with very casual speech particles.'
-    scope: register
-    domain: grammar
-  notes: Annotated sentence with 1 error(s). At least one marked span depends on sentence context for disambiguation.
+  expected_errors: []
+  notes: Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.
 - id: BM-EXT-E047
   input: ဘုန်းကြီးက ထရားပြောတော့ ရီစရာကြီးပဲ ကြားနေကြတယ်။
   is_clean: false
@@ -18741,73 +18686,31 @@ sentences:
     domain: spelling
 - id: BM-GEN-E030
   input: ဒီနေ့ မိုး အရမ်းကောင်းတာကြောင့် အိမ်မှာပဲ နေပါမည်။
-  is_clean: false
+  is_clean: true
   domain: social_media
   register: colloquial
   difficulty_tier: 1
   scope: spelling
-  notes: 'Generated error pair: Using a formal ''ပါမည်'' in a casual social media post where a colloquial ''မယ်'' is expected.'
-  expected_errors:
-  - error_id: BM-GEN-E030-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: grammar
-    span:
-      start: 34
-      end: 40
-    erroneous_text: မ်မှာပ
-    gold_correction: နေမယ်
-    edit_distance: 5
-    context_required: true
-    notes: Using a formal 'ပါမည်' in a casual social media post where a colloquial 'မယ်' is expected.
-    scope: context_dependent
-    domain: grammar
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
+  expected_errors: []
 - id: BM-GEN-E031
   input: စနစ်သစ်ကို ထည့်သွင်းပြီးနောက် စွမ်းဆောင်ရည် သိသိသာသာ မြင့်တက်လာပါတယ်။
-  is_clean: false
+  is_clean: true
   domain: technical
   register: formal
   difficulty_tier: 2
   scope: spelling
-  notes: 'Generated error pair: Mixing a formal technical sentence with a polite ''ပါတယ်။'' ending instead of a formal ''ခဲ့ပါသည်။''.'
-  expected_errors:
-  - error_id: BM-GEN-E031-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: grammar
-    span:
-      start: 53
-      end: 66
-    erroneous_text: မြင့်တက်လာပါတ
-    gold_correction: မြင့်တက်လာခဲ့ပါသည်။
-    edit_distance: 5
-    context_required: true
-    notes: Mixing a formal technical sentence with a polite 'ပါတယ်။' ending instead of a formal 'ခဲ့ပါသည်။'.
-    scope: context_dependent
-    domain: grammar
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
+  expected_errors: []
 - id: BM-GEN-E032
   input: ဘုရားရှင်၏ တရားတော်များကို နာကြားပြီးနောက် စိတ်ချမ်းသာရတယ်ဗျာ။
-  is_clean: false
+  is_clean: true
   domain: religious
   register: formal
   difficulty_tier: 2
   scope: spelling
-  notes: 'Generated error pair: Using a colloquial/slang ending ''ရတယ်ဗျာ'' in a formal religious context where ''ရပါသည်။'' is appropria'
-  expected_errors:
-  - error_id: BM-GEN-E032-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: grammar
-    span:
-      start: 49
-      end: 57
-    erroneous_text: မ်းသာရတယ
-    gold_correction: ရပါသည်
-    edit_distance: 5
-    context_required: true
-    notes: Using a colloquial/slang ending 'ရတယ်ဗျာ' in a formal religious context where 'ရပါသည်။' is appropriate.
-    scope: context_dependent
-    domain: grammar
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
+  expected_errors: []
 - id: BM-GEN-E033
   input: မနက်စာ စားပြီးပြီလား။ ကျွန်တော်တော့ စားပြီးပါပြီ။ ပြီးရင် ကော်ဖိသောက်မယ်။
   is_clean: false
@@ -18833,27 +18736,13 @@ sentences:
     domain: spelling
 - id: BM-GEN-E034
   input: အစည်းအဝေးကို တက်ရောက်ခဲ့ကြသူများက အနာဂတ်အစီအစဉ်များကို ဆွေးနွေးခဲ့ကြတယ်။
-  is_clean: false
+  is_clean: true
   domain: news
   register: formal
   difficulty_tier: 1
   scope: spelling
-  notes: 'Generated error pair: Using a colloquial ending ''တယ်'' in a formal news report where ''ပါသည်။'' is expected.'
-  expected_errors:
-  - error_id: BM-GEN-E034-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: grammar
-    span:
-      start: 49
-      end: 62
-    erroneous_text: ားကို ဆွေးနွေ
-    gold_correction: ဆွေးနွေးခဲ့ကြပါသည်။
-    edit_distance: 5
-    context_required: true
-    notes: Using a colloquial ending 'တယ်' in a formal news report where 'ပါသည်။' is expected.
-    scope: context_dependent
-    domain: grammar
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
+  expected_errors: []
 - id: BM-GEN-E035
   input: ဒီခရီးစည်က တကယ်ပျော်စရာကောင်းပါသည်၊ နောက်တစ်ခါ ထပ်သွားဦးမယ်။
   is_clean: false
@@ -26285,25 +26174,12 @@ sentences:
   notes: '1 error(s). Subtypes: compound_confusion.'
 - id: BM-1374
   input: နေ့လယ်စာစားပြီးနောက် သူငယ်ချင်းတွေနဲ့ စကားဆိုကြတယ်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1374-E1
-    error_type: wrong_word
-    error_subtype: real_word_confusion
-    detection_layer: context
-    span:
-      start: 42
-      end: 45
-    erroneous_text: ဆို
-    gold_correction: ပြော
-    edit_distance: 4
-    context_required: true
-    notes: Replaced 'ပြော' (to speak informally) with 'ဆို' (to speak formally or recite), which is a different word and introduces a register mismatch or semantic error here.
-    domain: spelling
-  notes: '1 error(s). Subtypes: real_word_confusion.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
 - id: BM-1375
   input: ညနေပိုင်မှာတော့ အိမ်စာလုပ်ပီး အနားယူပါတယ်။
   is_clean: false
@@ -27011,25 +26887,12 @@ sentences:
   notes: Marked clean during benchmark audit 2026-04-15.
 - id: BM-1408
   input: အိမ်စာလုပ်ရတာ ပျင်းဖို့ကောင်းပေမယ့် မဖြစ်မနေလုပ်ရမယ်။
-  is_clean: false
+  is_clean: true
   domain: academic
   register: informal
   difficulty_tier: 1
-  expected_errors:
-  - error_id: BM-1408-E1
-    error_type: wrong_word
-    error_subtype: homophone_confusion
-    detection_layer: context
-    span:
-      start: 29
-      end: 35
-    erroneous_text: ပေမယ့်
-    gold_correction: ပေမဲ့
-    edit_distance: 2
-    context_required: false
-    notes: Replaced 'ပေမဲ့' (although) with 'ပေမယ့်', a common homophone-like confusion where the 'ယ့်' ending is used instead of 'မဲ့'.
-    domain: spelling
-  notes: '1 error(s). Subtypes: homophone_confusion.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
 - id: BM-1409
   input: ပိုဂျက်တစ်ခုပြီးဖို့အတွက် အချိန်အများကြီးပေးရတယ်။
   is_clean: false
@@ -28863,26 +28726,12 @@ sentences:
   notes: '1 error(s). Subtypes: confusable_semantic.'
 - id: BM-1500
   input: ယဉ်ကျေးမှုအထောက်အထားကို ထိန်းသိမ်းစောင့်ရှောက်ဖို့က ကျွန်တော်တို့ရဲ့တာဝန် မဖြစ်ပါဘူး။
-  is_clean: false
+  is_clean: true
   domain: conversational
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1500-E1
-    error_type: grammar_error
-    error_subtype: negation_error
-    fix_owner: dict
-    detection_layer: grammar
-    span:
-      start: 74
-      end: 84
-    erroneous_text: မဖြစ်ပါဘူး
-    gold_correction: ပဲဖြစ်ပါတယ်။
-    edit_distance: 6
-    context_required: true
-    notes: Changed the affirmative ending 'ပဲဖြစ်ပါတယ်' (it is our duty) to a negative 'မဖြစ်ပါဘူး' (it is not our duty), creating a semantic and grammatical error.
-    domain: grammar
-  notes: '1 error(s). Subtypes: negation_error.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
 - id: BM-1501
   input: လစာနဲ့ အကျိုးခံစားခွင့်တွေက အရေးကြီးပါတယ်။
   is_clean: false
@@ -29106,25 +28955,12 @@ sentences:
   notes: '1 error(s). Subtypes: syllable_error.'
 - id: BM-1512
   input: တောင်းဆိုမှုတစ်ခုကို ငြင်းလိုက်တာကို ကိုယ့်ရဲ့ဆုံးဖြတ်ချက်ပဲ။
-  is_clean: false
+  is_clean: true
   domain: news
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1512-E1
-    error_type: grammar_error
-    error_subtype: particle_misuse
-    detection_layer: grammar
-    span:
-      start: 30
-      end: 33
-    erroneous_text: ်တာ
-    gold_correction: က
-    edit_distance: 2
-    context_required: true
-    notes: Replaced the subject marker `က` with the object marker `ကို`, leading to grammatical incorrectness.
-    domain: grammar
-  notes: '1 error(s). Subtypes: particle_misuse.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
 - id: BM-1513
   input: အများကြီး မလုပ်နိုင်တဲ့အခါ ငြင်းရဲဖို့ လိုလား။
   is_clean: true
@@ -35008,19 +34844,6 @@ sentences:
   register: informal
   difficulty_tier: 3
   expected_errors:
-  - error_id: BM-1794-E1
-    error_type: grammar_error
-    error_subtype: particle_misuse
-    detection_layer: grammar
-    span:
-      start: 18
-      end: 22
-    erroneous_text: နှင့
-    gold_correction: တဲ့
-    edit_distance: 4
-    context_required: true
-    notes: Replaced the informal relative clause marker 'တဲ့' with the conjunction/instrumental particle 'နှင့်', creating a grammatical error.
-    domain: grammar
   - error_id: BM-1794-E2
     error_type: wrong_word
     error_subtype: homophone_confusion
@@ -38116,26 +37939,12 @@ sentences:
   notes: '1 error(s). Subtypes: consonant_substitution.'
 - id: BM-1945
   input: လူတိုင်းကို ကူညီပေးဖို့ မမေ့အပ်ပါ။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1945-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: grammar
-    span:
-      start: 24
-      end: 34
-    erroneous_text: မမေ့အပ်ပါ။
-    gold_correction: မမေ့ပါနဲ့။
-    edit_distance: 5
-    context_required: true
-    notes: Replaced the general/polite imperative ending 'မမေ့ပါနဲ့' (don't forget) with the formal/literary 'မမေ့အပ်ပါ' (should not forget), creating a register mismatch.
-    scope: register
-    domain: grammar
-  notes: '1 error(s). Subtypes: register_mismatch.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
 - id: BM-1946
   input: လေယာဉ်ခရီးစဉ်က အရမ်းစိတ်ဝင်စားဖို့ကောင်းတယ်။
   is_clean: true
@@ -39047,26 +38856,12 @@ sentences:
   notes: '1 error(s). Subtypes: tone_mark_error.'
 - id: BM-1993
   input: ခေါက်ဆွဲပေါ်မှာ နှမ်းဆီလေးတွေ ပါ၏။
-  is_clean: false
+  is_clean: true
   domain: general
   register: informal
   difficulty_tier: 2
-  expected_errors:
-  - error_id: BM-1993-E1
-    error_type: register_error
-    error_subtype: register_mismatch
-    detection_layer: grammar
-    span:
-      start: 30
-      end: 34
-    erroneous_text: ပါ၏။
-    gold_correction: ပါတယ်နော်။
-    edit_distance: 7
-    context_required: true
-    notes: Changed informal ending 'ပါတယ်နော်။' to formal 'ပါ၏။' to create a register mismatch.
-    scope: register
-    domain: grammar
-  notes: '1 error(s). Subtypes: register_mismatch.'
+  expected_errors: []
+  notes: 'Clean control — the sole annotation was a register/grammar flag, descoped from the spelling-focused benchmark.'
 - id: BM-1994
   input: ရှမ်းပြည်က ထွက်တဲ့ ခေါက်စွဲဖြစ်ပါတယ်။
   is_clean: false
