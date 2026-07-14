@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-07-14
+
+The v2.0 release focuses on Myanmar spelling detection: several hard error classes are now detected and enabled by default. The public API is unchanged and upgrading is backward-compatible.
+
+### Added
+
+- **Split-compound detection**: misspelled compounds whose fragments each look like valid words (a common Burmese error class) are now detected via syllable-window out-of-vocabulary scanning.
+- **Displaced-correction recovery**: a valid correction that was previously dropped when a broader, wrong candidate won is now restored, recovering corrections that were silently lost.
+- **Confidence-bypass surfacing**: high-confidence structural errors (invalid syllables, missing diacritics) are surfaced even when the checker cannot produce a ranked suggestion.
+
+### Changed
+
+- **Dictionary coverage repair**: about 900 curated dictionary words that carried zero corpus frequency — and were therefore invisible to frequency gates — now carry a baseline frequency, so valid rare words are no longer flagged as errors.
+- **Hidden-compound verification**: hidden-compound corrections are confirmed against trigram evidence before emission, reducing spurious merges.
+- **Segmenter-rescue retention**: corrections for typo'd compounds recovered by the segmenter rescue are retained through candidate fusion rather than being dropped.
+
+### Fixed
+
+- Margin-backed exemption for the dot-below suppressor, so context-supported dot-below corrections survive.
+- Broken-compound corrections are protected from being reranked below high-frequency particles.
+
+### Benchmark
+
+- The evaluation benchmark (2,084 sentences) was independently audited and corrected — 90 annotation defects fixed — and re-scoped toward genuine spelling errors with an explicit spelling/secondary scope tag (benchmark version `1.6.6-scope-tagged`).
+- Pure-spelling clearance: **77.4%** (full configuration) / **73.1%** (default). Composite `0.782` (full) / `0.769` (default); clean false-positive sentences 78 of 791; p95 436 ms.
+
 ## [1.9.0] - 2026-07-02
 
 ### Changed
